@@ -9,10 +9,21 @@ import CdnWebpackPlugin from './tools/cdn-webpack-plugin';
 
 
 const devMode = process.env.NODE_ENV !== 'production'
+const devPort = 8000;
+const backendPort = 9000;
 
 
 export default {
   entry: './src/index.jsx',
+  devServer: {
+    host: 'localhost',
+    port: devPort,
+    proxy: {
+      '/api': {
+        target: `http://localhost:${backendPort}`,
+      },
+    },
+  },
   module: {
     rules: [
       // js, jsx

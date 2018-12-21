@@ -1,7 +1,8 @@
 export class FileSystem {
 
   constructor (baseURL) {
-    this._baseURL = baseURL;
+    const { protocol, host } = location;
+    this._baseURL = `${protocol}//${host}`;
   }
 
   async root () {
