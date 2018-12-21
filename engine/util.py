@@ -84,7 +84,7 @@ class SearchEngine(object):
             nodes = await async_dict(nodes)
             self._cache[pattern] = nodes
         except Exception as e:
-            EXCEPTION('server', e) << 'search failed, abort'
+            EXCEPTION('engine', e) << 'search failed, abort'
             raise SearchFailedError(str(e))
         finally:
             del self._searching[pattern]
@@ -148,7 +148,7 @@ class UnpackEngine(object):
         except UnpackFailedError:
             raise
         except Exception as e:
-            EXCEPTION('server', e) << 'unpack failed, abort'
+            EXCEPTION('engine', e) << 'unpack failed, abort'
             raise UnpackFailedError(str(e))
         finally:
             del self._unpacking[node.id_]

@@ -274,7 +274,7 @@ async def search_by_name(search_engine, pattern):
     try:
         re.compile(real_pattern)
     except Exception as e:
-        EXCEPTION('server', e) << real_pattern
+        EXCEPTION('engine', e) << real_pattern
         raise u.InvalidPatternError(real_pattern)
 
     se = search_engine

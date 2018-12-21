@@ -21,8 +21,8 @@ class Daemon(object):
         self._loggers = setup_logger((
             'aiohttp',
             'wcpan.drive.google',
-            'server',
-        ), '/tmp/server.log')
+            'engine',
+        ), '/tmp/engine.log')
 
     def __call__(self):
         self._loop.create_task(self._guard())
@@ -36,7 +36,7 @@ class Daemon(object):
         try:
             return await self._main()
         except Exception as e:
-            EXCEPTION('server', e)
+            EXCEPTION('engine', e)
         finally:
             self._loop.stop()
         return 1
@@ -82,7 +82,7 @@ class ServerContext(object):
 
 
 def parse_args(args):
-    parser = argparse.ArgumentParser('server')
+    parser = argparse.ArgumentParser('engine')
 
     parser.add_argument('-l', '--listen', required=True, type=int)
 
