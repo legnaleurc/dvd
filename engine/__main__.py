@@ -43,6 +43,7 @@ class Daemon(object):
 
     async def _main(self):
         port = self._kwargs.listen
+        unpack_path = self._kwargs.unpack
         app = aw.Application()
 
         setup_api_path(app)
@@ -50,7 +51,7 @@ class Daemon(object):
         async with wdg.Drive() as drive:
             app['drive'] = drive
             app['se'] = util.SearchEngine(drive)
-            async with util.UnpackEngine(drive, port) as ue:
+            async with util.UnpackEngine(drive, port, unpack_path) as ue:
                 app['ue'] = ue
                 async with ServerContext(app, port):
                     await self._until_finished()
@@ -85,6 +86,7 @@ def parse_args(args):
     parser = argparse.ArgumentParser('engine')
 
     parser.add_argument('-l', '--listen', required=True, type=int)
+    parser.add_argument('-u', '--unpack', required=True, type=str)
 
     args = parser.parse_args(args)
 

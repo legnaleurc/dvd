@@ -102,12 +102,13 @@ class SearchEngine(object):
 
 class UnpackEngine(object):
 
-    def __init__(self, drive, port):
+    def __init__(self, drive, port, unpack_path):
         super(UnpackEngine, self).__init__()
         self._loop = asyncio.get_event_loop()
         # NOTE only takes a reference, not owning
         self._drive = drive
         self._port = port
+        self._unpack_path = unpack_path
         self._cache = {}
         self._unpacking = {}
         self._tmp = None
@@ -164,7 +165,7 @@ class UnpackEngine(object):
             raise UnpackFailedError(f'{node_id} canceled unpack')
 
     async def _unpack_local(self, node_id):
-        p = await asyncio.create_subprocess_exec('unpack',
+        p = await asyncio.create_subprocess_exec(self._unpack_path,
                                                  str(self._port),
                                                  node_id,
                                                  self._tmp)
