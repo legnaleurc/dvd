@@ -15,6 +15,9 @@ const backendPort = 9000;
 
 export default {
   entry: './src/index.jsx',
+  output: {
+    publicPath: devMode ? '' : '/static/',
+  },
   devServer: {
     host: 'localhost',
     port: devPort,

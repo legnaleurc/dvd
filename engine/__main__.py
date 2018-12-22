@@ -9,7 +9,7 @@ from aiohttp import web as aw
 import wcpan.drive.google as wdg
 from wcpan.logger import setup as setup_logger, INFO, EXCEPTION
 
-from . import api, util
+from . import api, util, view
 
 
 class Daemon(object):
@@ -44,9 +44,13 @@ class Daemon(object):
     async def _main(self):
         port = self._kwargs.listen
         unpack_path = self._kwargs.unpack
+        static_path = self._kwargs.static
         app = aw.Application()
 
         setup_api_path(app)
+        if static_path:
+            app['static'] = static_path
+            setup_static_path(app, static_path)
 
         async with wdg.Drive() as drive:
             app['drive'] = drive
@@ -87,6 +91,7 @@ def parse_args(args):
 
     parser.add_argument('-l', '--listen', required=True, type=int)
     parser.add_argument('-u', '--unpack', required=True, type=str)
+    parser.add_argument('-s', '--static', type=str)
 
     args = parser.parse_args(args)
 
@@ -102,6 +107,12 @@ def setup_api_path(app):
     app.router.add_view(r'/api/v1/nodes/{id}/images', api.NodeImageListView)
     app.router.add_view(r'/api/v1/nodes/{id}/images/{image_id}', api.NodeImageView)
     app.router.add_view(r'/api/v1/changes', api.ChangesView)
+
+
+def setup_static_path(app, path):
+    app.router.add_static(r'/static', path)
+    app.router.add_view(r'/', view.IndexView)
+    app.router.add_view(r'/{name}', view.IndexView)
 
 
 main = Daemon(sys.argv)
