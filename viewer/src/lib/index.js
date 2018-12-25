@@ -1,6 +1,6 @@
 export class FileSystem {
 
-  constructor (baseURL) {
+  constructor () {
     const { protocol, host } = location;
     this._baseURL = `${protocol}//${host}`;
   }
