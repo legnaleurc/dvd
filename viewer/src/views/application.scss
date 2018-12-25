@@ -25,19 +25,19 @@
         @include w-100;
         @include h-100;
 
-        &.normal {
+        &.side-1 {
           background-color: hsl(0, 100%, 50%);
         }
 
-        &.search {
+        &.side-2 {
           background-color: hsl(120, 100%, 50%);
         }
 
-        &.two-pane {
+        &.side-3 {
           background-color: hsl(180, 100%, 50%);
         }
 
-        &.mpv {
+        &.side-4 {
           background-color: hsl(270, 100%, 50%);
         }
       }
