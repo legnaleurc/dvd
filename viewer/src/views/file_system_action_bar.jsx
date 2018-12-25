@@ -18,15 +18,16 @@ class FileSystemActionBar extends React.Component {
   }
 
   render () {
+    const { updating } = this.props;
     return (
       <div className="file-system-action-bar">
         <div className="group">
-          <Button onClick={this._sync}>SYNC</Button>
+          <Button disabled={updating} onClick={this._sync}>SYNC</Button>
         </div>
         <div className="expand">
         </div>
         <div className="group">
-          <Button onClick={this._trash}>TRASH</Button>
+          <Button disabled={updating} onClick={this._trash}>TRASH</Button>
         </div>
       </div>
     );
@@ -45,6 +46,13 @@ class FileSystemActionBar extends React.Component {
 }
 
 
+function mapStateToProps (state) {
+  return {
+    updating: state.fileSystem.updating,
+  };
+}
+
+
 function mapDispatchToProps (dispatch) {
   return {
     sync () {
@@ -57,4 +65,7 @@ function mapDispatchToProps (dispatch) {
 }
 
 
-export default connect(null, mapDispatchToProps)(FileSystemActionBar);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(FileSystemActionBar);

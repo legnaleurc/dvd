@@ -1,7 +1,13 @@
 import {
+  FS_ROOT_GET_TRY,
   FS_ROOT_GET_SUCCEED,
+  FS_ROOT_GET_FAILED,
+  FS_LIST_GET_TRY,
   FS_LIST_GET_SUCCEED,
+  FS_LIST_GET_FAILED,
+  FS_SYNC_TRY,
   FS_SYNC_SUCCEED,
+  FS_SYNC_FAILED,
   FS_SET_SORT,
 } from './actions';
 import {
@@ -11,6 +17,7 @@ import {
 
 
 const initialState = {
+  updating: false,
   nodes: {},
   rootId: null,
   sortKey: SORT_BY_MTIME_DES,
@@ -19,6 +26,11 @@ const initialState = {
 
 export default function reduceFileSystem (state = initialState, { type, payload }) {
   switch (type) {
+    case FS_ROOT_GET_TRY: {
+      return Object.assign({}, state, {
+        updating: true,
+      });
+    }
     case FS_ROOT_GET_SUCCEED: {
       let { node } = payload;
       const { children } = payload;
@@ -39,8 +51,19 @@ export default function reduceFileSystem (state = initialState, { type, payload 
 
       // root changes means all data need reinitialize
       return Object.assign({}, state, {
+        updating: false,
         nodes,
         rootId: node.id,
+      });
+    }
+    case FS_ROOT_GET_FAILED: {
+      return Object.assign({}, state, {
+        updating: false,
+      });
+    }
+    case FS_LIST_GET_TRY: {
+      return Object.assign({}, state, {
+        updating: true,
       });
     }
     case FS_LIST_GET_SUCCEED: {
@@ -61,7 +84,18 @@ export default function reduceFileSystem (state = initialState, { type, payload 
       });
 
       return Object.assign({}, state, {
+        updating: false,
         nodes: Object.assign({}, nodes),
+      });
+    }
+    case FS_LIST_GET_FAILED: {
+      return Object.assign({}, state, {
+        updating: false,
+      });
+    }
+    case FS_SYNC_TRY: {
+      return Object.assign({}, state, {
+        updating: true,
       });
     }
     case FS_SYNC_SUCCEED: {
@@ -71,7 +105,13 @@ export default function reduceFileSystem (state = initialState, { type, payload 
         applyChange(nodes, state.sortKey, change);
       }
       return Object.assign({}, state, {
+        updating: false,
         nodes: Object.assign({}, nodes),
+      });
+    }
+    case FS_SYNC_FAILED: {
+      return Object.assign({}, state, {
+        updating: false,
       });
     }
     case FS_SET_SORT: {
