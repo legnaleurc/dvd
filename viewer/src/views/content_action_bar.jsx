@@ -14,10 +14,11 @@ class ContentActionBar extends React.Component {
   }
 
   render () {
+    const { unpacking } = this.props;
     return (
       <div className="content-action-bar">
         <div className="group">
-          <Button onClick={this._mpv}>MPV</Button>
+          <Button disabled={unpacking} onClick={this._mpv}>MPV</Button>
         </div>
       </div>
     );
@@ -31,6 +32,13 @@ class ContentActionBar extends React.Component {
 }
 
 
+function mapStateToProps (state) {
+  return {
+    unpacking: state.mpv.unpacking,
+  };
+}
+
+
 function mapDispatchToProps (dispatch) {
   return {
     mpv () {
@@ -40,4 +48,4 @@ function mapDispatchToProps (dispatch) {
 }
 
 
-export default connect(null, mapDispatchToProps)(ContentActionBar);
+export default connect(mapStateToProps, mapDispatchToProps)(ContentActionBar);
