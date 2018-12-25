@@ -14,7 +14,7 @@ import { getRoot } from './states/file_system/actions';
 import './index.scss';
 
 
-const fileSystem = new FileSystem('http://localhost:9000');
+const fileSystem = new FileSystem();
 
 const sagaMiddleware = createSagaMiddleware();
 const store = createStore(reduce, composeWithDevTools(applyMiddleware(sagaMiddleware)));
