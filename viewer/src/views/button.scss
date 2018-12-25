@@ -16,14 +16,17 @@
   color: $text-color;
   background-color: $bg-color;
   border-color: lighten($bg-color, 25%);
+
   &:hover {
     background-color: lighten($bg-color, 25%);
+
     cursor: pointer;
   }
 
   &:disabled {
     background-color: $bg-color;
     opacity: 0.65;
+
     cursor: not-allowed;
   }
 }
