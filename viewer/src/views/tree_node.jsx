@@ -190,7 +190,7 @@ function mapConsumerToProps (value, ownProps) {
   const { expanded, toggle } = value;
   const { nodeId } = ownProps;
   return {
-    expanded: expanded[nodeId],
+    expanded: !!expanded[nodeId],
     toggle,
   };
 }
@@ -203,7 +203,7 @@ function connectConsumer (Consumer, mapConsumerToProps) {
         {value => {
           const newProps = mapConsumerToProps(value, props);
           return (
-            <Component {...newProps} {...props} />
+            <Component {...props} {...newProps} />
           );
         }}
       </Consumer>
