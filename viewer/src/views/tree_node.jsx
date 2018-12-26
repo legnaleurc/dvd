@@ -9,6 +9,7 @@ import {
 } from '../states/selection/actions';
 import DragDrop from './dragdrop';
 import Selectable from './selectable';
+import Expandable from './expandable';
 
 import './tree_node.scss';
 
@@ -17,10 +18,6 @@ class TreeNode extends React.Component {
 
   constructor (props) {
     super(props);
-
-    this.state = {
-      expended: false,
-    };
 
     this._onDragStart = this._onDragStart.bind(this);
     this._onDrop = this._onDrop.bind(this);
@@ -66,16 +63,14 @@ class TreeNode extends React.Component {
   }
 
   _renderIndicator () {
-    const { node } = this.props;
-    const { expended } = this.state;
-    const { children } = node;
+    const { node, expanded } = this.props;
 
-    if (!children) {
+    if (!node.children) {
       return null;
     }
     return (
       <Indicator
-        expended={expended}
+        expanded={expanded}
         onClick={event => {
           event.preventDefault();
           this._toggle();
@@ -85,8 +80,7 @@ class TreeNode extends React.Component {
   }
 
   _renderChildren () {
-    const { node } = this.props;
-    const { expended } = this.state;
+    const { node, expanded } = this.props;
     const { children } = node;
 
     if (!children || children.length <= 0) {
@@ -96,7 +90,7 @@ class TreeNode extends React.Component {
     return (
       <div className={classNameFromObject({
         tail: true,
-        hidden: !expended,
+        hidden: !expanded,
       })}>
         {children.map((nodeId, index) => (
           <React.Fragment key={index}>
@@ -108,16 +102,12 @@ class TreeNode extends React.Component {
   }
 
   _toggle () {
-    const { node, getChildren } = this.props;
+    const { node, getChildren, toggle } = this.props;
     if (!node.fetched) {
       getChildren(node.id);
     }
 
-    const { expended } = this.state;
-    // flip
-    this.setState({
-      expended: !expended,
-    });
+    toggle(node.id);
   }
 
   _openFile () {
@@ -148,7 +138,7 @@ function Indicator (props) {
     <div
       className={classNameFromObject({
         indicator: true,
-        expended: props.expended,
+        expanded: props.expanded,
       })}
       onClick={props.onClick}
     />
@@ -178,7 +168,7 @@ function mapStateToProps (state, ownProps) {
 }
 
 
-function mapDispatchToProps (dispatch, ownProps) {
+function mapDispatchToProps (dispatch) {
   return {
     getChildren (id) {
       dispatch(getList(id));
@@ -196,5 +186,37 @@ function mapDispatchToProps (dispatch, ownProps) {
 }
 
 
-const ConnectedTreeNode = connect(mapStateToProps, mapDispatchToProps)(TreeNode);
+function mapConsumerToProps (value, ownProps) {
+  const { expanded, toggle } = value;
+  const { nodeId } = ownProps;
+  return {
+    expanded: expanded[nodeId],
+    toggle,
+  };
+}
+
+
+function connectConsumer (Consumer, mapConsumerToProps) {
+  return Component => (
+    props => (
+      <Consumer>
+        {value => {
+          const newProps = mapConsumerToProps(value, props);
+          return (
+            <Component {...newProps} {...props} />
+          );
+        }}
+      </Consumer>
+    )
+  );
+}
+
+
+const ConnectedTreeNode = (Component => {
+  let decorator = connect(mapStateToProps, mapDispatchToProps);
+  Component = decorator(Component);
+  decorator = connectConsumer(Expandable.Consumer, mapConsumerToProps);
+  Component = decorator(Component);
+  return Component;
+})(TreeNode);
 export default ConnectedTreeNode;
