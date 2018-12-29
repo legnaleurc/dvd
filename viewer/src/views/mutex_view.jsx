@@ -8,7 +8,7 @@ import './mutex_view.scss';
 const Context = React.createContext();
 
 
-class MutexView extends React.Component {
+class MutexView extends React.PureComponent {
 
   constructor (props) {
     super(props);
@@ -30,7 +30,7 @@ class MutexView extends React.Component {
 }
 
 
-MutexView.Mutex = class Mutex extends React.Component {
+MutexView.Mutex = class Mutex extends React.PureComponent {
 
   constructor (props) {
     super(props);

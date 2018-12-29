@@ -14,7 +14,7 @@ import { clearSelection } from '../states/selection/actions';
 import './application.scss';
 
 
-class Application extends React.Component {
+class Application extends React.PureComponent {
 
   constructor (props) {
     super(props);

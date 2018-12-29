@@ -14,7 +14,7 @@ import Expandable from './expandable';
 import './tree_node.scss';
 
 
-class TreeNode extends React.Component {
+class TreeNode extends React.PureComponent {
 
   constructor (props) {
     super(props);

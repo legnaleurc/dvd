@@ -6,7 +6,7 @@ import { classNameFromObject } from '../lib';
 const Context = React.createContext();
 
 
-class SwitchBar extends React.Component {
+class SwitchBar extends React.PureComponent {
 
   constructor (props) {
     super(props);
@@ -35,7 +35,7 @@ class SwitchBar extends React.Component {
 }
 
 
-SwitchBar.Switch = class Switch extends React.Component {
+SwitchBar.Switch = class Switch extends React.PureComponent {
 
   constructor (props) {
     super(props);

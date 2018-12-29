@@ -5,7 +5,7 @@ import TreeNode from './tree_node';
 import Expandable from './expandable';
 
 
-class FileExplorer extends React.Component {
+class FileExplorer extends React.PureComponent {
 
   constructor (props) {
     super(props);
