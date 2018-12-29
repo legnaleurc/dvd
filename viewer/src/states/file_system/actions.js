@@ -99,11 +99,12 @@ export function * sagaGetRoot (fileSystem) {
 }
 
 
-export function getStreamUrl (id, done) {
+export function getStreamUrl (id, name, done) {
   return {
     type: FS_STREAM_URL,
     payload: {
       id,
+      name,
       done,
     },
   };
@@ -112,8 +113,8 @@ export function getStreamUrl (id, done) {
 
 export function * sagaGetStreamUrl (fileSystem) {
   yield takeEvery(FS_STREAM_URL, function * ({ payload }) {
-    const { id, done } = payload;
-    const url = yield call(() => fileSystem.stream(id));
+    const { id, name, done } = payload;
+    const url = yield call(() => fileSystem.stream(id, name));
     yield call(() => done(url));
   });
 }

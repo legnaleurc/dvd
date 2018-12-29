@@ -47,8 +47,8 @@ export class FileSystem {
     return await this._get(`/api/v1/nodes/${id}/images`);
   }
 
-  stream (id) {
-    return `${this._baseURL}/api/v1/nodes/${id}/stream`;
+  stream (id, name) {
+    return `${this._baseURL}/api/v1/nodes/${id}/stream/${name}`;
   }
 
   image (id, imageId) {
