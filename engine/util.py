@@ -187,7 +187,11 @@ class UnpackEngine(object):
                     continue
                 if not type_.startswith('image/'):
                     continue
-                image = Image.open(path)
+                try:
+                    image = Image.open(path)
+                except OSError as e:
+                    EXCEPTION('engine', e) << 'unknown image'
+                    continue
                 width, height = image.size
                 rv.append({
                     'path': path,
