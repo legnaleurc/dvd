@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { classNameFromObject } from '../lib';
+import { classNameFromObject, connectConsumer } from '../lib';
 import { getList, getStreamUrl } from '../states/file_system/actions';
 import {
   moveSelectedNodesTo,
@@ -186,7 +186,7 @@ function mapDispatchToProps (dispatch) {
 }
 
 
-function mapConsumerToProps (value, ownProps) {
+function mapValueToProps (value, ownProps) {
   const { expanded, toggle } = value;
   const { nodeId } = ownProps;
   return {
@@ -196,26 +196,10 @@ function mapConsumerToProps (value, ownProps) {
 }
 
 
-function connectConsumer (Consumer, mapConsumerToProps) {
-  return Component => (
-    props => (
-      <Consumer>
-        {value => {
-          const newProps = mapConsumerToProps(value, props);
-          return (
-            <Component {...props} {...newProps} />
-          );
-        }}
-      </Consumer>
-    )
-  );
-}
-
-
 const ConnectedTreeNode = (Component => {
   let decorator = connect(mapStateToProps, mapDispatchToProps);
   Component = decorator(Component);
-  decorator = connectConsumer(Expandable.Consumer, mapConsumerToProps);
+  decorator = connectConsumer(Expandable.Consumer, mapValueToProps);
   Component = decorator(Component);
   return Component;
 })(TreeNode);

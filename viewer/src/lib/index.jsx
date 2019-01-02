@@ -115,3 +115,17 @@ function * chunksOf (array, size) {
     yield array.slice(i, i + size);
   }
 }
+
+
+export function connectConsumer (Consumer, mapValueToProps) {
+  return Component => (
+    props => (
+      <Consumer>
+        {value => {
+          const newProps = mapValueToProps(value, props);
+          return <Component {...props} {...newProps} />;
+        }}
+      </Consumer>
+    )
+  );
+}
