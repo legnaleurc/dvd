@@ -5,25 +5,17 @@
   @include w-100;
   @include h-100;
 
-  @include hbox;
+  .tab-view {
+    @include w-100;
+    @include h-100;
 
-  .side-bar {
-    .switch {
-      box-sizing: border-box;
-      width: 50px;
-      height: 50px;
+    @include hbox;
 
-      &.active {
-        border: {
-          width: 5px;
-          color: white;
-          style: solid;
-        }
-      }
-
+    .label-container .label {
       .block {
-        @include w-100;
-        @include h-100;
+        box-sizing: border-box;
+        width: 50px;
+        height: 50px;
 
         &.side-1 {
           background-color: hsl(0, 100%, 50%);
@@ -41,11 +33,29 @@
           background-color: hsl(270, 100%, 50%);
         }
       }
-    }
-  }
 
-  .side-content {
-    @include w-100;
-    @include h-100;
+      &.active {
+        .block {
+          border: {
+            width: 5px;
+            color: white;
+            style: solid;
+          }
+        }
+      }
+    }
+
+    .page-container {
+      @include w-100;
+      @include h-100;
+
+      .page.active {
+        display: contents;
+      }
+
+      .page {
+        display: none;
+      }
+    }
   }
 }
