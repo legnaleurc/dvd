@@ -5,8 +5,7 @@ import { hot } from 'react-hot-loader/root';
 
 import SearchList from './search_list';
 import MultiPageView from './multipage_view';
-import SwitchBar from './switch_bar';
-import MutexView from './mutex_view';
+import TabView from './tab_view';
 import SingleTreeView from './single_tree_view';
 import DoubleTreeView from './double_tree_view';
 import { clearSelection } from '../states/selection/actions';
@@ -24,44 +23,42 @@ class Application extends React.PureComponent {
     const { clearSelection, match, history } = this.props;
     return (
       <div className="application">
-        <div className="side-bar">
-          <SwitchBar
-            selected={match.params.tabId}
-            onSwitch={(key) => {
-              clearSelection();
-              history.push(`/${key}`);
-            }}
-          >
-            <SwitchBar.Switch name="tree">
+        <TabView
+          active={match.params.tabId}
+          onSwitch={(key) => {
+            clearSelection();
+            history.push(`/${key}`);
+          }}
+        >
+          <TabView.LabelContainer>
+            <TabView.Label name="tree">
               <div className="block side-1"></div>
-            </SwitchBar.Switch>
-            <SwitchBar.Switch name="search">
+            </TabView.Label>
+            <TabView.Label name="search">
               <div className="block side-2"></div>
-            </SwitchBar.Switch>
-            <SwitchBar.Switch name="double-tree">
+            </TabView.Label>
+            <TabView.Label name="double-tree">
               <div className="block side-3"></div>
-            </SwitchBar.Switch>
-            <SwitchBar.Switch name="mpv">
+            </TabView.Label>
+            <TabView.Label name="mpv">
               <div className="block side-4"></div>
-            </SwitchBar.Switch>
-          </SwitchBar>
-        </div>
-        <div className="side-content">
-          <MutexView selected={match.params.tabId}>
-            <MutexView.Mutex name="tree">
+            </TabView.Label>
+          </TabView.LabelContainer>
+          <TabView.PageContainer>
+            <TabView.Page name="tree">
               <SingleTreeView />
-            </MutexView.Mutex>
-            <MutexView.Mutex name="search">
+            </TabView.Page>
+            <TabView.Page name="search">
               <SearchList />
-            </MutexView.Mutex>
-            <MutexView.Mutex name="double-tree">
+            </TabView.Page>
+            <TabView.Page name="double-tree">
               <DoubleTreeView />
-            </MutexView.Mutex>
-            <MutexView.Mutex name="mpv">
+            </TabView.Page>
+            <TabView.Page name="mpv">
               <MultiPageView />
-            </MutexView.Mutex>
-          </MutexView>
-        </div>
+            </TabView.Page>
+          </TabView.PageContainer>
+        </TabView>
       </div>
     );
   }
