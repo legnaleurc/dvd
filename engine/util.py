@@ -8,7 +8,7 @@ import re
 import tempfile
 
 from PIL import Image
-from wcpan.logger import EXCEPTION
+from wcpan.logger import EXCEPTION, DEBUG
 
 
 class InvalidPatternError(Exception):
@@ -165,10 +165,9 @@ class UnpackEngine(object):
             raise UnpackFailedError(f'{node_id} canceled unpack')
 
     async def _unpack_local(self, node_id):
-        p = await asyncio.create_subprocess_exec(self._unpack_path,
-                                                 str(self._port),
-                                                 node_id,
-                                                 self._tmp)
+        cmd = [self._unpack_path, str(self._port), node_id, self._tmp]
+        DEBUG('engine') << ' '.join(cmd)
+        p = await asyncio.create_subprocess_exec(*cmd)
         out, err = await p.communicate()
         if p.returncode != 0:
             raise UnpackFailedError(f'unpack failed code: {p.returncode}')
