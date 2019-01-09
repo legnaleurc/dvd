@@ -1,4 +1,4 @@
-import { call, put, takeEvery } from 'redux-saga/effects';
+import { call, put, takeEvery, select } from 'redux-saga/effects';
 
 
 export const FS_LIST_GET_TRY = 'FS_LIST_GET_TRY';
@@ -99,12 +99,11 @@ export function * sagaGetRoot (fileSystem) {
 }
 
 
-export function getStreamUrl (id, name, done) {
+export function getStreamUrl (id, done) {
   return {
     type: FS_STREAM_URL,
     payload: {
       id,
-      name,
       done,
     },
   };
@@ -113,8 +112,9 @@ export function getStreamUrl (id, name, done) {
 
 export function * sagaGetStreamUrl (fileSystem) {
   yield takeEvery(FS_STREAM_URL, function * ({ payload }) {
-    const { id, name, done } = payload;
-    const url = yield call(() => fileSystem.stream(id, name));
+    const { id, done } = payload;
+    const { nodes } = yield select(state => state.fileSystem);
+    const url = yield call(() => fileSystem.stream(id, nodes[id].name));
     yield call(() => done(url));
   });
 }

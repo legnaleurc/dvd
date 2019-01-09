@@ -118,7 +118,7 @@ class TreeNode extends React.PureComponent {
 
   _openFile () {
     const { getFileUrl, node } = this.props;
-    getFileUrl(node.id, node.name, openUrl);
+    getFileUrl(node.id, openUrl);
   }
 
   _onDragStart (event) {
@@ -179,8 +179,8 @@ function mapDispatchToProps (dispatch) {
     getChildren (id) {
       dispatch(getList(id));
     },
-    getFileUrl (id, name, done) {
-      dispatch(getStreamUrl(id, name, done));
+    getFileUrl (id, done) {
+      dispatch(getStreamUrl(id, done));
     },
     moveSelectedNodesTo (id) {
       dispatch(moveSelectedNodesTo(id));
