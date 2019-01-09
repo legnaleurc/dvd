@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { classNameFromObject, connectConsumer } from '../lib';
+import { classNameFromObject } from '../lib';
 import { getList, getStreamUrl } from '../states/file_system/actions';
 import {
   moveSelectedNodesTo,
@@ -9,7 +9,6 @@ import {
 } from '../states/selection/actions';
 import DragDrop from './dragdrop';
 import Selectable from './selectable';
-import Expandable from './expandable';
 
 import './tree_node.scss';
 
@@ -21,6 +20,10 @@ class TreeNode extends React.PureComponent {
 
     this._onDragStart = this._onDragStart.bind(this);
     this._onDrop = this._onDrop.bind(this);
+
+    this.state = {
+      expanded: false,
+    };
   }
 
   render () {
@@ -63,7 +66,8 @@ class TreeNode extends React.PureComponent {
   }
 
   _renderIndicator () {
-    const { node, expanded } = this.props;
+    const { node } = this.props;
+    const { expanded } = this.state;
 
     if (!node.children) {
       return null;
@@ -80,7 +84,8 @@ class TreeNode extends React.PureComponent {
   }
 
   _renderChildren () {
-    const { node, expanded } = this.props;
+    const { node } = this.props;
+    const { expanded } = this.state;
     const { children } = node;
 
     if (!children || children.length <= 0) {
@@ -92,22 +97,23 @@ class TreeNode extends React.PureComponent {
         tail: true,
         hidden: !expanded,
       })}>
-        {children.map((nodeId, index) => (
-          <React.Fragment key={index}>
-            <ConnectedTreeNode nodeId={nodeId} />
-          </React.Fragment>
+        {children.map(nodeId => (
+          <ConnectedTreeNode key={nodeId} nodeId={nodeId} />
         ))}
       </div>
     );
   }
 
   _toggle () {
-    const { node, getChildren, toggle } = this.props;
+    const { node, getChildren } = this.props;
     if (!node.fetched) {
       getChildren(node.id);
     }
 
-    toggle(node.id);
+    const { expanded } = this.state;
+    this.setState({
+      expanded: !expanded,
+    });
   }
 
   _openFile () {
@@ -186,20 +192,8 @@ function mapDispatchToProps (dispatch) {
 }
 
 
-function mapValueToProps (value, ownProps) {
-  const { expanded, toggle } = value;
-  const { nodeId } = ownProps;
-  return {
-    expanded: !!expanded[nodeId],
-    toggle,
-  };
-}
-
-
 const ConnectedTreeNode = (Component => {
   let decorator = connect(mapStateToProps, mapDispatchToProps);
-  Component = decorator(Component);
-  decorator = connectConsumer(Expandable.Consumer, mapValueToProps);
   Component = decorator(Component);
   return Component;
 })(TreeNode);

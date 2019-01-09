@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import TreeNode from './tree_node';
-import Expandable from './expandable';
 
 
 class FileExplorer extends React.PureComponent {
@@ -21,13 +20,9 @@ class FileExplorer extends React.PureComponent {
     }
     return (
       <div className="file-explorer">
-        <Expandable.Provider>
-          {root.children.map((nodeId, index) => (
-            <React.Fragment key={index}>
-              <TreeNode nodeId={nodeId} />
-            </React.Fragment>
-          ))}
-        </Expandable.Provider>
+        {root.children.map(nodeId => (
+          <TreeNode key={nodeId} nodeId={nodeId} />
+        ))}
       </div>
     );
   }
