@@ -12,6 +12,8 @@ import {
   sagaSelectSiblingList,
   sagaSelectMatchedList,
   sagaDeleteSelectedNodes,
+  sagaCopySelected,
+  sagaDownloadSelected,
 } from './selection/actions';
 import { sagaLoadMultiPageViewer } from './multipage/actions';
 
@@ -27,6 +29,8 @@ export default function * ({ fileSystem }) {
     sagaSelectSiblingList(),
     sagaSelectMatchedList(),
     sagaDeleteSelectedNodes(fileSystem),
+    sagaCopySelected(fileSystem),
+    sagaDownloadSelected(fileSystem),
     sagaLoadMultiPageViewer(fileSystem),
   ]);
 }
