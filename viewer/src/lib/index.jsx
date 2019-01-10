@@ -54,6 +54,10 @@ export class FileSystem {
     return `${this._baseURL}/api/v1/nodes/${id}/stream/${encodeURI(name)}`;
   }
 
+  download (id) {
+    return `${this._baseURL}/api/v1/nodes/${id}/download`;
+  }
+
   image (id, imageId) {
     return `${this._baseURL}/api/v1/nodes/${id}/images/${imageId}`;
   }
