@@ -18,6 +18,7 @@ export const SELECT_DELETE_TRY = 'SELECT_DELETE_TRY';
 export const SELECT_DELETE_SUCCEED = 'SELECT_DELETE_SUCCEED';
 export const SELECT_DELETE_FAILED = 'SELECT_DELETE_FAILED';
 export const SELECT_COPY = 'SELECT_COPY';
+export const SELECT_DOWNLOAD = 'SELECT_DOWNLOAD';
 
 
 function getLocalState (state) {
@@ -271,5 +272,29 @@ export function * sagaCopySelected (fileSystem) {
     const url = yield call(() => fileSystem.stream(id, nodes[id].name));
 
     yield call(() => navigator.clipboard.writeText(url));
+  });
+}
+
+
+export function downloadSelected () {
+  return {
+    type: SELECT_DOWNLOAD,
+  };
+}
+
+
+export function * sagaDownloadSelected (fileSystem) {
+  yield takeEvery(SELECT_DOWNLOAD, function * () {
+    const { table } = yield select(getLocalState);
+    const srcList = Object.keys(table);
+    if (srcList.length !== 1) {
+      // TODO error message?
+      return;
+    }
+    const id = srcList[0];
+
+    const url = yield call(() => fileSystem.download(id));
+
+    window.open(url, '_blank');
   });
 }
