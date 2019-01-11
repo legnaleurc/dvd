@@ -2,6 +2,7 @@ import asyncio
 import functools as ft
 import json
 import re
+import shlex
 
 import aiohttp.web as aw
 from wcpan.drive.google import dict_from_node
@@ -250,6 +251,23 @@ class ChangesView(aw.View):
         await se.clear_cache()
         changes = [_ async for _ in drive.sync()]
         return json_response(changes)
+
+
+class ApplyView(aw.View):
+
+    async def post(self):
+        kwargs = await self.request.json()
+        command = kwargs['command']
+        kwargs = kwargs['kwargs']
+
+        command = shlex.split(command)
+        command = (_.format(kwargs) for _ in command)
+        command = (shlex.quote(_) for _ in command)
+        command = list(command)
+        p = await asyncio.create_subprocess_exec(*command)
+        await p.communicate()
+        assert p.returncode == 0
+        return aw.Response(status=204)
 
 
 def json_response(data):

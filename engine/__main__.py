@@ -108,6 +108,7 @@ def setup_api_path(app):
     app.router.add_view(r'/api/v1/nodes/{id}/images', api.NodeImageListView)
     app.router.add_view(r'/api/v1/nodes/{id}/images/{image_id}', api.NodeImageView)
     app.router.add_view(r'/api/v1/changes', api.ChangesView)
+    app.router.add_view(r'/api/v1/apply', api.ApplyView)
 
 
 def setup_static_path(app, path):
