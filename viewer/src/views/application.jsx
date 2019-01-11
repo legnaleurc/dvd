@@ -8,6 +8,7 @@ import MultiPageView from './multipage_view';
 import TabView from './tab_view';
 import SingleTreeView from './single_tree_view';
 import DoubleTreeView from './double_tree_view';
+import SettingsView from './settings_view';
 import { clearSelection } from '../states/selection/actions';
 
 import './application.scss';
@@ -43,6 +44,9 @@ class Application extends React.PureComponent {
             <TabView.Label name="mpv">
               <div className="block side-4"></div>
             </TabView.Label>
+            <TabView.Label name="settings">
+              <div className="block side-5"></div>
+            </TabView.Label>
           </TabView.LabelContainer>
           <TabView.PageContainer>
             <TabView.Page name="tree">
@@ -56,6 +60,9 @@ class Application extends React.PureComponent {
             </TabView.Page>
             <TabView.Page name="mpv">
               <MultiPageView />
+            </TabView.Page>
+            <TabView.Page name="settings">
+              <SettingsView />
             </TabView.Page>
           </TabView.PageContainer>
         </TabView>
