@@ -28,7 +28,7 @@ export default function reduceMultiPage (state = initialState, { type, payload }
     case MPV_LOAD_FAILED: {
       return Object.assign({}, state, {
         unpacking: false,
-        imageList: payload.imageList,
+        imageList: [],
       });
     }
     default:
