@@ -58,6 +58,13 @@ export class FileSystem {
     return `${this._baseURL}/api/v1/nodes/${id}/images/${imageId}`;
   }
 
+  async apply (command, kwargs) {
+    return await this._post('/api/v1/apply', {
+      command,
+      kwargs,
+    });
+  }
+
   async sync () {
     return await this._post('/api/v1/changes');
   }
