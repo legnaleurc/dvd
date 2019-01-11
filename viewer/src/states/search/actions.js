@@ -1,5 +1,7 @@
 import { call, put, takeEvery, select } from 'redux-saga/effects';
 
+import { getSearch } from '../selectors';
+
 
 const SEARCH_NAME_PRE = 'SEARCH_NAME_PRE';
 export const SEARCH_NAME_TRY = 'SEARCH_NAME_TRY';
@@ -50,7 +52,7 @@ function getSearchNameFailed (message) {
 export function * sagaGetSearchName (fileSystem) {
   yield takeEvery(SEARCH_NAME_PRE, function * ({ payload }) {
     try {
-      const { loading } = yield select(state => state.search);
+      const { loading } = yield select(getSearch);
       if (loading) {
         return;
       }

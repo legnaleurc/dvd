@@ -1,6 +1,7 @@
 import { call, put, takeEvery, select } from 'redux-saga/effects';
 
 import { getActionList } from '../../lib';
+import { getFileSystem } from '../selectors';
 
 
 export const FS_LIST_GET_TRY = 'FS_LIST_GET_TRY';
@@ -164,7 +165,7 @@ export function openStreamUrl (id) {
 export function * sagaOpenStreamUrl (fileSystem) {
   yield takeEvery(FS_OPEN_STREAM, function * ({ payload }) {
     const { id } = payload;
-    const { nodes } = yield select(state => state.fileSystem);
+    const { nodes } = yield select(getFileSystem);
     const node = nodes[id];
     if (!node || !node.mimeType) {
       // TODO error

@@ -1,6 +1,7 @@
 import { call, put, takeEvery, select } from 'redux-saga/effects';
 
 import { clearSelection } from '../selection/actions';
+import { getSelection } from '../selectors';
 
 
 export const MPV_LOAD_TRY = 'MPV_LOAD_TRY';
@@ -38,7 +39,7 @@ function loadMultiPageViewerFailed (message) {
 export function * sagaLoadMultiPageViewer (fileSystem) {
   yield takeEvery(MPV_LOAD_TRY, function * () {
     try {
-      const { table } = yield select(state => state.selection);
+      const { table } = yield select(getSelection);
       let srcList = Object.keys(table);
       if (srcList.length !== 1) {
         yield put(loadMultiPageViewerFailed('SELECTED_MULTIPLE_OR_NONE'));

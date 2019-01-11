@@ -1,6 +1,7 @@
 import { call, put, takeEvery, select } from 'redux-saga/effects';
 
 import { postSync } from '../file_system/actions';
+import { getFileSystem, getSelection, getSearch } from '../selectors';
 
 
 export const SELECT_TOGGLE = 'SELECT_TOGGLE';
@@ -19,11 +20,6 @@ export const SELECT_DELETE_SUCCEED = 'SELECT_DELETE_SUCCEED';
 export const SELECT_DELETE_FAILED = 'SELECT_DELETE_FAILED';
 export const SELECT_COPY = 'SELECT_COPY';
 export const SELECT_DOWNLOAD = 'SELECT_DOWNLOAD';
-
-
-function getLocalState (state) {
-  return state.selection;
-}
 
 
 export function toggleSelection (id) {
@@ -74,7 +70,7 @@ export function * sagaMoveSelectedNodesTo (fileSystem) {
   yield takeEvery(SELECT_MOVE_TRY, function * ({ payload }) {
     const { id } = payload;
     try {
-      const { table } = yield select(getLocalState);
+      const { table } = yield select(getSelection);
       const srcList = Object.keys(table);
       yield call(() => fileSystem.move(srcList, id));
       yield put(moveSelectedNodesToSucceed());
@@ -119,12 +115,12 @@ function selectSiblingListFailed (message) {
 export function * sagaSelectSiblingList () {
   yield takeEvery(SELECT_SIBLING_LIST_TRY, function * ({ payload }) {
     const { id } = payload;
-    const { last } = yield select(getLocalState);
+    const { last } = yield select(getSelection);
     if (!last) {
       yield put(selectSiblingListFailed('NO_LATEST_SELECTION'));
       return;
     }
-    const { nodes } = yield select(state => state.fileSystem);
+    const { nodes } = yield select(getFileSystem);
     const node = nodes[last];
     if (!node.parentId) {
       yield put(selectSiblingListFailed('NO_SIBLING'));
@@ -182,12 +178,12 @@ function selectMatchedListFailed (message) {
 
 export function * sagaSelectMatchedList () {
   yield takeEvery(SELECT_MATCHED_LIST_TRY, function * ({ payload }) {
-    const { last } = yield select(getLocalState);
+    const { last } = yield select(getSelection);
     if (!last) {
       yield put(selectMatchedListFailed('NO_LATEST_SELECTION'));
       return;
     }
-    const { matched } = yield select(state => state.search);
+    const { matched } = yield select(getSearch);
     if (!matched) {
       yield put(selectMatchedListFailed('NOTHING_MATCHED'));
       return;
@@ -239,7 +235,7 @@ function deleteSelectedNodesFailed (message) {
 export function * sagaDeleteSelectedNodes (fileSystem) {
   yield takeEvery(SELECT_DELETE_TRY, function * () {
     try {
-      const { table } = yield select(getLocalState);
+      const { table } = yield select(getSelection);
       const srcList = Object.keys(table);
       yield call(() => fileSystem.trash(srcList));
       yield put(deleteSelectedNodesSucceed());
@@ -260,7 +256,7 @@ export function copySelected () {
 
 export function * sagaCopySelected (fileSystem) {
   yield takeEvery(SELECT_COPY, function * () {
-    const { table } = yield select(getLocalState);
+    const { table } = yield select(getSelection);
     const srcList = Object.keys(table);
     if (srcList.length !== 1) {
       // TODO error message?
@@ -268,7 +264,7 @@ export function * sagaCopySelected (fileSystem) {
     }
     const id = srcList[0];
 
-    const { nodes } = yield select(state => state.fileSystem);
+    const { nodes } = yield select(getFileSystem);
     const url = yield call(() => fileSystem.stream(id, nodes[id].name));
 
     yield call(() => navigator.clipboard.writeText(url));
@@ -285,7 +281,7 @@ export function downloadSelected () {
 
 export function * sagaDownloadSelected (fileSystem) {
   yield takeEvery(SELECT_DOWNLOAD, function * () {
-    const { table } = yield select(getLocalState);
+    const { table } = yield select(getSelection);
     const srcList = Object.keys(table);
     if (srcList.length !== 1) {
       // TODO error message?
