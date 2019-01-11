@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { classNameFromObject } from '../lib';
-import { getList, getStreamUrl } from '../states/file_system/actions';
+import { getList, openStreamUrl } from '../states/file_system/actions';
 import {
   moveSelectedNodesTo,
   selectSiblingList,
@@ -117,8 +117,8 @@ class TreeNode extends React.PureComponent {
   }
 
   _openFile () {
-    const { getFileUrl, node } = this.props;
-    getFileUrl(node.id, openUrl);
+    const { openFileUrl, node } = this.props;
+    openFileUrl(node.id);
   }
 
   _onDragStart (event) {
@@ -152,17 +152,6 @@ function Indicator (props) {
 }
 
 
-function openUrl (url) {
-  function onCopy (event) {
-    event.preventDefault();
-    event.clipboardData.setData('text/plain', url);
-    document.removeEventListener('copy', onCopy);
-  }
-  document.addEventListener('copy', onCopy);
-  document.execCommand('copy');
-}
-
-
 function mapStateToProps (state, ownProps) {
   const { fileSystem, selection } = state;
   const { nodeId } = ownProps;
@@ -179,8 +168,8 @@ function mapDispatchToProps (dispatch) {
     getChildren (id) {
       dispatch(getList(id));
     },
-    getFileUrl (id, done) {
-      dispatch(getStreamUrl(id, done));
+    openFileUrl (id) {
+      dispatch(openStreamUrl(id));
     },
     moveSelectedNodesTo (id) {
       dispatch(moveSelectedNodesTo(id));
