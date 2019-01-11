@@ -17,6 +17,7 @@ export const SELECT_MATCHED_LIST_FAILED = 'SELECT_MATCHED_LIST_FAILED';
 export const SELECT_DELETE_TRY = 'SELECT_DELETE_TRY';
 export const SELECT_DELETE_SUCCEED = 'SELECT_DELETE_SUCCEED';
 export const SELECT_DELETE_FAILED = 'SELECT_DELETE_FAILED';
+export const SELECT_COPY = 'SELECT_COPY';
 
 
 function getLocalState (state) {
@@ -245,5 +246,30 @@ export function * sagaDeleteSelectedNodes (fileSystem) {
       yield put(deleteSelectedNodesFailed(e.message));
     }
     yield put(postSync());
+  });
+}
+
+
+export function copySelected () {
+  return {
+    type: SELECT_COPY,
+  };
+}
+
+
+export function * sagaCopySelected (fileSystem) {
+  yield takeEvery(SELECT_COPY, function * () {
+    const { table } = yield select(getLocalState);
+    const srcList = Object.keys(table);
+    if (srcList.length !== 1) {
+      // TODO error message?
+      return;
+    }
+    const id = srcList[0];
+
+    const { nodes } = yield select(state => state.fileSystem);
+    const url = yield call(() => fileSystem.stream(id, nodes[id].name));
+
+    yield call(() => navigator.clipboard.writeText(url));
   });
 }
