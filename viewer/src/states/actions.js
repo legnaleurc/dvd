@@ -3,7 +3,6 @@ import { all } from 'redux-saga/effects';
 import {
   sagaGetList,
   sagaGetRoot,
-  sagaGetStreamUrl,
   sagaPostSync,
   sagaOpenStreamUrl,
 } from './file_system/actions';
@@ -23,7 +22,6 @@ export default function * ({ fileSystem }) {
   yield all([
     sagaGetList(fileSystem),
     sagaGetRoot(fileSystem),
-    sagaGetStreamUrl(fileSystem),
     sagaPostSync(fileSystem),
     sagaOpenStreamUrl(fileSystem),
     sagaGetSearchName(fileSystem),
