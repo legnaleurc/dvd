@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { getStreamUrl } from '../states/file_system/actions';
+import { openStreamUrl } from '../states/file_system/actions';
 import { getSearchName } from '../states/search/actions';
 import { selectMatchedList, clearSelection } from '../states/selection/actions';
 import Input from './input';
@@ -97,8 +97,8 @@ class SearchList extends React.Component {
   }
 
   _openFile (nodeId) {
-    const { getFileUrl } = this.props;
-    getFileUrl(nodeId, openUrl);
+    const { openFileUrl } = this.props;
+    openFileUrl(nodeId);
   }
 
 };
@@ -145,17 +145,6 @@ function HistoryEntry (props) {
 }
 
 
-function openUrl (url) {
-  function onCopy (event) {
-    event.preventDefault();
-    event.clipboardData.setData('text/plain', url);
-    document.removeEventListener('copy', onCopy);
-  }
-  document.addEventListener('copy', onCopy);
-  document.execCommand('copy');
-}
-
-
 function mapStateToProps (state) {
   const { search } = state;
   return {
@@ -171,8 +160,8 @@ function mapDispatchToProps (dispatch) {
     searchName (name) {
       dispatch(getSearchName(name));
     },
-    getFileUrl (id, done) {
-      dispatch(getStreamUrl(id, done));
+    openFileUrl (id) {
+      dispatch(openStreamUrl(id));
     },
     selectMatchedList (id) {
       dispatch(selectMatchedList(id));
