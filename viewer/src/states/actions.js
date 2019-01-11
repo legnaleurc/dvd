@@ -5,6 +5,7 @@ import {
   sagaGetRoot,
   sagaGetStreamUrl,
   sagaPostSync,
+  sagaOpenStreamUrl,
 } from './file_system/actions';
 import { sagaGetSearchName } from './search/actions';
 import {
@@ -24,6 +25,7 @@ export default function * ({ fileSystem }) {
     sagaGetRoot(fileSystem),
     sagaGetStreamUrl(fileSystem),
     sagaPostSync(fileSystem),
+    sagaOpenStreamUrl(fileSystem),
     sagaGetSearchName(fileSystem),
     sagaMoveSelectedNodesTo(fileSystem),
     sagaSelectSiblingList(),
