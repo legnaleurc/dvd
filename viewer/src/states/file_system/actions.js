@@ -1,5 +1,7 @@
 import { call, put, takeEvery, select } from 'redux-saga/effects';
 
+import { getActionList } from '../../lib';
+
 
 export const FS_LIST_GET_TRY = 'FS_LIST_GET_TRY';
 export const FS_LIST_GET_SUCCEED = 'FS_LIST_GET_SUCCEED';
@@ -12,6 +14,7 @@ export const FS_SYNC_TRY = 'FS_SYNC_TRY';
 export const FS_SYNC_SUCCEED = 'FS_SYNC_SUCCEED';
 export const FS_SYNC_FAILED = 'FS_SYNC_FAILED';
 export const FS_SET_SORT = 'FS_SET_SORT';
+export const FS_OPEN_STREAM = 'FS_OPEN_STREAM';
 
 
 export function getList (id) {
@@ -166,4 +169,40 @@ export function setSortFunction (key) {
       key,
     },
   };
+}
+
+
+export function openStreamUrl (id) {
+  return {
+    type: FS_OPEN_STREAM,
+    payload: {
+      id,
+    },
+  };
+}
+
+
+export function * sagaOpenStreamUrl (fileSystem) {
+  yield takeEvery(FS_OPEN_STREAM, function * ({ payload }) {
+    const { id } = payload;
+    const { nodes } = yield select(state => state.fileSystem);
+    const node = nodes[id];
+    if (!node || !node.mimeType) {
+      // TODO error
+      return;
+    }
+    const url = yield call(() => fileSystem.stream(id, node.name));
+
+    const actionList = getActionList();
+    const [category, __] = node.mimeType.split('/');
+    const command = actionList[category];
+    if (!command) {
+      // just no command
+      return;
+    }
+
+    yield call(() => fileSystem.apply(command, {
+      url,
+    }));
+  });
 }
