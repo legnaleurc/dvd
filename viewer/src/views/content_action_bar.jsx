@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 
 import Button from './button';
 import { loadMultiPageViewer } from '../states/multipage/actions';
+import { copySelected, downloadSelected } from '../states/selection/actions';
 
 
 class ContentActionBar extends React.Component {
@@ -11,6 +12,8 @@ class ContentActionBar extends React.Component {
     super(props);
 
     this._mpv = this._mpv.bind(this);
+    this._copy = this._copy.bind(this);
+    this._download = this._download.bind(this);
   }
 
   render () {
@@ -18,6 +21,8 @@ class ContentActionBar extends React.Component {
     return (
       <div className="content-action-bar">
         <div className="group">
+          <Button onClick={this._copy}>COPY</Button>
+          <Button onClick={this._download}>DOWNLOAD</Button>
           <Button disabled={unpacking} onClick={this._mpv}>MPV</Button>
         </div>
       </div>
@@ -27,6 +32,16 @@ class ContentActionBar extends React.Component {
   _mpv () {
     const { mpv } = this.props;
     mpv();
+  }
+
+  _copy () {
+    const { copy } = this.props;
+    copy();
+  }
+
+  _download () {
+    const { download } = this.props;
+    download();
   }
 
 }
@@ -43,6 +58,12 @@ function mapDispatchToProps (dispatch) {
   return {
     mpv () {
       dispatch(loadMultiPageViewer());
+    },
+    copy () {
+      dispatch(copySelected());
+    },
+    download () {
+      dispatch(downloadSelected());
     },
   };
 }
