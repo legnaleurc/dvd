@@ -139,3 +139,18 @@ export function connectConsumer (Consumer, mapValueToProps) {
     )
   );
 }
+
+
+export function getActionList () {
+  const actionList = localStorage.getItem('actionList');
+  if (!actionList) {
+    return actionList;
+  }
+  return JSON.parse(actionList);
+}
+
+
+export function setActionList (actionList) {
+  actionList = JSON.stringify(actionList);
+  localStorage.setItem('actionList', actionList);
+}
