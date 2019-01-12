@@ -261,7 +261,7 @@ class ApplyView(aw.View):
         kwargs = kwargs['kwargs']
 
         command = shlex.split(command)
-        command = (_.format(kwargs) for _ in command)
+        command = (_.format(**kwargs) for _ in command)
         command = (shlex.quote(_) for _ in command)
         command = list(command)
         p = await asyncio.create_subprocess_exec(*command)
