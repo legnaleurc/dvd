@@ -79,9 +79,10 @@ class SearchEngine(object):
         lock = self._searching[pattern]
         try:
             nodes = await self._drive.find_nodes_by_regex(pattern)
-            nodes = {_.id_: self._drive.get_path(_)
-                     for _ in nodes if not _.trashed}
-            nodes = await async_dict(nodes)
+            nodes = (_ for _ in nodes if not _.trashed)
+            nodes = (self._make_item(_) for _ in nodes)
+            nodes = list(nodes)
+            nodes = await asyncio.gather(*nodes)
             self._cache[pattern] = nodes
         except Exception as e:
             EXCEPTION('engine', e) << 'search failed, abort'
@@ -98,6 +99,13 @@ class SearchEngine(object):
             return self._cache[pattern]
         except KeyError:
             raise SearchFailedError(f'{pattern} canceled search')
+
+    async def _make_item(self, node):
+        return {
+            'id': node.id_,
+            'name': node.name,
+            'path': await self._drive.get_path(node),
+        }
 
 
 class UnpackEngine(object):
@@ -263,13 +271,3 @@ def inner_normalize_search_pattern(raw):
     rv = map(re.escape, rv)
     rv = '.*'.join(rv)
     return rv
-
-
-async def async_dict(dict_):
-    dict_ = (wait_for_value(k, v) for k, v in dict_.items())
-    dict_ = await asyncio.gather(*dict_)
-    return dict(dict_)
-
-
-async def wait_for_value(k, v):
-    return k, await v

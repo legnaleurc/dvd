@@ -137,7 +137,6 @@ class NodeListView(aw.View):
         except u.SearchFailedError:
             return aw.Response(status=503)
 
-        nodes = [{'id': k, 'path': v} for k, v in nodes.items()]
         nodes = sorted(nodes, key=lambda _: _['path'])
         return json_response(nodes)
 
