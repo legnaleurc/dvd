@@ -22,11 +22,15 @@ class Application extends React.PureComponent {
 
   render () {
     const { clearSelection, match, history } = this.props;
+    const tabId = match.params.tabId;
     return (
       <div className="application">
         <TabView
-          active={match.params.tabId}
+          active={tabId}
           onSwitch={(key) => {
+            if (key === tabId) {
+              return;
+            }
             clearSelection();
             history.push(`/${key}`);
           }}
