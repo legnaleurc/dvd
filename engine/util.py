@@ -44,7 +44,6 @@ class SearchEngine(object):
         super(SearchEngine, self).__init__()
         # NOTE only takes a reference, not owning
         self._drive = drive
-        self._loop = asyncio.get_event_loop()
         self._cache = {}
         self._searching = {}
 
@@ -59,7 +58,7 @@ class SearchEngine(object):
 
         lock = asyncio.Condition()
         self._searching[pattern] = lock
-        self._loop.create_task(self._search(pattern))
+        asyncio.create_task(self._search(pattern))
         return await self._wait_for_result(lock, pattern)
 
     async def clear_cache(self):
@@ -112,7 +111,6 @@ class UnpackEngine(object):
 
     def __init__(self, drive, port, unpack_path):
         super(UnpackEngine, self).__init__()
-        self._loop = asyncio.get_event_loop()
         # NOTE only takes a reference, not owning
         self._drive = drive
         self._port = port
@@ -144,7 +142,7 @@ class UnpackEngine(object):
 
         lock = asyncio.Condition()
         self._unpacking[node.id_] = lock
-        self._loop.create_task(self._unpack(node))
+        asyncio.create_task(self._unpack(node))
         return await self._wait_for_result(lock, node.id_)
 
     async def _unpack(self, node):

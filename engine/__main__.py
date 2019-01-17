@@ -16,29 +16,22 @@ class Daemon(object):
 
     def __init__(self, args):
         self._kwargs = parse_args(args[1:])
-        self._loop = asyncio.get_event_loop()
-        self._finished = asyncio.Event()
+        self._finished = None
         self._loggers = setup_logger((
             'aiohttp',
             'wcpan.drive.google',
             'engine',
         ), '/tmp/engine.log')
 
-    def __call__(self):
-        self._loop.create_task(self._guard())
-        self._loop.add_signal_handler(signal.SIGINT, self._close)
-        self._loop.run_forever()
-        self._loop.close()
-
-        return 0
-
-    async def _guard(self):
+    async def __call__(self):
+        self._finished = asyncio.Event()
+        loop = asyncio.get_running_loop()
+        loop.add_signal_handler(signal.SIGINT, self._close)
+        loop.add_signal_handler(signal.SIGTERM, self._close)
         try:
             return await self._main()
         except Exception as e:
             EXCEPTION('engine', e)
-        finally:
-            self._loop.stop()
         return 1
 
     async def _main(self):
@@ -118,5 +111,4 @@ def setup_static_path(app, path):
 
 
 main = Daemon(sys.argv)
-exit_code = main()
-sys.exit(exit_code)
+sys.exit(asyncio.run(main()))
