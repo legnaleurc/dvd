@@ -1,0 +1,95 @@
+#! /usr/bin/env python3
+
+import asyncio
+import argparse
+import os
+import pathlib
+import signal
+import sys
+
+
+PUBLIC_PORT = 8000
+PRIVATE_PORT = 9000
+
+
+async def main(args=None):
+    if args is None:
+        args = sys.argv
+
+    setup()
+
+    args = parse_args(args)
+    if not args.debug:
+        await run_release()
+    else:
+        await run_debug()
+
+    return 0
+
+
+def close(*args):
+    print(args)
+
+
+def setup():
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGINT, close)
+
+
+def parse_args(args):
+    parser = argparse.ArgumentParser('dvd')
+    parser.add_argument('-d', '--debug', action='store_true')
+    args = parser.parse_args(args[1:])
+    return args
+
+
+async def run_release():
+    rv = await shell(['make', '-j'])
+    assert rv == 0
+    rv = await shell([
+        'python3', '-m', 'engine',
+            '-u', 'unpack/build/unpack',
+            '-s', 'viewer/dist',
+            '-l', str(PUBLIC_PORT),
+    ])
+    assert rv == 0
+    return 0
+
+
+async def run_debug():
+    rv = await shell(['make', '-j', 'debug'])
+    assert rv == 0
+    await asyncio.wait([
+        shell([
+            'python3', '-m', 'engine',
+                '-u', 'unpack/build/unpack',
+                '-l', str(PRIVATE_PORT),
+        ]),
+        shell(
+            [
+                'yarn', 'start',
+                    f'--port={PUBLIC_PORT}',
+            ],
+            cwd=pathlib.Path('./viewer'),
+            env=clone_env({
+                'BACKEND_PORT': str(PRIVATE_PORT),
+            }),
+        ),
+    ])
+    return 0
+
+
+async def shell(cmd, cwd=None, env=None):
+    p = await asyncio.create_subprocess_exec(*cmd, cwd=cwd, env=env)
+    return await p.wait()
+
+
+def clone_env(override=None):
+    env = os.environ.copy()
+    if override:
+        env.update(override)
+    return env
+
+
+if __name__ == '__main__':
+    sys.exit(asyncio.run(main()))
