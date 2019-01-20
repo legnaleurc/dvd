@@ -12,7 +12,7 @@ import ContentActionBar from './content_action_bar';
 import './search_list.scss';
 
 
-class SearchList extends React.Component {
+class SearchList extends React.PureComponent {
 
   constructor (props) {
     super(props);
