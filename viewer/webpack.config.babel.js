@@ -9,8 +9,7 @@ import CdnWebpackPlugin from './tools/cdn_webpack_plugin';
 
 
 const devMode = process.env.NODE_ENV !== 'production'
-const devPort = 8000;
-const backendPort = 9000;
+const backendPort = process.env.BACKEND_PORT;
 
 
 export default {
@@ -19,8 +18,6 @@ export default {
     publicPath: devMode ? '' : '/static/',
   },
   devServer: {
-    host: 'localhost',
-    port: devPort,
     proxy: {
       '/api': {
         target: `http://localhost:${backendPort}`,
