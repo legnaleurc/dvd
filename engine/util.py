@@ -103,6 +103,7 @@ class SearchEngine(object):
         return {
             'id': node.id_,
             'name': node.name,
+            'md5': node.md5,
             'path': await self._drive.get_path(node),
         }
 
