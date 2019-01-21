@@ -23,7 +23,7 @@ unpack/build:
 
 viewer-release: viewer/dist
 
-viewer/dist: viewer/node_modules $(VIEWER_FILES)
+viewer/dist: viewer/node_modules $(VIEWER_ALL_FILES)
 	$(CD) viewer && $(YARN) build
 	$(TOUCH) "$@"
 
