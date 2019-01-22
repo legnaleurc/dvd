@@ -49,9 +49,7 @@ class TreeNode extends React.PureComponent {
                     this._openFile();
                   }}
                 >
-                  <Selectable.Trigger
-                    nodeId={node.id}
-                  >
+                  <Selectable.Trigger nodeId={node.id}>
                     {node.name}
                   </Selectable.Trigger>
                 </div>
