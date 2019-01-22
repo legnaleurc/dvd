@@ -48,7 +48,7 @@ class SearchList extends React.PureComponent {
                 <FileSystemActionBar />
               </div>
               <div className="action">
-                <ConnectedContentActionBar />
+                <ContentActionBar />
               </div>
             </div>
           </div>
@@ -112,14 +112,6 @@ class SearchList extends React.PureComponent {
   }
 
 }
-
-
-const ConnectedContentActionBar = Selectable.connect(value => {
-  return {
-    getSelectionList: value.getList,
-    clearSelection: value.clear,
-  };
-})(ContentActionBar);
 
 
 function LoadingBlock (props) {

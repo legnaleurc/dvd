@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import Button from './button';
+import Selectable from './selectable';
 import { loadMultiPageViewer } from '../states/multipage/actions';
 import {
   copyStream,
@@ -95,4 +96,12 @@ function mapDispatchToProps (dispatch) {
 }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(ContentActionBar);
+const ConnectedContentActionBar = (Component => {
+  Component = Selectable.connect(value => ({
+    getSelectionList: value.getList,
+    clearSelection: value.clear,
+  }))(Component);
+  Component = connect(mapStateToProps, mapDispatchToProps)(Component)
+  return Component;
+})(ContentActionBar);
+export default ConnectedContentActionBar;

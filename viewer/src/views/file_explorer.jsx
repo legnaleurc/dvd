@@ -24,7 +24,7 @@ class FileExplorer extends React.PureComponent {
       <div className="file-explorer">
         <Selectable getSourceList={getSiblingList} revision={revision}>
           <div className="group">
-            <ConnectedContentActionBar />
+            <ContentActionBar />
           </div>
           <div className="group">
             {root.children.map(nodeId => (
@@ -37,14 +37,6 @@ class FileExplorer extends React.PureComponent {
   }
 
 }
-
-
-const ConnectedContentActionBar = Selectable.connect(value => {
-  return {
-    getSelectionList: value.getList,
-    clearSelection: value.clear,
-  };
-})(ContentActionBar);
 
 
 function mapStateToProps (state, ownProps) {
