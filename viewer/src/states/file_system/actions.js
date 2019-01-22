@@ -14,8 +14,16 @@ export const FS_STREAM_URL = 'FS_STREAM_URL';
 export const FS_SYNC_TRY = 'FS_SYNC_TRY';
 export const FS_SYNC_SUCCEED = 'FS_SYNC_SUCCEED';
 export const FS_SYNC_FAILED = 'FS_SYNC_FAILED';
+export const FS_MOVE_TRY = 'FS_MOVE_TRY';
+export const FS_MOVE_SUCCEED = 'FS_MOVE_SUCCEED';
+export const FS_MOVE_FAILED = 'FS_MOVE_FAILED';
+export const FS_TRASH_TRY = 'FS_TRASH_TRY';
+export const FS_TRASH_SUCCEED = 'FS_TRASH_SUCCEED';
+export const FS_TRASH_FAILED = 'FS_TRASH_FAILED';
 export const FS_SET_SORT = 'FS_SET_SORT';
 export const FS_OPEN_STREAM = 'FS_OPEN_STREAM';
+export const FS_COPY_STREAM = 'FS_COPY_STREAM';
+export const FS_DOWNLOAD_STREAM = 'FS_DOWNLOAD_STREAM';
 
 
 export function getList (id) {
@@ -142,6 +150,48 @@ export function * sagaPostSync (fileSystem) {
 }
 
 
+export function moveNodes (srcList, dst) {
+  return {
+    type: FS_MOVE_TRY,
+    payload: {
+      srcList,
+      dst,
+    },
+  };
+}
+
+
+function moveNodesSucceed () {
+  return {
+    type: FS_MOVE_SUCCEED,
+  };
+}
+
+
+function moveNodesFailed (message) {
+  return {
+    type: FS_MOVE_FAILED,
+    payload: {
+      message,
+    },
+  };
+}
+
+
+export function * sagaMoveNodes (fileSystem) {
+  yield takeEvery(FS_MOVE_TRY, function * ({ payload }) {
+    try {
+      const { srcList, dst } = payload;
+      yield call(() => fileSystem.move(srcList, dst));
+      yield put(moveNodesSucceed());
+    } catch (e) {
+      yield put(moveNodesFailed(e.message));
+    }
+    yield put(postSync());
+  });
+}
+
+
 export function setSortFunction (key) {
   return {
     type: FS_SET_SORT,
@@ -184,5 +234,99 @@ export function * sagaOpenStreamUrl (fileSystem) {
     yield call(() => fileSystem.apply(command, {
       url,
     }));
+  });
+}
+
+
+export function copyStream (list) {
+  return {
+    type: FS_COPY_STREAM,
+    payload: {
+      list,
+    },
+  };
+}
+
+
+export function * sagaCopyStream (fileSystem) {
+  yield takeEvery(FS_COPY_STREAM, function * ({ payload }) {
+    const { list } = payload;
+    if (list.length !== 1) {
+      // TODO error message?
+      return;
+    }
+    const id = list[0];
+
+    const { nodes } = yield select(getFileSystem);
+    const url = yield call(() => fileSystem.stream(id, nodes[id].name));
+
+    yield call(() => navigator.clipboard.writeText(url));
+  });
+}
+
+
+export function downloadStream (list) {
+  return {
+    type: FS_DOWNLOAD_STREAM,
+    payload: {
+      list,
+    },
+  };
+}
+
+
+export function * sagaDownloadStream (fileSystem) {
+  yield takeEvery(FS_DOWNLOAD_STREAM, function * ({ payload }) {
+    const { list } = payload;
+    if (list.length !== 1) {
+      // TODO error message?
+      return;
+    }
+    const id = list[0];
+
+    const url = yield call(() => fileSystem.download(id));
+
+    window.open(url, '_blank');
+  });
+}
+
+
+export function trashNodes (list) {
+  return {
+    type: FS_TRASH_TRY,
+    payload: {
+      list,
+    },
+  };
+}
+
+
+function trashNodesSucceed () {
+  return {
+    type: FS_TRASH_SUCCEED,
+  };
+}
+
+
+function trashNodesFailed (message) {
+  return {
+    type: FS_TRASH_FAILED,
+    payload: {
+      message,
+    },
+  };
+}
+
+
+export function * sagaTrashNodes (fileSystem) {
+  yield takeEvery(FS_TRASH_TRY, function * ({ payload }) {
+    try {
+      const { list } = payload;
+      yield call(() => fileSystem.trash(list));
+      yield put(trashNodesSucceed());
+    } catch (e) {
+      yield put(trashNodesFailed(e.message));
+    }
+    yield put(postSync());
   });
 }
