@@ -1,7 +1,4 @@
-import { call, put, takeEvery, select } from 'redux-saga/effects';
-
-import { clearSelection } from '../selection/actions';
-import { getSelection } from '../selectors';
+import { call, put, takeEvery } from 'redux-saga/effects';
 
 
 export const MPV_LOAD_TRY = 'MPV_LOAD_TRY';
@@ -9,9 +6,13 @@ export const MPV_LOAD_SUCCEED = 'MPV_LOAD_SUCCEED';
 export const MPV_LOAD_FAILED = 'MPV_LOAD_FAILED';
 
 
-export function loadMultiPageViewer () {
+export function loadMultiPageViewer (list, done) {
   return {
     type: MPV_LOAD_TRY,
+    payload: {
+      list,
+      done,
+    },
   };
 }
 
@@ -37,10 +38,9 @@ function loadMultiPageViewerFailed (message) {
 
 
 export function * sagaLoadMultiPageViewer (fileSystem) {
-  yield takeEvery(MPV_LOAD_TRY, function * () {
+  yield takeEvery(MPV_LOAD_TRY, function * ({ payload }) {
     try {
-      const { table } = yield select(getSelection);
-      let srcList = Object.keys(table);
+      let srcList = payload.list;
       if (srcList.length !== 1) {
         yield put(loadMultiPageViewerFailed('SELECTED_MULTIPLE_OR_NONE'));
         return;
@@ -52,7 +52,11 @@ export function * sagaLoadMultiPageViewer (fileSystem) {
         return data;
       });
       yield put(loadMultiPageViewerSucceed(srcList));
-      yield put(clearSelection());
+
+      const done = payload.done;
+      if (done) {
+        yield call(done);
+      }
     } catch (e) {
       yield put(loadMultiPageViewerFailed(e.message));
     }
