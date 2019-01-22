@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 
 import { openStreamUrl } from '../states/file_system/actions';
 import { getSearchName } from '../states/search/actions';
-import { selectMatchedList, clearSelection } from '../states/selection/actions';
 import Input from './input';
 import Selectable from './selectable';
 import FileSystemActionBar from './file_system_action_bar';
@@ -18,42 +17,50 @@ class SearchList extends React.PureComponent {
     super(props);
 
     this._search = this._search.bind(this);
+    this._getResultList = this._getResultList.bind(this);
+
+    this.state = {
+      revision: 0,
+    };
   }
 
   render () {
     const { history } = this.props;
+    const { revision } = this.state;
     return (
       <div className="search-list">
-        <div>
-          <div className="input-group">
-            <Input
-              type="text"
-              onKeyPress={event => {
-                if (event.key !== 'Enter') {
-                  return;
-                }
-                event.preventDefault();
-                this._search(event.target.value);
-              }}
-            />
-          </div>
-          <div className="action-group">
-            <div className="action">
-              <FileSystemActionBar />
+        <Selectable getSourceList={this._getResultList} revision={revision}>
+          <div>
+            <div className="input-group">
+              <Input
+                type="text"
+                onKeyPress={event => {
+                  if (event.key !== 'Enter') {
+                    return;
+                  }
+                  event.preventDefault();
+                  this._search(event.target.value);
+                }}
+              />
             </div>
-            <div className="action">
-              <ContentActionBar />
+            <div className="action-group">
+              <div className="action">
+                <FileSystemActionBar />
+              </div>
+              <div className="action">
+                <ConnectedContentActionBar />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="tail">
-          <div className="history">
-            <HistoryList history={history} search={this._search} />
+          <div className="tail">
+            <div className="history">
+              <HistoryList history={history} search={this._search} />
+            </div>
+            <div className="list">
+              {this._renderList()}
+            </div>
           </div>
-          <div className="list">
-            {this._renderList()}
-          </div>
-        </div>
+        </Selectable>
       </div>
     );
   }
@@ -69,7 +76,6 @@ class SearchList extends React.PureComponent {
       return <EmptyBlock />;
     }
 
-    const { selectMatchedList } = this.props;
     return matched.map(({id, path}) => (
       <div
         key={id}
@@ -79,10 +85,7 @@ class SearchList extends React.PureComponent {
         }}
       >
         <Selectable.Area nodeId={id}>
-          <Selectable.Trigger
-            nodeId={id}
-            onMultiSelect={selectMatchedList}
-          >
+          <Selectable.Trigger nodeId={id}>
             <code>{path}</code>
           </Selectable.Trigger>
         </Selectable.Area>
@@ -91,8 +94,10 @@ class SearchList extends React.PureComponent {
   }
 
   _search (text) {
-    const { clearSelection, searchName } = this.props;
-    clearSelection();
+    const { searchName } = this.props;
+    this.setState({
+      revision: this.state.revision + 1,
+    });
     searchName(text);
   }
 
@@ -101,7 +106,20 @@ class SearchList extends React.PureComponent {
     openFileUrl(nodeId);
   }
 
-};
+  _getResultList (id) {
+    const { matched } = this.props;
+    return matched.map(node => node.id);
+  }
+
+}
+
+
+const ConnectedContentActionBar = Selectable.connect(value => {
+  return {
+    getSelectionList: value.getList,
+    clearSelection: value.clear,
+  };
+})(ContentActionBar);
 
 
 function LoadingBlock (props) {
@@ -162,12 +180,6 @@ function mapDispatchToProps (dispatch) {
     },
     openFileUrl (id) {
       dispatch(openStreamUrl(id));
-    },
-    selectMatchedList (id) {
-      dispatch(selectMatchedList(id));
-    },
-    clearSelection () {
-      dispatch(clearSelection());
     },
   };
 }
