@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
-import { connect } from 'react-redux';
 import { hot } from 'react-hot-loader/root';
 
 import SearchList from './search_list';
@@ -9,7 +8,6 @@ import TabView from './tab_view';
 import SingleTreeView from './single_tree_view';
 import DoubleTreeView from './double_tree_view';
 import SettingsView from './settings_view';
-import { clearSelection } from '../states/selection/actions';
 
 import './application.scss';
 
@@ -21,7 +19,7 @@ class Application extends React.PureComponent {
   }
 
   render () {
-    const { clearSelection, match, history } = this.props;
+    const { match, history } = this.props;
     const tabId = match.params.tabId;
     return (
       <div className="application">
@@ -31,7 +29,6 @@ class Application extends React.PureComponent {
             if (key === tabId) {
               return;
             }
-            clearSelection();
             history.push(`/${key}`);
           }}
         >
@@ -77,21 +74,6 @@ class Application extends React.PureComponent {
 }
 
 
-function mapDispatchToProps (dispatch) {
-  return {
-    clearSelection () {
-      dispatch(clearSelection());
-    },
-  };
-}
-
-
-const ConnectedApplication = connect(
-  undefined,
-  mapDispatchToProps,
-)(Application);
-
-
 class RoutedApplication extends React.Component {
 
   constructor (props) {
@@ -105,7 +87,7 @@ class RoutedApplication extends React.Component {
           <Redirect exact from="/" to="/tree" />
           <Route
             path="/:tabId"
-            component={ConnectedApplication}
+            component={Application}
           />
         </Switch>
       </BrowserRouter>
