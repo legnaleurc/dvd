@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 
 import Selectable from './selectable';
 import TreeNode from './tree_node';
+import ContentActionBar from './content_action_bar';
 
 
 class FileExplorer extends React.PureComponent {
@@ -23,6 +24,9 @@ class FileExplorer extends React.PureComponent {
       <div className="file-explorer">
         <Selectable getSourceList={getSiblingList} revision={revision}>
           <div className="group">
+            <ConnectedContentActionBar />
+          </div>
+          <div className="group">
             {root.children.map(nodeId => (
               <TreeNode key={nodeId} nodeId={nodeId} />
             ))}
@@ -33,6 +37,14 @@ class FileExplorer extends React.PureComponent {
   }
 
 }
+
+
+const ConnectedContentActionBar = Selectable.connect(value => {
+  return {
+    getSelectionList: value.getList,
+    clearSelection: value.clear,
+  };
+})(ContentActionBar);
 
 
 function mapStateToProps (state, ownProps) {
