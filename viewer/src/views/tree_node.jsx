@@ -2,11 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { classNameFromObject } from '../lib';
-import { getList, openStreamUrl } from '../states/file_system/actions';
 import {
-  moveSelectedNodesTo,
-  selectSiblingList,
-} from '../states/selection/actions';
+  getList,
+  moveNodes,
+  openStreamUrl,
+} from '../states/file_system/actions';
 import DragDrop from './dragdrop';
 import Selectable from './selectable';
 
@@ -27,7 +27,7 @@ class TreeNode extends React.PureComponent {
   }
 
   render () {
-    const { node, selected, selectSiblingList } = this.props;
+    const { node, selected } = this.props;
     return (
       <div className="tree-node">
         <DragDrop.Dragable
@@ -51,7 +51,6 @@ class TreeNode extends React.PureComponent {
                 >
                   <Selectable.Trigger
                     nodeId={node.id}
-                    onMultiSelect={selectSiblingList}
                   >
                     {node.name}
                   </Selectable.Trigger>
@@ -122,17 +121,20 @@ class TreeNode extends React.PureComponent {
   }
 
   _onDragStart (event) {
-    const { node } = this.props;
-    event.dataTransfer.dropEffect = 'copy';
-    event.dataTransfer.setData('text/plain', node.id);
+    const { getSelectionList } = this.props;
+    const list = getSelectionList();
+    event.dataTransfer.dropEffect = 'move';
+    event.dataTransfer.setData('text/plain', JSON.stringify(list));
   }
 
   _onDrop (event) {
-    const { node, moveSelectedNodesTo } = this.props;
+    const { node, moveNodes } = this.props;
+    let list = event.dataTransfer.getData('text/plain');
+    list = JSON.parse(list);
     if (node.children) {
-      moveSelectedNodesTo(node.id);
+      moveNodes(list, node.id);
     } else {
-      moveSelectedNodesTo(node.parentId);
+      moveNodes(list, node.parentId);
     }
   }
 
@@ -153,12 +155,11 @@ function Indicator (props) {
 
 
 function mapStateToProps (state, ownProps) {
-  const { fileSystem, selection } = state;
+  const { fileSystem } = state;
   const { nodeId } = ownProps;
 
   return {
     node: fileSystem.nodes[nodeId],
-    selected: !!selection.table[nodeId],
   };
 }
 
@@ -171,11 +172,8 @@ function mapDispatchToProps (dispatch) {
     openFileUrl (id) {
       dispatch(openStreamUrl(id));
     },
-    moveSelectedNodesTo (id) {
-      dispatch(moveSelectedNodesTo(id));
-    },
-    selectSiblingList (id) {
-      dispatch(selectSiblingList(id));
+    moveNodes (nodeList, id) {
+      dispatch(moveNodes(nodeList, id));
     },
   };
 }
@@ -183,6 +181,11 @@ function mapDispatchToProps (dispatch) {
 
 const ConnectedTreeNode = (Component => {
   let decorator = connect(mapStateToProps, mapDispatchToProps);
+  Component = decorator(Component);
+  decorator = Selectable.connect((value, ownProps) => ({
+    selected: value.selected[ownProps.nodeId],
+    getSelectionList: value.getList,
+  }));
   Component = decorator(Component);
   return Component;
 })(TreeNode);
