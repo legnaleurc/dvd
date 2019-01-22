@@ -8,6 +8,7 @@ import {
   sagaOpenStreamUrl,
   sagaCopyStream,
   sagaDownloadStream,
+  sagaTrashNodes,
 } from './file_system/actions';
 import { sagaGetSearchName } from './search/actions';
 import { sagaLoadMultiPageViewer } from './multipage/actions';
@@ -22,6 +23,7 @@ export default function * ({ fileSystem }) {
     sagaOpenStreamUrl(fileSystem),
     sagaCopyStream(fileSystem),
     sagaDownloadStream(fileSystem),
+    sagaTrashNodes(fileSystem),
     sagaGetSearchName(fileSystem),
     sagaLoadMultiPageViewer(fileSystem),
   ]);

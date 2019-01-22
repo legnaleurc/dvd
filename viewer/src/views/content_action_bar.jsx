@@ -21,6 +21,7 @@ class ContentActionBar extends React.PureComponent {
     this._mpv = this._mpv.bind(this);
     this._copy = this._copy.bind(this);
     this._download = this._download.bind(this);
+    this._trash = this._trash.bind(this);
   }
 
   render () {

@@ -25,11 +25,11 @@ class SearchList extends React.PureComponent {
   }
 
   render () {
-    const { history } = this.props;
+    const { history, fsRevision } = this.props;
     const { revision } = this.state;
     return (
       <div className="search-list">
-        <Selectable getSourceList={this._getResultList} revision={revision}>
+        <Selectable getSourceList={this._getResultList} revision={revision + fsRevision}>
           <div>
             <div className="input-group">
               <Input
@@ -156,11 +156,12 @@ function HistoryEntry (props) {
 
 
 function mapStateToProps (state) {
-  const { search } = state;
+  const { fileSystem, search } = state;
   return {
     loading: search.loading,
     matched: search.matched,
     history: search.history,
+    fsRevision: fileSystem.revision,
   };
 }
 
