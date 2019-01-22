@@ -3,10 +3,14 @@ import { connect } from 'react-redux';
 
 import Button from './button';
 import { loadMultiPageViewer } from '../states/multipage/actions';
-import { copySelected, downloadSelected } from '../states/selection/actions';
+import {
+  copyStream,
+  downloadStream,
+} from '../states/file_system/actions';
 
 
-class ContentActionBar extends React.Component {
+
+class ContentActionBar extends React.PureComponent {
 
   constructor (props) {
     super(props);
@@ -21,27 +25,33 @@ class ContentActionBar extends React.Component {
     return (
       <div className="content-action-bar">
         <div className="group">
-          <Button onClick={this._copy}>COPY</Button>
-          <Button onClick={this._download}>DOWNLOAD</Button>
           <Button disabled={unpacking} onClick={this._mpv}>MPV</Button>
+        </div>
+        <div className="expand" />
+        <div className="group">
+          <Button onClick={this._copy}>COPY_URL</Button>
+          <Button onClick={this._download}>DOWNLOAD</Button>
         </div>
       </div>
     );
   }
 
   _mpv () {
-    const { mpv } = this.props;
-    mpv();
+    const { getSelectionList, clearSelection, mpv } = this.props;
+    const list = getSelectionList();
+    mpv(list, clearSelection);
   }
 
   _copy () {
-    const { copy } = this.props;
-    copy();
+    const { getSelectionList, copy } = this.props;
+    const list = getSelectionList();
+    copy(list);
   }
 
   _download () {
-    const { download } = this.props;
-    download();
+    const { getSelectionList, download } = this.props;
+    const list = getSelectionList();
+    download(list);
   }
 
 }
@@ -56,14 +66,14 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
   return {
-    mpv () {
-      dispatch(loadMultiPageViewer());
+    mpv (list, done) {
+      dispatch(loadMultiPageViewer(list, done));
     },
-    copy () {
-      dispatch(copySelected());
+    copy (list) {
+      dispatch(copyStream(list));
     },
-    download () {
-      dispatch(downloadSelected());
+    download (list) {
+      dispatch(downloadStream(list));
     },
   };
 }
