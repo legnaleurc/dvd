@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
+import Selectable from './selectable';
 import TreeNode from './tree_node';
 
 
@@ -11,7 +12,7 @@ class FileExplorer extends React.PureComponent {
   }
 
   render () {
-    const { root } = this.props;
+    const { getSiblingList, root, revision } = this.props;
     if (!root) {
       return null;
     }
@@ -20,9 +21,13 @@ class FileExplorer extends React.PureComponent {
     }
     return (
       <div className="file-explorer">
-        {root.children.map(nodeId => (
-          <TreeNode key={nodeId} nodeId={nodeId} />
-        ))}
+        <Selectable getSourceList={getSiblingList} revision={revision}>
+          <div className="group">
+            {root.children.map(nodeId => (
+              <TreeNode key={nodeId} nodeId={nodeId} />
+            ))}
+          </div>
+        </Selectable>
       </div>
     );
   }
@@ -31,10 +36,22 @@ class FileExplorer extends React.PureComponent {
 
 
 function mapStateToProps (state, ownProps) {
-  const { nodes } = state.fileSystem;
+  const { nodes, revision } = state.fileSystem;
   const { rootId } = ownProps;
   return {
     root: rootId ? nodes[rootId] : null,
+    revision,
+    getSiblingList (id) {
+      const node = nodes[id];
+      if (!node) {
+        return null;
+      }
+      const parent = nodes[node.parentId];
+      if (!parent) {
+        return null;
+      }
+      return parent.children;
+    },
   };
 }
 
