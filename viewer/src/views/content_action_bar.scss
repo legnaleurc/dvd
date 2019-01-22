@@ -1,0 +1,14 @@
+@import '../lib/index';
+
+
+.content-action-bar {
+  @include hbox;
+
+  .group {
+    @include size-shrink;
+  }
+
+  .expand {
+    @include size-grow;
+  }
+}

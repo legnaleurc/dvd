@@ -3,8 +3,4 @@
 
 .file-system-action-bar {
   @include hbox;
-
-  .expand {
-    @include size-grow;
-  }
 }
