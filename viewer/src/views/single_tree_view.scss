@@ -12,7 +12,7 @@
 
     @include hbox;
 
-    .group {
+    > .group {
       @include size-grow;
     }
   }
@@ -26,7 +26,7 @@
 
     @include hbox;
 
-    .group {
+    > .group {
       @include scrollable;
 
       @include w-100;
