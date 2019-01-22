@@ -21,6 +21,8 @@ const initialState = {
   nodes: {},
   rootId: null,
   sortKey: SORT_BY_MTIME_DES,
+  // denotes the changes from the database point of view
+  revision: 0,
 };
 
 
@@ -99,7 +101,7 @@ export default function reduceFileSystem (state = initialState, { type, payload 
       });
     }
     case FS_SYNC_SUCCEED: {
-      const { nodes } = state;
+      const { nodes, revision } = state;
       const { changeList } = payload;
       for (const change of changeList) {
         applyChange(nodes, state.sortKey, change);
@@ -107,6 +109,7 @@ export default function reduceFileSystem (state = initialState, { type, payload 
       return Object.assign({}, state, {
         updating: false,
         nodes: Object.assign({}, nodes),
+        revision: revision + 1,
       });
     }
     case FS_SYNC_FAILED: {
