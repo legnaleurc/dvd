@@ -75,11 +75,17 @@ async def run_debug(public_listen, private_listen):
     await run_or_die(['make', '-j', 'debug'])
 
     ps = [
-        await cspe([
-            'python3', '-m', 'engine',
-                '-u', 'unpack/build/unpack',
-                '-l', str(private_listen),
-        ]),
+        await cspe(
+            [
+                'python3', '-m', 'watchgod',
+                    'engine.main.from_env',
+                    './engine',
+            ],
+            env=clone_env({
+                'ENGINE_UNPACK': 'unpack/build/unpack',
+                'ENGINE_LISTEN': str(private_listen),
+            }),
+        ),
         await cspe(
             [
                 'yarn', 'start',
