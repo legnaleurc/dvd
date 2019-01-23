@@ -31,9 +31,10 @@ async def main(args=None):
 
     try:
         if not args.debug:
-            await run_release()
+            await run_release(public_listen=args.public_listen)
         else:
-            await run_debug()
+            await run_debug(public_listen=args.public_listen,
+                            private_listen=args.private_listen)
     except Exception as e:
         print(e)
         return 1
@@ -54,37 +55,39 @@ def setup():
 def parse_args(args):
     parser = argparse.ArgumentParser('dvd')
     parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('--public-listen', type=int, default=PUBLIC_PORT)
+    parser.add_argument('--private-listen', type=int, default=PRIVATE_PORT)
     args = parser.parse_args(args[1:])
     return args
 
 
-async def run_release():
+async def run_release(public_listen):
     await run_or_die(['make', '-j'])
     await run_or_die([
         'python3', '-m', 'engine',
             '-u', 'unpack/build/unpack',
             '-s', 'viewer/dist',
-            '-l', str(PUBLIC_PORT),
+            '-l', str(public_listen),
     ])
 
 
-async def run_debug():
+async def run_debug(public_listen, private_listen):
     await run_or_die(['make', '-j', 'debug'])
 
     ps = [
         await cspe([
             'python3', '-m', 'engine',
                 '-u', 'unpack/build/unpack',
-                '-l', str(PRIVATE_PORT),
+                '-l', str(private_listen),
         ]),
         await cspe(
             [
                 'yarn', 'start',
-                    f'--port={PUBLIC_PORT}',
+                    f'--port={public_listen}',
             ],
             cwd=pathlib.Path('./viewer'),
             env=clone_env({
-                'BACKEND_PORT': str(PRIVATE_PORT),
+                'BACKEND_PORT': str(private_listen),
             }),
         ),
     ]
