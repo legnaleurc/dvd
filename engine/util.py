@@ -58,6 +58,11 @@ class SearchEngine(object):
 
         lock = asyncio.Condition()
         self._searching[pattern] = lock
+        # We cannot directly await this task, because if the request connection
+        # resetted (e.g. by timeout), the task will be cancelled, which will
+        # interrupt searching. asyncio.shield can protect searching, but cannot
+        # prevent cancellation to other requests. So we use a lock here to
+        # truely isolate the cancellation.
         asyncio.create_task(self._search(pattern))
         return await self._wait_for_result(lock, pattern)
 
@@ -143,6 +148,8 @@ class UnpackEngine(object):
 
         lock = asyncio.Condition()
         self._unpacking[node.id_] = lock
+        # See the comments in SearchEngine to understand why we need a lock
+        # here.
         asyncio.create_task(self._unpack(node))
         return await self._wait_for_result(lock, node.id_)
 
