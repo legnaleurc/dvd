@@ -12,6 +12,15 @@ PUBLIC_PORT = 8000
 PRIVATE_PORT = 9000
 
 
+class ProcessError(Exception):
+
+    def __init__(self, rv):
+        self._rv = rv
+
+    def __str__(self):
+        return f'failed with code: {self._rv}'
+
+
 async def main(args=None):
     if args is None:
         args = sys.argv
@@ -19,21 +28,27 @@ async def main(args=None):
     setup()
 
     args = parse_args(args)
-    if not args.debug:
-        await run_release()
-    else:
-        await run_debug()
+
+    try:
+        if not args.debug:
+            await run_release()
+        else:
+            await run_debug()
+    except Exception as e:
+        print(e)
+        return 1
 
     return 0
 
 
-def close(*args):
-    print(args)
+def close(*args, **kwargs):
+    pass
 
 
 def setup():
     loop = asyncio.get_running_loop()
     loop.add_signal_handler(signal.SIGINT, close)
+    loop.add_signal_handler(signal.SIGTERM, close)
 
 
 def parse_args(args):
@@ -44,28 +59,25 @@ def parse_args(args):
 
 
 async def run_release():
-    rv = await shell(['make', '-j'])
-    assert rv == 0
-    rv = await shell([
+    await run_or_die(['make', '-j'])
+    await run_or_die([
         'python3', '-m', 'engine',
             '-u', 'unpack/build/unpack',
             '-s', 'viewer/dist',
             '-l', str(PUBLIC_PORT),
     ])
-    assert rv == 0
-    return 0
 
 
 async def run_debug():
-    rv = await shell(['make', '-j', 'debug'])
-    assert rv == 0
-    await asyncio.wait([
-        shell([
+    await run_or_die(['make', '-j', 'debug'])
+
+    ps = [
+        await cspe([
             'python3', '-m', 'engine',
                 '-u', 'unpack/build/unpack',
                 '-l', str(PRIVATE_PORT),
         ]),
-        shell(
+        await cspe(
             [
                 'yarn', 'start',
                     f'--port={PUBLIC_PORT}',
@@ -75,13 +87,49 @@ async def run_debug():
                 'BACKEND_PORT': str(PRIVATE_PORT),
             }),
         ),
-    ])
-    return 0
+    ]
+    rv = await run_all(ps)
+    assert rv
 
 
-async def shell(cmd, cwd=None, env=None):
-    p = await asyncio.create_subprocess_exec(*cmd, cwd=cwd, env=env)
-    return await p.wait()
+async def cspe(cmd, cwd=None, env=None):
+    return await asyncio.create_subprocess_exec(*cmd, cwd=cwd, env=env)
+
+
+async def ok_or_die(p):
+    rv = await p.wait()
+    if rv > 0:
+        raise ProcessError(rv)
+
+
+async def run_or_die(cmd, cwd=None, env=None):
+    p = await cspe(cmd, cwd=cwd, env=env)
+    await ok_or_die(p)
+
+
+async def run_all(ps):
+    aws = [asyncio.create_task(ok_or_die(p)) for p in ps]
+    done, pending = await asyncio.wait(aws, return_when=asyncio.FIRST_EXCEPTION)
+    if not pending:
+        return True
+
+    for t in done:
+        assert not t.cancelled()
+        if t.exception():
+            print(t.exception())
+
+    for p in ps:
+        if p.returncode is None:
+            p.send_signal(signal.SIGTERM)
+
+    done, pending = await asyncio.wait(pending)
+
+    for t in done:
+        assert not t.cancelled()
+        if t.exception():
+            print(t.exception())
+
+    return False
 
 
 def clone_env(override=None):
