@@ -2,10 +2,13 @@
 
 import asyncio
 import argparse
+import functools
 import os
 import pathlib
 import signal
 import sys
+
+import watchgod
 
 
 PUBLIC_PORT = 8000
@@ -25,7 +28,7 @@ async def main(args=None):
     if args is None:
         args = sys.argv
 
-    setup()
+    stop_event = setup()
 
     args = parse_args(args)
 
@@ -34,7 +37,8 @@ async def main(args=None):
             await run_release(public_listen=args.public_listen)
         else:
             await run_debug(public_listen=args.public_listen,
-                            private_listen=args.private_listen)
+                            private_listen=args.private_listen,
+                            stop_event=stop_event)
     except Exception as e:
         print(e)
         return 1
@@ -42,14 +46,17 @@ async def main(args=None):
     return 0
 
 
-def close(*args, **kwargs):
-    pass
+def close(stop_event):
+    stop_event.set()
 
 
 def setup():
     loop = asyncio.get_running_loop()
-    loop.add_signal_handler(signal.SIGINT, close)
-    loop.add_signal_handler(signal.SIGTERM, close)
+    stop_event = asyncio.Event()
+    fn = functools.partial(close, stop_event)
+    loop.add_signal_handler(signal.SIGINT, fn)
+    loop.add_signal_handler(signal.SIGTERM, fn)
+    return stop_event
 
 
 def parse_args(args):
@@ -71,37 +78,53 @@ async def run_release(public_listen):
     ])
 
 
-async def run_debug(public_listen, private_listen):
+async def run_debug(public_listen, private_listen, stop_event):
     await run_or_die(['make', '-j', 'debug'])
 
-    ps = [
-        await cspe(
-            [
-                'python3', '-m', 'watchgod',
-                    'engine.main.from_env',
-                    './engine',
-            ],
-            env=clone_env({
-                'ENGINE_UNPACK': 'unpack/build/unpack',
-                'ENGINE_LISTEN': str(private_listen),
-            }),
-        ),
-        await cspe(
-            [
-                'yarn', 'start',
-                    f'--port={public_listen}',
-            ],
-            cwd=pathlib.Path('./viewer'),
-            env=clone_env({
-                'BACKEND_PORT': str(private_listen),
-            }),
-        ),
-    ]
-    rv = await run_all(ps)
-    assert rv
+    backend = auto_rerun([
+        'python3', '-m', 'engine',
+            '-u', 'unpack/build/unpack',
+            '-l', str(private_listen),
+    ], path='./engine', stop_event=stop_event)
+    backend = asyncio.create_task(backend)
+
+    frontend = run_or_die(
+        [
+            'yarn', 'start',
+                f'--port={public_listen}',
+        ],
+        cwd=pathlib.Path('./viewer'),
+        env=clone_env({
+            'BACKEND_PORT': str(private_listen),
+        }),
+    )
+    frontend = asyncio.create_task(frontend)
+
+    await asyncio.wait([backend, frontend])
 
 
-async def cspe(cmd, cwd=None, env=None):
+async def run_or_die(cmd, cwd=None, env=None):
+    p = await spawn(cmd, cwd=cwd, env=env)
+    await ok_or_die(p)
+
+
+async def auto_rerun(cmd, path, stop_event, cwd=None, env=None):
+    # Important to be able to stop the watcher.
+    assert stop_event
+
+    loop = asyncio.get_running_loop()
+    process = await spawn(cmd, cwd=cwd, env=env)
+
+    async for changes in watchgod.awatch(path, stop_event=stop_event,
+                                         loop=loop):
+        print(changes)
+        await kill(process, signal.SIGINT, True)
+        process = await spawn(cmd, cwd=cwd, env=env)
+
+    await kill(process, signal.SIGINT, False)
+
+
+async def spawn(cmd, cwd=None, env=None):
     return await asyncio.create_subprocess_exec(*cmd, cwd=cwd, env=env)
 
 
@@ -111,34 +134,13 @@ async def ok_or_die(p):
         raise ProcessError(rv)
 
 
-async def run_or_die(cmd, cwd=None, env=None):
-    p = await cspe(cmd, cwd=cwd, env=env)
-    await ok_or_die(p)
-
-
-async def run_all(ps):
-    aws = [asyncio.create_task(ok_or_die(p)) for p in ps]
-    done, pending = await asyncio.wait(aws, return_when=asyncio.FIRST_EXCEPTION)
-    if not pending:
-        return True
-
-    for t in done:
-        assert not t.cancelled()
-        if t.exception():
-            print(t.exception())
-
-    for p in ps:
-        if p.returncode is None:
-            p.send_signal(signal.SIGTERM)
-
-    done, pending = await asyncio.wait(pending)
-
-    for t in done:
-        assert not t.cancelled()
-        if t.exception():
-            print(t.exception())
-
-    return False
+async def kill(process, signal_, verbose):
+    rc = process.returncode
+    if rc is None:
+        process.send_signal(signal_)
+        await process.wait()
+    elif verbose:
+        print(f'process already exited with code: {rc}')
 
 
 def clone_env(override=None):
