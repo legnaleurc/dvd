@@ -1,7 +1,7 @@
 @import '../lib/index';
 
 
-.single-tree-view {
+.file-explorer {
   @include w-100;
   @include h-100;
 
@@ -12,8 +12,8 @@
 
     @include hbox;
 
-    > .group {
-      @include size-grow;
+    > .content-action-bar {
+      @include w-100;
     }
   }
 
@@ -22,5 +22,7 @@
     @include w-100;
     // IMPORTANT set min-height to have scroll for children
     @include mh-0;
+
+    @include scrollable;
   }
 }

@@ -21,9 +21,7 @@ function SingleTreeView (props) {
         </div>
       </div>
       <div className="tail">
-        <div className="group">
-          <FileExplorer rootId={props.rootId} />
-        </div>
+        <FileExplorer rootId={props.rootId} />
       </div>
     </div>
   );

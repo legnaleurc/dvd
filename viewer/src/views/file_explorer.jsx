@@ -5,6 +5,8 @@ import Selectable from './selectable';
 import TreeNode from './tree_node';
 import ContentActionBar from './content_action_bar';
 
+import './file_explorer.scss';
+
 
 class FileExplorer extends React.PureComponent {
 
@@ -23,10 +25,10 @@ class FileExplorer extends React.PureComponent {
     return (
       <div className="file-explorer">
         <Selectable getSourceList={getSiblingList} revision={revision}>
-          <div className="group">
+          <div className="head">
             <ContentActionBar />
           </div>
-          <div className="group">
+          <div className="tail">
             {root.children.map(nodeId => (
               <TreeNode key={nodeId} nodeId={nodeId} />
             ))}
