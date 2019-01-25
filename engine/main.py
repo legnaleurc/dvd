@@ -1,7 +1,6 @@
 import argparse
 import asyncio
 import logging
-import os
 import os.path as op
 import signal
 
@@ -112,15 +111,3 @@ def setup_static_path(app, path):
 
 
 main = Daemon()
-
-
-def from_env():
-    listen = os.environ['ENGINE_LISTEN']
-    unpack = os.environ['ENGINE_UNPACK']
-    static = os.environ.get('ENGINE_STATIC', None)
-    cmd = ['engine']
-    cmd.extend(['-l', listen])
-    cmd.extend(['-u', unpack])
-    if static:
-        cmd.extend(['-s', static])
-    return asyncio.run(main(cmd))
