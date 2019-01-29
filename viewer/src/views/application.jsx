@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
 import { hot } from 'react-hot-loader/root';
 
-import SearchList from './search_list';
+import SearchView from './search_view';
 import MultiPageView from './multipage_view';
 import TabView from './tab_view';
 import SingleTreeView from './single_tree_view';
@@ -54,7 +54,7 @@ class Application extends React.PureComponent {
               <SingleTreeView />
             </TabView.Page>
             <TabView.Page name="search">
-              <SearchList />
+              <SearchView />
             </TabView.Page>
             <TabView.Page name="double-tree">
               <DoubleTreeView />

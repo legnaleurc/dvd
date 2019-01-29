@@ -9,10 +9,10 @@ import Selectable from './selectable';
 import FileSystemActionBar from './file_system_action_bar';
 import ContentActionBar from './content_action_bar';
 
-import './search_list.scss';
+import './search_view.scss';
 
 
-class SearchList extends React.PureComponent {
+class SearchView extends React.PureComponent {
 
   constructor (props) {
     super(props);
@@ -241,4 +241,4 @@ function mapDispatchToProps (dispatch) {
 }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(SearchList);
+export default connect(mapStateToProps, mapDispatchToProps)(SearchView);
