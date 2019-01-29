@@ -67,7 +67,7 @@ class Application extends React.PureComponent {
 }
 
 
-class RoutedApplication extends React.Component {
+class RoutedApplication extends React.PureComponent {
 
   constructor (props) {
     super(props);
