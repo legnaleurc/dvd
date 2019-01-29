@@ -16,6 +16,7 @@ function SingleTreeView (props) {
         <div className="group">
           <FileSystemActionBar />
         </div>
+        <div className="expand"></div>
         <div className="group">
           <SortActionBar />
         </div>
