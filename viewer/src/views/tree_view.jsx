@@ -9,23 +9,49 @@ import SortActionBar from './sort_action_bar';
 import './tree_view.scss';
 
 
-function TreeView (props) {
-  return (
-    <div className="tree-view">
-      <div className="head">
-        <div className="group">
-          <FileSystemActionBar />
+class TreeView extends React.PureComponent {
+
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      two: false,
+    };
+  }
+
+  render () {
+    return (
+      <div className="tree-view">
+        <div className="head">
+          <div className="group">
+            <FileSystemActionBar />
+          </div>
+          <div className="expand"></div>
+          <div className="group">
+            <SortActionBar />
+          </div>
         </div>
-        <div className="expand"></div>
-        <div className="group">
-          <SortActionBar />
+        <div className="tail">
+          <div className="group">
+            <FileExplorer rootId={this.props.rootId} />
+          </div>
+          {this._renderSecond()}
         </div>
       </div>
-      <div className="tail">
-        <FileExplorer rootId={props.rootId} />
+    );
+  }
+
+  _renderSecond () {
+    if (!this.state.two) {
+      return null;
+    }
+    return (
+      <div className="group">
+        <FileExplorer rootId={this.props.rootId} />
       </div>
-    </div>
-  );
+    );
+  }
+
 }
 
 

@@ -26,5 +26,13 @@
     @include w-100;
     // IMPORTANT set min-height to have scroll for children
     @include mh-0;
+
+    @include hbox;
+
+    > .group {
+      @include scrollable;
+
+      @include size-grow;
+    }
   }
 }
