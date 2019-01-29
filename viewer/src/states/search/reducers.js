@@ -2,6 +2,9 @@ import {
   SEARCH_NAME_TRY,
   SEARCH_NAME_SUCCEED,
   SEARCH_NAME_FAILED,
+  SEARCH_COMPARE_TRY,
+  SEARCH_COMPARE_SUCCEED,
+  SEARCH_COMPARE_FAILED,
 } from './actions';
 
 
@@ -10,6 +13,7 @@ const initialState = {
   dict: {},
   list: [],
   history: [],
+  diff: null,
 };
 
 
@@ -48,6 +52,22 @@ export default function reduceSearch (state = initialState, { type, payload }) {
         loading: false,
         dict: {},
         list: [],
+      });
+    }
+    case SEARCH_COMPARE_TRY: {
+      return Object.assign({}, state, {
+        diff: null,
+      });
+    }
+    case SEARCH_COMPARE_SUCCEED: {
+      return Object.assign({}, state, {
+        diff: [],
+      });
+    }
+    case SEARCH_COMPARE_FAILED: {
+      const { sizeList } = payload;
+      return Object.assign({}, state, {
+        diff: sizeList,
       });
     }
     default:

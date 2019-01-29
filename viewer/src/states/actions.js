@@ -10,7 +10,7 @@ import {
   sagaDownloadStream,
   sagaTrashNodes,
 } from './file_system/actions';
-import { sagaGetSearchName } from './search/actions';
+import { sagaGetSearchName, sagaCompare } from './search/actions';
 import { sagaLoadMultiPageViewer } from './multipage/actions';
 
 
@@ -25,6 +25,7 @@ export default function * ({ fileSystem }) {
     sagaDownloadStream(fileSystem),
     sagaTrashNodes(fileSystem),
     sagaGetSearchName(fileSystem),
+    sagaCompare(),
     sagaLoadMultiPageViewer(fileSystem),
   ]);
 }
