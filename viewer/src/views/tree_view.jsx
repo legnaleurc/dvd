@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import FileExplorer from './file_explorer';
 import FileSystemActionBar from './file_system_action_bar';
 import SortActionBar from './sort_action_bar';
+import Button from './button';
 
 import './tree_view.scss';
 
@@ -17,6 +18,8 @@ class TreeView extends React.PureComponent {
     this.state = {
       two: false,
     };
+
+    this._toggle = this._toggle.bind(this);
   }
 
   render () {
@@ -25,6 +28,10 @@ class TreeView extends React.PureComponent {
         <div className="head">
           <div className="group">
             <FileSystemActionBar />
+          </div>
+          <div className="expand"></div>
+          <div className="group">
+            <TreeViewActionBar two={this.state.two} toggle={this._toggle} />
           </div>
           <div className="expand"></div>
           <div className="group">
@@ -52,6 +59,25 @@ class TreeView extends React.PureComponent {
     );
   }
 
+  _toggle () {
+    this.setState({
+      two: !this.state.two,
+    });
+  }
+
+}
+
+
+function TreeViewActionBar (props) {
+  return (
+    <div className="trew-view-action-bar">
+      <Button
+        onClick={props.toggle}
+      >
+        {props.two ? 'ONE' : 'TWO'}
+      </Button>
+    </div>
+  );
 }
 
 
