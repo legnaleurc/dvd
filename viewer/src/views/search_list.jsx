@@ -30,7 +30,7 @@ class SearchList extends React.PureComponent {
     return (
       <div className="search-list">
         <Selectable getSourceList={this._getResultList} revision={revision + fsRevision}>
-          <div>
+          <div className="head">
             <div className="input-group">
               <Input
                 type="text"
@@ -53,10 +53,10 @@ class SearchList extends React.PureComponent {
             </div>
           </div>
           <div className="tail">
-            <div className="history">
+            <div className="tool-group">
               <HistoryList history={history} search={this._search} />
             </div>
-            <div className="list">
+            <div className="search-result">
               {this._renderList()}
             </div>
           </div>

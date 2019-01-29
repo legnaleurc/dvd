@@ -24,18 +24,24 @@
 
   .tail {
     @include size-grow;
+    @include mh-0;
 
     @include hbox;
 
-    @include mh-0;
-
-    .history {
+    .tool-group {
       width: 200px;
+      @include h-100;
 
-      @include scrollable;
+      .history-list {
+        @include w-100;
+
+        @include scrollable;
+      }
     }
 
-    .list {
+    .search-result {
+      @include size-grow;
+
       @include scrollable;
     }
   }
