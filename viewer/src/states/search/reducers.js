@@ -7,7 +7,8 @@ import {
 
 const initialState = {
   loading: false,
-  matched: [],
+  dict: {},
+  list: [],
   history: [],
 };
 
@@ -23,21 +24,30 @@ export default function reduceSearch (state = initialState, { type, payload }) {
       history.unshift(name);
       return Object.assign({}, state, {
         loading: true,
-        matched: [],
+        dict: {},
+        list: [],
         history,
       });
     }
     case SEARCH_NAME_SUCCEED: {
       const { pathList } = payload;
+      const dict = {};
+      const list = [];
+      for (const entry of pathList) {
+        dict[entry.id] = entry;
+        list.push(entry.id);
+      }
       return Object.assign({}, state, {
         loading: false,
-        matched: pathList,
+        dict,
+        list,
       });
     }
     case SEARCH_NAME_FAILED: {
       return Object.assign({}, state, {
         loading: false,
-        matched: [],
+        dict: {},
+        list: [],
       });
     }
     default:

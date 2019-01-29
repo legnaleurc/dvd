@@ -71,12 +71,12 @@ class SearchList extends React.PureComponent {
       return <LoadingBlock />;
     }
 
-    const { matched } = this.props;
-    if (!matched || matched.length <= 0) {
+    const { list, dict } = this.props;
+    if (!list || list.length <= 0) {
       return <EmptyBlock />;
     }
 
-    return matched.map(({id, path}) => (
+    return list.map(id => (
       <div
         key={id}
         onDoubleClick={event => {
@@ -86,7 +86,7 @@ class SearchList extends React.PureComponent {
       >
         <Selectable.Area nodeId={id}>
           <Selectable.Trigger nodeId={id}>
-            <code>{path}</code>
+            <code>{dict[id].path}</code>
           </Selectable.Trigger>
         </Selectable.Area>
       </div>
@@ -107,8 +107,8 @@ class SearchList extends React.PureComponent {
   }
 
   _getResultList (id) {
-    const { matched } = this.props;
-    return matched.map(node => node.id);
+    const { list } = this.props;
+    return list;
   }
 
 }
@@ -159,7 +159,8 @@ function mapStateToProps (state) {
   const { fileSystem, search } = state;
   return {
     loading: search.loading,
-    matched: search.matched,
+    dict: search.dict,
+    list: search.list,
     history: search.history,
     fsRevision: fileSystem.revision,
   };
