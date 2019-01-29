@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-
 import FileExplorer from './file_explorer';
 import FileSystemActionBar from './file_system_action_bar';
 import SortActionBar from './sort_action_bar';
 import Button from './button';
+import { classNameFromObject } from '../lib';
 
 import './tree_view.scss';
 
@@ -38,7 +38,12 @@ class TreeView extends React.PureComponent {
             <SortActionBar />
           </div>
         </div>
-        <div className="tail">
+        <div
+          className={classNameFromObject({
+            tail: true,
+            even: this.state.two,
+          })}
+        >
           <div className="group">
             <FileExplorer rootId={this.props.rootId} />
           </div>
