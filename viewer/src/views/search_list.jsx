@@ -2,8 +2,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { openStreamUrl } from '../states/file_system/actions';
-import { getSearchName } from '../states/search/actions';
+import { getSearchName, compare } from '../states/search/actions';
 import Input from './input';
+import Button from './button';
 import Selectable from './selectable';
 import FileSystemActionBar from './file_system_action_bar';
 import ContentActionBar from './content_action_bar';
@@ -18,6 +19,7 @@ class SearchList extends React.PureComponent {
 
     this._search = this._search.bind(this);
     this._getResultList = this._getResultList.bind(this);
+    this._compare = this._compare.bind(this);
 
     this.state = {
       revision: 0,
@@ -25,7 +27,7 @@ class SearchList extends React.PureComponent {
   }
 
   render () {
-    const { history, fsRevision } = this.props;
+    const { diff, history, fsRevision } = this.props;
     const { revision } = this.state;
     return (
       <div className="search-list">
@@ -48,12 +50,16 @@ class SearchList extends React.PureComponent {
                 <FileSystemActionBar />
               </div>
               <div className="action">
+                <ConnectedSearchActionBar compare={this._compare} />
+              </div>
+              <div className="action">
                 <ContentActionBar />
               </div>
             </div>
           </div>
           <div className="tail">
             <div className="tool-group">
+              <CompareList diff={diff} />
               <HistoryList history={history} search={this._search} />
             </div>
             <div className="search-result">
@@ -111,6 +117,11 @@ class SearchList extends React.PureComponent {
     return list;
   }
 
+  _compare (list) {
+    const { compare } = this.props;
+    compare(list);
+  }
+
 }
 
 
@@ -122,6 +133,53 @@ function LoadingBlock (props) {
 function EmptyBlock (props) {
   return (
     <div className="empty-block">EMPTY</div>
+  );
+}
+
+
+function SearchActionBar (props) {
+  return (
+    <>
+      <Button
+        onClick={event => {
+          const list = props.getSelection();
+          props.compare(list);
+        }}
+      >
+        COMPARE
+      </Button>
+    </>
+  );
+}
+const ConnectedSearchActionBar = Selectable.connect(value => ({
+  getSelection: value.getList,
+}))(SearchActionBar);
+
+
+function CompareList (props) {
+  return (
+    <div className="compare-list">
+      <InnerCompareList diff={props.diff} />
+    </div>
+  );
+}
+
+
+function InnerCompareList (props) {
+  if (!props.diff) {
+    return null;
+  }
+  if (props.diff.length <= 0) {
+    return 'OK';
+  }
+  return (
+    <>
+      {props.diff.map(({path, size}, i) => (
+        <pre key={i}>
+          {`${size}: ${path}`}
+        </pre>
+      ))}
+    </>
   );
 }
 
@@ -162,6 +220,7 @@ function mapStateToProps (state) {
     dict: search.dict,
     list: search.list,
     history: search.history,
+    diff: search.diff,
     fsRevision: fileSystem.revision,
   };
 }
@@ -174,6 +233,9 @@ function mapDispatchToProps (dispatch) {
     },
     openFileUrl (id) {
       dispatch(openStreamUrl(id));
+    },
+    compare (idList) {
+      dispatch(compare(idList));
     },
   };
 }

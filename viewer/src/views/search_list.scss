@@ -32,8 +32,16 @@
       width: 200px;
       @include h-100;
 
+      .compare-list {
+        @include w-100;
+        height: 20%;
+
+        @include scrollable;
+      }
+
       .history-list {
         @include w-100;
+        height: 80%;
 
         @include scrollable;
       }
