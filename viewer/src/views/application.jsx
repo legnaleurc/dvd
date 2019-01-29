@@ -5,8 +5,7 @@ import { hot } from 'react-hot-loader/root';
 import SearchView from './search_view';
 import MultiPageView from './multipage_view';
 import TabView from './tab_view';
-import SingleTreeView from './single_tree_view';
-import DoubleTreeView from './double_tree_view';
+import TreeView from './tree_view';
 import SettingsView from './settings_view';
 
 import './application.scss';
@@ -39,25 +38,19 @@ class Application extends React.PureComponent {
             <TabView.Label name="search">
               <div className="block side-2"></div>
             </TabView.Label>
-            <TabView.Label name="double-tree">
+            <TabView.Label name="mpv">
               <div className="block side-3"></div>
             </TabView.Label>
-            <TabView.Label name="mpv">
-              <div className="block side-4"></div>
-            </TabView.Label>
             <TabView.Label name="settings">
-              <div className="block side-5"></div>
+              <div className="block side-4"></div>
             </TabView.Label>
           </TabView.LabelContainer>
           <TabView.PageContainer>
             <TabView.Page name="tree">
-              <SingleTreeView />
+              <TreeView />
             </TabView.Page>
             <TabView.Page name="search">
               <SearchView />
-            </TabView.Page>
-            <TabView.Page name="double-tree">
-              <DoubleTreeView />
             </TabView.Page>
             <TabView.Page name="mpv">
               <MultiPageView />
