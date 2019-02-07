@@ -2,6 +2,7 @@ import readPkgUp from 'read-pkg-up';
 import resolvePkg from 'resolve-pkg';
 import cdnFromModule from 'module-to-cdn';
 import ExternalModule from 'webpack/lib/ExternalModule';
+import semver from 'semver';
 
 
 const PLUGIN_NAME = 'cdn-webpack-plugin';
@@ -59,7 +60,7 @@ class CdnWebpackPlugin {
       return false;
     }
 
-    const cdnConfig = await cdnFromModule(modulePath, version, { env: mode });
+    const cdnConfig = await getCDNFromModule(modulePath, version, { env: mode });
     if (!cdnConfig) {
       return false;
     }
@@ -101,6 +102,18 @@ class CdnWebpackPlugin {
     });
   }
 
+}
+
+
+async function getCDNFromModule (moduleName, version, options) {
+  const cdnConfig = await cdnFromModule(moduleName, version, options);
+  if (!cdnConfig) {
+    return null;
+  }
+  if (moduleName === 'redux-saga' && semver.satisfies(version, '>= 1.0.0')) {
+    cdnConfig.url = cdnConfig.url.replace(/(redux-saga\.)/, '$1umd.');
+  }
+  return cdnConfig;
 }
 
 
