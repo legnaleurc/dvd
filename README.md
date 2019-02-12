@@ -56,3 +56,19 @@ This module uses Node.js 10 or later. It also uses yarn instead of npm.
 cd viewer
 yarn install
 ```
+
+## Run the Daemon
+
+Just run the following script:
+
+```sh
+./dvd
+```
+
+By default it will listen on localhost 8000. You can change this by options.
+
+If you want to develop this project, simply run:
+
+```sh
+./dvd --debug
+```
