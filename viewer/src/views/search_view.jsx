@@ -1,8 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { openStreamUrl } from '../states/file_system/actions';
-import { getSearchName, compare } from '../states/search/actions';
+import {
+  getSearchName,
+  compare,
+  openStreamUrl,
+} from '../states/search/actions';
 import Input from './input';
 import Button from './button';
 import Selectable from './selectable';
