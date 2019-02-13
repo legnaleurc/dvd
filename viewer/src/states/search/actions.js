@@ -1,5 +1,6 @@
 import { call, put, takeEvery, select } from 'redux-saga/effects';
 
+import { getActionList } from '../../lib';
 import { getSearch } from '../selectors';
 
 
@@ -10,6 +11,7 @@ export const SEARCH_NAME_FAILED = 'SEARCH_NAME_FAILED';
 export const SEARCH_COMPARE_TRY = 'SEARCH_COMPARE_TRY';
 export const SEARCH_COMPARE_SUCCEED = 'SEARCH_COMPARE_SUCCEED';
 export const SEARCH_COMPARE_FAILED = 'SEARCH_COMPARE_FAILED';
+export const SEARCH_OPEN_STREAM = 'SEARCH_OPEN_STREAM';
 
 
 export function getSearchName (name) {
@@ -119,5 +121,41 @@ export function * sagaCompare () {
       size: dict[id].size,
     }));
     yield put(compareFailed(sizeList));
+  });
+}
+
+
+export function openStreamUrl (id) {
+  return {
+    type: SEARCH_OPEN_STREAM,
+    payload: {
+      id,
+    },
+  };
+}
+
+
+export function * sagaOpenStreamUrlFromSearch (fileSystem) {
+  yield takeEvery(SEARCH_OPEN_STREAM, function * ({ payload }) {
+    const { id } = payload;
+    const { dict } = yield select(getSearch);
+    const node = dict[id];
+    if (!node || !node.mimeType) {
+      // TODO error
+      return;
+    }
+    const url = yield call(() => fileSystem.stream(id, node.name));
+
+    const actionList = getActionList();
+    const [category, __] = node.mimeType.split('/');
+    const command = actionList[category];
+    if (!command) {
+      // just no command
+      return;
+    }
+
+    yield call(() => fileSystem.apply(command, {
+      url,
+    }));
   });
 }

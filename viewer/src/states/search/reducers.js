@@ -38,7 +38,7 @@ export default function reduceSearch (state = initialState, { type, payload }) {
       const dict = {};
       const list = [];
       for (const entry of pathList) {
-        dict[entry.id] = entry;
+        dict[entry.id] = createEntry(entry);
         list.push(entry.id);
       }
       return Object.assign({}, state, {
@@ -73,4 +73,16 @@ export default function reduceSearch (state = initialState, { type, payload }) {
     default:
       return state;
   }
+}
+
+
+function createEntry (entry) {
+  return {
+    id: entry.id,
+    name: entry.name,
+    md5: entry.md5,
+    size: entry.size,
+    mimeType: entry.mime_type,
+    path: entry.path,
+  };
 }
