@@ -110,6 +110,7 @@ class SearchEngine(object):
             'name': node.name,
             'md5': node.md5,
             'size': node.size,
+            'mime_type': node.mime_type,
             'path': await self._drive.get_path(node),
         }
 
