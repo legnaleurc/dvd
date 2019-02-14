@@ -1,8 +1,11 @@
+@import '../lib/index';
+
+
 .dropable {
   border: {
     width: 1px;
     style: solid;
-    color: white;
+    color: $background-color;
   }
 
   &.drag-over {

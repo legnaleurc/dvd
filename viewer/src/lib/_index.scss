@@ -1,3 +1,8 @@
+$background-color: hsl(0, 0%, 15%);
+$text-color: hsl(0, 0%, 85%);
+$selection-color: hsl(210, 100%, 25%);
+
+
 @mixin hbox {
   display: flex;
 }
