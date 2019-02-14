@@ -45,13 +45,14 @@ class Daemon(object):
             app['static'] = static_path
             setup_static_path(app, static_path)
 
-        async with wdg.Drive() as drive:
-            app['drive'] = drive
-            app['se'] = util.SearchEngine(drive)
-            async with util.UnpackEngine(drive, port, unpack_path) as ue:
-                app['ue'] = ue
-                async with ServerContext(app, port):
-                    await self._until_finished()
+        async with wdg.Drive() as drive, \
+                   util.UnpackEngine(drive, port, unpack_path) as ue, \
+                   ServerContext(app, port, {
+                       'drive': drive,
+                       'se': util.SearchEngine(drive),
+                       'ue': ue,
+                   }):
+            await self._until_finished()
 
         return 0
 
@@ -64,8 +65,10 @@ class Daemon(object):
 
 class ServerContext(object):
 
-    def __init__(self, app, port):
+    def __init__(self, app, port, context):
         log_format = '%s %r (%b) %Tfs'
+        for k, v in context.items():
+            app[k] = v
         self._runner = aw.AppRunner(app, access_log_format=log_format)
         self._port = port
 
