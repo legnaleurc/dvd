@@ -1,6 +1,11 @@
 @import '../lib/index';
 
 
+.dragable.dragging {
+  cursor: move;
+}
+
+
 .dropable {
   border: {
     width: 1px;

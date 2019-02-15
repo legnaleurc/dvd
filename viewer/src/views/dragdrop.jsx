@@ -11,6 +11,7 @@ class Dragable extends React.Component {
     super(props);
 
     this._onDragStart = this._onDragStart.bind(this);
+    this._onDragEnd = this._onDragEnd.bind(this);
   }
 
   render() {
@@ -23,6 +24,7 @@ class Dragable extends React.Component {
         className="dragable"
         draggable={enabled}
         onDragStart={this._onDragStart}
+        onDragEnd={this._onDragEnd}
       >
         {children}
       </div>
@@ -31,8 +33,20 @@ class Dragable extends React.Component {
 
   _onDragStart (event) {
     event.stopPropagation();
+    event.target.classList.add('dragging');
     const { onDragStart } = this.props;
-    onDragStart(event);
+    if (onDragStart) {
+      onDragStart(event);
+    }
+  }
+
+  _onDragEnd (event) {
+    event.stopPropagation();
+    event.target.classList.remove('dragging');
+    const { onDragEnd } = this.props;
+    if (onDragEnd) {
+      onDragEnd(event);
+    }
   }
 
 }
