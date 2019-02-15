@@ -18,19 +18,19 @@
         height: 50px;
 
         &.side-1 {
-          background-color: hsl(0, 100%, 50%);
+          background-color: hsl(0, 100%, 25%);
         }
 
         &.side-2 {
-          background-color: hsl(90, 100%, 50%);
+          background-color: hsl(90, 100%, 25%);
         }
 
         &.side-3 {
-          background-color: hsl(180, 100%, 50%);
+          background-color: hsl(180, 100%, 25%);
         }
 
         &.side-4 {
-          background-color: hsl(270, 100%, 50%);
+          background-color: hsl(270, 100%, 25%);
         }
       }
 
@@ -38,7 +38,7 @@
         .block {
           border: {
             width: 5px;
-            color: white;
+            color: $background-color;
             style: solid;
           }
         }
