@@ -3,6 +3,7 @@ MKDIR := mkdir
 TOUCH := touch
 CMAKE := cmake
 YARN := yarn
+PYTHON := python3
 
 VIEWER_ALL_FILES = $(shell find viewer -type d \( -name node_modules -o -name dist \) -prune -o -type f -print)
 VIEWER_CONF_FILES = viewer/package.json
@@ -34,3 +35,8 @@ viewer/node_modules: $(VIEWER_CONF_FILES)
 
 # TODO there is no need to debug unpack for now
 debug: unpack-release viewer/node_modules
+
+test: engine-test
+
+engine-test:
+	$(CD) engine && $(PYTHON) -m compileall engine
