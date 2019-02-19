@@ -70,22 +70,30 @@ def parse_args(args):
 
 async def run_release(public_listen):
     await run_or_die(['make', '-j'])
-    await run_or_die([
-        'python3', '-m', 'engine',
-            '-u', 'unpack/build/unpack',
-            '-s', 'viewer/dist',
-            '-l', str(public_listen),
-    ])
+    await run_or_die(
+        [
+            'python3', '-m', 'engine',
+                '-u', '../unpack/build/unpack',
+                '-s', '../viewer/dist',
+                '-l', str(public_listen),
+        ],
+        cwd=pathlib.Path('./engine'),
+    )
 
 
 async def run_debug(public_listen, private_listen, stop_event):
     await run_or_die(['make', '-j', 'debug'])
 
-    backend = auto_rerun([
-        'python3', '-m', 'engine',
-            '-u', 'unpack/build/unpack',
-            '-l', str(private_listen),
-    ], path='./engine', stop_event=stop_event)
+    backend = auto_rerun(
+        [
+            'python3', '-m', 'engine',
+                '-u', '../unpack/build/unpack',
+                '-l', str(private_listen),
+        ],
+        cwd=pathlib.Path('./engine'),
+        path='./engine',
+        stop_event=stop_event,
+    )
     backend = asyncio.create_task(backend)
 
     frontend = run_or_die(
