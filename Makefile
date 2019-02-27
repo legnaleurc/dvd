@@ -40,3 +40,4 @@ test: engine-test
 
 engine-test:
 	$(CD) engine && $(PYTHON) -m compileall engine
+	$(CD) engine && $(PYTHON) -m unittest
