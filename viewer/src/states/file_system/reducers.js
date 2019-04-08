@@ -101,10 +101,16 @@ export default function reduceFileSystem (state = initialState, { type, payload 
       });
     }
     case FS_SYNC_SUCCEED: {
-      const { nodes, revision } = state;
+      const { nodes, sortKey, revision } = state;
       const { changeList } = payload;
+      const needSort = new Set();
       for (const change of changeList) {
-        applyChange(nodes, state.sortKey, change);
+        applyChange(needSort, nodes, change);
+      }
+      const cmp = getCompareFunction(sortKey);
+      for (const id of needSort) {
+        const node = nodes[id];
+        node.children.sort(cmp);
       }
       return Object.assign({}, state, {
         updating: false,
@@ -152,7 +158,7 @@ function createNode (node) {
 }
 
 
-function applyChange (nodes, sortKey, change) {
+function applyChange (needSort, nodes, change) {
   if (change.removed) {
     removeNode(nodes, change.id);
     return;
@@ -161,7 +167,7 @@ function applyChange (nodes, sortKey, change) {
     removeNode(nodes, change.node.id);
     return;
   }
-  upsertNode(nodes, sortKey, change.node);
+  upsertNode(needSort, nodes, change.node);
 }
 
 
@@ -170,34 +176,19 @@ function removeNode (nodes, nodeId) {
   if (!node) {
     return;
   }
-  const parentId = node.parentId;
-  let parent = nodes[parentId];
-  if (parent && parent.fetched) {
-    parent = Object.assign({}, parent, {
-      children: parent.children.filter(id => id !== nodeId),
-    });
-    nodes[parentId] = parent;
-  }
-  delete nodes[nodeId];
+  removeNodeFromParent(nodes, node.parentId, node.id);
+  delete nodes[node.id];
 }
 
 
-function upsertNode (nodes, sortKey, node) {
+function upsertNode (needSort, nodes, node) {
   const newNode = createNode(node);
   node = nodes[node.id];
-
-  const cmp = getCompareFunction(sortKey);
 
   // this is a new node
   if (!node) {
     // if have parent and already fetched chilidren, need to update the list
-    let parent = nodes[newNode.parentId];
-    if (parent && parent.fetched) {
-      parent = Object.assign({}, parent, {
-        children: [newNode.id, ...parent.children].sort(cmp),
-      });
-      nodes[newNode.parentId] = parent;
-    }
+    insertNodeToParent(needSort, nodes, newNode.parentId, newNode.id);
     nodes[newNode.id] = newNode;
     return;
   }
@@ -205,23 +196,34 @@ function upsertNode (nodes, sortKey, node) {
   // this is an existing node
   if (node.parentId !== newNode.parentId) {
     // remove child from old parent
-    let parent = nodes[node.parentId];
-    if (parent && parent.fetched) {
-      parent = Object.assign({}, parent, {
-        children: parent.children.filter(id => id !== node.id),
-      });
-      nodes[node.parentId] = parent;
-    }
+    removeNodeFromParent(nodes, node.parentId, node.id);
     // insert to new parent
-    parent = nodes[newNode.parentId];
-    if (parent && parent.fetched) {
-      parent = Object.assign({}, parent, {
-        children: [newNode.id, ...parent.children].sort(cmp),
-      });
-      nodes[newNode.parentId] = parent;
-    }
+    insertNodeToParent(needSort, nodes, newNode.parentId, newNode.id);
   }
-  nodes[newNode.id] = newNode;
+  nodes[newNode.id] = Object.assign({}, newNode);
+}
+
+
+function removeNodeFromParent (nodes, parentId, nodeId) {
+  const parent = nodes[parentId];
+  if (!parent || !parent.fetched) {
+    return;
+  }
+  nodes[parentId] = Object.assign({}, parent, {
+    children: parent.children.filter(id => id !== nodeId),
+  });
+}
+
+
+function insertNodeToParent (needSort, nodes, parentId, nodeId) {
+  const parent = nodes[parentId];
+  if (!parent || !parent.fetched) {
+    return;
+  }
+  nodes[parentId] = Object.assign({}, parent, {
+    children: [...parent.children, nodeId],
+  });
+  needSort.add(parentId)
 }
 
 
