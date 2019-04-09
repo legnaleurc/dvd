@@ -14,12 +14,7 @@ export class FileSystem {
   }
 
   async list (id) {
-    let children = await this._get(`/api/v1/nodes/${id}/children`);
-    children = children.map(node => {
-      node.created = Date.parse(node.created);
-      node.modified = Date.parse(node.modified);
-      return node;
-    });
+    const children = await this._get(`/api/v1/nodes/${id}/children`);
     return children;
   }
 

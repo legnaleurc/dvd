@@ -152,7 +152,7 @@ function createNode (node) {
     id: node.id,
     name: node.name,
     parentId: getParentId(node),
-    modified: node.modified,
+    modified: Date.parse(node.modified),
     mimeType: node.mime_type,
     children: node.is_folder ? [] : null,
     fetched: false,
