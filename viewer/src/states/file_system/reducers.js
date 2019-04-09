@@ -34,11 +34,10 @@ export default function reduceFileSystem (state = initialState, { type, payload 
       });
     }
     case FS_ROOT_GET_SUCCEED: {
-      let { node } = payload;
-      const { children } = payload;
+      let { node, children } = payload;
 
       const cmp = getCompareFunction(state.sortKey);
-      children.sort(cmp);
+      children = children.map(createNode).sort(cmp);
 
       node = createNode(node);
       node.fetched = true;
@@ -48,7 +47,7 @@ export default function reduceFileSystem (state = initialState, { type, payload 
       };
 
       for (const node of children) {
-        nodes[node.id] = createNode(node);
+        nodes[node.id] = node;
       }
 
       // root changes means all data need reinitialize
@@ -69,14 +68,15 @@ export default function reduceFileSystem (state = initialState, { type, payload 
       });
     }
     case FS_LIST_GET_SUCCEED: {
-      const { nodes } = state;
-      const { id, children } = payload;
+      const { nodes, sortKey } = state;
+      const { id } = payload;
+      let { children } = payload;
 
-      const cmp = getCompareFunction(state.sortKey);
-      children.sort(cmp);
+      const cmp = getCompareFunction(sortKey);
+      children = children.map(createNode).sort(cmp);
 
       for (const node of children) {
-        nodes[node.id] = createNode(node);
+        nodes[node.id] = node;
       }
 
       const parent = nodes[id];
