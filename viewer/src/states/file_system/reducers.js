@@ -110,7 +110,9 @@ export default function reduceFileSystem (state = initialState, { type, payload 
       const cmp = getCompareFunction(sortKey);
       for (const id of needSort) {
         const node = nodes[id];
-        node.children.sort(cmp);
+        const children = node.children.map(id => nodes[id]);
+        node.children = children.sort(cmp).map(node => node.id);
+        nodes[id] = Object.assign({}, node);
       }
       return Object.assign({}, state, {
         updating: false,
@@ -220,9 +222,8 @@ function insertNodeToParent (needSort, nodes, parentId, nodeId) {
   if (!parent || !parent.fetched) {
     return;
   }
-  nodes[parentId] = Object.assign({}, parent, {
-    children: [...parent.children, nodeId],
-  });
+  // sort later
+  parent.children.push(nodeId);
   needSort.add(parentId)
 }
 
