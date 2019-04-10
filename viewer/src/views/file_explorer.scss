@@ -24,5 +24,7 @@
     @include mh-0;
 
     @include scrollable;
+
+    overflow-wrap: anywhere;
   }
 }
