@@ -110,9 +110,6 @@ async function getCDNFromModule (moduleName, version, options) {
   if (!cdnConfig) {
     return null;
   }
-  if (moduleName === 'redux-saga' && semver.satisfies(version, '>= 1.0.0')) {
-    cdnConfig.url = cdnConfig.url.replace(/(redux-saga\.)/, '$1umd.');
-  }
   return cdnConfig;
 }
 
