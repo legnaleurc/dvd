@@ -85,10 +85,10 @@ class CdnWebpackPlugin {
     const cwd = resolvePkg(moduleName, {
       cwd: contextPath,
     });
-    const { pkg } = await readPkgUp({ cwd });
+    const packageJson = await readPkgUp({ cwd });
     return {
-      version: pkg.version,
-      peerDependencies: pkg.peerDependencies,
+      version: packageJson.package.version,
+      peerDependencies: packageJson.package.peerDependencies,
     };
   }
 
