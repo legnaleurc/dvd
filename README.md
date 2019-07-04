@@ -39,7 +39,7 @@ export CMAKE_PREFIX_PATH="/usr/local/opt/libarchive:/usr/local/opt/openssl"
 This module uses Python 3.7.
 
 ```sh
-pip install -r requirements.txt
+pip install -r engine/requirements.txt
 ```
 
 Then you need to initialize the drive cache.
