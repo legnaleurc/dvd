@@ -2,7 +2,6 @@ import readPkgUp from 'read-pkg-up';
 import resolvePkg from 'resolve-pkg';
 import cdnFromModule from 'module-to-cdn';
 import ExternalModule from 'webpack/lib/ExternalModule';
-import semver from 'semver';
 
 
 const PLUGIN_NAME = 'cdn-webpack-plugin';
