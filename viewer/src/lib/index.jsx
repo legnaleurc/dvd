@@ -1,6 +1,9 @@
 import React from 'react';
 
 
+const MAX_TASK_COUNT = 6;
+
+
 export class FileSystem {
 
   constructor () {
@@ -26,7 +29,7 @@ export class FileSystem {
   }
 
   async move (srcList, id) {
-    for (const chunk of chunksOf(srcList, 10)) {
+    for (const chunk of chunksOf(srcList, MAX_TASK_COUNT)) {
       const requestList = chunk.map(src => this._patch(`/api/v1/nodes/${src}`, {
         parent_id: id,
       }));
@@ -35,7 +38,7 @@ export class FileSystem {
   }
 
   async trash (srcList) {
-    for (const chunk of chunksOf(srcList, 10)) {
+    for (const chunk of chunksOf(srcList, MAX_TASK_COUNT)) {
       const requestList = chunk.map(src => this._delete(`/api/v1/nodes/${src}`));
       await Promise.all(requestList);
     }
