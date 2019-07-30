@@ -94,7 +94,9 @@ class CdnWebpackPlugin {
   _applyHtmlWebpackPlugin (compiler) {
     compiler.hooks.compilation.tap(PLUGIN_NAME, compilation => {
       compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync(PLUGIN_NAME, (data, cb) => {
-        const assets = Object.values(this._modulesFromCdn).map(_ => _.url);
+        let assets = Object.values(this._modulesFromCdn);
+        hackOrder(assets);
+        assets = assets.map(_ => _.url);
         data.assets.js = assets.concat(data.assets.js);
         cb(null, data);
       });
@@ -110,6 +112,19 @@ async function getCDNFromModule (moduleName, version, options) {
     return null;
   }
   return cdnConfig;
+}
+
+
+// see reduxjs/react-redux#1366
+function hackOrder (assets) {
+  const reactDom = assets.findIndex(_ => _.name === 'react-dom');
+  const reactRedux = assets.findIndex(_ => _.name === 'react-redux');
+  if (reactDom < 0 || reactRedux < 0 ) {
+    return;
+  }
+  if (reactDom > reactRedux) {
+    [assets[reactDom], assets[reactRedux]] = [assets[reactRedux], assets[reactDom]];
+  }
 }
 
 
