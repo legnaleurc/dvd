@@ -239,14 +239,11 @@ std::string resolvePath (const std::string & localPath, const std::string & id,
 {
     std::ostringstream sout;
     for (auto c : entryName) {
-        if (c < 0) {
-            continue;
-        }
         if (isalnum(c) || c == '.' || c == ' ' || c == '/') {
             sout << c;
         } else {
-            sout << std::setfill('0') << std::setw(2) << std::hex
-                 << static_cast<int>(c);
+            int k = static_cast<int>(c & 0x7F) | 0x80;
+            sout << std::setfill('0') << std::setw(2) << std::hex << k;
         }
     }
     boost::filesystem::path path = localPath;
