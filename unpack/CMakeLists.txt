@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.11)
+project(unpack)
 
 find_package(LibArchive REQUIRED)
 find_package(cpprestsdk REQUIRED)
