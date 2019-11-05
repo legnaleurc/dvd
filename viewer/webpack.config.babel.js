@@ -8,79 +8,83 @@ import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
 import CdnWebpackPlugin from './tools/cdn_webpack_plugin';
 
 
-const devMode = process.env.NODE_ENV !== 'production'
 const backendPort = process.env.BACKEND_PORT;
 
 
-export default {
-  entry: './src/index.jsx',
-  output: {
-    publicPath: devMode ? '' : '/static/',
-  },
-  devServer: {
-    proxy: {
-      '/api': {
-        target: `http://localhost:${backendPort}`,
+export default function (env, argv) {
+  const isReleaseMode = argv.mode === 'production';
+  const config = {
+    entry: './src/index.jsx',
+    output: {
+      publicPath: isReleaseMode ? '/static/' : '/',
+    },
+    devServer: {
+      proxy: {
+        '/api': {
+          target: `http://localhost:${backendPort}`,
+        },
       },
     },
-  },
-  module: {
-    rules: [
-      // js, jsx
-      {
-        test: /\.jsx?$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
+    module: {
+      rules: [
+        // js, jsx
+        {
+          test: /\.jsx?$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+          },
         },
-      },
-      // html
-      {
-        test: /\.html$/,
-        use: {
-          loader: 'html-loader',
+        // html
+        {
+          test: /\.html$/,
+          use: {
+            loader: 'html-loader',
+          },
         },
-      },
-      // css
-      {
-        test: /\.s?css$/,
-        use: [
-          devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
-          'css-loader',
-          'postcss-loader',
-          'sass-loader',
-        ],
-      },
-    ],
-  },
-  resolve: {
-    extensions: ['.js', '.jsx']
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './src/html/index.html',
-      // this uses the path related to output directory, not source directory
-      filename: 'index.html',
-    }),
-    new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
-      filename: devMode ? '[name].css' : '[name].css',
-      chunkFilename: devMode ? '[id].css' : '[id].[hash].css',
-    }),
-    new CdnWebpackPlugin(),
-  ],
-  devtool: devMode ? 'inline-source-map' : 'source-map',
-  optimization: {
-    minimizer: [
-      new TerserPlugin({
-        parallel: true,
-        terserOptions: {
-          ecma: 6,
+        // css
+        {
+          test: /\.s?css$/,
+          use: [
+            isReleaseMode ? MiniCssExtractPlugin.loader : 'style-loader',
+            'css-loader',
+            'postcss-loader',
+            'sass-loader',
+          ],
         },
-        sourceMap: true,
+      ],
+    },
+    resolve: {
+      extensions: ['.js', '.jsx']
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: './src/html/index.html',
+        // this uses the path related to output directory, not source directory
+        filename: 'index.html',
       }),
-      new OptimizeCSSAssetsPlugin({}),
+      new MiniCssExtractPlugin({
+        // Options similar to the same options in webpackOptions.output
+        // both options are optional
+        filename: '[name].css',
+        chunkFilename: isReleaseMode ? '[id].[hash].css' : '[id].css',
+      }),
+      new CdnWebpackPlugin(),
     ],
-  },
-};
+    devtool: isReleaseMode ? 'source-map' : 'inline-source-map',
+    optimization: {
+      minimizer: [
+        new TerserPlugin({
+          parallel: true,
+          terserOptions: {
+            ecma: 6,
+          },
+          sourceMap: true,
+        }),
+        new OptimizeCSSAssetsPlugin({}),
+      ],
+    },
+  };
+
+  return config;
+}
