@@ -107,6 +107,15 @@ class CdnWebpackPlugin {
 
 
 async function getCDNFromModule (moduleName, version, options) {
+  if (moduleName === 'redux-saga/effects') {
+    const postfix = options.env === 'production' ? '.min' : '';
+    return {
+      name: moduleName,
+      var: 'ReduxSagaEffects',
+      url: `https://unpkg.com/redux-saga@${version}/dist/redux-saga-effects.umd${postfix}.js`,
+      version,
+    };
+  }
   const cdnConfig = await cdnFromModule(moduleName, version, options);
   if (!cdnConfig) {
     return null;
