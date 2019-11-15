@@ -11,7 +11,7 @@ const MODULE_REGEX = /^((?:@[a-z0-9][\w-.]+\/)?[a-z0-9][\w-.]*)/;
 class CdnWebpackPlugin {
 
   constructor () {
-    this._modulesFromCdn = {};
+    this._modulesFromCdn = new OrderedMap();
   }
 
   apply (compiler) {
@@ -49,7 +49,7 @@ class CdnWebpackPlugin {
       peerDependencies,
     } = await this._getPkgInfo(contextPath, moduleName);
 
-    const cache = this._modulesFromCdn[modulePath];
+    const cache = this._modulesFromCdn.get(modulePath);
     const isModuleAlreadyLoaded = !!cache;
     if (isModuleAlreadyLoaded) {
       const isSameVersion = cache.version === version;
@@ -75,7 +75,7 @@ class CdnWebpackPlugin {
       }
     }
 
-    this._modulesFromCdn[modulePath] = cdnConfig;
+    this._modulesFromCdn.set(modulePath, cdnConfig);
 
     return cdnConfig.var;
   }
@@ -94,13 +94,41 @@ class CdnWebpackPlugin {
   _applyHtmlWebpackPlugin (compiler) {
     compiler.hooks.compilation.tap(PLUGIN_NAME, compilation => {
       compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync(PLUGIN_NAME, (data, cb) => {
-        let assets = Object.values(this._modulesFromCdn);
+        let assets = this._modulesFromCdn.values();
         hackOrder(assets);
         assets = assets.map(_ => _.url);
         data.assets.js = assets.concat(data.assets.js);
         cb(null, data);
       });
     });
+  }
+
+}
+
+
+class OrderedMap {
+
+  constructor () {
+    this._dict = new Map();
+    this._list = [];
+  }
+
+  get (key) {
+    if (!this._dict.has(key)) {
+      return undefined;
+    }
+    return this._dict.get(key);
+  }
+
+  set (key, value) {
+    if (!this._dict.has(key)) {
+      this._list.push(key);
+    }
+    this._dict.set(key, value);
+  }
+
+  values () {
+    return this._list.map(key => this._dict.get(key));
   }
 
 }
