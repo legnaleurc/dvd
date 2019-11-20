@@ -1,5 +1,6 @@
 import process from 'process';
 
+import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -11,7 +12,7 @@ import CdnWebpackPlugin from './tools/cdn_webpack_plugin';
 const backendPort = process.env.BACKEND_PORT;
 
 
-export default function (env, argv) {
+export default function (env: unknown, argv: webpack.Configuration) {
   const isReleaseMode = argv.mode === 'production';
   const config = {
     entry: './src/index.jsx',

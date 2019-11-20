@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import readPkgUp from 'read-pkg-up';
 import resolvePkg from 'resolve-pkg';
 import cdnFromModule from 'module-to-cdn';
