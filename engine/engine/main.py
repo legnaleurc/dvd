@@ -46,6 +46,7 @@ class Daemon(object):
             setup_static_path(app, static_path)
 
         factory = DriveFactory()
+        factory.load_config()
 
         async with factory() as drive, \
                    util.UnpackEngine(drive, port, unpack_path) as ue, \

@@ -105,13 +105,14 @@ class SearchEngine(object):
             raise SearchFailedError(f'{pattern} canceled search')
 
     async def _make_item(self, node):
+        path = await self._drive.get_path(node)
         return {
             'id': node.id_,
             'name': node.name,
-            'md5': node.md5,
+            'hash': node.hash_,
             'size': node.size,
             'mime_type': node.mime_type,
-            'path': await self._drive.get_path(node),
+            'path': str(path),
         }
 
 

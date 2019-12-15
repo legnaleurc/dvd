@@ -109,8 +109,8 @@ export function * sagaCompare () {
     }
 
     const { dict } = yield select(getSearch);
-    const md5List = idList.map(id => dict[id].md5);
-    const rv = md5List.slice(1).every(md5 => md5 === md5List[0]);
+    const hashList = idList.map(id => dict[id].hash);
+    const rv = hashList.slice(1).every(hash => hash === hashList[0]);
     if (rv) {
       yield put(compareSucceed());
       return;

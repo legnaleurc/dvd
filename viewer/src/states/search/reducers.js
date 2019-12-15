@@ -80,7 +80,7 @@ function createEntry (entry) {
   return {
     id: entry.id,
     name: entry.name,
-    md5: entry.md5,
+    hash: entry.hash,
     size: entry.size,
     mimeType: entry.mime_type,
     path: entry.path,
