@@ -5,7 +5,6 @@ import re
 import shlex
 
 import aiohttp.web as aw
-from wcpan.drive.google import dict_from_node
 from wcpan.logger import EXCEPTION
 
 from . import util as u
@@ -77,8 +76,8 @@ class NodeView(NodeObjectMixin, aw.View):
     @raise_404
     async def get(self):
         node = await self.get_object()
-        node = dict_from_node(node)
-        return json_response(node)
+        dict_ = node.to_dict()
+        return json_response(dict_)
 
     @raise_404
     async def patch(self):
@@ -149,7 +148,7 @@ class NodeChildrenView(NodeObjectMixin, aw.View):
         drive = self.request.app['drive']
         children = await drive.get_children(node)
         children = filter(lambda _: not _.trashed, children)
-        children = [dict_from_node(_) for _ in children]
+        children = [_.to_dict() for _ in children]
         return json_response(children)
 
 

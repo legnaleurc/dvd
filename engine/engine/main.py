@@ -5,7 +5,7 @@ import os.path as op
 import signal
 
 from aiohttp import web as aw
-import wcpan.drive.google as wdg
+from wcpan.drive.core.drive import DriveFactory
 from wcpan.logger import setup as setup_logger, INFO, EXCEPTION
 
 from . import api, util, view
@@ -18,7 +18,7 @@ class Daemon(object):
         self._finished = None
         self._loggers = setup_logger((
             'aiohttp',
-            'wcpan.drive.google',
+            'wcpan.drive',
             'engine',
         ), '/tmp/engine.log')
 
@@ -45,7 +45,9 @@ class Daemon(object):
             app['static'] = static_path
             setup_static_path(app, static_path)
 
-        async with wdg.Drive() as drive, \
+        factory = DriveFactory()
+
+        async with factory() as drive, \
                    util.UnpackEngine(drive, port, unpack_path) as ue, \
                    ServerContext(app, port, {
                        'drive': drive,
