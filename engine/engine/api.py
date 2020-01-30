@@ -99,7 +99,7 @@ class NodeView(NodeObjectMixin, aw.View):
         drive = self.request.app['drive']
         se = self.request.app['se']
         path = await drive.get_path(node)
-        se.drop_value(path)
+        se.drop_value(str(path))
         await drive.trash_node(node)
         return aw.Response(
             status=204,
