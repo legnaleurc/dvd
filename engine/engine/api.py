@@ -85,8 +85,8 @@ class NodeView(NodeObjectMixin, aw.View):
         drive = self.request.app['drive']
         kwargs = await self.request.json()
         if 'parent_id' in kwargs:
-            path = await drive.get_path_by_id(kwargs['parent_id'])
-            await drive.rename_node(node, path)
+            parent_node = await drive.get_node_by_id(kwargs['parent_id'])
+            await drive.rename_node(node, parent_node, None)
         return aw.Response(
             status=204,
             headers={
