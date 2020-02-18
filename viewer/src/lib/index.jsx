@@ -30,9 +30,16 @@ export class FileSystem {
 
   async move (srcList, id) {
     for (const chunk of chunksOf(srcList, MAX_TASK_COUNT)) {
-      const requestList = chunk.map(src => this._patch(`/api/v1/nodes/${src}`, {
-        parent_id: id,
-      }));
+      const requestList = chunk.map(async src => {
+        try {
+          const rv = await this._patch(`/api/v1/nodes/${src}`, {
+            parent_id: id,
+          });
+          return rv;
+        } catch (e) {
+          console.warn(e);
+        }
+      });
       await Promise.all(requestList);
     }
   }
