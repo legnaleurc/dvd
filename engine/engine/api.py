@@ -53,18 +53,26 @@ class NodeRandomAccessMixin(object):
         offset = 0 if range_.start is None else range_.start
         length = node.size - offset if not range_.stop else range_.stop
         stop = range_.stop if range_.stop else node.size - 1
+        # Not out of range.
+        good_range = is_valid_range(range_, node.size)
+        # The response needs Content-Range.
+        want_range = range_.start is not None or range_.stop is not None
 
-        if range_.start is not None or range_.stop is not None:
+        if want_range:
             response.headers['Content-Range'] = f'bytes {offset}-{stop}/{node.size}'
 
         response.content_length = length
 
         response.headers['Accept-Ranges'] = 'bytes'
         response.content_type = node.mime_type
+        if not good_range:
+            response.set_status(416)
 
         drive = self.request.app['drive']
 
         await response.prepare(self.request)
+        if not good_range:
+            return
         async with await drive.download(node) as stream:
             await stream.seek(offset)
             async for chunk in stream:
@@ -295,3 +303,21 @@ async def search_by_name(search_engine, pattern):
     se = search_engine
     nodes = await se.get_nodes_by_regex(real_pattern)
     return nodes
+
+
+def is_valid_range(range_: slice, size: int) -> bool:
+    if range_.start is None and range_.stop is None:
+        return True
+    if range_.start is None:
+        return False
+    if range_.start < 0:
+        return False
+    if range_.start >= size:
+        return False
+    if range_.stop is None:
+        return True
+    if range_.stop <= 0:
+        return False
+    if range_.stop > size:
+        return False
+    return True
