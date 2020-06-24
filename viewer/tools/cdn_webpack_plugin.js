@@ -2,6 +2,7 @@ import readPkgUp from 'read-pkg-up';
 import resolvePkg from 'resolve-pkg';
 import cdnFromModule from 'module-to-cdn';
 import ExternalModule from 'webpack/lib/ExternalModule';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 
 const PLUGIN_NAME = 'cdn-webpack-plugin';
@@ -93,7 +94,8 @@ class CdnWebpackPlugin {
 
   _applyHtmlWebpackPlugin (compiler) {
     compiler.hooks.compilation.tap(PLUGIN_NAME, compilation => {
-      compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync(PLUGIN_NAME, (data, cb) => {
+      const hwpHooks = HtmlWebpackPlugin.getHooks(compilation);
+      hwpHooks.beforeAssetTagGeneration.tapAsync(PLUGIN_NAME, (data, cb) => {
         let assets = this._modulesFromCdn.values();
         hackOrder(assets);
         assets = assets.map(_ => _.url);
