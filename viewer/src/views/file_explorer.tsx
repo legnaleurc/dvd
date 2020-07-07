@@ -1,18 +1,27 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import Selectable from './selectable';
-import TreeNode from './tree_node';
-import ContentActionBar from './content_action_bar';
+import { Node } from '../states/file_system/types';
+import { IGlobalStateType } from '../states/reducers';
+import { Selectable } from './selectable';
+import { TreeNode } from './tree_node';
+import { ContentActionBar } from './content_action_bar';
 
 import './file_explorer.scss';
 
 
-class FileExplorer extends React.PureComponent {
+interface IPropsType {
+  rootId: string | null;
+}
+interface IPrivatePropsType {
+  root: Node | null;
+  revision: number;
 
-  constructor (props) {
-    super(props);
-  }
+  getSiblingList: (id: string) => string[] | null;
+}
+
+
+class FileExplorer extends React.PureComponent<IPropsType & IPrivatePropsType> {
 
   render () {
     const { getSiblingList, root, revision } = this.props;
@@ -41,15 +50,18 @@ class FileExplorer extends React.PureComponent {
 }
 
 
-function mapStateToProps (state, ownProps) {
+function mapStateToProps (state: IGlobalStateType, ownProps: IPropsType) {
   const { nodes, revision } = state.fileSystem;
   const { rootId } = ownProps;
   return {
     root: rootId ? nodes[rootId] : null,
     revision,
-    getSiblingList (id) {
+    getSiblingList (id: string) {
       const node = nodes[id];
       if (!node) {
+        return null;
+      }
+      if (!node.parentId) {
         return null;
       }
       const parent = nodes[node.parentId];
@@ -62,4 +74,5 @@ function mapStateToProps (state, ownProps) {
 }
 
 
-export default connect(mapStateToProps)(FileExplorer);
+const ConnectedFileExplorer = connect(mapStateToProps)(FileExplorer);
+export { ConnectedFileExplorer as FileExplorer };

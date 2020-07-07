@@ -1,7 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 
-import Button from './button';
+import { Button } from './button';
 import { setSortFunction } from '../states/file_system/actions';
 import {
   SORT_BY_NAME_ASC,
@@ -10,11 +11,12 @@ import {
 } from '../states/file_system/sort';
 
 
-class SortActionBar extends React.Component {
+interface IPropsType {
+  setSortFunction: (key: string) => void;
+}
 
-  constructor (props) {
-    super(props);
-  }
+
+class SortActionBar extends React.Component<IPropsType> {
 
   render () {
     const { setSortFunction } = this.props;
@@ -50,13 +52,14 @@ class SortActionBar extends React.Component {
 }
 
 
-function mapDispatchToProps (dispatch) {
+function mapDispatchToProps (dispatch: Dispatch) {
   return {
-    setSortFunction (key) {
+    setSortFunction (key: string) {
       dispatch(setSortFunction(key));
     },
   };
 }
 
 
-export default connect(null, mapDispatchToProps)(SortActionBar);
+const ConnectedSortActionBar = connect(null, mapDispatchToProps)(SortActionBar);
+export { ConnectedSortActionBar as SortActionBar };

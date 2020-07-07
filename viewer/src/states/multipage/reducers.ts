@@ -2,17 +2,20 @@ import {
   MPV_LOAD_TRY,
   MPV_LOAD_SUCCEED,
   MPV_LOAD_FAILED,
-} from './actions';
+  ActionTypes,
+  SucceedLoadAction,
+  MpvState,
+} from './types';
 
 
-const initialState = {
+const initialState: MpvState = {
   unpacking: false,
   imageList: [],
 };
 
 
-export default function reduceMultiPage (state = initialState, { type, payload }) {
-  switch (type) {
+export default function reduceMultiPage (state: MpvState = initialState, action: ActionTypes) {
+  switch (action.type) {
     case MPV_LOAD_TRY: {
       return Object.assign({}, state, {
         unpacking: true,
@@ -22,7 +25,7 @@ export default function reduceMultiPage (state = initialState, { type, payload }
     case MPV_LOAD_SUCCEED: {
       return Object.assign({}, state, {
         unpacking: false,
-        imageList: payload.imageList,
+        imageList: (action as SucceedLoadAction).payload.imageList,
       });
     }
     case MPV_LOAD_FAILED: {

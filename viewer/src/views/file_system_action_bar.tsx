@@ -1,15 +1,23 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 
-import Button from './button';
+import { Button } from './button';
 import { postSync } from '../states/file_system/actions';
+import { IGlobalStateType } from '../states/reducers';
 
 import './file_system_action_bar.scss';
 
 
-class FileSystemActionBar extends React.Component {
+interface IPropsType {
+  updating: boolean;
+  sync: () => void;
+}
 
-  constructor (props) {
+
+class FileSystemActionBar extends React.Component<IPropsType> {
+
+  constructor (props: IPropsType) {
     super(props);
 
     this._sync = this._sync.bind(this);
@@ -34,14 +42,14 @@ class FileSystemActionBar extends React.Component {
 }
 
 
-function mapStateToProps (state) {
+function mapStateToProps (state: IGlobalStateType) {
   return {
     updating: state.fileSystem.updating,
   };
 }
 
 
-function mapDispatchToProps (dispatch) {
+function mapDispatchToProps (dispatch: Dispatch) {
   return {
     sync () {
       dispatch(postSync());
@@ -50,7 +58,8 @@ function mapDispatchToProps (dispatch) {
 }
 
 
-export default connect(
+const ConnectedFileSystemActionBar = connect(
   mapStateToProps,
   mapDispatchToProps,
 )(FileSystemActionBar);
+export { ConnectedFileSystemActionBar as FileSystemActionBar };

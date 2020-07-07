@@ -1,23 +1,51 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 
 import {
   getSearchName,
   compare,
   openStreamUrl,
 } from '../states/search/actions';
-import Input from './input';
-import Button from './button';
-import Selectable from './selectable';
-import FileSystemActionBar from './file_system_action_bar';
-import ContentActionBar from './content_action_bar';
+import { IGlobalStateType } from '../states/reducers';
+import { CompareResult, EntryDict } from '../states/search/types';
+import { Input } from './input';
+import { Button } from './button';
+import {
+  Selectable,
+  SelectableArea,
+  SelectableTrigger,
+  connectSelection,
+  ISelectionStateType,
+} from './selectable';
+import { FileSystemActionBar } from './file_system_action_bar';
+import { ContentActionBar } from './content_action_bar';
 
 import './search_view.scss';
 
 
-class SearchView extends React.PureComponent {
+interface IPropsType {
+  loading: boolean;
+  diff: CompareResult[] | null;
+  history: string[];
+  fsRevision: number;
+  list: string[];
+  dict: EntryDict;
 
-  constructor (props) {
+  searchName: (name: string) => void;
+  openFileUrl: (id: string) => void;
+  compare: (idList: string[]) => void;
+}
+
+
+interface IStateType {
+  revision: number;
+}
+
+
+class SearchView extends React.PureComponent<IPropsType, IStateType> {
+
+  constructor (props: IPropsType) {
     super(props);
 
     this._search = this._search.bind(this);
@@ -34,7 +62,10 @@ class SearchView extends React.PureComponent {
     const { revision } = this.state;
     return (
       <div className="search-list">
-        <Selectable getSourceList={this._getResultList} revision={revision + fsRevision}>
+        <Selectable
+          getSourceList={this._getResultList}
+          revision={revision + fsRevision}
+        >
           <div className="head">
             <div className="input-group">
               <Input
@@ -44,7 +75,7 @@ class SearchView extends React.PureComponent {
                     return;
                   }
                   event.preventDefault();
-                  this._search(event.target.value);
+                  this._search(event.currentTarget.value);
                 }}
               />
             </div>
@@ -93,16 +124,16 @@ class SearchView extends React.PureComponent {
           this._openFile(id);
         }}
       >
-        <Selectable.Area nodeId={id}>
-          <Selectable.Trigger nodeId={id}>
+        <SelectableArea nodeId={id}>
+          <SelectableTrigger nodeId={id}>
             <code>{dict[id].path}</code>
-          </Selectable.Trigger>
-        </Selectable.Area>
+          </SelectableTrigger>
+        </SelectableArea>
       </div>
     ));
   }
 
-  _search (text) {
+  _search (text: string) {
     const { searchName } = this.props;
     this.setState({
       revision: this.state.revision + 1,
@@ -110,17 +141,17 @@ class SearchView extends React.PureComponent {
     searchName(text);
   }
 
-  _openFile (nodeId) {
+  _openFile (nodeId: string) {
     const { openFileUrl } = this.props;
     openFileUrl(nodeId);
   }
 
-  _getResultList (id) {
+  _getResultList (id: string) {
     const { list } = this.props;
     return list;
   }
 
-  _compare (list) {
+  _compare (list: string[]) {
     const { compare } = this.props;
     compare(list);
   }
@@ -128,19 +159,27 @@ class SearchView extends React.PureComponent {
 }
 
 
-function LoadingBlock (props) {
+function LoadingBlock (props: {}) {
   return <div className="loading-block">SEARCHING</div>;
 }
 
 
-function EmptyBlock (props) {
+function EmptyBlock (props: {}) {
   return (
     <div className="empty-block">EMPTY</div>
   );
 }
 
 
-function SearchActionBar (props) {
+interface ISearchActionBarPropsType {
+  compare: (list: string[]) => void;
+}
+interface ISearchActionBarPrivatePropsType {
+  getSelection: () => string[];
+}
+
+
+function SearchActionBar (props: ISearchActionBarPropsType & ISearchActionBarPrivatePropsType) {
   return (
     <>
       <Button
@@ -154,12 +193,15 @@ function SearchActionBar (props) {
     </>
   );
 }
-const ConnectedSearchActionBar = Selectable.connect(value => ({
+const ConnectedSearchActionBar = connectSelection((
+  value: ISelectionStateType,
+  _ownProps: ISearchActionBarPropsType,
+) => ({
   getSelection: value.getList,
 }))(SearchActionBar);
 
 
-function CompareList (props) {
+function CompareList (props: { diff: CompareResult[] | null }) {
   return (
     <div className="compare-list">
       <InnerCompareList diff={props.diff} />
@@ -168,12 +210,12 @@ function CompareList (props) {
 }
 
 
-function InnerCompareList (props) {
+function InnerCompareList (props: { diff: CompareResult[] | null }): JSX.Element {
   if (!props.diff) {
-    return null;
+    return <React.Fragment />;
   }
   if (props.diff.length <= 0) {
-    return 'OK';
+    return <>OK</>;
   }
   return (
     <>
@@ -187,7 +229,13 @@ function InnerCompareList (props) {
 }
 
 
-function HistoryList (props) {
+interface IHistoryListPropsType {
+  history: string[];
+  search: (name: string) => void;
+}
+
+
+function HistoryList (props: IHistoryListPropsType) {
   return (
     <div className="history-list">
       {props.history.map((name, i) => (
@@ -202,7 +250,13 @@ function HistoryList (props) {
 }
 
 
-function HistoryEntry (props) {
+interface IHistoryEntryPropsType {
+  name: string;
+  search: (name: string) => void;
+}
+
+
+function HistoryEntry (props: IHistoryEntryPropsType) {
   return (
     <pre
       className="history-entry"
@@ -216,7 +270,7 @@ function HistoryEntry (props) {
 }
 
 
-function mapStateToProps (state) {
+function mapStateToProps (state: IGlobalStateType) {
   const { fileSystem, search } = state;
   return {
     loading: search.loading,
@@ -229,19 +283,20 @@ function mapStateToProps (state) {
 }
 
 
-function mapDispatchToProps (dispatch) {
+function mapDispatchToProps (dispatch: Dispatch) {
   return {
-    searchName (name) {
+    searchName (name: string) {
       dispatch(getSearchName(name));
     },
-    openFileUrl (id) {
+    openFileUrl (id: string) {
       dispatch(openStreamUrl(id));
     },
-    compare (idList) {
+    compare (idList: string[]) {
       dispatch(compare(idList));
     },
   };
 }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(SearchView);
+const ConnectedSearchView = connect(mapStateToProps, mapDispatchToProps)(SearchView);
+export { ConnectedSearchView as SearchView };

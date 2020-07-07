@@ -1,15 +1,44 @@
 import React from 'react';
-import _ from 'lodash';
 
-import { classNameFromObject, connectConsumer } from '../lib';
-
-
-const Context = React.createContext();
+import { classNameFromObject, connectConsumer, MapFunction } from '../lib';
 
 
-class Selectable extends React.PureComponent {
+type Selection = { [id: string]: boolean };
 
-  constructor (props) {
+
+export interface ISelectionStateType {
+  selected: Selection;
+  toggle: (id: string) => void;
+  selectFromLast: (id: string) => void;
+  getList: () => string[];
+  clear: () => void;
+}
+
+
+const Context = React.createContext<ISelectionStateType>({
+  selected: {},
+  toggle: (id: string) => {},
+  selectFromLast: (id: string) => {},
+  getList: () => ([]),
+  clear: () => {},
+});
+
+
+interface IPropsType {
+  revision: number;
+  getSourceList: (id: string) => string[] | null;
+}
+
+
+interface IStateType {
+  selected: Selection;
+  last: string | null;
+}
+
+
+export class Selectable extends React.PureComponent<IPropsType, IStateType> {
+
+  constructor (props: IPropsType) {
     super(props);
 
     this.state = {
@@ -23,7 +52,7 @@ class Selectable extends React.PureComponent {
     this._clear = this._clear.bind(this);
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate (prevProps: IPropsType) {
     if (this.props.revision !== prevProps.revision) {
       this._clear();
     }
@@ -45,7 +74,7 @@ class Selectable extends React.PureComponent {
     );
   }
 
-  _toggle (id) {
+  _toggle (id: string) {
     const { selected } = this.state;
     let last = null;
     if (selected[id]) {
@@ -60,7 +89,7 @@ class Selectable extends React.PureComponent {
     });
   }
 
-  _selectFromLast (id) {
+  _selectFromLast (id: string) {
     const { getSourceList } = this.props;
     const { selected, last } = this.state;
 
@@ -110,14 +139,20 @@ class Selectable extends React.PureComponent {
 }
 
 
-Selectable.connect = _.partial(connectConsumer, Context.Consumer);
+export function connectSelection<O, N> (mapValueToProps: MapFunction<ISelectionStateType, O, N>) {
+  return connectConsumer(Context.Consumer, mapValueToProps);
+}
 
 
-Selectable.Area = class Area extends React.PureComponent {
+interface IAreaPropsType {
+  nodeId: string;
+}
+interface IAreaPrivatePropsType {
+  selected: boolean;
+}
 
-  constructor (props) {
-    super(props);
-  }
+
+class Area extends React.PureComponent<IAreaPropsType & IAreaPrivatePropsType> {
 
   render () {
     const { children, selected } = this.props;
@@ -131,21 +166,29 @@ Selectable.Area = class Area extends React.PureComponent {
     );
   }
 
-};
-Selectable.Area = Selectable.connect((value, ownProps) => {
+}
+
+
+const ConnectedArea = connectSelection((value: ISelectionStateType, ownProps: IAreaPropsType) => {
   const { selected } = value;
   const { nodeId } = ownProps;
   return {
     selected: !!selected[nodeId],
   };
-})(Selectable.Area);
+})(Area);
+export { ConnectedArea as SelectableArea };
 
 
-Selectable.Trigger = class Trigger extends React.PureComponent {
+interface ITriggerPropsType {
+  nodeId: string;
+}
+interface ITriggerPrivatePropsType {
+  toggle: (id: string) => void;
+  selectFromLast: (id: string) => void;
+}
 
-  constructor (props) {
-    super(props);
-  }
+
+class Trigger extends React.PureComponent<ITriggerPropsType & ITriggerPrivatePropsType> {
 
   render () {
     const { children } = this.props;
@@ -177,13 +220,16 @@ Selectable.Trigger = class Trigger extends React.PureComponent {
   }
 
 };
-Selectable.Trigger = Selectable.connect(value => {
+
+
+const ConnectedTrigger = connectSelection((
+  value: ISelectionStateType,
+  _ownProps: ITriggerPropsType,
+) => {
   const { toggle, selectFromLast } = value;
   return {
     toggle,
     selectFromLast,
   };
-})(Selectable.Trigger);
-
-
-export default Selectable;
+})(Trigger);
+export { ConnectedTrigger as SelectableTrigger };

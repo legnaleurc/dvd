@@ -2,13 +2,23 @@ import React from 'react';
 import _ from 'lodash';
 
 import { getActionList, setActionList } from '../lib';
-import Input from './input';
-import Button from './button';
+import { Input } from './input';
+import { Button } from './button';
 
 
-class SettingsView extends React.PureComponent {
+interface IPropsType {}
 
-  constructor (props) {
+
+interface IStateType {
+  actionList: { [key: string]: string };
+  newCategory: string;
+  newCommand: string;
+}
+
+
+export class SettingsView extends React.PureComponent<IPropsType, IStateType> {
+
+  constructor (props: IPropsType) {
     super(props);
 
     this.state = {
@@ -74,17 +84,17 @@ class SettingsView extends React.PureComponent {
     setActionList(newActionList);
   }
 
-  _removeAction (category) {
+  _removeAction (category: string) {
     const { actionList } = this.state;
     delete actionList[category];
     const newActionList = Object.assign({}, actionList);
     this.setState({
-      actionList, newActionList,
+      actionList: newActionList,
     });
     setActionList(newActionList);
   }
 
-  _updateAction (category, command) {
+  _updateAction (category: string, command: string) {
     const { actionList } = this.state;
     const newActionList = Object.assign({}, actionList, {
       [category]: command,
@@ -98,9 +108,23 @@ class SettingsView extends React.PureComponent {
 }
 
 
-class ActionItem extends React.PureComponent {
+interface IActionItemPropsType {
+  category: string;
+  command: string;
+  onUpdate: (category: string, command: string) => void;
+  onRemove: (category: string) => void;
+}
 
-  constructor (props) {
+
+interface IActionItemStateType {
+  category: string;
+  command: string;
+}
+
+
+class ActionItem extends React.PureComponent<IActionItemPropsType, IActionItemStateType> {
+
+  constructor (props: IActionItemPropsType) {
     super(props);
 
     this.state = {
@@ -109,7 +133,7 @@ class ActionItem extends React.PureComponent {
     };
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate (prevProps: IActionItemPropsType) {
     if (prevProps.command !== this.props.command) {
       this.setState({
         command: this.props.command,
@@ -152,6 +176,3 @@ class ActionItem extends React.PureComponent {
   }
 
 }
-
-
-export default SettingsView;

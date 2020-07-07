@@ -5,9 +5,16 @@ import { classNameFromObject } from '../lib';
 import './dragdrop.scss';
 
 
-class Dragable extends React.Component {
+interface IDragablePropsType {
+  enabled: boolean;
+  onDragStart?: React.DragEventHandler<HTMLDivElement>;
+  onDragEnd?: React.DragEventHandler<HTMLDivElement>;
+}
 
-  constructor (props) {
+
+class Dragable extends React.Component<IDragablePropsType> {
+
+  constructor (props: IDragablePropsType) {
     super(props);
 
     this._onDragStart = this._onDragStart.bind(this);
@@ -31,18 +38,18 @@ class Dragable extends React.Component {
     );
   }
 
-  _onDragStart (event) {
+  _onDragStart (event: React.DragEvent<HTMLDivElement>) {
     event.stopPropagation();
-    event.target.classList.add('dragging');
+    event.currentTarget.classList.add('dragging');
     const { onDragStart } = this.props;
     if (onDragStart) {
       onDragStart(event);
     }
   }
 
-  _onDragEnd (event) {
+  _onDragEnd (event: React.DragEvent<HTMLDivElement>) {
     event.stopPropagation();
-    event.target.classList.remove('dragging');
+    event.currentTarget.classList.remove('dragging');
     const { onDragEnd } = this.props;
     if (onDragEnd) {
       onDragEnd(event);
@@ -52,9 +59,21 @@ class Dragable extends React.Component {
 }
 
 
-class Dropable extends React.Component {
+interface IDropablePropsType {
+  onDrop: React.DragEventHandler<HTMLDivElement>;
+}
 
-  constructor (props) {
+
+interface IDropableStateType {
+  dragOver: boolean;
+}
+
+
+class Dropable extends React.Component<IDropablePropsType, IDropableStateType> {
+
+  private _dragCounter: number;
+
+  constructor (props: IDropablePropsType) {
     super(props);
 
     this.state = {
@@ -88,7 +107,7 @@ class Dropable extends React.Component {
     );
   }
 
-  _onDragEnter (event) {
+  _onDragEnter (event: React.DragEvent<HTMLDivElement>) {
     event.preventDefault();
     event.stopPropagation();
     if (this._dragCounter === 0) {
@@ -99,7 +118,7 @@ class Dropable extends React.Component {
     this._dragCounter += 1;
   }
 
-  _onDragLeave (event) {
+  _onDragLeave (event: React.DragEvent<HTMLDivElement>) {
     event.preventDefault();
     event.stopPropagation();
     this._dragCounter -= 1;
@@ -110,12 +129,12 @@ class Dropable extends React.Component {
     }
   }
 
-  _onDragOver (event) {
+  _onDragOver (event: React.DragEvent<HTMLDivElement>) {
     event.preventDefault();
     event.stopPropagation();
   }
 
-  _onDrop (event) {
+  _onDrop (event: React.DragEvent<HTMLDivElement>) {
     event.preventDefault();
     event.stopPropagation();
     this._dragCounter = 0;

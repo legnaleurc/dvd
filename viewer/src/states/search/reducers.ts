@@ -5,10 +5,18 @@ import {
   SEARCH_COMPARE_TRY,
   SEARCH_COMPARE_SUCCEED,
   SEARCH_COMPARE_FAILED,
-} from './actions';
+  SearchState,
+  ActionTypes,
+  TrySearchNameAction,
+  SucceedSearchNameAction,
+  Entry,
+  EntryDict,
+  FailedSearchCompareAction,
+} from './types';
+import { SearchResponse } from '../../lib';
 
 
-const initialState = {
+const initialState: SearchState = {
   loading: false,
   dict: {},
   list: [],
@@ -17,13 +25,13 @@ const initialState = {
 };
 
 
-export default function reduceSearch (state = initialState, { type, payload }) {
-  switch (type) {
+export default function reduceSearch (state: SearchState = initialState, action: ActionTypes) {
+  switch (action.type) {
     case SEARCH_NAME_TRY: {
       if (state.loading) {
         return state;
       }
-      const { name } = payload;
+      const { name } = (action as TrySearchNameAction).payload;
       const history = state.history.filter(e => e !== name);
       history.unshift(name);
       return Object.assign({}, state, {
@@ -34,9 +42,9 @@ export default function reduceSearch (state = initialState, { type, payload }) {
       });
     }
     case SEARCH_NAME_SUCCEED: {
-      const { pathList } = payload;
-      const dict = {};
-      const list = [];
+      const { pathList } = (action as SucceedSearchNameAction).payload;
+      const dict: EntryDict = {};
+      const list: string[] = [];
       for (const entry of pathList) {
         dict[entry.id] = createEntry(entry);
         list.push(entry.id);
@@ -65,7 +73,7 @@ export default function reduceSearch (state = initialState, { type, payload }) {
       });
     }
     case SEARCH_COMPARE_FAILED: {
-      const { sizeList } = payload;
+      const { sizeList } = (action as FailedSearchCompareAction).payload;
       return Object.assign({}, state, {
         diff: sizeList,
       });
@@ -76,7 +84,7 @@ export default function reduceSearch (state = initialState, { type, payload }) {
 }
 
 
-function createEntry (entry) {
+function createEntry (entry: SearchResponse): Entry {
   return {
     id: entry.id,
     name: entry.name,

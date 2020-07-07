@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 
 import { classNameFromObject } from '../lib';
 import {
@@ -7,15 +8,41 @@ import {
   moveNodes,
   openStreamUrl,
 } from '../states/file_system/actions';
+import { IGlobalStateType } from '../states/reducers';
+import { Node } from '../states/file_system/types';
 import DragDrop from './dragdrop';
-import Selectable from './selectable';
+import {
+  SelectableArea,
+  SelectableTrigger,
+  connectSelection,
+  ISelectionStateType,
+} from './selectable';
 
 import './tree_node.scss';
 
 
-class TreeNode extends React.PureComponent {
+interface IPropsType {
+  nodeId: string;
+}
+interface IPrivatePropsType {
+  node: Node;
+  selected: boolean;
 
-  constructor (props) {
+  getSelectionList: () => string[];
+  getChildren: (id: string) => void;
+  moveNodes: (srcList: string[], dst: string) => void;
+  openFileUrl: (id: string) => void;
+}
+
+
+interface IStateType {
+  expanded: boolean;
+}
+
+
+class TreeNode extends React.PureComponent<IPropsType & IPrivatePropsType, IStateType> {
+
+  constructor (props: IPropsType & IPrivatePropsType) {
     super(props);
 
     this._onDragStart = this._onDragStart.bind(this);
@@ -37,7 +64,7 @@ class TreeNode extends React.PureComponent {
           <DragDrop.Dropable
             onDrop={this._onDrop}
           >
-            <Selectable.Area nodeId={node.id}>
+            <SelectableArea nodeId={node.id}>
               <div className="head">
                 {this._renderIndicator()}
                 <div
@@ -49,12 +76,12 @@ class TreeNode extends React.PureComponent {
                     this._openFile();
                   }}
                 >
-                  <Selectable.Trigger nodeId={node.id}>
+                  <SelectableTrigger nodeId={node.id}>
                     {node.name}
-                  </Selectable.Trigger>
+                  </SelectableTrigger>
                 </div>
               </div>
-            </Selectable.Area>
+            </SelectableArea>
             {this._renderChildren()}
           </DragDrop.Dropable>
         </DragDrop.Dragable>
@@ -72,7 +99,7 @@ class TreeNode extends React.PureComponent {
     return (
       <Indicator
         expanded={expanded}
-        onClick={event => {
+        onClick={(event) => {
           event.preventDefault();
           this._toggle();
         }}
@@ -118,20 +145,23 @@ class TreeNode extends React.PureComponent {
     openFileUrl(node.id);
   }
 
-  _onDragStart (event) {
+  _onDragStart (event: React.DragEvent<HTMLDivElement>) {
     const { getSelectionList } = this.props;
     const list = getSelectionList();
     event.dataTransfer.dropEffect = 'move';
     event.dataTransfer.setData('text/plain', JSON.stringify(list));
   }
 
-  _onDrop (event) {
+  _onDrop (event: React.DragEvent<HTMLDivElement>) {
     const { node, moveNodes } = this.props;
-    let list = event.dataTransfer.getData('text/plain');
-    list = JSON.parse(list);
+    const raw = event.dataTransfer.getData('text/plain');
+    const list: string[] = JSON.parse(raw);
     if (node.children) {
       moveNodes(list, node.id);
     } else {
+      if (!node.parentId) {
+        return;
+      }
       moveNodes(list, node.parentId);
     }
   }
@@ -139,7 +169,13 @@ class TreeNode extends React.PureComponent {
 }
 
 
-function Indicator (props) {
+interface IIndicatorPropsType {
+  expanded: boolean;
+  onClick: React.MouseEventHandler<HTMLDivElement>;
+}
+
+
+function Indicator (props: IIndicatorPropsType) {
   return (
     <div
       className={classNameFromObject({
@@ -152,7 +188,7 @@ function Indicator (props) {
 }
 
 
-function mapStateToProps (state, ownProps) {
+function mapStateToProps (state: IGlobalStateType, ownProps: IPropsType) {
   const { fileSystem } = state;
   const { nodeId } = ownProps;
 
@@ -162,15 +198,15 @@ function mapStateToProps (state, ownProps) {
 }
 
 
-function mapDispatchToProps (dispatch) {
+function mapDispatchToProps (dispatch: Dispatch) {
   return {
-    getChildren (id) {
+    getChildren (id: string) {
       dispatch(getList(id));
     },
-    openFileUrl (id) {
+    openFileUrl (id: string) {
       dispatch(openStreamUrl(id));
     },
-    moveNodes (nodeList, id) {
+    moveNodes (nodeList: string[], id: string) {
       dispatch(moveNodes(nodeList, id));
     },
   };
@@ -178,13 +214,15 @@ function mapDispatchToProps (dispatch) {
 
 
 const ConnectedTreeNode = (Component => {
-  let decorator = connect(mapStateToProps, mapDispatchToProps);
-  Component = decorator(Component);
-  decorator = Selectable.connect((value, ownProps) => ({
+  const globalDecorator = connect(mapStateToProps, mapDispatchToProps);
+  const GlobalComponent = globalDecorator(Component);
+
+  const selectionDecorator = connectSelection((value: ISelectionStateType, ownProps: IPropsType) => ({
     selected: value.selected[ownProps.nodeId],
     getSelectionList: value.getList,
   }));
-  Component = decorator(Component);
-  return Component;
+  const ConnectedComponent = selectionDecorator(GlobalComponent);
+
+  return ConnectedComponent;
 })(TreeNode);
-export default ConnectedTreeNode;
+export { ConnectedTreeNode as TreeNode };

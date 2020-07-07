@@ -5,9 +5,26 @@ import { classNameFromObject } from '../lib/index';
 import './image_view.scss';
 
 
-class ImageView extends React.Component {
+interface IPropsType {
+  rootRef: React.RefObject<HTMLDivElement>;
+  width: number;
+  height: number;
+  url: string;
+}
 
-  constructor (props) {
+
+interface IStateType {
+  url: string;
+  loaded: boolean;
+}
+
+
+export class ImageView extends React.Component<IPropsType, IStateType> {
+
+  private _root: React.RefObject<HTMLDivElement>;
+  private _observer: IntersectionObserver;
+
+  constructor (props: IPropsType) {
     super(props);
 
     this.state = {
@@ -28,6 +45,9 @@ class ImageView extends React.Component {
   }
 
   componentDidMount () {
+    if (!this._root.current) {
+      return;
+    }
     this._observer.observe(this._root.current);
   }
 
@@ -56,14 +76,14 @@ class ImageView extends React.Component {
     );
   }
 
-  _setImageUrl (url) {
+  _setImageUrl (url: string) {
     this.setState({
       url,
       loaded: true,
     });
   }
 
-  _handleIntersect (entries) {
+  _handleIntersect (entries: IntersectionObserverEntry[]) {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         this._setImageUrl(this.props.url);
@@ -74,7 +94,7 @@ class ImageView extends React.Component {
 }
 
 
-function createDummyImage (width, height, color) {
+function createDummyImage (width: number, height: number, color: string) {
   const svg = [
     `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`,
       `<rect width="100%" height="100%" fill="${color}" />`,
@@ -82,5 +102,3 @@ function createDummyImage (width, height, color) {
   ].join('');
   return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
-
-export default ImageView;

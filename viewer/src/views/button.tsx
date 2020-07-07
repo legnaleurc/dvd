@@ -2,7 +2,8 @@ import React from 'react';
 
 import './button.scss';
 
-export default function Button (props) {
+
+export function Button (props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       className="button"

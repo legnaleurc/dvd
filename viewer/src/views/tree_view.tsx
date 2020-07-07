@@ -1,18 +1,29 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import FileExplorer from './file_explorer';
-import FileSystemActionBar from './file_system_action_bar';
-import SortActionBar from './sort_action_bar';
-import Button from './button';
+import { IGlobalStateType } from '../states/reducers';
+import { FileExplorer } from './file_explorer';
+import { FileSystemActionBar } from './file_system_action_bar';
+import { SortActionBar } from './sort_action_bar';
+import { Button } from './button';
 import { classNameFromObject } from '../lib';
 
 import './tree_view.scss';
 
 
-class TreeView extends React.PureComponent {
+interface IPropsType {
+  rootId: string | null;
+}
 
-  constructor (props) {
+
+interface IStateType {
+  two: boolean;
+}
+
+
+class TreeView extends React.PureComponent<IPropsType, IStateType> {
+
+  constructor (props: IPropsType) {
     super(props);
 
     this.state = {
@@ -73,7 +84,13 @@ class TreeView extends React.PureComponent {
 }
 
 
-function TreeViewActionBar (props) {
+interface IActionBarPropsType {
+  two: boolean;
+  toggle: () => void;
+}
+
+
+function TreeViewActionBar (props: IActionBarPropsType) {
   return (
     <div className="trew-view-action-bar">
       <Button
@@ -86,11 +103,12 @@ function TreeViewActionBar (props) {
 }
 
 
-function mapStateToProps (state) {
+function mapStateToProps (state: IGlobalStateType) {
   return {
     rootId: state.fileSystem.rootId,
   };
 }
 
 
-export default connect(mapStateToProps)(TreeView);
+const ConnectedTreeView = connect(mapStateToProps)(TreeView);
+export { ConnectedTreeView as TreeView };

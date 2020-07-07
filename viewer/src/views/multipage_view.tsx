@@ -1,28 +1,43 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import ImageView from './image_view';
+import { ImageView } from './image_view';
+import { ImageData } from '../states/multipage/types';
+import { IGlobalStateType } from '../states/reducers';
 
 import './multipage_view.scss';
 
 
-class MultiPageView extends React.Component {
+interface IPropsType {
+  imageList: ImageData[];
+}
 
-  constructor (props) {
+
+class MultiPageView extends React.Component<IPropsType> {
+
+  private _root: React.RefObject<HTMLDivElement>;
+  private _observer: IntersectionObserver;
+  private _dirty: boolean;
+
+  constructor (props: IPropsType) {
     super(props);
 
     this._handleIntersect = this._handleIntersect.bind(this);
     this._root = React.createRef();
     this._dirty = false;
-  }
 
-  componentDidMount () {
     const options = {
       root: document.body,
       rootMargin: '0px 0px 0px 0px',
       threshold: 0,
     };
     this._observer = new IntersectionObserver(this._handleIntersect, options);
+  }
+
+  componentDidMount () {
+    if (!this._root.current) {
+      return;
+    }
     this._observer.observe(this._root.current);
   }
 
@@ -30,7 +45,7 @@ class MultiPageView extends React.Component {
     this._observer.disconnect();
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate (prevProps: IPropsType) {
     if (this.props.imageList !== prevProps.imageList) {
       this._dirty = true;
     }
@@ -53,10 +68,14 @@ class MultiPageView extends React.Component {
     );
   }
 
-  _handleIntersect (entries) {
+  _handleIntersect (entries: IntersectionObserverEntry[]) {
+    if (!this._root.current) {
+      return;
+    }
+    const root = this._root.current;
     entries.forEach(entry => {
       if (this._dirty && entry.isIntersecting) {
-        this._root.current.scrollTop = 0;
+        root.scrollTop = 0;
         this._dirty = false;
       }
     });
@@ -65,7 +84,7 @@ class MultiPageView extends React.Component {
 }
 
 
-function mapStateToProps (state) {
+function mapStateToProps (state: IGlobalStateType) {
   const { imageList } = state.mpv;
   return {
     imageList,
@@ -73,4 +92,5 @@ function mapStateToProps (state) {
 }
 
 
-export default connect(mapStateToProps)(MultiPageView);
+const ConnectedMultiPageView = connect(mapStateToProps)(MultiPageView);
+export { ConnectedMultiPageView as MultiPageView };

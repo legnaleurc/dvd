@@ -1,5 +1,6 @@
 import { all } from 'redux-saga/effects';
 
+import { FileSystem } from '../lib';
 import {
   sagaGetList,
   sagaGetRoot,
@@ -18,7 +19,8 @@ import {
 import { sagaLoadMultiPageViewer } from './multipage/actions';
 
 
-export default function * ({ fileSystem }) {
+export function * saga (opts: { fileSystem: FileSystem }) {
+  const { fileSystem } = opts;
   yield all([
     sagaGetList(fileSystem),
     sagaGetRoot(fileSystem),

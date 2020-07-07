@@ -5,8 +5,9 @@ import reduceMultiPage from './multipage/reducers';
 import reduceSearch from './search/reducers';
 
 
-export default combineReducers({
+export const reducer = combineReducers({
   fileSystem: reduceFileSystem,
   mpv: reduceMultiPage,
   search: reduceSearch,
 });
+export type IGlobalStateType = ReturnType<typeof reducer>;

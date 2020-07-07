@@ -1,21 +1,37 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 
-import Button from './button';
-import Selectable from './selectable';
+import { Button } from './button';
+import { connectSelection, ISelectionStateType } from './selectable';
 import { loadMultiPageViewer } from '../states/multipage/actions';
 import {
   copyStream,
   downloadStream,
   trashNodes,
 } from '../states/file_system/actions';
+import { IGlobalStateType } from '../states/reducers';
 
 import './content_action_bar.scss';
 
 
-class ContentActionBar extends React.PureComponent {
+interface IPropsType {
+}
+interface IPrivatePropsType {
+  unpacking: boolean;
+  updating: boolean;
+  mpv: (list: string[], done: () => void) => void;
+  copy: (list: string[]) => void;
+  download: (list: string[]) => void;
+  trash: (list: string[]) => void;
+  getSelectionList: () => string[];
+  clearSelection: () => void;
+}
 
-  constructor (props) {
+
+class ContentActionBar extends React.PureComponent<IPropsType & IPrivatePropsType> {
+
+  constructor (props: IPropsType & IPrivatePropsType) {
     super(props);
 
     this._mpv = this._mpv.bind(this);
@@ -71,7 +87,7 @@ class ContentActionBar extends React.PureComponent {
 }
 
 
-function mapStateToProps (state) {
+function mapStateToProps (state: IGlobalStateType) {
   return {
     updating: state.fileSystem.updating,
     unpacking: state.mpv.unpacking,
@@ -79,18 +95,18 @@ function mapStateToProps (state) {
 }
 
 
-function mapDispatchToProps (dispatch) {
+function mapDispatchToProps (dispatch: Dispatch) {
   return {
-    mpv (list, done) {
+    mpv (list: string[], done: () => void) {
       dispatch(loadMultiPageViewer(list, done));
     },
-    copy (list) {
+    copy (list: string[]) {
       dispatch(copyStream(list));
     },
-    download (list) {
+    download (list: string[]) {
       dispatch(downloadStream(list));
     },
-    trash (list) {
+    trash (list: string[]) {
       dispatch(trashNodes(list));
     },
   };
@@ -98,11 +114,11 @@ function mapDispatchToProps (dispatch) {
 
 
 const ConnectedContentActionBar = (Component => {
-  Component = Selectable.connect(value => ({
+  const GlobalComponent = connect(mapStateToProps, mapDispatchToProps)(Component)
+  const SelectionComponent = connectSelection((value: ISelectionStateType, _ownProps: IPropsType) => ({
     getSelectionList: value.getList,
     clearSelection: value.clear,
-  }))(Component);
-  Component = connect(mapStateToProps, mapDispatchToProps)(Component)
-  return Component;
+  }))(GlobalComponent);
+  return SelectionComponent;
 })(ContentActionBar);
-export default ConnectedContentActionBar;
+export { ConnectedContentActionBar as ContentActionBar };
