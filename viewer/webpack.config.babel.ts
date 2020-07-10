@@ -15,7 +15,7 @@ const backendPort = process.env.BACKEND_PORT;
 export default function (env: unknown, argv: webpack.Configuration) {
   const isReleaseMode = argv.mode === 'production';
   const config = {
-    entry: './src/index.jsx',
+    entry: './src/index.tsx',
     output: {
       publicPath: isReleaseMode ? '/static/' : '/',
     },
@@ -28,9 +28,9 @@ export default function (env: unknown, argv: webpack.Configuration) {
     },
     module: {
       rules: [
-        // js, jsx
+        // js, jsx, ts, tsx
         {
-          test: /\.jsx?$/,
+          test: /\.[jt]sx?$/,
           exclude: /node_modules/,
           use: {
             loader: 'babel-loader',
@@ -56,7 +56,7 @@ export default function (env: unknown, argv: webpack.Configuration) {
       ],
     },
     resolve: {
-      extensions: ['.js', '.jsx']
+      extensions: ['.js', '.jsx', '.ts', '.tsx']
     },
     plugins: [
       new HtmlWebpackPlugin({
