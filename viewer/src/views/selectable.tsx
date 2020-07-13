@@ -190,23 +190,31 @@ interface ITriggerPrivatePropsType {
 
 class Trigger extends React.PureComponent<ITriggerPropsType & ITriggerPrivatePropsType> {
 
+  constructor (props: ITriggerPropsType & ITriggerPrivatePropsType) {
+    super(props);
+
+    this._onClick = this._onClick.bind(this);
+  }
+
   render () {
     const { children } = this.props;
     return (
       <div
         className="selectable-trigger"
-        onClick={event => {
-          event.preventDefault();
-          if (event.shiftKey) {
-            this._multiSelect();
-          } else {
-            this._toggle();
-          }
-        }}
+        onClick={this._onClick}
       >
         {children}
       </div>
     );
+  }
+
+  _onClick (event: React.MouseEvent<HTMLDivElement>) {
+    event.preventDefault();
+    if (event.shiftKey) {
+      this._multiSelect();
+    } else {
+      this._toggle();
+    }
   }
 
   _toggle () {
