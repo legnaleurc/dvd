@@ -47,6 +47,8 @@ class TreeNode extends React.PureComponent<IPropsType & IPrivatePropsType, IStat
 
     this._onDragStart = this._onDragStart.bind(this);
     this._onDrop = this._onDrop.bind(this);
+    this._onDoubleClick = this._onDoubleClick.bind(this);
+    this._onClickIndicator = this._onClickIndicator.bind(this);
 
     this.state = {
       expanded: false,
@@ -71,10 +73,7 @@ class TreeNode extends React.PureComponent<IPropsType & IPrivatePropsType, IStat
                   className={classNameFromObject({
                     shift: !node.children,
                   })}
-                  onDoubleClick={event => {
-                    event.preventDefault();
-                    this._openFile();
-                  }}
+                  onDoubleClick={this._onDoubleClick}
                 >
                   <SelectableTrigger nodeId={node.id}>
                     {node.name}
@@ -99,10 +98,7 @@ class TreeNode extends React.PureComponent<IPropsType & IPrivatePropsType, IStat
     return (
       <Indicator
         expanded={expanded}
-        onClick={(event) => {
-          event.preventDefault();
-          this._toggle();
-        }}
+        onClick={this._onClickIndicator}
       />
     );
   }
@@ -164,6 +160,16 @@ class TreeNode extends React.PureComponent<IPropsType & IPrivatePropsType, IStat
       }
       moveNodes(list, node.parentId);
     }
+  }
+
+  _onDoubleClick (event: React.MouseEvent<HTMLDivElement>) {
+    event.preventDefault();
+    this._openFile();
+  }
+
+  _onClickIndicator (event: React.MouseEvent<HTMLDivElement>) {
+    event.preventDefault();
+    this._toggle();
   }
 
 }
