@@ -181,7 +181,7 @@ interface IIndicatorPropsType {
 }
 
 
-function Indicator (props: IIndicatorPropsType) {
+const Indicator = React.memo(function Indicator (props: IIndicatorPropsType) {
   return (
     <div
       className={classNameFromObject({
@@ -191,7 +191,7 @@ function Indicator (props: IIndicatorPropsType) {
       onClick={props.onClick}
     />
   );
-}
+});
 
 
 function mapStateToProps (state: IGlobalStateType, ownProps: IPropsType) {
