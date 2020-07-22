@@ -59,7 +59,7 @@ export class SettingsView extends React.PureComponent<IPropsType, IStateType> {
           />
           <Button onClick={this._addAction}>ADD</Button>
         </div>
-        {Object.entries(actionList).map(([command, category]) => (
+        {Object.entries(actionList).map(([category, command]) => (
           <ActionItem
             key={category}
             category={category}
