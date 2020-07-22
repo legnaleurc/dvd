@@ -190,10 +190,14 @@ interface ITriggerPrivatePropsType {
 
 class Trigger extends React.PureComponent<ITriggerPropsType & ITriggerPrivatePropsType> {
 
+  private _clickTimer: number;
+
   constructor (props: ITriggerPropsType & ITriggerPrivatePropsType) {
     super(props);
 
     this._onClick = this._onClick.bind(this);
+
+    this._clickTimer = 0;
   }
 
   render () {
@@ -210,11 +214,19 @@ class Trigger extends React.PureComponent<ITriggerPropsType & ITriggerPrivatePro
 
   _onClick (event: React.MouseEvent<HTMLDivElement>) {
     event.preventDefault();
-    if (event.shiftKey) {
-      this._multiSelect();
-    } else {
-      this._toggle();
-    }
+    const count = event.detail;
+    const hasShiftKey = event.shiftKey;
+    window.clearTimeout(this._clickTimer);
+    this._clickTimer = window.setTimeout(() => {
+      if (count > 1) {
+        return;
+      }
+      if (hasShiftKey) {
+        this._multiSelect();
+      } else {
+        this._toggle();
+      }
+    }, 200);
   }
 
   _toggle () {
