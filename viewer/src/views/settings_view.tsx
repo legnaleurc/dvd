@@ -1,5 +1,4 @@
 import React from 'react';
-import _ from 'lodash';
 
 import { getActionList, setActionList } from '../lib';
 import { Input } from './input';
