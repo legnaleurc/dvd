@@ -94,7 +94,6 @@ async def run_debug(public_listen, private_listen, stop_event):
         path='./engine',
         stop_event=stop_event,
     )
-    backend = asyncio.create_task(backend)
 
     frontend = run_or_die(
         [
@@ -106,9 +105,14 @@ async def run_debug(public_listen, private_listen, stop_event):
             'BACKEND_PORT': str(private_listen),
         }),
     )
-    frontend = asyncio.create_task(frontend)
+    frontend_task = asyncio.create_task(frontend)
+    fn = functools.partial(stop_backend, stop_event=stop_event)
+    frontend_task.add_done_callback(fn)
 
-    await asyncio.wait([backend, frontend])
+    await asyncio.wait([
+        asyncio.create_task(backend),
+        frontend_task,
+    ])
 
 
 async def run_or_die(cmd, cwd=None, env=None):
@@ -149,6 +153,11 @@ async def kill(process, signal_, verbose):
         await process.wait()
     elif verbose:
         print(f'process already exited with code: {rc}')
+
+
+def stop_backend(frontend_task, *, stop_event):
+    if frontend_task.exception():
+        stop_event.set()
 
 
 def clone_env(override=None):
