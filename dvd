@@ -98,6 +98,7 @@ async def run_debug(public_listen, private_listen, stop_event):
     frontend = run_or_die(
         [
             'yarn', 'start',
+                '--host=0.0.0.0',
                 f'--port={public_listen}',
         ],
         cwd=pathlib.Path('./viewer'),
