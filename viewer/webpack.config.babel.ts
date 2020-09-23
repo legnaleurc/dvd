@@ -17,6 +17,8 @@ export default function (env: unknown, argv: webpack.Configuration) {
   const config = {
     entry: './src/index.tsx',
     output: {
+      filename: isReleaseMode ? '[name].[hash].js' : '[name].js',
+      chunkFilename: isReleaseMode ? '[name].[hash].js' : '[name].js',
       publicPath: isReleaseMode ? '/static/' : '/',
     },
     devServer: {
@@ -67,7 +69,7 @@ export default function (env: unknown, argv: webpack.Configuration) {
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
-        filename: '[name].css',
+        filename: isReleaseMode ? '[name].[hash].css' : '[name].css',
         chunkFilename: isReleaseMode ? '[id].[hash].css' : '[id].css',
       }),
       new CdnWebpackPlugin(),
@@ -84,6 +86,15 @@ export default function (env: unknown, argv: webpack.Configuration) {
         }),
         new OptimizeCSSAssetsPlugin({}),
       ],
+      splitChunks: {
+        cacheGroups: {
+          commons: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
+      },
     },
   };
 
