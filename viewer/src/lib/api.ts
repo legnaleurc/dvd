@@ -1,7 +1,4 @@
-import * as React from 'react';
-
-
-type Dict<T> = { [key: string]: T };
+import { Dict, chunksOf } from './common';
 
 
 const MAX_TASK_COUNT = 6;
@@ -169,53 +166,4 @@ export interface SearchResponse {
 export interface ImageResponse {
   width: number;
   height: number;
-}
-
-
-export function classNameFromObject(o: Dict<boolean>) {
-  const keys = Object.keys(o);
-  const classList = keys.filter(key => o[key]);
-  return classList.join(' ');
-}
-
-
-function * chunksOf<T> (array: T[], size: number) {
-  for (let i = 0; i < array.length; i += size) {
-    yield array.slice(i, i + size);
-  }
-}
-
-
-type Connector<O, N> = (component: React.ComponentType<O & N>) => React.ComponentType<O>;
-export type MapFunction<C, O, N> = (value: C, props: O) => N;
-
-export function connectConsumer<ValueType, OldPropsType, NewPropsType> (
-  Consumer: React.Consumer<ValueType>,
-  mapValueToProps: MapFunction<ValueType, OldPropsType, NewPropsType>,
-): Connector<OldPropsType, NewPropsType> {
-  return Component => (
-    props => (
-      <Consumer>
-        {(value) => {
-          const newProps = mapValueToProps(value, props);
-          return <Component {...props} {...newProps} />;
-        }}
-      </Consumer>
-    )
-  );
-}
-
-
-export function getActionList (): Dict<string> | null {
-  const actionList = localStorage.getItem('actionList');
-  if (!actionList) {
-    return null;
-  }
-  return JSON.parse(actionList);
-}
-
-
-export function setActionList (actionList: Dict<string>) {
-  const rv = JSON.stringify(actionList);
-  localStorage.setItem('actionList', rv);
 }
