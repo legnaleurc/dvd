@@ -17,8 +17,7 @@ const factory: webpack.ConfigurationFactory = (env, argv) => {
   return {
     entry: './src/index.tsx',
     output: {
-      filename: isReleaseMode ? '[name].[hash].js' : '[name].js',
-      chunkFilename: isReleaseMode ? '[name].[hash].js' : '[name].js',
+      filename: isReleaseMode ? '[name].[contenthash].js' : '[name].js',
       publicPath: isReleaseMode ? '/static/' : '/',
     },
     devServer: {
@@ -72,8 +71,7 @@ const factory: webpack.ConfigurationFactory = (env, argv) => {
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
-        filename: isReleaseMode ? '[name].[hash].css' : '[name].css',
-        chunkFilename: isReleaseMode ? '[id].[hash].css' : '[id].css',
+        filename: isReleaseMode ? '[name].[contenthash].css' : '[name].css',
       }),
       new CdnWebpackPlugin(),
     ],
