@@ -12,9 +12,9 @@ import CdnWebpackPlugin from './tools/cdn_webpack_plugin';
 const backendPort = process.env.BACKEND_PORT;
 
 
-export default function (env: unknown, argv: webpack.Configuration) {
+const factory: webpack.ConfigurationFactory = (env, argv) => {
   const isReleaseMode = argv.mode === 'production';
-  const config = {
+  return {
     entry: './src/index.tsx',
     output: {
       filename: isReleaseMode ? '[name].[hash].js' : '[name].js',
@@ -97,6 +97,7 @@ export default function (env: unknown, argv: webpack.Configuration) {
       },
     },
   };
-
-  return config;
 }
+
+
+export default factory;
