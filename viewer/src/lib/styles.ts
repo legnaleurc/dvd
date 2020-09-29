@@ -1,8 +1,6 @@
 import { CSSProperties } from '@material-ui/core/styles/withStyles';
 
 
-export const BACKGROUND_COLOR = 'hsl(0, 0%, 15%)';
-export const TEXT_COLOR = 'hsl(0, 0%, 85%)';
 export const SELECTION_COLOR = 'hsl(210, 100%, 25%)';
 export const MAIN_MENU_WIDTH = 240;
 

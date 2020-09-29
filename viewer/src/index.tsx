@@ -5,13 +5,13 @@ import { Provider } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 
-import { Application } from './views/application';
-import { FileSystem } from './lib';
-import { reducer } from './states/reducers';
-import { saga } from './states/actions';
-import { getRoot } from './states/file_system/actions';
+import { Application } from '@/views/application';
+import { FileSystem } from '@/lib';
+import { reducer } from '@/states/reducers';
+import { saga } from '@/states/actions';
+import { getRoot } from '@/states/file_system/actions';
 
-import './index.scss';
+import './index.css';
 
 
 const fileSystem = new FileSystem();

@@ -1,13 +1,17 @@
 import React from 'react';
+import clsx from 'clsx';
 
-import { classNameFromObject, connectConsumer, MapFunction } from '../lib';
+import { connectConsumer, MapFunction } from '@/lib';
 
 
-type Selection = { [id: string]: boolean };
+type Selection = Record<string, boolean>;
+type ISelectionClasses = Record<'selected', string>;
 
 
 export interface ISelectionStateType {
   selected: Selection;
+  count: number;
+  classes: ISelectionClasses;
   toggle: (id: string) => void;
   selectFromLast: (id: string) => void;
   getList: () => string[];
@@ -17,6 +21,8 @@ export interface ISelectionStateType {
 
 const Context = React.createContext<ISelectionStateType>({
   selected: {},
+  count: 0,
+  classes: { selected: '' },
   toggle: (id: string) => {},
   selectFromLast: (id: string) => {},
   getList: () => ([]),
@@ -27,11 +33,13 @@ const Context = React.createContext<ISelectionStateType>({
 interface IPropsType {
   revision: number;
   getSourceList: (id: string) => string[] | null;
+  classes: ISelectionClasses;
 }
 
 
 interface IStateType {
   selected: Selection;
+  count: number;
   last: string | null;
 }
 
@@ -43,6 +51,7 @@ export class Selectable extends React.PureComponent<IPropsType, IStateType> {
 
     this.state = {
       selected: {},
+      count: 0,
       last: null,
     };
 
@@ -62,7 +71,9 @@ export class Selectable extends React.PureComponent<IPropsType, IStateType> {
     return (
       <Context.Provider
         value={{
+          classes: this.props.classes,
           selected: this.state.selected,
+          count: this.state.count,
           toggle: this._toggle,
           selectFromLast: this._selectFromLast,
           getList: this._getList,
@@ -77,14 +88,18 @@ export class Selectable extends React.PureComponent<IPropsType, IStateType> {
   _toggle (id: string) {
     const { selected } = this.state;
     let last = null;
+    let count = this.state.count;
     if (selected[id]) {
       delete selected[id];
+      --count;
     } else {
       selected[id] = true;
       last = id;
+      ++count;
     }
     this.setState({
-      selected: Object.assign({}, selected),
+      selected: { ...selected },
+      count,
       last,
     });
   }
@@ -113,13 +128,18 @@ export class Selectable extends React.PureComponent<IPropsType, IStateType> {
       [fromIndex, toIndex] = [toIndex, fromIndex];
     }
 
+    let count = this.state.count;
     list = list.slice(fromIndex, toIndex + 1);
     for (const id of list) {
+      if (!selected[id]) {
+        ++count;
+      }
       selected[id] = true;
     }
 
     this.setState({
-      selected: Object.assign({}, selected),
+      selected: { ...selected },
+      count,
       last: id,
     });
   }
@@ -132,6 +152,7 @@ export class Selectable extends React.PureComponent<IPropsType, IStateType> {
   _clear () {
     this.setState({
       selected: {},
+      count: 0,
       last: null,
     });
   }
@@ -149,17 +170,17 @@ interface IAreaPropsType {
 }
 interface IAreaPrivatePropsType {
   selected: boolean;
+  classes: ISelectionClasses;
 }
 
 
 class Area extends React.PureComponent<IAreaPropsType & IAreaPrivatePropsType> {
 
   render () {
-    const { children, selected } = this.props;
+    const { children, selected, classes } = this.props;
     return (
-      <div className={classNameFromObject({
-        'selectable-area': true,
-        selected,
+      <div className={clsx('selectable-area', {
+        [classes.selected]: selected,
       })}>
         {children}
       </div>
@@ -170,10 +191,11 @@ class Area extends React.PureComponent<IAreaPropsType & IAreaPrivatePropsType> {
 
 
 const ConnectedArea = connectSelection((value: ISelectionStateType, ownProps: IAreaPropsType) => {
-  const { selected } = value;
+  const { selected, classes } = value;
   const { nodeId } = ownProps;
   return {
     selected: !!selected[nodeId],
+    classes,
   };
 })(Area);
 export { ConnectedArea as SelectableArea };
