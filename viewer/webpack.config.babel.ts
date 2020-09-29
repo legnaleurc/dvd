@@ -9,11 +9,10 @@ import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
 import CdnWebpackPlugin from './tools/cdn_webpack_plugin';
 
 
-const backendPort = process.env.BACKEND_PORT;
-
-
 const factory: webpack.ConfigurationFactory = (env, argv) => {
+  const backendPort = process.env.BACKEND_PORT;
   const isReleaseMode = argv.mode === 'production';
+
   return {
     entry: './src/index.tsx',
     output: {
