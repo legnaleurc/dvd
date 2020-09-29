@@ -148,6 +148,14 @@ async function getCDNFromModule (moduleName, version, options) {
       version,
     };
   }
+  if (moduleName === 'react-virtualized') {
+    return {
+      name: moduleName,
+      var: 'ReactVirtualized',
+      url: `https://unpkg.com/react-virtualized@${version}/dist/umd/react-virtualized.js`,
+      version,
+    };
+  }
   const cdnConfig = await cdnFromModule(moduleName, version, options);
   if (!cdnConfig) {
     return null;
