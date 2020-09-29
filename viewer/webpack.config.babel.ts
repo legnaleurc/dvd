@@ -96,6 +96,9 @@ const factory: webpack.ConfigurationFactory = (env, argv) => {
           },
         },
       },
+      runtimeChunk: {
+        name: 'manifest',
+      },
     },
   };
 }
