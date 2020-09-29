@@ -1,3 +1,4 @@
+import path from 'path';
 import process from 'process';
 
 import webpack from 'webpack';
@@ -57,7 +58,10 @@ const factory: webpack.ConfigurationFactory = (env, argv) => {
       ],
     },
     resolve: {
-      extensions: ['.js', '.jsx', '.ts', '.tsx']
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+      },
+      extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
     plugins: [
       new HtmlWebpackPlugin({
