@@ -278,7 +278,7 @@ function RoutedApplication (props: {}) {
   return (
     <BrowserRouter>
       <Switch>
-        <Redirect exact from="/" to="/tree" />
+        <Redirect exact from="/" to="/files" />
         <Route
           path="/:tabId"
           component={Application}

@@ -40,7 +40,7 @@ export interface ISiteChunk {
 export function useSiteMap (): ISiteChunk[] {
   const siteMap = React.useRef([
     {
-      id: 'tree',
+      id: 'files',
       name: 'File Explorer',
       icon: FileExplorerIcon,
       context: FileExplorerContextProvider,
