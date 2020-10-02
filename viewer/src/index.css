@@ -5,6 +5,7 @@ html, body, body > .body {
   height: 100vh;
 
   font-size: 16px;
+  background-color: black;
 
   overflow: hidden;
 }
