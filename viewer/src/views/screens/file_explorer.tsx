@@ -293,7 +293,7 @@ function ToolBar (props: IToolBar) {
             ref={menuButtonRef}
             className={classes.icon}
             onClick={openMenu}
-            aria-controls="simple-menu"
+            aria-controls="file-menu"
             aria-haspopup="true"
           >
             <MoreVertIcon />
@@ -308,7 +308,7 @@ function ToolBar (props: IToolBar) {
         </div>
 
         <Menu
-          id="simple-menu"
+          id="file-menu"
           open={menuOpen}
           keepMounted={true}
           anchorEl={menuButtonRef.current}
