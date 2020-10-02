@@ -117,42 +117,30 @@ function Application (props: IApplicationProps) {
   }, [toolBarRef.current]);
 
   return (
-    <FullScreenProvider>
-      <div className={classes.application}>
-        <Header
-          classes={classes}
-          toggleMobileDrawer={toggleMobileDrawer}
-          toggleDesktopDrawer={toggleDesktopDrawer}
-          toolBarRef={toolBarRef}
-        />
-        <nav className={classes.drawer}>
-          <Hidden smUp={true} implementation="css">
-            <MobileDrawerMenu
-              open={mobileOpen}
-              closeMenu={toggleMobileDrawer}
-              siteMap={siteMap}
-              tabIndex={tabIndex}
-              changeTab={changeTab}
-            />
-          </Hidden>
-          <Hidden xsDown={true} implementation="css">
-            <DesktopDrawerMenu
-              open={desktopOpen}
-              closeMenu={closeDesktopDrawer}
-              siteMap={siteMap}
-              tabIndex={tabIndex}
-              changeTab={changeTab}
-            />
-          </Hidden>
-        </nav>
-        <Content
-          classes={classes}
-          siteMap={siteMap}
-          tabIndex={tabIndex}
-          toolBarEl={toolBarEl}
-        />
-      </div>
-    </FullScreenProvider>
+    <div className={classes.application}>
+      <Header
+        classes={classes}
+        toggleMobileDrawer={toggleMobileDrawer}
+        toggleDesktopDrawer={toggleDesktopDrawer}
+        toolBarRef={toolBarRef}
+      />
+      <SideBar
+        classes={classes}
+        siteMap={siteMap}
+        tabIndex={tabIndex}
+        changeTab={changeTab}
+        mobileOpen={mobileOpen}
+        toggleMobileDrawer={toggleMobileDrawer}
+        desktopOpen={desktopOpen}
+        closeDesktopDrawer={closeDesktopDrawer}
+      />
+      <Content
+        classes={classes}
+        siteMap={siteMap}
+        tabIndex={tabIndex}
+        toolBarEl={toolBarEl}
+      />
+    </div>
   );
 }
 
@@ -200,6 +188,55 @@ function Header (props: IHeaderProps) {
         <div className={classes.screenToolBar} ref={toolBarRef} />
       </Toolbar>
     </AppBar>
+  );
+}
+
+
+interface ISideBarProps {
+  classes: Classes;
+  siteMap: ISiteChunk[];
+  tabIndex: number;
+  changeTab: (index: number) => void;
+  mobileOpen: boolean;
+  toggleMobileDrawer: () => void;
+  desktopOpen: boolean;
+  closeDesktopDrawer: () => void;
+}
+function SideBar (props: ISideBarProps) {
+  const {
+    classes,
+    siteMap,
+    tabIndex,
+    changeTab,
+    mobileOpen,
+    toggleMobileDrawer,
+    desktopOpen,
+    closeDesktopDrawer,
+  } = props;
+  const { fullScreen } = useFullScreen();
+  return (
+    <nav className={clsx(classes.drawer, {
+      [classes.hidden]: fullScreen,
+    })}>
+      <Hidden smUp={true} implementation="css">
+        <MobileDrawerMenu
+          open={mobileOpen}
+          closeMenu={toggleMobileDrawer}
+          siteMap={siteMap}
+          tabIndex={tabIndex}
+          changeTab={changeTab}
+        />
+      </Hidden>
+      <Hidden xsDown={true} implementation="css">
+        <DesktopDrawerMenu
+          open={desktopOpen}
+          closeMenu={closeDesktopDrawer}
+          siteMap={siteMap}
+          tabIndex={tabIndex}
+          changeTab={changeTab}
+        />
+      </Hidden>
+    </nav>
   );
 }
 
@@ -267,6 +304,14 @@ function useTabState (props: IApplicationProps, siteMap: ISiteChunk[]) {
     history.push(`/${tabList[newValue]}`);
   }, [history, siteMap]);
 
+  const { leaveFullScreen } = useFullScreen();
+
+  React.useEffect(() => {
+    return history.listen(() => {
+      leaveFullScreen();
+    });
+  }, [history, leaveFullScreen]);
+
   return {
     tabIndex,
     changeTab,
@@ -289,6 +334,15 @@ function RoutedApplication (props: {}) {
 }
 
 
+function FullscreenApplication (props: {}) {
+  return (
+    <FullScreenProvider>
+      <RoutedApplication />
+    </FullScreenProvider>
+  );
+}
+
+
 const gTheme = createMuiTheme({
   palette: {
     type: 'dark',
@@ -302,7 +356,7 @@ const gTheme = createMuiTheme({
 function ThemedApplication (props: {}) {
   return (
     <ThemeProvider theme={gTheme}>
-      <RoutedApplication />
+      <FullscreenApplication />
     </ThemeProvider>
   );
 }
