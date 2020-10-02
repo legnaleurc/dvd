@@ -347,9 +347,6 @@ const gTheme = createMuiTheme({
   palette: {
     type: 'dark',
   },
-  typography: {
-    fontSize: 16,
-  },
 });
 
 
