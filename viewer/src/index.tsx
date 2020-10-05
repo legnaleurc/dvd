@@ -6,6 +6,7 @@ import createSagaMiddleware from 'redux-saga';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 
 import { Application } from '@/views/application';
+import { GlobalProvider } from '@/views/hooks/global';
 import { FileSystem } from '@/lib';
 import { reducer } from '@/states/reducers';
 import { saga } from '@/states/actions';
@@ -25,7 +26,9 @@ sagaMiddleware.run(saga, {
 
 ReactDOM.render(
   <Provider store={store}>
-    <Application />
+    <GlobalProvider fileSystem={fileSystem}>
+      <Application />
+    </GlobalProvider>
   </Provider>,
   document.querySelector('body > .body'));
 
