@@ -5,12 +5,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Search as SearchIcon } from '@material-ui/icons';
 
 import { getMixins } from '@/lib';
-import { openStreamUrl } from '@/states/search/actions';
 import { IGlobalStateType } from '@/states/reducers';
-import { CompareResult, EntryDict } from '@/states/search/types';
 import { SelectableArea, SelectableTrigger } from '@/views/hooks/selectable';
 import { ContentActionBar } from '@/views/widgets/content_action_bar';
 import { useContext } from './hooks';
+import { CompareResult, EntryDict } from './types';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -64,21 +63,17 @@ const useStyles = makeStyles((theme) => ({
 type Classes = ReturnType<typeof useStyles>;
 
 
-interface IPropsType {
-  loading: boolean;
-  diff: CompareResult[] | null;
-  history: string[];
-  list: string[];
-  dict: EntryDict;
-
-  openFileUrl: (id: string) => void;
-}
-
-
-function SearchView (props: IPropsType) {
-  const { diff, history } = props;
+export function SearchView (props: {}) {
   const classes = useStyles();
-  const { search } = useContext();
+  const {
+    loading,
+    list,
+    dict,
+    openStreamUrl,
+    diff,
+    history,
+    search,
+  } = useContext();
   return (
     <div className={classes.searchView}>
       <div className={classes.head}>
@@ -88,10 +83,10 @@ function SearchView (props: IPropsType) {
         </div>
         <div className={classes.searchResult}>
           <ResultList
-            loading={props.loading}
-            list={props.list}
-            dict={props.dict}
-            openFileUrl={props.openFileUrl}
+            loading={loading}
+            list={list}
+            dict={dict}
+            openFileUrl={openStreamUrl}
           />
         </div>
       </div>
@@ -101,29 +96,6 @@ function SearchView (props: IPropsType) {
     </div>
   );
 }
-const ConnectedSearchView = (() => {
-  function mapStateToProps (state: IGlobalStateType) {
-    const { search } = state;
-    return {
-      loading: search.loading,
-      dict: search.dict,
-      list: search.list,
-      history: search.history,
-      diff: search.diff,
-    };
-  }
-
-  function mapDispatchToProps (dispatch: Dispatch) {
-    return {
-      openFileUrl (id: string) {
-        dispatch(openStreamUrl(id));
-      },
-    };
-  }
-
-  return connect(mapStateToProps, mapDispatchToProps)(SearchView);
-})();
-export { ConnectedSearchView as SearchView };
 
 
 interface IResultListProps {

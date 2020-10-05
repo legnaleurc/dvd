@@ -11,10 +11,6 @@ import {
 
 import { useInstance, getMixins } from '@/lib';
 import { IGlobalStateType } from '@/states/reducers';
-import {
-  getSearchName,
-  compare,
-} from '@/states/search/actions';
 import { postSync } from '@/states/file_system/actions';
 import {
   connectSelection,
@@ -86,14 +82,15 @@ const useStyles = makeStyles((theme) => ({
 function useActions (
   props: IToolBarProps & IToolBarPrivateProps,
   searchName: (name: string) => void,
+  compare: (idList: string[]) => void,
 ) {
   const self = useInstance(() => ({
     compare () {
-      const { compare, getSelection } = props;
+      const { getSelection } = props;
       compare(getSelection());
     },
   }), [
-    props.compare,
+    compare,
   ]);
   const inputRef = React.useRef<HTMLInputElement>();
 
@@ -102,18 +99,17 @@ function useActions (
       return;
     }
     event.preventDefault();
-    console.info(inputRef.current, inputRef.current.value);
     searchName(inputRef.current.value);
   }, [self, inputRef, searchName]);
 
-  const compare = React.useCallback(() => {
+  const compareSelected = React.useCallback(() => {
     self.current.compare();
   }, [self]);
 
   return {
     inputRef,
     onInputReturn,
-    compare,
+    compareSelected,
   };
 }
 
@@ -122,7 +118,6 @@ interface IToolBarProps {
   anchorEl?: HTMLDivElement;
   updating: boolean;
   sync: () => void;
-  compare: (idList: string[]) => void;
 }
 interface IToolBarPrivateProps {
   getSelection: () => string[];
@@ -130,12 +125,12 @@ interface IToolBarPrivateProps {
 function ToolBar (props: IToolBarProps & IToolBarPrivateProps) {
   const { updating } = props;
   const classes = useStyles();
-  const { search } = useContext();
+  const { search, compare } = useContext();
   const {
     inputRef,
     onInputReturn,
-    compare,
-  } = useActions(props, search);
+    compareSelected,
+  } = useActions(props, search, compare);
 
   if (!props.anchorEl) {
     return null;
@@ -170,7 +165,7 @@ function ToolBar (props: IToolBarProps & IToolBarPrivateProps) {
         <div className={classes.group}>
           <IconButton
             className={classes.icon}
-            onClick={compare}
+            onClick={compareSelected}
           >
             <CompareIcon />
           </IconButton>
@@ -195,12 +190,6 @@ const ConnectedToolBar = (() => {
 
   function mapDispatchToProps (dispatch: Dispatch) {
     return {
-      searchName (name: string) {
-        dispatch(getSearchName(name));
-      },
-      compare (idList: string[]) {
-        dispatch(compare(idList));
-      },
       sync () {
         dispatch(postSync());
       },
