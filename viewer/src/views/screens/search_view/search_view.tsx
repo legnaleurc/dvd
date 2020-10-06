@@ -1,11 +1,8 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Search as SearchIcon } from '@material-ui/icons';
 
 import { getMixins } from '@/lib';
-import { IGlobalStateType } from '@/states/reducers';
 import { SelectableArea, SelectableTrigger } from '@/views/hooks/selectable';
 import { ContentActionBar } from '@/views/widgets/content_action_bar';
 import { useContext } from './hooks';

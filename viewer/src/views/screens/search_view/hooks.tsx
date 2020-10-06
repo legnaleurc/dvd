@@ -11,7 +11,13 @@ import {
 import { IGlobalStateType } from '@/states/reducers';
 import { Selectable } from '@/views/hooks/selectable';
 import { useGlobal } from '@/views/hooks/global';
-import { SearchState, ActionType, EntryDict, Entry, CompareResult } from './types';
+import {
+  SearchState,
+  ActionType,
+  EntryDict,
+  Entry,
+  CompareResult,
+} from './types';
 
 
 function reduce (state: SearchState, action: ActionType) {
