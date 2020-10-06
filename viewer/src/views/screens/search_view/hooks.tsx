@@ -36,6 +36,7 @@ function reduce (state: SearchState, action: ActionType) {
         dict: {},
         list: [],
         history,
+        revision: state.revision + 1,
       };
     }
     case 'SEARCH_END': {
@@ -51,6 +52,7 @@ function reduce (state: SearchState, action: ActionType) {
         loading: false,
         dict,
         list,
+        revision: state.revision + 1,
       };
     }
     case 'COMPARE': {
