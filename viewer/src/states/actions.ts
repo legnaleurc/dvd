@@ -11,11 +11,6 @@ import {
   sagaDownloadStream,
   sagaTrashNodes,
 } from './file_system/actions';
-import {
-  sagaGetSearchName,
-  sagaCompare,
-  sagaOpenStreamUrlFromSearch,
-} from './search/actions';
 import { sagaLoadMultiPageViewer } from './multipage/actions';
 
 
@@ -30,9 +25,6 @@ export function * saga (opts: { fileSystem: FileSystem }) {
     sagaCopyStream(fileSystem),
     sagaDownloadStream(fileSystem),
     sagaTrashNodes(fileSystem),
-    sagaGetSearchName(fileSystem),
-    sagaOpenStreamUrlFromSearch(fileSystem),
-    sagaCompare(),
     sagaLoadMultiPageViewer(fileSystem),
   ]);
 }
