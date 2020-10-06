@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Typography, Portal } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { ImportContacts as ImportContactsIcon } from '@material-ui/icons';
 
@@ -25,8 +24,6 @@ const useStyles = makeStyles((theme) => ({
 interface IPropsType {
   imageList: ImageData[];
 }
-
-
 function MultiPageView (props: IPropsType) {
   const root = React.useRef<HTMLDivElement>(null);
   const classes = useStyles();
@@ -53,6 +50,14 @@ function MultiPageView (props: IPropsType) {
     </div>
   );
 }
+function mapStateToProps (state: IGlobalStateType) {
+  const { imageList } = state.mpv;
+  return {
+    imageList,
+  };
+}
+const ConnectedMultiPageView = connect(mapStateToProps)(MultiPageView);
+export { ConnectedMultiPageView as MultiPageView };
 
 
 function useActions (props: IPropsType, rootRef: React.RefObject<HTMLDivElement>) {
@@ -110,54 +115,4 @@ function useObserver (
 }
 
 
-const useToolBarStyles = makeStyles((theme) => ({
-  multiPageViewToolBar: {
-    ...getMixins([
-      'size-grow',
-      'hbox',
-    ]),
-  },
-  group: {
-    ...getMixins([
-      'size-shrink',
-      'hbox',
-    ]),
-    alignItems: 'center',
-  },
-}));
-interface IToolBar {
-  anchorEl?: HTMLDivElement;
-}
-function ToolBar (props: IToolBar) {
-  const classes = useToolBarStyles();
-  if (!props.anchorEl) {
-    return null;
-  }
-  return (
-    <Portal container={props.anchorEl}>
-      <div className={classes.multiPageViewToolBar}>
-        <div className={classes.group}>
-          <Typography variant="h6" noWrap>
-            Multi-page Viewer
-          </Typography>
-        </div>
-      </div>
-    </Portal>
-  );
-}
-export { ToolBar as MultiPageViewToolBar };
-
-
 export { ImportContactsIcon as MultiPageViewIcon };
-
-
-function mapStateToProps (state: IGlobalStateType) {
-  const { imageList } = state.mpv;
-  return {
-    imageList,
-  };
-}
-
-
-const ConnectedMultiPageView = connect(mapStateToProps)(MultiPageView);
-export { ConnectedMultiPageView as MultiPageView };
