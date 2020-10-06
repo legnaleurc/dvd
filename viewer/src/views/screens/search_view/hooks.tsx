@@ -142,6 +142,9 @@ function useActions () {
   });
 
   const self = useInstance(() => ({
+    get loading () {
+      return state.loading;
+    },
     get list () {
       return state.list;
     },
@@ -149,6 +152,7 @@ function useActions () {
       return state.dict;
     },
   }), [
+    state.loading,
     state.list,
     state.dict,
   ]);
@@ -158,6 +162,9 @@ function useActions () {
   }, [self]);
 
   const search = React.useCallback(async (text: string) => {
+    if (self.current.loading) {
+      return;
+    }
     dispatch({
       type: 'SEARCH_BEGIN',
       value: text,
@@ -174,7 +181,7 @@ function useActions () {
         value: e,
       })
     }
-  }, [dispatch, fileSystem]);
+  }, [self, dispatch, fileSystem]);
 
   const compare = React.useCallback((idList: string[]) => {
     dispatch({
