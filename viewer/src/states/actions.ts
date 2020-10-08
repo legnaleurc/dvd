@@ -11,7 +11,6 @@ import {
   sagaDownloadStream,
   sagaTrashNodes,
 } from './file_system/actions';
-import { sagaLoadMultiPageViewer } from './multipage/actions';
 
 
 export function * saga (opts: { fileSystem: FileSystem }) {
@@ -25,6 +24,5 @@ export function * saga (opts: { fileSystem: FileSystem }) {
     sagaCopyStream(fileSystem),
     sagaDownloadStream(fileSystem),
     sagaTrashNodes(fileSystem),
-    sagaLoadMultiPageViewer(fileSystem),
   ]);
 }

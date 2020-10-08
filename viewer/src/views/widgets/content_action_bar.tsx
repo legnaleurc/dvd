@@ -15,7 +15,6 @@ import {
   connectSelection,
   ISelectionStateType,
 } from '@/views/hooks/selectable';
-import { loadMultiPageViewer } from '@/states/multipage/actions';
 import {
   copyStream,
   downloadStream,
@@ -23,6 +22,7 @@ import {
 } from '@/states/file_system/actions';
 import { IGlobalStateType } from '@/states/reducers';
 import { getMixins, useInstance } from '@/lib';
+import { useComic } from '../hooks/comic';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -52,10 +52,8 @@ const useStyles = makeStyles((theme) => ({
 interface IPropsType {
 }
 interface IPrivatePropsType {
-  unpacking: boolean;
   updating: boolean;
   count: number;
-  mpv: (list: string[], done: () => void) => void;
   copy: (list: string[]) => void;
   download: (list: string[]) => void;
   trash: (list: string[]) => void;
@@ -65,11 +63,19 @@ interface IPrivatePropsType {
 
 
 function useActions (props: IPropsType & IPrivatePropsType) {
+  const { unpacking, loadComic } = useComic();
   const self = useInstance(() => ({
-    mpv () {
-      const { getSelectionList, clearSelection, mpv } = props;
+    async loadComic () {
+      if (unpacking) {
+        return;
+      }
+      const { getSelectionList, clearSelection } = props;
       const list = getSelectionList();
-      mpv(list, clearSelection);
+      if (list.length !== 1) {
+        return;
+      }
+      await loadComic(list[0], '');
+      clearSelection();
     },
     copy () {
       const { getSelectionList, copy } = props;
@@ -87,16 +93,17 @@ function useActions (props: IPropsType & IPrivatePropsType) {
       trash(list);
     },
   }), [
+    unpacking,
     props.getSelectionList,
     props.clearSelection,
-    props.mpv,
+    loadComic,
     props.copy,
     props.download,
     props.trash,
   ]);
 
-  const mpv = React.useCallback(() => {
-    self.current.mpv();
+  const loadComic_ = React.useCallback(async () => {
+    await self.current.loadComic();
   }, [self]);
   const copy = React.useCallback(() => {
     self.current.copy();
@@ -109,7 +116,8 @@ function useActions (props: IPropsType & IPrivatePropsType) {
   }, [self]);
 
   return {
-    mpv,
+    unpacking,
+    loadComic: loadComic_,
     copy,
     download,
     trash,
@@ -118,11 +126,12 @@ function useActions (props: IPropsType & IPrivatePropsType) {
 
 
 function ContentActionBar(props: IPropsType & IPrivatePropsType) {
-  const { unpacking, updating, count, clearSelection } = props;
+  const { updating, count, clearSelection } = props;
 
   const classes = useStyles();
   const {
-    mpv,
+    unpacking,
+    loadComic,
     copy,
     download,
     trash,
@@ -133,7 +142,7 @@ function ContentActionBar(props: IPropsType & IPrivatePropsType) {
       <div className={classes.group}>
         <IconButton
           disabled={unpacking || count !== 1}
-          onClick={mpv}
+          onClick={loadComic}
         >
           <ImportContactsIcon />
         </IconButton>
@@ -179,15 +188,11 @@ const ConnectedContentActionBar = (Component => {
   function mapStateToProps (state: IGlobalStateType) {
     return {
       updating: state.fileSystem.updating,
-      unpacking: state.mpv.unpacking,
     };
   }
 
   function mapDispatchToProps (dispatch: Dispatch) {
     return {
-      mpv (list: string[], done: () => void) {
-        dispatch(loadMultiPageViewer(list, done));
-      },
       copy (list: string[]) {
         dispatch(copyStream(list));
       },

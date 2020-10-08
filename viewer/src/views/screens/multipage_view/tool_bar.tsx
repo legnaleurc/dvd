@@ -3,6 +3,7 @@ import { Typography, Portal } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
+import { useComic } from '@/views/hooks/comic';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -27,6 +28,7 @@ interface IToolBar {
 }
 function ToolBar (props: IToolBar) {
   const classes = useStyles();
+  const { name } = useComic();
   if (!props.anchorEl) {
     return null;
   }
@@ -35,7 +37,7 @@ function ToolBar (props: IToolBar) {
       <div className={classes.multiPageViewToolBar}>
         <div className={classes.group}>
           <Typography variant="h6" noWrap>
-            Multi-page Viewer
+            {name}
           </Typography>
         </div>
       </div>

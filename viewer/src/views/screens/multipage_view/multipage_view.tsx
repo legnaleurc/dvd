@@ -1,13 +1,11 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { ImportContacts as ImportContactsIcon } from '@material-ui/icons';
 
 import { ImageView } from '@/views/widgets/image_view';
-import { ImageData } from '@/states/multipage/types';
-import { IGlobalStateType } from '@/states/reducers';
 import { useInstance, getMixins } from '@/lib';
 import { useFullScreen } from '@/views/hooks/fullscreen';
+import { useComic } from '@/views/hooks/comic';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -21,14 +19,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-interface IPropsType {
-  imageList: ImageData[];
-}
-function MultiPageView (props: IPropsType) {
+export function MultiPageView (props: {}) {
   const root = React.useRef<HTMLDivElement>(null);
   const classes = useStyles();
   const { toggleFullScreen } = useFullScreen();
-  const { onIntersect } = useActions(props, root);
+  const { imageList, onIntersect } = useActions(root);
   useObserver(root, onIntersect);
 
   return (
@@ -37,7 +32,7 @@ function MultiPageView (props: IPropsType) {
       ref={root}
       onClick={toggleFullScreen}
     >
-      {props.imageList.map((d, index) => (
+      {imageList.map((d, index) => (
         <React.Fragment key={index}>
           <ImageView
             rootRef={root}
@@ -50,17 +45,10 @@ function MultiPageView (props: IPropsType) {
     </div>
   );
 }
-function mapStateToProps (state: IGlobalStateType) {
-  const { imageList } = state.mpv;
-  return {
-    imageList,
-  };
-}
-const ConnectedMultiPageView = connect(mapStateToProps)(MultiPageView);
-export { ConnectedMultiPageView as MultiPageView };
 
 
-function useActions (props: IPropsType, rootRef: React.RefObject<HTMLDivElement>) {
+function useActions (rootRef: React.RefObject<HTMLDivElement>) {
+  const { imageList } = useComic();
   const [dirty, setDirty] = React.useState(false);
 
   const self = useInstance(() => ({
@@ -80,14 +68,14 @@ function useActions (props: IPropsType, rootRef: React.RefObject<HTMLDivElement>
 
   React.useEffect(() => {
     setDirty(true);
-  }, [props.imageList, setDirty]);
+  }, [imageList, setDirty]);
 
   const onIntersect = React.useCallback((entries: IntersectionObserverEntry[]) => {
     self.current.onIntersect(entries);
   }, [self]);
 
   return {
-    dirty,
+    imageList,
     onIntersect,
   };
 }

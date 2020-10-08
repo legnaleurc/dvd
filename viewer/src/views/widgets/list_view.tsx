@@ -22,7 +22,6 @@ import { SELECTION_COLOR, getMixins } from '@/lib';
 import { Node } from '@/states/file_system/types';
 import { IGlobalStateType } from '@/states/reducers';
 import { getList } from '@/states/file_system/actions';
-import { loadMultiPageViewer } from '@/states/multipage/actions';
 import {
   SimpleSelectable,
   useSimpleSelectable,
@@ -32,6 +31,7 @@ import {
   LayoutCacheProvider,
   useLayoutCache,
 } from './virtual_list';
+import { useComic } from '../hooks/comic';
 
 
 const TOOLBAR_HEIGHT = 56;
@@ -183,18 +183,15 @@ interface IToolBarProps {
 interface IGlobalToolBarProps {
   node: Node | null;
   fileLoading: boolean;
-  fileUnpacking: boolean;
-  mpv: (list: string[], done: () => void) => void;
 }
 function ToolBar (props: IToolBarProps & IGlobalToolBarProps) {
   const {
     fileLoading,
-    fileUnpacking,
-    mpv,
     node,
     setNodeId,
   } = props;
 
+  const { unpacking: fileUnpacking, loadComic } = useComic();
   const { dict, count, clear } = useSimpleSelectable();
   const { cache } = useLayoutCache();
 
@@ -204,16 +201,18 @@ function ToolBar (props: IToolBarProps & IGlobalToolBarProps) {
       setNodeId(node.parentId);
     }
   }, [node, setNodeId, cache]);
-  const onMPV = React.useCallback(() => {
+  const onComic = React.useCallback(async () => {
     const list = (
       Object.entries(dict)
       .filter(([id, value]) => value)
       .map(([id, value]) => id)
     );
-    mpv(list, () => {
-      clear();
-    });
-  }, [clear, dict]);
+    if (list.length !== 1) {
+      return;
+    }
+    await loadComic(list[0], '');
+    clear();
+  }, [clear, dict, loadComic]);
 
   return (
     <>
@@ -236,7 +235,7 @@ function ToolBar (props: IToolBarProps & IGlobalToolBarProps) {
       </IconButton>
       <IconButton
         disabled={fileLoading || fileUnpacking || count !== 1}
-        onClick={onMPV}
+        onClick={onComic}
       >
         <ImportContactsIcon />
       </IconButton>
@@ -246,25 +245,14 @@ function ToolBar (props: IToolBarProps & IGlobalToolBarProps) {
 const ConnectedToolBar = (() => {
   function mapStateToProps (state: IGlobalStateType, ownProps: IToolBarProps) {
     const { nodes, updating } = state.fileSystem;
-    const { unpacking } = state.mpv;
     const { nodeId } = ownProps;
     return {
       node: nodeId ? nodes[nodeId] : null,
       fileLoading: updating,
-      fileUnpacking: unpacking,
     };
   }
 
-
-  function mapDispatchToProps (dispatch: Dispatch) {
-    return {
-      mpv (list: string[], done: () => void) {
-        dispatch(loadMultiPageViewer(list, done));
-      },
-    };
-  }
-
-  return connect(mapStateToProps, mapDispatchToProps)(ToolBar);
+  return connect(mapStateToProps)(ToolBar);
 })();
 
 
