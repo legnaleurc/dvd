@@ -22,6 +22,7 @@ import { SELECTION_COLOR, getMixins } from '@/lib';
 import { Node } from '@/states/file_system/types';
 import { IGlobalStateType } from '@/states/reducers';
 import { getList } from '@/states/file_system/actions';
+import { useComicState, useComicAction } from '@/views/hooks/comic';
 import {
   SimpleSelectable,
   useSimpleSelectable,
@@ -31,7 +32,6 @@ import {
   LayoutCacheProvider,
   useLayoutCache,
 } from './virtual_list';
-import { useComic } from '../hooks/comic';
 
 
 const TOOLBAR_HEIGHT = 56;
@@ -191,7 +191,8 @@ function ToolBar (props: IToolBarProps & IGlobalToolBarProps) {
     setNodeId,
   } = props;
 
-  const { unpacking: fileUnpacking, loadComic } = useComic();
+  const { unpacking: fileUnpacking } = useComicState();
+  const { loadComic } = useComicAction();
   const { dict, count, clear } = useSimpleSelectable();
   const { cache } = useLayoutCache();
 

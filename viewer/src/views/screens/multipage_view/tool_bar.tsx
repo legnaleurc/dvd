@@ -3,7 +3,7 @@ import { Typography, Portal } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
-import { useComic } from '@/views/hooks/comic';
+import { useComicState } from '@/views/hooks/comic';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -28,7 +28,7 @@ interface IToolBar {
 }
 function ToolBar (props: IToolBar) {
   const classes = useStyles();
-  const { name } = useComic();
+  const { name } = useComicState();
   if (!props.anchorEl) {
     return null;
   }

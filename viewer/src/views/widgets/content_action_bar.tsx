@@ -22,7 +22,7 @@ import {
 } from '@/states/file_system/actions';
 import { IGlobalStateType } from '@/states/reducers';
 import { getMixins, useInstance } from '@/lib';
-import { useComic } from '../hooks/comic';
+import { useComicState, useComicAction } from '@/views/hooks/comic';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -63,7 +63,8 @@ interface IPrivatePropsType {
 
 
 function useActions (props: IPropsType & IPrivatePropsType) {
-  const { unpacking, loadComic } = useComic();
+  const { unpacking } = useComicState();
+  const { loadComic } = useComicAction();
   const self = useInstance(() => ({
     async loadComic () {
       if (unpacking) {

@@ -5,7 +5,7 @@ import { ImportContacts as ImportContactsIcon } from '@material-ui/icons';
 import { ImageView } from '@/views/widgets/image_view';
 import { useInstance, getMixins } from '@/lib';
 import { useFullScreen } from '@/views/hooks/fullscreen';
-import { useComic } from '@/views/hooks/comic';
+import { useComicState } from '@/views/hooks/comic';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -48,7 +48,7 @@ export function MultiPageView (props: {}) {
 
 
 function useActions (rootRef: React.RefObject<HTMLDivElement>) {
-  const { imageList } = useComic();
+  const { imageList } = useComicState();
   const [dirty, setDirty] = React.useState(false);
 
   const self = useInstance(() => ({

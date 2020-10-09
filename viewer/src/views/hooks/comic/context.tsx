@@ -5,34 +5,51 @@ import { useGlobal } from '@/views/hooks/global';
 import { ImageData, ActionType } from './types';
 
 
-interface IContext {
-  loadComic: (id: string, name: string) => Promise<void>;
+interface IStateContext {
   name: string;
   imageList: ImageData[];
   unpacking: boolean;
 }
-const Context = React.createContext<IContext | null>(null);
+const StateContext = React.createContext<IStateContext | null>(null);
+interface IActionContext {
+  loadComic: (id: string, name: string) => Promise<void>;
+}
+const ActionContext = React.createContext<IActionContext | null>(null);
 
 
 export function ComicProvider (props: React.PropsWithChildren<{}>) {
   const { state, loadComic } = useActions();
+  const dispatchValue = React.useMemo(() => ({
+    loadComic,
+  }), [loadComic]);
+  const stateValue = React.useMemo(() => ({
+    name: state.name,
+    imageList: state.imageList,
+    unpacking: state.unpacking,
+  }), [state]);
   return (
-    <Context.Provider value={{
-      name: state.name,
-      imageList: state.imageList,
-      unpacking: state.unpacking,
-      loadComic,
-    }}>
-      {props.children}
-    </Context.Provider>
+    <ActionContext.Provider value={dispatchValue}>
+      <StateContext.Provider value={stateValue}>
+        {props.children}
+      </StateContext.Provider>
+    </ActionContext.Provider>
   );
 }
 
 
-export function useComic () {
-  const context = React.useContext(Context);
+export function useComicState () {
+  const context = React.useContext(StateContext);
   if (!context) {
-    throw new Error('viewer context is not ready');
+    throw new Error('comic context is not ready');
+  }
+  return context;
+}
+
+
+export function useComicAction () {
+  const context = React.useContext(ActionContext);
+  if (!context) {
+    throw new Error('comic context is not ready');
   }
   return context;
 }

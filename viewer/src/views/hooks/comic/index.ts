@@ -1,1 +1,1 @@
-export { ComicProvider, useComic } from './context';
+export { ComicProvider, useComicState, useComicAction } from './context';
