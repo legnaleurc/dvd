@@ -140,11 +140,6 @@ function ToolBar (props: IToolBarProps & IToolBarPrivateProps) {
     <Portal container={props.anchorEl}>
       <div className={classes.searchToolBar}>
         <div className={classes.group}>
-          <Typography variant="h6" noWrap>
-            Search
-          </Typography>
-        </div>
-        <div className={classes.group}>
           <div className={classes.search}>
             <div className={classes.searchIcon}>
               <SearchIcon />
