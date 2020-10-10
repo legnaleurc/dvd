@@ -99,7 +99,6 @@ class CdnWebpackPlugin {
       const hwpHooks = HtmlWebpackPlugin.getHooks(compilation);
       hwpHooks.beforeAssetTagGeneration.tapAsync(PLUGIN_NAME, (data, cb) => {
         let assets = this._modulesFromCdn.values();
-        hackOrder(assets);
         assets = assets.map(_ => _.url);
         data.assets.js = assets.concat(data.assets.js);
         cb(null, data);
@@ -139,15 +138,6 @@ class OrderedMap {
 
 
 async function getCDNFromModule (moduleName, version, options) {
-  if (moduleName === 'redux-saga/effects') {
-    const postfix = options.env === 'production' ? '.min' : '';
-    return {
-      name: moduleName,
-      var: 'ReduxSagaEffects',
-      url: `https://unpkg.com/redux-saga@${version}/dist/redux-saga-effects.umd${postfix}.js`,
-      version,
-    };
-  }
   if (moduleName === 'react-virtualized') {
     return {
       name: moduleName,
@@ -161,19 +151,6 @@ async function getCDNFromModule (moduleName, version, options) {
     return null;
   }
   return cdnConfig;
-}
-
-
-// see reduxjs/react-redux#1366
-function hackOrder (assets) {
-  const reactDom = assets.findIndex(_ => _.name === 'react-dom');
-  const reactRedux = assets.findIndex(_ => _.name === 'react-redux');
-  if (reactDom < 0 || reactRedux < 0 ) {
-    return;
-  }
-  if (reactDom > reactRedux) {
-    [assets[reactDom], assets[reactRedux]] = [assets[reactRedux], assets[reactDom]];
-  }
 }
 
 
