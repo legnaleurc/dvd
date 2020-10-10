@@ -1,9 +1,4 @@
-import { Node } from './types';
-
-
-export const SORT_BY_NAME_ASC = 'SORT_BY_NAME_ASC';
-export const SORT_BY_MTIME_ASC = 'SORT_BY_MTIME_ASC';
-export const SORT_BY_MTIME_DES = 'SORT_BY_MTIME_DES';
+import { Node, SortKey } from './types';
 
 
 function sortByName (a: Node, b: Node) {
@@ -28,14 +23,14 @@ function sortByDate (a: Node, b: Node) {
 }
 
 
-const TABLE: { [key: string]: (a: Node, b: Node) => number } = {
+const TABLE: Record<SortKey, (a: Node, b: Node) => number> = {
   SORT_BY_NAME_ASC: sortByName,
   SORT_BY_MTIME_ASC: sortByDate,
   SORT_BY_MTIME_DES: (a: Node, b: Node) => (-1 * sortByDate(a, b)),
 };
 
 
-export function getCompareFunction (key: string) {
+export function getCompareFunction (key: SortKey) {
   const fn = TABLE[key];
   if (!fn) {
     return sortByName;
