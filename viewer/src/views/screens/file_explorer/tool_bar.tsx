@@ -1,6 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
 import {
   FormControlLabel,
   FormGroup,
@@ -19,8 +17,10 @@ import {
 } from '@material-ui/icons';
 
 import { getMixins } from '@/lib';
-import { IGlobalStateType } from '@/states/reducers';
-import { postSync, setSortFunction } from '@/states/file_system/actions';
+import {
+  useFileSystemAction,
+  useFileSystemState,
+} from '@/views/hooks/file_system';
 import { useContext } from './hooks';
 import { SORT_MENU_LIST } from './types';
 
@@ -50,14 +50,10 @@ const useStyles = makeStyles((theme) => ({
 
 interface IToolBar {
   anchorEl?: HTMLDivElement;
-  updating: boolean;
-  currentKey: string;
-  sync: () => void;
-  setSortFunction: (key: string) => void;
 }
-function ToolBar (props: IToolBar) {
-  const { updating, setSortFunction, currentKey } = props;
-
+export function ToolBar (props: IToolBar) {
+  const { updating, sortKey } = useFileSystemState();
+  const { sync, setSortKey } = useFileSystemAction();
   const classes = useStyles();
   const { two, toggle } = useContext();
   const menuButtonRef = React.useRef<HTMLButtonElement>(null);
@@ -111,7 +107,7 @@ function ToolBar (props: IToolBar) {
           <IconButton
             className={classes.icon}
             disabled={updating}
-            onClick={props.sync}
+            onClick={sync}
           >
             <RefreshIcon />
           </IconButton>
@@ -128,9 +124,9 @@ function ToolBar (props: IToolBar) {
             <MenuItem
               key={menu.value}
               value={menu.value}
-              selected={menu.value === currentKey}
+              selected={menu.value === sortKey}
               onClick={() => {
-                setSortFunction(menu.value);
+                setSortKey(menu.value);
               }}
             >
               {menu.name}
@@ -141,25 +137,3 @@ function ToolBar (props: IToolBar) {
     </Portal>
   );
 }
-const ConnectedToolBar = (() => {
-  function mapStateToProps (state: IGlobalStateType) {
-    return {
-      updating: state.fileSystem.updating,
-      currentKey: state.fileSystem.sortKey,
-    };
-  }
-
-  function mapDispatchToProps (dispatch: Dispatch) {
-    return {
-      sync () {
-        dispatch(postSync());
-      },
-      setSortFunction (key: string) {
-        dispatch(setSortFunction(key));
-      },
-    };
-  }
-
-  return connect(mapStateToProps, mapDispatchToProps)(ToolBar);
-})();
-export { ConnectedToolBar as FileExplorerToolBar };

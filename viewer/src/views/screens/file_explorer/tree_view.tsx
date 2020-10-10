@@ -1,13 +1,11 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { getMixins, SELECTION_COLOR } from '@/lib';
-import { Node } from '@/states/file_system/types';
-import { IGlobalStateType } from '@/states/reducers';
-import { Selectable } from '@/views/hooks/selectable';
+import { getMixins, SELECTION_COLOR, useInstance } from '@/lib';
+import { useFileSystemState } from '@/views/hooks/file_system';
+import { RichSelectableProvider } from '@/views/hooks/rich_selectable';
+import { ContentActionBar } from '@/views/widgets/content_action_bar';
 import { TreeNode } from './tree_node';
-import { ContentActionBar } from './content_action_bar';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -45,15 +43,9 @@ const useStyles = makeStyles((theme) => ({
 interface IPropsType {
   rootId: string | null;
 }
-interface IPrivatePropsType {
-  root: Node | null;
-  revision: number;
-
-  getSiblingList: (id: string) => string[] | null;
-}
-function TreeView (props: IPropsType & IPrivatePropsType) {
+export function TreeView (props: IPropsType) {
   const classes = useStyles();
-  const { getSiblingList, root, revision } = props;
+  const { getSiblingList, root, revision } = useActions(props);
   if (!root) {
     return null;
   }
@@ -62,7 +54,7 @@ function TreeView (props: IPropsType & IPrivatePropsType) {
   }
   return (
     <div className={classes.treeView}>
-      <Selectable
+      <RichSelectableProvider
         getSourceList={getSiblingList}
         revision={revision}
         classes={classes}
@@ -75,18 +67,18 @@ function TreeView (props: IPropsType & IPrivatePropsType) {
         <div className={classes.tail}>
           <ContentActionBar />
         </div>
-      </Selectable>
+      </RichSelectableProvider>
     </div>
   );
 }
 
 
-function mapStateToProps (state: IGlobalStateType, ownProps: IPropsType) {
-  const { nodes, revision } = state.fileSystem;
-  const { rootId } = ownProps;
-  return {
-    root: rootId ? nodes[rootId] : null,
-    revision,
+function useActions (props: IPropsType) {
+  const { rootId } = props;
+  const { nodes, revision } = useFileSystemState();
+  const root = rootId ? nodes[rootId] : null;
+
+  const self = useInstance(() => ({
     getSiblingList (id: string) {
       const node = nodes[id];
       if (!node) {
@@ -101,9 +93,15 @@ function mapStateToProps (state: IGlobalStateType, ownProps: IPropsType) {
       }
       return parent.children;
     },
+  }), [nodes]);
+
+  const getSiblingList = React.useCallback((id: string) => {
+    return self.current.getSiblingList(id);
+  }, [self]);
+
+  return {
+    root,
+    revision,
+    getSiblingList,
   };
 }
-
-
-const ConnectedTreeView = connect(mapStateToProps)(TreeView);
-export { ConnectedTreeView as TreeView };

@@ -2,10 +2,11 @@ import {
   SORT_BY_NAME_ASC,
   SORT_BY_MTIME_ASC,
   SORT_BY_MTIME_DES,
-} from '@/states/file_system/sort';
+  SortKey,
+} from '@/views/hooks/file_system';
 
 
-export const SORT_MENU_LIST = [
+export const SORT_MENU_LIST: { name: string, value: SortKey }[] = [
   {
     name: 'Sort By Name Asc',
     value: SORT_BY_NAME_ASC,

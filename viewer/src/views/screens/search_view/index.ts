@@ -1,3 +1,3 @@
 export { SearchView, SearchViewIcon } from './search_view';
-export { SearchViewToolBar } from './tool_bar';
-export { SearchViewContextProvider } from './hooks';
+export { ToolBar as SearchViewToolBar } from './tool_bar';
+export { ContextProvider as SearchViewProvider } from './hooks';

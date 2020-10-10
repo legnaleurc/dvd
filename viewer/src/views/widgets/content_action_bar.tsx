@@ -1,6 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
 import { Badge, Divider, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -11,18 +9,17 @@ import {
   RemoveShoppingCart as RemoveShoppingCartIcon,
 } from '@material-ui/icons';
 
-import {
-  connectSelection,
-  ISelectionStateType,
-} from '@/views/hooks/selectable';
-import {
-  copyStream,
-  downloadStream,
-  trashNodes,
-} from '@/states/file_system/actions';
-import { IGlobalStateType } from '@/states/reducers';
 import { getMixins, useInstance } from '@/lib';
+import {
+  useFileSystemAction,
+  useFileSystemState,
+  Node,
+} from '@/views/hooks/file_system';
 import { useComicState, useComicAction } from '@/views/hooks/comic';
+import {
+  useRichSelectableAction,
+  useRichSelectableState,
+} from '@/views/hooks/rich_selectable';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -49,58 +46,65 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-interface IPropsType {
-}
-interface IPrivatePropsType {
+interface IPureProps {
   updating: boolean;
+  copyUrl: (idList: string[]) => Promise<void>;
+  download: (idList: string[]) => void;
+  trashNodes: (idList: string[]) => Promise<void>;
+  getNode: (id: string) => Node;
+  unpacking: boolean;
+  loadComic: (id: string, name: string) => Promise<void>;
   count: number;
-  copy: (list: string[]) => void;
-  download: (list: string[]) => void;
-  trash: (list: string[]) => void;
   getSelectionList: () => string[];
   clearSelection: () => void;
 }
 
 
-function useActions (props: IPropsType & IPrivatePropsType) {
-  const { unpacking } = useComicState();
-  const { loadComic } = useComicAction();
+function useActions (props: IPureProps) {
+  const {
+    updating,
+    copyUrl,
+    download,
+    trashNodes,
+    getNode,
+    unpacking,
+    loadComic,
+    getSelectionList,
+    clearSelection,
+  } = props;
   const self = useInstance(() => ({
     async loadComic () {
       if (unpacking) {
         return;
       }
-      const { getSelectionList, clearSelection } = props;
       const list = getSelectionList();
       if (list.length !== 1) {
         return;
       }
-      await loadComic(list[0], '');
+      const node = getNode(list[0]);
+      await loadComic(node.id, node.name);
       clearSelection();
     },
     copy () {
-      const { getSelectionList, copy } = props;
       const list = getSelectionList();
-      copy(list);
+      copyUrl(list);
     },
     download () {
-      const { getSelectionList, download } = props;
       const list = getSelectionList();
       download(list);
     },
     trash () {
-      const { getSelectionList, trash } = props;
       const list = getSelectionList();
-      trash(list);
+      trashNodes(list);
     },
   }), [
     unpacking,
-    props.getSelectionList,
-    props.clearSelection,
+    getSelectionList,
+    clearSelection,
     loadComic,
-    props.copy,
-    props.download,
-    props.trash,
+    copyUrl,
+    download,
+    trashNodes,
   ]);
 
   const loadComic_ = React.useCallback(async () => {
@@ -109,7 +113,7 @@ function useActions (props: IPropsType & IPrivatePropsType) {
   const copy = React.useCallback(() => {
     self.current.copy();
   }, [self]);
-  const download = React.useCallback(() => {
+  const download_ = React.useCallback(() => {
     self.current.download();
   }, [self]);
   const trash = React.useCallback(() => {
@@ -117,20 +121,22 @@ function useActions (props: IPropsType & IPrivatePropsType) {
   }, [self]);
 
   return {
+    updating,
     unpacking,
     loadComic: loadComic_,
     copy,
-    download,
+    download: download_,
     trash,
   };
 }
 
 
-function ContentActionBar(props: IPropsType & IPrivatePropsType) {
-  const { updating, count, clearSelection } = props;
+function PureContentActionBar(props: IPureProps) {
+  const { count, clearSelection } = props;
 
   const classes = useStyles();
   const {
+    updating,
     unpacking,
     loadComic,
     copy,
@@ -183,36 +189,28 @@ function ContentActionBar(props: IPropsType & IPrivatePropsType) {
     </div>
   );
 }
+const MemorizedPureContentActionBar = React.memo(PureContentActionBar);
 
 
-const ConnectedContentActionBar = (Component => {
-  function mapStateToProps (state: IGlobalStateType) {
-    return {
-      updating: state.fileSystem.updating,
-    };
-  }
-
-  function mapDispatchToProps (dispatch: Dispatch) {
-    return {
-      copy (list: string[]) {
-        dispatch(copyStream(list));
-      },
-      download (list: string[]) {
-        dispatch(downloadStream(list));
-      },
-      trash (list: string[]) {
-        dispatch(trashNodes(list));
-      },
-    };
-  }
-
-  const GlobalComponent = connect(mapStateToProps, mapDispatchToProps)(Component)
-  const SelectionComponent = connectSelection((value: ISelectionStateType, _ownProps: IPropsType) => ({
-    count: value.count,
-    getSelectionList: value.getList,
-    clearSelection: value.clear,
-  }))(GlobalComponent);
-
-  return SelectionComponent;
-})(ContentActionBar);
-export { ConnectedContentActionBar as ContentActionBar };
+export function ContentActionBar (props: {}) {
+  const { updating } = useFileSystemState();
+  const { copyUrl, download, trashNodes, getNode } = useFileSystemAction();
+  const { unpacking } = useComicState();
+  const { loadComic } = useComicAction();
+  const { count } = useRichSelectableState();
+  const { getList, clear } = useRichSelectableAction();
+  return (
+    <MemorizedPureContentActionBar
+      updating={updating}
+      copyUrl={copyUrl}
+      download={download}
+      trashNodes={trashNodes}
+      getNode={getNode}
+      unpacking={unpacking}
+      loadComic={loadComic}
+      count={count}
+      getSelectionList={getList}
+      clearSelection={clear}
+    />
+  );
+}

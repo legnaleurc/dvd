@@ -3,7 +3,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Search as SearchIcon } from '@material-ui/icons';
 
 import { getMixins } from '@/lib';
-import { SelectableArea, SelectableTrigger } from '@/views/hooks/selectable';
+import {
+  RichSelectableArea,
+  RichSelectableTrigger,
+} from '@/views/hooks/rich_selectable';
 import { ContentActionBar } from '@/views/widgets/content_action_bar';
 import { useContext } from './hooks';
 import { CompareResult, EntryDict } from './types';
@@ -127,11 +130,11 @@ function ResultList (props: IResultListProps) {
             openFile(id);
           }}
         >
-          <SelectableArea nodeId={id}>
-            <SelectableTrigger nodeId={id}>
+          <RichSelectableArea nodeId={id}>
+            <RichSelectableTrigger nodeId={id}>
               <code>{dict[id].path}</code>
-            </SelectableTrigger>
-          </SelectableArea>
+            </RichSelectableTrigger>
+          </RichSelectableArea>
         </div>
       ))}
     </>

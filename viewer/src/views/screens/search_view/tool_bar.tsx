@@ -1,7 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
-import { Typography, IconButton, InputBase, Portal } from '@material-ui/core';
+import { IconButton, InputBase, Portal } from '@material-ui/core';
 import { makeStyles, fade } from '@material-ui/core/styles';
 import {
   Refresh as RefreshIcon,
@@ -10,12 +8,11 @@ import {
 } from '@material-ui/icons';
 
 import { useInstance, getMixins } from '@/lib';
-import { IGlobalStateType } from '@/states/reducers';
-import { postSync } from '@/states/file_system/actions';
 import {
-  connectSelection,
-  ISelectionStateType,
-} from '@/views/hooks/selectable';
+  useFileSystemAction,
+  useFileSystemState,
+} from '@/views/hooks/file_system';
+import { useRichSelectableAction } from '@/views/hooks/rich_selectable';
 import { useContext } from './hooks';
 
 
@@ -80,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function useActions (
-  props: IToolBarProps & IToolBarPrivateProps,
+  props: IPureProps,
   searchName: (name: string) => void,
   compare: (idList: string[]) => void,
 ) {
@@ -114,16 +111,14 @@ function useActions (
 }
 
 
-interface IToolBarProps {
+interface IPureProps {
   anchorEl?: HTMLDivElement;
   updating: boolean;
-  sync: () => void;
-}
-interface IToolBarPrivateProps {
+  sync: () => Promise<void>;
   getSelection: () => string[];
 }
-function ToolBar (props: IToolBarProps & IToolBarPrivateProps) {
-  const { updating } = props;
+function PureToolBar (props: IPureProps) {
+  const { anchorEl, updating, sync } = props;
   const classes = useStyles();
   const { search, compare } = useContext();
   const {
@@ -132,12 +127,12 @@ function ToolBar (props: IToolBarProps & IToolBarPrivateProps) {
     compareSelected,
   } = useActions(props, search, compare);
 
-  if (!props.anchorEl) {
+  if (!anchorEl) {
     return null;
   }
 
   return (
-    <Portal container={props.anchorEl}>
+    <Portal container={anchorEl}>
       <div className={classes.searchToolBar}>
         <div className={classes.group}>
           <div className={classes.search}>
@@ -167,7 +162,7 @@ function ToolBar (props: IToolBarProps & IToolBarPrivateProps) {
           <IconButton
             className={classes.icon}
             disabled={updating}
-            onClick={props.sync}
+            onClick={sync}
           >
             <RefreshIcon />
           </IconButton>
@@ -176,28 +171,22 @@ function ToolBar (props: IToolBarProps & IToolBarPrivateProps) {
     </Portal>
   );
 }
-const ConnectedToolBar = (() => {
-  function mapStateToProps (state: IGlobalStateType) {
-    return {
-      updating: state.fileSystem.updating,
-    };
-  }
+const MemorizedPureToolBar = React.memo(PureToolBar);
 
-  function mapDispatchToProps (dispatch: Dispatch) {
-    return {
-      sync () {
-        dispatch(postSync());
-      },
-    };
-  }
 
-  const SelectableToolBar = connectSelection((
-    value: ISelectionStateType,
-    _ownProps: IToolBarProps,
-  ) => ({
-    getSelection: value.getList,
-  }))(ToolBar);
-
-  return connect(mapStateToProps, mapDispatchToProps)(SelectableToolBar);
-})();
-export { ConnectedToolBar as SearchViewToolBar };
+interface IProps {
+  anchorEl?: HTMLDivElement;
+}
+export function ToolBar (props: IProps) {
+  const { updating } = useFileSystemState();
+  const { sync } = useFileSystemAction();
+  const { getList } = useRichSelectableAction();
+  return (
+    <MemorizedPureToolBar
+      anchorEl={props.anchorEl}
+      updating={updating}
+      sync={sync}
+      getSelection={getList}
+    />
+  );
+}

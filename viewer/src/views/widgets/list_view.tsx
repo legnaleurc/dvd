@@ -1,6 +1,4 @@
 import React from 'react';
-import { Dispatch } from 'redux';
-import { connect } from 'react-redux';
 import {
   Badge,
   IconButton,
@@ -19,9 +17,11 @@ import {
 } from '@material-ui/icons';
 
 import { SELECTION_COLOR, getMixins } from '@/lib';
-import { Node } from '@/states/file_system/types';
-import { IGlobalStateType } from '@/states/reducers';
-import { getList } from '@/states/file_system/actions';
+import {
+  useFileSystemAction,
+  useFileSystemState,
+  Node,
+} from '@/views/hooks/file_system';
 import { useComicState, useComicAction } from '@/views/hooks/comic';
 import {
   SimpleSelectable,
@@ -110,7 +110,7 @@ export function ListView (props: IProps) {
         <div className={classes.listView}>
           <div className={classes.head}>
             <div className={classes.virtualList}>
-              <ConnectedDynamicListView
+              <DynamicListView
                 rootId={nodeId}
                 setRootId={setNodeId}
               />
@@ -118,7 +118,7 @@ export function ListView (props: IProps) {
             <div className={classes.fakeToolBar} />
           </div>
           <div className={classes.tail}>
-            <ConnectedToolBar
+            <ToolBar
               nodeId={nodeId}
               setNodeId={setNodeId}
             />
@@ -134,12 +134,14 @@ interface IDynamicListViewProps {
   rootId: string | null;
   setRootId: (id: string) => void;
 }
-interface IPrivateProps {
-  root: Node | null;
-}
-function DynamicListView (props: IDynamicListViewProps & IPrivateProps) {
-  const { setRootId, root } = props;
+function DynamicListView (props: IDynamicListViewProps) {
+  const { setRootId, rootId } = props;
+  const { nodes } = useFileSystemState();
 
+  if (!rootId) {
+    return null;
+  }
+  const root = nodes[rootId];
   if (!root) {
     return null;
   }
@@ -152,7 +154,7 @@ function DynamicListView (props: IDynamicListViewProps & IPrivateProps) {
     <VirtualList
       count={children.length}
       renderer={({ index, style, itemRef }) => (
-        <ConnectedFileOrFolderItem
+        <FileOrFolderItem
           nodeId={children[index]}
           setRootId={setRootId}
           isLast={index === (children.length - 1)}
@@ -163,38 +165,23 @@ function DynamicListView (props: IDynamicListViewProps & IPrivateProps) {
     />
   );
 }
-const ConnectedDynamicListView = (() => {
-  function mapStateToProps (state: IGlobalStateType, ownProps: IDynamicListViewProps) {
-    const { nodes } = state.fileSystem;
-    const { rootId } = ownProps;
-    return {
-      root: rootId ? nodes[rootId] : null,
-    };
-  }
-
-  return connect(mapStateToProps)(DynamicListView);
-})();
 
 
 interface IToolBarProps {
   nodeId: string | null;
   setNodeId: (id: string) => void;
 }
-interface IGlobalToolBarProps {
-  node: Node | null;
-  fileLoading: boolean;
-}
-function ToolBar (props: IToolBarProps & IGlobalToolBarProps) {
-  const {
-    fileLoading,
-    node,
-    setNodeId,
-  } = props;
+function ToolBar (props: IToolBarProps) {
+  const { nodeId, setNodeId } = props;
 
+  const { updating: fileLoading, nodes } = useFileSystemState();
+  const { getNode } = useFileSystemAction();
   const { unpacking: fileUnpacking } = useComicState();
   const { loadComic } = useComicAction();
   const { dict, count, clear } = useSimpleSelectable();
   const { cache } = useLayoutCache();
+
+  const node = nodeId ? nodes[nodeId] : null;
 
   const onBack = React.useCallback(() => {
     if (node && node.parentId) {
@@ -211,7 +198,8 @@ function ToolBar (props: IToolBarProps & IGlobalToolBarProps) {
     if (list.length !== 1) {
       return;
     }
-    await loadComic(list[0], '');
+    const node = getNode(list[0]);
+    await loadComic(node.id, node.name);
     clear();
   }, [clear, dict, loadComic]);
 
@@ -243,18 +231,6 @@ function ToolBar (props: IToolBarProps & IGlobalToolBarProps) {
     </>
   );
 }
-const ConnectedToolBar = (() => {
-  function mapStateToProps (state: IGlobalStateType, ownProps: IToolBarProps) {
-    const { nodes, updating } = state.fileSystem;
-    const { nodeId } = ownProps;
-    return {
-      node: nodeId ? nodes[nodeId] : null,
-      fileLoading: updating,
-    };
-  }
-
-  return connect(mapStateToProps)(ToolBar);
-})();
 
 
 interface IFileOrFolderItemProps {
@@ -264,22 +240,21 @@ interface IFileOrFolderItemProps {
   style: React.CSSProperties;
   itemRef: (element: Element | null) => void;
 }
-interface IPrivateFileOrFolderItemProps {
-  node: Node;
-  getChildren: (id: string) => void;
-}
-function FileOrFolderItem (props: IFileOrFolderItemProps & IPrivateFileOrFolderItemProps) {
+function FileOrFolderItem (props: IFileOrFolderItemProps) {
   const {
-    getChildren,
     isLast,
     itemRef,
-    node,
+    nodeId,
     setRootId,
     style,
   } = props;
 
+  const { loadList: getChildren } = useFileSystemAction();
+  const { nodes } = useFileSystemState();
   const { dict, toggle, clear } = useSimpleSelectable();
   const { cache } = useLayoutCache();
+
+  const node = nodes[nodeId];
 
   const switchId = React.useCallback((id: string) => {
     clear();
@@ -313,26 +288,6 @@ function FileOrFolderItem (props: IFileOrFolderItemProps & IPrivateFileOrFolderI
     );
   }
 }
-const ConnectedFileOrFolderItem = (() => {
-  function mapStateToProps (state: IGlobalStateType, ownProps: IFileOrFolderItemProps) {
-    const { fileSystem } = state;
-    const { nodeId } = ownProps;
-
-    return {
-      node: fileSystem.nodes[nodeId],
-    };
-  }
-
-  function mapDispatchToProps (dispatch: Dispatch) {
-    return {
-      getChildren (id: string) {
-        dispatch(getList(id));
-      },
-    };
-  }
-
-  return connect(mapStateToProps, mapDispatchToProps)(FileOrFolderItem);
-})();
 
 
 interface IItemProps {

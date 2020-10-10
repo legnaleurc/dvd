@@ -2,7 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { useInstance } from '@/lib/index';
+import { useInstance } from '@/lib';
 
 
 const useStyles = makeStyles((theme) => ({

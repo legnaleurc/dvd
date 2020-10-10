@@ -13,7 +13,7 @@ import {
 } from './screens/multipage_view';
 import {
   SearchView,
-  SearchViewContextProvider,
+  SearchViewProvider,
   SearchViewIcon,
   SearchViewToolBar,
 } from './screens/search_view';
@@ -59,7 +59,7 @@ export function useSiteMap (): ISiteChunk[] {
       id: 'search',
       name: 'Search',
       icon: SearchViewIcon,
-      context: SearchViewContextProvider,
+      context: SearchViewProvider,
       main: SearchView,
       toolBar: SearchViewToolBar,
     },

@@ -1,14 +1,16 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import clsx from 'clsx';
 import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Folder as FolderIcon } from '@material-ui/icons';
 
-import { IGlobalStateType } from '@/states/reducers';
-import { TreeView } from '@/views/widgets/tree_view';
-import { ListView } from '@/views/widgets/list_view';
 import { getMixins } from '@/lib';
+import {
+  useFileSystemAction,
+  useFileSystemState,
+} from '@/views/hooks/file_system';
+import { ListView } from '@/views/widgets/list_view';
+import { TreeView } from './tree_view';
 import { useContext } from './hooks';
 
 
@@ -66,12 +68,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-interface IPropsType {
-  rootId: string | null;
-}
-function FileExplorer (props: IPropsType) {
+export function FileExplorer (props: {}) {
+  const { loadRoot } = useFileSystemAction();
+  const { rootId } = useFileSystemState();
   const classes = useStyles();
   const { two } = useContext();
+
+  React.useEffect(() => {
+    loadRoot();
+  }, []);
 
   return (
     <div className={classes.fileExplorer}>
@@ -83,32 +88,22 @@ function FileExplorer (props: IPropsType) {
           display={{ xs: 'none', sm: 'flex' }}
         >
           <div className={classes.group}>
-            <TreeView rootId={props.rootId} />
+            <TreeView rootId={rootId} />
           </div>
-          <SecondTreeView rootId={props.rootId} two={two} />
+          <SecondTreeView rootId={rootId} two={two} />
         </Box>
         <Box
           className={classes.mobile}
           display={{ xs: 'flex', sm: 'none' }}
         >
           <div className={classes.group}>
-            <ListView rootId={props.rootId} />
+            <ListView rootId={rootId} />
           </div>
         </Box>
       </div>
     </div>
   );
 }
-const ConnectedFileExplorer = (() => {
-  function mapStateToProps (state: IGlobalStateType) {
-    return {
-      rootId: state.fileSystem.rootId,
-    };
-  }
-
-  return connect(mapStateToProps)(FileExplorer);
-})();
-export { ConnectedFileExplorer as FileExplorer };
 
 
 interface ISecondTreeView {

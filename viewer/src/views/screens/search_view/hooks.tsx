@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 
 import {
@@ -8,9 +7,9 @@ import {
   getActionList,
   useInstance,
 } from '@/lib';
-import { IGlobalStateType } from '@/states/reducers';
-import { Selectable } from '@/views/hooks/selectable';
 import { useGlobal } from '@/views/hooks/global';
+import { useFileSystemState } from '@/views/hooks/file_system';
+import { RichSelectableProvider } from '@/views/hooks/rich_selectable';
 import {
   SearchState,
   ActionType,
@@ -99,11 +98,6 @@ function createEntry (entry: SearchResponse): Entry {
     mimeType: entry.mime_type,
     path: entry.path,
   };
-}
-
-
-interface IProps {
-  globalRevision: number;
 }
 
 
@@ -234,11 +228,9 @@ export function useContext () {
 }
 
 
-export function ContextProvider (
-  props: React.PropsWithChildren<IProps>
-) {
+export function ContextProvider (props: React.PropsWithChildren<{}>) {
+  const { revision: globalRevision } = useFileSystemState();
   const classes = useStyles();
-  const { globalRevision } = props;
   const {
     state,
     compare,
@@ -259,23 +251,13 @@ export function ContextProvider (
         diff: state.diff,
       }}
     >
-      <Selectable
+      <RichSelectableProvider
         getSourceList={getResultList}
         revision={state.revision + globalRevision}
         classes={classes}
       >
         {props.children}
-      </Selectable>
+      </RichSelectableProvider>
     </Context.Provider>
   );
 }
-const ConnectedContextProvider = (() => {
-  function mapStateToProps (state: IGlobalStateType) {
-    const { fileSystem } = state;
-    return {
-      globalRevision: fileSystem.revision,
-    };
-  }
-  return connect(mapStateToProps)(ContextProvider);
-})();
-export { ConnectedContextProvider as SearchViewContextProvider };
