@@ -1,129 +1,30 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
-import {
-  SELECTION_COLOR,
-  SearchResponse,
-  getActionList,
-  useInstance,
-} from '@/lib';
+import { SELECTION_COLOR, useInstance } from '@/lib';
 import { useGlobal } from '@/views/hooks/global';
 import {
   useFileSystemAction,
   useFileSystemState,
 } from '@/views/hooks/file_system';
 import { RichSelectableProvider } from '@/views/hooks/rich_selectable';
-import {
-  SearchState,
-  ActionType,
-  EntryDict,
-  Entry,
-  CompareResult,
-} from './types';
-
-
-function reduce (state: SearchState, action: ActionType) {
-  switch (action.type) {
-    case 'ERROR':
-      return {
-        ...state,
-        loading: false,
-        dict: {},
-        list: [],
-      };
-    case 'SEARCH_BEGIN': {
-      if (state.loading) {
-        return state;
-      }
-      const name = action.value;
-      const history = state.history.filter(e => e !== name);
-      history.unshift(name);
-      return {
-        ...state,
-        loading: true,
-        dict: {},
-        list: [],
-        history,
-        revision: state.revision + 1,
-      };
-    }
-    case 'SEARCH_END': {
-      const pathList = action.value;
-      const dict: EntryDict = {};
-      const list: string[] = [];
-      for (const entry of pathList) {
-        dict[entry.id] = createEntry(entry);
-        list.push(entry.id);
-      }
-      return {
-        ...state,
-        loading: false,
-        dict,
-        list,
-        revision: state.revision + 1,
-      };
-    }
-    case 'COMPARE': {
-      const idList = action.value;
-      if (idList.length <= 0) {
-        return state;
-      }
-      const dict = state.dict;
-      const hashList = idList.map(id => dict[id].hash);
-      const rv = hashList.slice(1).every(hash => hash === hashList[0]);
-      if (rv) {
-        return {
-          ...state,
-          diff: [],
-        };
-      }
-      const sizeList: CompareResult[] = idList.map(id => ({
-        path: dict[id].path,
-        size: dict[id].size,
-      }));
-      return {
-        ...state,
-        diff: sizeList,
-      };
-    }
-    default:
-      return state;
-  }
-}
-
-
-function createEntry (entry: SearchResponse): Entry {
-  return {
-    id: entry.id,
-    name: entry.name,
-    hash: entry.hash,
-    size: entry.size,
-    mimeType: entry.mime_type,
-    path: entry.path,
-  };
-}
+import { EntryDict, CompareResult } from './types';
+import { useReducer } from './reducer';
 
 
 interface IContext {
   search: (name: string) => void;
   openStreamUrl: (id: string) => Promise<void>;
-  compare: (idList: string[]) => void;
+  showCompare: (idList: string[]) => void;
+  hideCompare: () => void;
   loading: boolean;
   dict: EntryDict;
   list: string[];
   history: string[];
+  showCompareDialog: boolean;
   diff: CompareResult[] | null;
 }
-const Context = React.createContext<IContext>({
-  search: (name: string) => {},
-  openStreamUrl: async (id: string) => {},
-  compare: (idList: string[]) => {},
-  loading: false,
-  dict: {},
-  list: [],
-  history: [],
-  diff: null,
-});
+const Context = React.createContext<IContext | null>(null);
 
 
 const useStyles = makeStyles((theme) => ({
@@ -136,14 +37,7 @@ const useStyles = makeStyles((theme) => ({
 function useActions () {
   const { fileSystem } = useGlobal();
   const { openUrl } = useFileSystemAction();
-  const [state, dispatch] = React.useReducer(reduce, {
-    loading: false,
-    revision: 0,
-    dict: {},
-    list: [],
-    history: [],
-    diff: null,
-  });
+  const [state, dispatch] = useReducer();
 
   const self = useInstance(() => ({
     get loading () {
@@ -187,10 +81,17 @@ function useActions () {
     }
   }, [self, dispatch, fileSystem]);
 
-  const compare = React.useCallback((idList: string[]) => {
+  const showCompare = React.useCallback((idList: string[]) => {
     dispatch({
-      type: 'COMPARE',
+      type: 'COMPARE_SHOW',
       value: idList,
+    });
+  }, [dispatch]);
+
+  const hideCompare = React.useCallback(() => {
+    dispatch({
+      type: 'COMPARE_HIDE',
+      value: null,
     });
   }, [dispatch]);
 
@@ -202,7 +103,8 @@ function useActions () {
 
   return {
     state,
-    compare,
+    showCompare,
+    hideCompare,
     getResultList,
     openStreamUrl,
     search,
@@ -211,7 +113,11 @@ function useActions () {
 
 
 export function useContext () {
-  return React.useContext(Context);
+  const context = React.useContext(Context);
+  if (!context) {
+    throw new Error('search context not ready');
+  }
+  return context;
 }
 
 
@@ -220,7 +126,8 @@ export function ContextProvider (props: React.PropsWithChildren<{}>) {
   const classes = useStyles();
   const {
     state,
-    compare,
+    showCompare,
+    hideCompare,
     getResultList,
     openStreamUrl,
     search,
@@ -228,13 +135,15 @@ export function ContextProvider (props: React.PropsWithChildren<{}>) {
   return (
     <Context.Provider
       value={{
-        compare,
+        showCompare,
+        hideCompare,
         openStreamUrl,
         search,
         loading: state.loading,
         dict: state.dict,
         list: state.list,
         history: state.history,
+        showCompareDialog: state.showCompareDialog,
         diff: state.diff,
       }}
     >

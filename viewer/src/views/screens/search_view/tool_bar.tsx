@@ -76,18 +76,16 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-function useActions (
-  props: IPureProps,
-  searchName: (name: string) => void,
-  compare: (idList: string[]) => void,
-) {
+function useActions (props: IPureProps) {
+  const { getSelection } = props;
+  const { search, showCompare } = useContext();
   const self = useInstance(() => ({
     compare () {
-      const { getSelection } = props;
-      compare(getSelection());
+      showCompare(getSelection());
     },
   }), [
-    compare,
+    getSelection,
+    showCompare,
   ]);
   const inputRef = React.useRef<HTMLInputElement>();
 
@@ -96,8 +94,8 @@ function useActions (
       return;
     }
     event.preventDefault();
-    searchName(inputRef.current.value);
-  }, [self, inputRef, searchName]);
+    search(inputRef.current.value);
+  }, [self, inputRef, search]);
 
   const compareSelected = React.useCallback(() => {
     self.current.compare();
@@ -120,12 +118,11 @@ interface IPureProps {
 function PureToolBar (props: IPureProps) {
   const { anchorEl, updating, sync } = props;
   const classes = useStyles();
-  const { search, compare } = useContext();
   const {
     inputRef,
     onInputReturn,
     compareSelected,
-  } = useActions(props, search, compare);
+  } = useActions(props);
 
   if (!anchorEl) {
     return null;

@@ -28,6 +28,7 @@ export interface SearchState {
   dict: EntryDict;
   list: string[];
   history: string[];
+  showCompareDialog: boolean;
   diff: CompareResult[] | null;
 }
 
@@ -43,4 +44,6 @@ export type ActionType = (
   | Action<'SEARCH_BEGIN', string>
   | Action<'SEARCH_END', SearchResponse[]>
   | Action<'COMPARE', string[]>
+  | Action<'COMPARE_SHOW', string[]>
+  | Action<'COMPARE_HIDE', null>
 );

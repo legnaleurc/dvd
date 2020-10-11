@@ -9,7 +9,8 @@ import {
 } from '@/views/hooks/rich_selectable';
 import { ContentActionBar } from '@/views/widgets/content_action_bar';
 import { useContext } from './hooks';
-import { CompareResult, EntryDict } from './types';
+import { EntryDict } from './types';
+import { CompareDialog } from './compare_dialog';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -19,46 +20,34 @@ const useStyles = makeStyles((theme) => ({
       'mh-0',
       'hbox',
     ]),
-    '& $head': {
-      ...getMixins([
-        'size-grow',
-        'mh-0',
-        'hbox',
-      ]),
-      '& $toolGroup': {
-        ...getMixins([
-          'h-100',
-        ]),
-        width: 200,
-        '& $compareList': {
-          ...getMixins([
-            'w-100',
-            'y-scroll',
-          ]),
-          height: '20%',
-        },
-        '& $historyList': {
-          ...getMixins([
-            'w-100',
-            'y-scroll',
-          ]),
-          height: '80%',
-        },
-      },
-      '& $searchResult': {
-        ...getMixins([
-          'size-grow',
-          'y-scroll',
-        ]),
-      },
-    },
   },
-  head: {},
+  head: {
+    ...getMixins([
+      'size-grow',
+      'mh-0',
+      'hbox',
+    ]),
+  },
+  toolGroup: {
+    ...getMixins([
+      'h-100',
+    ]),
+    width: 200,
+  },
+  historyList: {
+    ...getMixins([
+      'w-100',
+      'h-100',
+      'y-scroll',
+    ]),
+  },
   tail: {},
-  toolGroup: {},
-  compareList: {},
-  historyList: {},
-  searchResult: {},
+  searchResult: {
+    ...getMixins([
+      'size-grow',
+      'y-scroll',
+    ]),
+  },
 }));
 type Classes = ReturnType<typeof useStyles>;
 
@@ -70,15 +59,15 @@ export function SearchView (props: {}) {
     list,
     dict,
     openStreamUrl,
-    diff,
     history,
     search,
+    showCompareDialog,
+    hideCompare,
   } = useContext();
   return (
     <div className={classes.searchView}>
       <div className={classes.head}>
         <div className={classes.toolGroup}>
-          <CompareList classes={classes} diff={diff} />
           <HistoryList classes={classes} history={history} search={search} />
         </div>
         <div className={classes.searchResult}>
@@ -93,6 +82,10 @@ export function SearchView (props: {}) {
       <div className={classes.tail}>
         <ContentActionBar />
       </div>
+      <CompareDialog
+        open={showCompareDialog}
+        onClose={hideCompare}
+      />
     </div>
   );
 }
@@ -150,38 +143,6 @@ function LoadingBlock (props: {}) {
 function EmptyBlock (props: {}) {
   return (
     <div className="empty-block">EMPTY</div>
-  );
-}
-
-
-interface ICompareListProps {
-  diff: CompareResult[] | null;
-  classes: Classes;
-}
-function CompareList (props: ICompareListProps) {
-  return (
-    <div className={props.classes.compareList}>
-      <InnerCompareList diff={props.diff} />
-    </div>
-  );
-}
-
-
-function InnerCompareList (props: { diff: CompareResult[] | null }): JSX.Element {
-  if (!props.diff) {
-    return <React.Fragment />;
-  }
-  if (props.diff.length <= 0) {
-    return <>OK</>;
-  }
-  return (
-    <>
-      {props.diff.map(({path, size}, i) => (
-        <pre key={i}>
-          {`${size}: ${path}`}
-        </pre>
-      ))}
-    </>
   );
 }
 
