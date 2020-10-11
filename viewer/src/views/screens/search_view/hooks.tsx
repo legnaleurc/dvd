@@ -8,7 +8,10 @@ import {
   useInstance,
 } from '@/lib';
 import { useGlobal } from '@/views/hooks/global';
-import { useFileSystemState } from '@/views/hooks/file_system';
+import {
+  useFileSystemAction,
+  useFileSystemState,
+} from '@/views/hooks/file_system';
 import { RichSelectableProvider } from '@/views/hooks/rich_selectable';
 import {
   SearchState,
@@ -132,6 +135,7 @@ const useStyles = makeStyles((theme) => ({
 
 function useActions () {
   const { fileSystem } = useGlobal();
+  const { openUrl } = useFileSystemAction();
   const [state, dispatch] = React.useReducer(reduce, {
     loading: false,
     revision: 0,
@@ -193,25 +197,8 @@ function useActions () {
   const openStreamUrl = React.useCallback(async (id: string) => {
     const dict = self.current.dict;
     const node = dict[id];
-    if (!node || !node.mimeType) {
-      return;
-    }
-    const actionList = getActionList();
-    if (!actionList) {
-      // has no action
-      return;
-    }
-    const [category, __] = node.mimeType.split('/');
-    const command = actionList[category];
-    if (!command) {
-      // no command to run
-      return;
-    }
-    const url = fileSystem.stream(id, node.name);
-    await fileSystem.apply(command, {
-      url,
-    });
-  }, [fileSystem, self]);
+    await openUrl(node);
+  }, [self]);
 
   return {
     state,

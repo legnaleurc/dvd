@@ -1,5 +1,13 @@
 import { ChangeResponse, NodeResponse } from "@/lib";
 
+
+export interface IFileNode {
+  id: string;
+  name: string;
+  mimeType: string;
+}
+
+
 export interface Node {
   id: string;
   name: string;

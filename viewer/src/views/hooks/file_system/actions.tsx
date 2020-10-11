@@ -3,7 +3,7 @@ import React from 'react';
 import { useInstance, getActionList } from '@/lib';
 import { useGlobal } from '@/views/hooks/global';
 import { useReducer } from './reducer';
-import { SortKey } from './types';
+import { SortKey, IFileNode } from './types';
 
 
 export function useActions () {
@@ -105,8 +105,7 @@ export function useActions () {
         window.open(url, '_blank');
       }
     },
-    async openUrl (id: string) {
-      const node = state.nodes[id];
+    async openUrl (node: IFileNode) {
       if (!node || !node.mimeType) {
         return;
       }
@@ -121,7 +120,7 @@ export function useActions () {
         // no command to run
         return;
       }
-      const url = fileSystem.stream(id, node.name);
+      const url = fileSystem.stream(node.id, node.name);
       await fileSystem.apply(command, {
         url,
       });
@@ -157,8 +156,8 @@ export function useActions () {
   const download = React.useCallback((idList: string[]) => {
     self.current.download(idList);
   }, [self]);
-  const openUrl = React.useCallback(async (id: string) => {
-    await self.current.openUrl(id);
+  const openUrl = React.useCallback(async (node: IFileNode) => {
+    await self.current.openUrl(node);
   }, [self]);
   const getNode = React.useCallback((id: string) => {
     return self.current.getNode(id);

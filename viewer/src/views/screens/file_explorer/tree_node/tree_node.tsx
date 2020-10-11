@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { getMixins, useInstance } from '@/lib';
 import {
   Node,
+  IFileNode,
   useFileSystemAction,
   useFileSystemState,
 } from '@/views/hooks/file_system';
@@ -55,7 +56,7 @@ type Classes = ReturnType<typeof useStyles>;
 interface IPureProps {
   node: Node;
   getChildren: (id: string) => Promise<void>;
-  openUrl: (id: string) => Promise<void>;
+  openUrl: (node: IFileNode) => Promise<void>;
   moveNodes: (srcList: string[], dst: string) => Promise<void>;
   selected: boolean;
   getSelectionList: () => string[];
@@ -70,7 +71,7 @@ function useActions (props: IPureProps) {
     },
     async openFile () {
       const { openUrl, node } = props;
-      await openUrl(node.id);
+      await openUrl(node);
     },
     getSelection () {
       const { getSelectionList } = props;
