@@ -4,15 +4,11 @@ import {
   Divider,
   FormGroup,
   IconButton,
-  Portal,
   TextField,
-  Typography,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   Add as AddIcon,
-  Delete as DeleteIcon,
-  SaveAlt as SaveAltIcon,
   Settings as SettingsIcon,
 } from '@material-ui/icons';
 
@@ -22,6 +18,7 @@ import {
   setActionList,
   useInstance,
 } from '@/lib';
+import { ActionItem } from './action_item';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -38,7 +35,6 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: '0.5rem',
   },
 }));
-type Classes = ReturnType<typeof useStyles>;
 
 
 function useActions () {
@@ -164,134 +160,6 @@ export function SettingsView (props: IPropsType) {
     </div>
   );
 }
-
-
-interface IActionItemProps {
-  classes: Classes;
-  category: string;
-  command: string;
-  onUpdate: (category: string, command: string) => void;
-  onRemove: (category: string) => void;
-}
-
-
-function useActionItemActions (props: IActionItemProps) {
-  const [category, setCategory] = React.useState(props.category);
-  const [command, setCommand] = React.useState(props.command);
-
-  const onCategoryChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setCategory(event.currentTarget.value);
-  }, [setCategory]);
-  const onCommandChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setCommand(event.currentTarget.value);
-  }, [setCommand]);
-
-  const self = useInstance(() => ({
-    onUpdate () {
-      props.onUpdate(category, command);
-    },
-    onRemove () {
-      props.onRemove(category);
-    },
-  }), [
-    props.onUpdate,
-    category,
-    command,
-  ]);
-
-  const onUpdate = React.useCallback(() => {
-    self.current.onUpdate();
-  }, [self]);
-  const onRemove = React.useCallback(() => {
-    self.current.onRemove();
-  }, [self]);
-
-  return {
-    category,
-    command,
-    setCommand,
-    onCategoryChange,
-    onCommandChange,
-    onUpdate,
-    onRemove,
-  };
-}
-
-
-function ActionItem (props: IActionItemProps) {
-  const {
-    category,
-    command,
-    setCommand,
-    onCategoryChange,
-    onCommandChange,
-    onUpdate,
-    onRemove,
-  } = useActionItemActions(props);
-
-  React.useEffect(() => {
-    setCommand(props.command);
-  }, [setCommand, props.command]);
-
-  return (
-    <Box className={props.classes.actionRow}>
-      <TextField
-        label="Category"
-        value={category}
-        onChange={onCategoryChange}
-      />
-      <TextField
-        label="Command"
-        value={command}
-        onChange={onCommandChange}
-      />
-      <IconButton onClick={onUpdate}>
-        <SaveAltIcon />
-      </IconButton>
-      <IconButton onClick={onRemove}>
-        <DeleteIcon />
-      </IconButton>
-    </Box>
-  );
-}
-
-
-const useToolBarStyles = makeStyles((theme) => ({
-  multiPageViewToolBar: {
-    ...getMixins([
-      'size-grow',
-      'hbox',
-    ]),
-  },
-  group: {
-    ...getMixins([
-      'size-shrink',
-      'hbox',
-    ]),
-    alignItems: 'center',
-  },
-}));
-interface IToolBarProps {
-  anchorEl?: HTMLDivElement;
-}
-function ToolBar (props: IToolBarProps) {
-  const classes = useToolBarStyles();
-  if (!props.anchorEl) {
-    return null;
-  }
-  return (
-    <Portal container={props.anchorEl}>
-      <div className={classes.multiPageViewToolBar}>
-        <div className={classes.group}>
-          <Typography variant="h6" noWrap>
-            Settings
-          </Typography>
-        </div>
-      </div>
-    </Portal>
-  );
-}
-export { ToolBar as SettingsViewToolBar };
 
 
 export { SettingsIcon as SettingsViewIcon };
