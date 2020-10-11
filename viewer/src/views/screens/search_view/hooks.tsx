@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { SELECTION_COLOR, useInstance } from '@/lib';
 import { useGlobal } from '@/views/hooks/global';
 import {
+  IFileNode,
   useFileSystemAction,
   useFileSystemState,
 } from '@/views/hooks/file_system';
@@ -17,6 +18,7 @@ interface IContext {
   openStreamUrl: (id: string) => Promise<void>;
   showCompare: (idList: string[]) => void;
   hideCompare: () => void;
+  getNode: (id: string) => IFileNode;
   loading: boolean;
   dict: EntryDict;
   list: string[];
@@ -101,6 +103,11 @@ function useActions () {
     await openUrl(node);
   }, [self]);
 
+  const getNode = React.useCallback((id: string): IFileNode => {
+    const dict = self.current.dict;
+    return dict[id];
+  }, [self]);
+
   return {
     state,
     showCompare,
@@ -108,6 +115,7 @@ function useActions () {
     getResultList,
     openStreamUrl,
     search,
+    getNode,
   };
 }
 
@@ -131,6 +139,7 @@ export function ContextProvider (props: React.PropsWithChildren<{}>) {
     getResultList,
     openStreamUrl,
     search,
+    getNode,
   } = useActions();
   return (
     <Context.Provider
@@ -139,6 +148,7 @@ export function ContextProvider (props: React.PropsWithChildren<{}>) {
         hideCompare,
         openStreamUrl,
         search,
+        getNode,
         loading: state.loading,
         dict: state.dict,
         list: state.list,

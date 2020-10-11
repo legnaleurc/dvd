@@ -63,6 +63,7 @@ export function SearchView (props: {}) {
     search,
     showCompareDialog,
     hideCompare,
+    getNode,
   } = useContext();
   return (
     <div className={classes.searchView}>
@@ -80,7 +81,7 @@ export function SearchView (props: {}) {
         </div>
       </div>
       <div className={classes.tail}>
-        <ContentActionBar />
+        <ContentActionBar getNode={getNode} />
       </div>
       <CompareDialog
         open={showCompareDialog}

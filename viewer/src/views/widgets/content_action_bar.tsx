@@ -13,7 +13,7 @@ import { getMixins, useInstance } from '@/lib';
 import {
   useFileSystemAction,
   useFileSystemState,
-  Node,
+  IFileNode,
 } from '@/views/hooks/file_system';
 import { useComicState, useComicAction } from '@/views/hooks/comic';
 import {
@@ -51,7 +51,7 @@ interface IPureProps {
   copyUrl: (idList: string[]) => Promise<void>;
   download: (idList: string[]) => void;
   trashNodes: (idList: string[]) => Promise<void>;
-  getNode: (id: string) => Node;
+  getNode: (id: string) => IFileNode;
   unpacking: boolean;
   loadComic: (id: string, name: string) => Promise<void>;
   count: number;
@@ -192,9 +192,13 @@ function PureContentActionBar(props: IPureProps) {
 const MemorizedPureContentActionBar = React.memo(PureContentActionBar);
 
 
-export function ContentActionBar (props: {}) {
+interface IProps {
+  getNode: (id: string) => IFileNode;
+}
+export function ContentActionBar (props: IProps) {
+  const { getNode } = props;
   const { updating } = useFileSystemState();
-  const { copyUrl, download, trashNodes, getNode } = useFileSystemAction();
+  const { copyUrl, download, trashNodes } = useFileSystemAction();
   const { unpacking } = useComicState();
   const { loadComic } = useComicAction();
   const { count } = useRichSelectableState();

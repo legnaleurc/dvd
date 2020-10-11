@@ -2,7 +2,10 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins, SELECTION_COLOR, useInstance } from '@/lib';
-import { useFileSystemState } from '@/views/hooks/file_system';
+import {
+  useFileSystemAction,
+  useFileSystemState,
+} from '@/views/hooks/file_system';
 import { RichSelectableProvider } from '@/views/hooks/rich_selectable';
 import { ContentActionBar } from '@/views/widgets/content_action_bar';
 import { TreeNode } from './tree_node';
@@ -45,7 +48,7 @@ interface IPropsType {
 }
 export function TreeView (props: IPropsType) {
   const classes = useStyles();
-  const { getSiblingList, root, revision } = useActions(props);
+  const { getSiblingList, getNode, root, revision } = useActions(props);
   if (!root) {
     return null;
   }
@@ -65,7 +68,7 @@ export function TreeView (props: IPropsType) {
           ))}
         </div>
         <div className={classes.tail}>
-          <ContentActionBar />
+          <ContentActionBar getNode={getNode} />
         </div>
       </RichSelectableProvider>
     </div>
@@ -76,6 +79,7 @@ export function TreeView (props: IPropsType) {
 function useActions (props: IPropsType) {
   const { rootId } = props;
   const { nodes, revision } = useFileSystemState();
+  const { getNode } = useFileSystemAction();
   const root = rootId ? nodes[rootId] : null;
 
   const self = useInstance(() => ({
@@ -102,6 +106,7 @@ function useActions (props: IPropsType) {
   return {
     root,
     revision,
+    getNode,
     getSiblingList,
   };
 }
