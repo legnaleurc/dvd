@@ -2,10 +2,10 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { ImportContacts as ImportContactsIcon } from '@material-ui/icons';
 
-import { ImageView } from '@/views/widgets/image_view';
 import { useInstance, getMixins } from '@/lib';
 import { useFullScreen } from '@/views/hooks/fullscreen';
 import { useComicState } from '@/views/hooks/comic';
+import { ImageView } from './image_view';
 
 
 const useStyles = makeStyles((theme) => ({
