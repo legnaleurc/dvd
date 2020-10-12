@@ -61,6 +61,10 @@ const useStyles = makeStyles((theme) => ({
   },
   inputRoot: {
     color: 'inherit',
+    width: '15ch',
+    [theme.breakpoints.up('sm')]: {
+      width: 'auto',
+    },
   },
   inputInput: {
     padding: theme.spacing(1, 1, 1, 0),
