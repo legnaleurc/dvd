@@ -9,8 +9,8 @@ import {
   useFileSystemAction,
   useFileSystemState,
 } from '@/views/hooks/file_system';
-import { ListView } from '@/views/widgets/list_view';
 import { TreeView } from './tree_view';
+import { ListView } from './list_view';
 import { useContext } from './hooks';
 
 
