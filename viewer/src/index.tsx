@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { Application } from '@/views/application';
+import { FileSystem } from '@/lib';
+import { Application } from '@/views/screens/application';
 import { GlobalProvider } from '@/views/hooks/global';
 import { FileSystemProvider } from '@/views/hooks/file_system';
 import { ComicProvider } from '@/views/hooks/comic';
-import { FileSystem } from '@/lib';
 
 import './index.css';
 

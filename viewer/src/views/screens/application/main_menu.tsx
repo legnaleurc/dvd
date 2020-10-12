@@ -11,7 +11,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
 import { MAIN_MENU_WIDTH } from '@/lib';
-import { ISiteChunk } from '@/views/site_map';
+import { ISiteChunk } from './site_map';
 
 
 const useStyles = makeStyles((theme) => ({

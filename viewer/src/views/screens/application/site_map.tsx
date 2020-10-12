@@ -5,23 +5,23 @@ import {
   FileExplorerContextProvider,
   FileExplorerIcon,
   FileExplorerToolBar,
-} from './screens/file_explorer';
+} from '@/views/screens/file_explorer';
 import {
   MultiPageView,
   MultiPageViewIcon,
   MultiPageViewToolBar,
-} from './screens/multipage_view';
+} from '@/views/screens/multipage_view';
 import {
   SearchView,
   SearchViewProvider,
   SearchViewIcon,
   SearchViewToolBar,
-} from './screens/search_view';
+} from '@/views/screens/search_view';
 import {
   SettingsView,
   SettingsViewIcon,
   SettingsViewToolBar,
-} from './screens/settings_view';
+} from '@/views/screens/settings_view';
 
 
 interface IToolBarProps {

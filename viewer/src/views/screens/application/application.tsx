@@ -18,12 +18,12 @@ import { Menu as MenuIcon } from '@material-ui/icons';
 import clsx from 'clsx';
 
 import { getMixins } from '@/lib';
-import { DesktopDrawerMenu, MobileDrawerMenu } from './widgets/main_menu';
-import { useSiteMap, ISiteChunk } from './site_map';
 import {
   FullScreenProvider,
   useFullScreen,
 } from '@/views/hooks/fullscreen';
+import { DesktopDrawerMenu, MobileDrawerMenu } from './main_menu';
+import { useSiteMap, ISiteChunk } from './site_map';
 
 
 const useStyles = makeStyles((theme) => ({
