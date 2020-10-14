@@ -4,8 +4,11 @@ import itertools as it
 import mimetypes as mt
 import os
 import os.path as op
+import pathlib
 import re
+import shutil
 import tempfile
+import time
 
 from PIL import Image
 from wcpan.logger import EXCEPTION, DEBUG
@@ -127,18 +130,23 @@ class UnpackEngine(object):
         self._cache = {}
         self._unpacking = {}
         self._tmp = None
+        self._cleaner = None
         self._raii = None
 
     async def __aenter__(self):
         async with cl.AsyncExitStack() as stack:
             self._tmp = stack.enter_context(tempfile.TemporaryDirectory())
+            self._cleaner = await stack.enter_async_context(
+                UnpackCleaner(self._tmp)
+            )
             self._raii = stack.pop_all()
         return self
 
     async def __aexit__(self, exc, type_, tb):
         await self._raii.aclose()
-        self._raii = None
+        self._cleaner = None
         self._tmp = None
+        self._raii = None
 
     async def get_manifest(self, node):
         manifest = self._cache.get(node.id_, None)
@@ -261,6 +269,39 @@ class FuzzyName(object):
             if l != r:
                 return l < r
         return False
+
+
+class UnpackCleaner(object):
+
+    def __init__(self, path):
+        self._path = pathlib.Path(path)
+        self._task = None
+
+    async def __aenter__(self):
+        self._task = asyncio.create_task(self._loop())
+
+    async def __aexit__(self, et, e, bt):
+        self._task.cancel()
+        try:
+            await self._task
+        except asyncio.CancelledError:
+            self._task = None
+            pass
+
+    def _check(self):
+        DAY = 60 * 60 * 24
+        now = time.time()
+        for child in self._path.iterdir():
+            s = child.stat()
+            d = now - s.st_mtime
+            DEBUG('engine') << 'check' << child << f'({d})'
+            if d > DAY:
+                shutil.rmtree(str(child))
+
+    async def _loop(self):
+        while True:
+            await asyncio.sleep(60)
+            self._check()
 
 
 def normalize_search_pattern(raw):
