@@ -300,7 +300,7 @@ class UnpackCleaner(object):
 
     async def _loop(self):
         while True:
-            await asyncio.sleep(60)
+            await asyncio.sleep(60 * 60)
             self._check()
 
 
