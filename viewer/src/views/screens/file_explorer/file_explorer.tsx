@@ -2,7 +2,6 @@ import React from 'react';
 import clsx from 'clsx';
 import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Folder as FolderIcon } from '@material-ui/icons';
 
 import { getMixins } from '@/lib';
 import {
@@ -121,6 +120,3 @@ function SecondTreeView (props: ISecondTreeView) {
     </div>
   );
 }
-
-
-export { FolderIcon as FileExplorerIcon };

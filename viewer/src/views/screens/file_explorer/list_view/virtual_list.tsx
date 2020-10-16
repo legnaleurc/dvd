@@ -3,40 +3,10 @@ import {
   AutoSizer,
   CellMeasurer,
   CellMeasurerCache,
-  CellMeasurerCacheParams,
   List,
 } from 'react-virtualized';
 
-
-const Context = React.createContext({
-  cache: new CellMeasurerCache({
-    fixedHeight: true,
-    fixedWidth: true,
-  }),
-});
-
-
-type ILayoutCacheProviderProps = React.PropsWithChildren<CellMeasurerCacheParams>;
-export function LayoutCacheProvider (props: ILayoutCacheProviderProps) {
-  const { children, ...params } = props;
-
-  const cache = React.useRef(new CellMeasurerCache(params));
-
-  return (
-    <Context.Provider
-      value={{
-        cache: cache.current,
-      }}
-    >
-      {props.children}
-    </Context.Provider>
-  );
-}
-
-
-export function useLayoutCache () {
-  return React.useContext(Context);
-}
+import { useLayoutCache } from './layout_cache';
 
 
 interface IChildProps {

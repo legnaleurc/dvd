@@ -2,16 +2,10 @@ import React from 'react';
 import {
   Badge,
   IconButton,
-  ListItem,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  ListItemText,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
-  Folder as FolderIcon,
   ImportContacts as ImportContactsIcon,
   RemoveShoppingCart as RemoveShoppingCartIcon,
 } from '@material-ui/icons';
@@ -20,18 +14,15 @@ import { SELECTION_COLOR, getMixins } from '@/lib';
 import {
   useFileSystemAction,
   useFileSystemState,
-  Node,
 } from '@/views/hooks/file_system';
 import { useComicState, useComicAction } from '@/views/hooks/comic';
 import {
   SimpleSelectable,
   useSimpleSelectable,
 } from '@/views/hooks/simple_selectable';
-import {
-  VirtualList,
-  LayoutCacheProvider,
-  useLayoutCache,
-} from './virtual_list';
+import { LayoutCacheProvider, useLayoutCache } from './layout_cache';
+import { VirtualList } from './virtual_list';
+import { ItemView } from './item_view';
 
 
 const TOOLBAR_HEIGHT = 56;
@@ -154,7 +145,7 @@ function DynamicListView (props: IDynamicListViewProps) {
     <VirtualList
       count={children.length}
       renderer={({ index, style, itemRef }) => (
-        <FileOrFolderItem
+        <ItemView
           nodeId={children[index]}
           setRootId={setRootId}
           isLast={index === (children.length - 1)}
@@ -230,147 +221,5 @@ function ToolBar (props: IToolBarProps) {
         <ImportContactsIcon />
       </IconButton>
     </>
-  );
-}
-
-
-interface IFileOrFolderItemProps {
-  nodeId: string;
-  setRootId: (id: string) => void;
-  isLast: boolean;
-  style: React.CSSProperties;
-  itemRef: (element: Element | null) => void;
-}
-function FileOrFolderItem (props: IFileOrFolderItemProps) {
-  const {
-    isLast,
-    itemRef,
-    nodeId,
-    setRootId,
-    style,
-  } = props;
-
-  const { loadList: getChildren } = useFileSystemAction();
-  const { nodes } = useFileSystemState();
-  const { dict, toggle, clear } = useSimpleSelectable();
-  const { cache } = useLayoutCache();
-
-  const node = nodes[nodeId];
-
-  const switchId = React.useCallback((id: string) => {
-    clear();
-    cache.clearAll();
-    getChildren(id);
-    setRootId(id);
-  }, [clear, getChildren, setRootId, cache]);
-
-  if (!node.children) {
-    return (
-      <FileItem
-        node={node}
-        toggle={toggle}
-        selected={dict[node.id]}
-        style={style}
-        itemRef={itemRef}
-        isLast={isLast}
-      />
-    );
-  } else {
-    return (
-      <FolderItem
-        node={node}
-        toggle={toggle}
-        selected={dict[node.id]}
-        style={style}
-        itemRef={itemRef}
-        isLast={isLast}
-        switchId={switchId}
-      />
-    );
-  }
-}
-
-
-interface IItemProps {
-  node: Node;
-  selected: boolean;
-  toggle: (id: string) => void;
-  isLast: boolean;
-  style: React.CSSProperties;
-  itemRef: (element: HTMLDivElement) => void;
-}
-
-
-interface IFileItemProps extends IItemProps {
-}
-function FileItem (props: IFileItemProps) {
-  const { node, selected, toggle, style, itemRef, isLast } = props;
-  const onSelect = React.useCallback(() => {
-    toggle(node.id);
-  }, [toggle, node]);
-  return (
-    <ListItem
-      ContainerComponent="div"
-      button={true}
-      selected={selected}
-      onClick={onSelect}
-      style={style}
-      ref={itemRef}
-      divider={!isLast}
-    >
-      <ListItemIcon></ListItemIcon>
-      <ListItemText
-        primary={node.name}
-      />
-    </ListItem>
-  );
-}
-
-
-interface IFolderItemProps extends IItemProps {
-  switchId: (id: string) => void;
-}
-function FolderItem (props: IFolderItemProps) {
-  const {
-    isLast,
-    itemRef,
-    node,
-    selected,
-    style,
-    switchId,
-    toggle,
-  } = props;
-
-  const onSelect = React.useCallback(() => {
-    toggle(node.id);
-  }, [toggle, node]);
-  const onOpenFolder = React.useCallback(() => {
-    switchId(node.id);
-  }, [switchId, node]);
-
-  return (
-    <ListItem
-      ContainerComponent="div"
-      ContainerProps={{
-        style,
-      }}
-      ref={itemRef}
-      button={true}
-      selected={selected}
-      onClick={onSelect}
-      divider={!isLast}
-    >
-      <ListItemIcon>
-        <FolderIcon />
-      </ListItemIcon>
-      <ListItemText
-        primary={node.name}
-      />
-      <ListItemSecondaryAction>
-        <IconButton onClick={onOpenFolder}>
-          <ChevronRightIcon />
-        </IconButton>
-      </ListItemSecondaryAction>
-    </ListItem>
   );
 }
