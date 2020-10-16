@@ -11,14 +11,11 @@ import {
   Folder as FolderIcon,
 } from '@material-ui/icons';
 
-import { useInstance } from '@/lib';
 import {
-  useFileSystemAction,
   useFileSystemState,
   Node,
 } from '@/views/hooks/file_system';
 import { useSimpleSelectable } from '@/views/hooks/simple_selectable';
-import { useLayoutCache } from './layout_cache';
 
 
 interface IPureProps {
@@ -26,7 +23,7 @@ interface IPureProps {
   isLast: boolean;
   style: React.CSSProperties;
   itemRef: (element: Element | null) => void;
-  switchId: (id: string) => Promise<void>;
+  changeRoot: (id: string) => Promise<void>;
   selected: boolean;
   toggle: (id: string) => void;
 }
@@ -36,7 +33,7 @@ function PureItemView (props: IPureProps) {
     itemRef,
     node,
     style,
-    switchId,
+    changeRoot,
     selected,
     toggle,
   } = props;
@@ -61,7 +58,7 @@ function PureItemView (props: IPureProps) {
         style={style}
         itemRef={itemRef}
         isLast={isLast}
-        switchId={switchId}
+        switchId={changeRoot}
       />
     );
   }
@@ -71,7 +68,7 @@ const MemorizedPureItemView = React.memo(PureItemView);
 
 interface IProps {
   nodeId: string;
-  setRootId: (id: string) => void;
+  changeRoot: (id: string) => Promise<void>;
   isLast: boolean;
   style: React.CSSProperties;
   itemRef: (element: Element | null) => void;
@@ -81,30 +78,12 @@ export function ItemView (props: IProps) {
     isLast,
     itemRef,
     nodeId,
-    setRootId,
+    changeRoot,
     style,
   } = props;
 
-  const { loadList } = useFileSystemAction();
   const { nodes } = useFileSystemState();
-  const { dict, toggle, clear } = useSimpleSelectable();
-  const { cache } = useLayoutCache();
-
-  const self = useInstance(() => ({
-    getNode (id: string) {
-      return nodes[id];
-    },
-  }), [nodes]);
-
-  const switchId = React.useCallback(async (id: string) => {
-    clear();
-    cache.clearAll();
-    setRootId(id);
-    const node = self.current.getNode(id);
-    if (!node.fetched) {
-      await loadList(id);
-    }
-  }, [clear, loadList, setRootId, cache, self]);
+  const { dict, toggle } = useSimpleSelectable();
 
   return (
     <MemorizedPureItemView
@@ -112,7 +91,7 @@ export function ItemView (props: IProps) {
       itemRef={itemRef}
       style={style}
       isLast={isLast}
-      switchId={switchId}
+      changeRoot={changeRoot}
       selected={dict[nodeId]}
       toggle={toggle}
     />
