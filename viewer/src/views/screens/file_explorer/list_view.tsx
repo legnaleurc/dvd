@@ -186,6 +186,7 @@ function ToolBar (props: IToolBarProps) {
   const onBack = React.useCallback(() => {
     if (node && node.parentId) {
       cache.clearAll();
+      clear();
       setNodeId(node.parentId);
     }
   }, [node, setNodeId, cache]);
