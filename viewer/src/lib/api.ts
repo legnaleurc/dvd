@@ -1,7 +1,4 @@
-import { Dict, chunksOf } from './common';
-
-
-const MAX_TASK_COUNT = 6;
+import { Dict } from './common';
 
 
 export class FileSystem {
@@ -33,27 +30,16 @@ export class FileSystem {
     return rv;
   }
 
-  async move (srcList: string[], id: string) {
-    for (const chunk of chunksOf(srcList, MAX_TASK_COUNT)) {
-      const requestList = chunk.map(async src => {
-        try {
-          const rv = await this._patch(`/api/v1/nodes/${src}`, {
-            parent_id: id,
-          });
-          return rv;
-        } catch (e) {
-          console.warn(e);
-        }
-      });
-      await Promise.all(requestList);
-    }
+  async move (src: string, dst: string) {
+    const rv = await this._patch(`/api/v1/nodes/${src}`, {
+      parent_id: dst,
+    });
+    return rv;
   }
 
-  async trash (srcList: string[]) {
-    for (const chunk of chunksOf(srcList, MAX_TASK_COUNT)) {
-      const requestList = chunk.map(src => this._delete(`/api/v1/nodes/${src}`));
-      await Promise.all(requestList);
-    }
+  async trash (id: string) {
+    const rv = await this._delete(`/api/v1/nodes/${id}`);
+    return rv;
   }
 
   async imageList (id: string) {
