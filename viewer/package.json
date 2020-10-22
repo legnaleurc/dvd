@@ -26,7 +26,7 @@
     "@types/react-router-dom": "^5.1.5",
     "@types/react-virtualized": "^9.21.10",
     "@types/terser-webpack-plugin": "^4.2.0",
-    "@types/webpack": "^4.41.22",
+    "@types/webpack": "^4.41.23",
     "babel-loader": "^8.1.0",
     "babel-plugin-transform-imports": "^2.0.0",
     "css-loader": "^5.0.0",
