@@ -9,6 +9,7 @@ import {
   useFileSystemAction,
   useFileSystemState,
 } from '@/views/hooks/file_system';
+import { useQueueAction } from '@/views/hooks/queue';
 import { Dragable, Dropable } from '@/views/hooks/dragdrop';
 import {
   RichSelectableArea,
@@ -57,7 +58,8 @@ interface IPureProps {
   node: Node;
   getChildren: (id: string) => Promise<void>;
   openUrl: (node: IFileNode) => Promise<void>;
-  moveNodes: (srcList: string[], dst: string) => Promise<void>;
+  moveNodes: (getNode: (id: string) => IFileNode, srcList: string[], dst: string) => Promise<void>;
+  getNode: (id: string) => IFileNode;
   selected: boolean;
   getSelectionList: () => string[];
 }
@@ -78,15 +80,15 @@ function useActions (props: IPureProps) {
       const list = getSelectionList();
       return list;
     },
-    acceptNodes (list: string[]) {
-      const { node, moveNodes } = props;
+    async acceptNodes (list: string[]) {
+      const { node, moveNodes, getNode } = props;
       if (node.children) {
-        moveNodes(list, node.id);
+        await moveNodes(getNode, list, node.id);
       } else {
         if (!node.parentId) {
           return;
         }
-        moveNodes(list, node.parentId);
+        await moveNodes(getNode, list, node.parentId);
       }
     },
   }), [
@@ -94,6 +96,7 @@ function useActions (props: IPureProps) {
     props.getSelectionList,
     props.openUrl,
     props.moveNodes,
+    props.getNode,
     expanded,
     setExpanded,
   ]);
@@ -188,15 +191,18 @@ interface IProps {
 export function TreeNode (props: IProps) {
   const { nodeId } = props;
   const { nodes } = useFileSystemState();
-  const { loadList, openUrl, moveNodes } = useFileSystemAction();
+  const { loadList, openUrl, getNode } = useFileSystemAction();
+  const { moveNodes } = useQueueAction();
   const { dict } = useRichSelectableState();
   const { getList } = useRichSelectableAction();
+
   return (
     <MemorizedPureTreeNode
       node={nodes[nodeId]}
       getChildren={loadList}
       openUrl={openUrl}
       moveNodes={moveNodes}
+      getNode={getNode}
       selected={dict[nodeId]}
       getSelectionList={getList}
     />
