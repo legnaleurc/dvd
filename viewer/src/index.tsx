@@ -5,6 +5,7 @@ import { FileSystem } from '@/lib';
 import { Application } from '@/views/screens/application';
 import { GlobalProvider } from '@/views/hooks/global';
 import { FileSystemProvider } from '@/views/hooks/file_system';
+import { QueueProvider } from '@/views/hooks/queue';
 import { ComicProvider } from '@/views/hooks/comic';
 
 import './index.css';
@@ -16,9 +17,11 @@ ReactDOM.render(
   (
     <GlobalProvider fileSystem={fileSystem}>
       <FileSystemProvider>
-        <ComicProvider>
-          <Application />
-        </ComicProvider>
+        <QueueProvider>
+          <ComicProvider>
+            <Application />
+          </ComicProvider>
+        </QueueProvider>
       </FileSystemProvider>
     </GlobalProvider>
   ),
