@@ -80,12 +80,6 @@ export function useActions () {
         });
       }
     },
-    async moveNodes (srcList: string[], dst: string) {
-      await fileSystem.move(srcList, dst);
-    },
-    async trashNodes (idList: string[]) {
-      await fileSystem.trash(idList);
-    },
     setSortKey (key: SortKey) {
       dispatch({
         type: 'SORT',
@@ -139,14 +133,6 @@ export function useActions () {
   const loadList = React.useCallback(async (id: string) => {
     await self.current.loadList(id);
   }, [self]);
-  const moveNodes = React.useCallback(async (srcList: string[], dst: string) => {
-    await self.current.moveNodes(srcList, dst);
-    await self.current.sync();
-  }, [self]);
-  const trashNodes = React.useCallback(async (idList: string[]) => {
-    await self.current.trashNodes(idList);
-    await self.current.sync();
-  }, [self]);
   const setSortKey = React.useCallback((key: SortKey) => {
     self.current.setSortKey(key);
   }, [self]);
@@ -168,8 +154,6 @@ export function useActions () {
     sync,
     loadRoot,
     loadList,
-    moveNodes,
-    trashNodes,
     setSortKey,
     copyUrl,
     download,

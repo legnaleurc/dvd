@@ -17,8 +17,6 @@ interface IActionContext {
   sync: () => Promise<void>;
   loadRoot: () => Promise<void>;
   loadList: (id: string) => Promise<void>;
-  moveNodes: (srcList: string[], dst: string) => Promise<void>;
-  trashNodes: (idList: string[]) => Promise<void>;
   setSortKey: (key: SortKey) => void;
   copyUrl: (idList: string[]) => Promise<void>;
   download: (idList: string[]) => void;
@@ -34,8 +32,6 @@ export function FileSystemProvider (props: React.PropsWithChildren<{}>) {
     sync,
     loadRoot,
     loadList,
-    moveNodes,
-    trashNodes,
     setSortKey,
     copyUrl,
     download,
@@ -46,8 +42,6 @@ export function FileSystemProvider (props: React.PropsWithChildren<{}>) {
     sync,
     loadRoot,
     loadList,
-    moveNodes,
-    trashNodes,
     setSortKey,
     copyUrl,
     download,
@@ -57,8 +51,6 @@ export function FileSystemProvider (props: React.PropsWithChildren<{}>) {
     sync,
     loadRoot,
     loadList,
-    moveNodes,
-    trashNodes,
     setSortKey,
     copyUrl,
     download,
