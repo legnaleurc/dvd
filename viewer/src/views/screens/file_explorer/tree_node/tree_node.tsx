@@ -4,7 +4,7 @@ import clsx from 'clsx';
 
 import { getMixins, useInstance } from '@/lib';
 import {
-  Node,
+  Node_,
   IFileNode,
   useFileSystemAction,
   useFileSystemState,
@@ -55,7 +55,7 @@ type Classes = ReturnType<typeof useStyles>;
 
 
 interface IPureProps {
-  node: Node;
+  node: Node_;
   getChildren: (id: string) => Promise<void>;
   openUrl: (node: IFileNode) => Promise<void>;
   moveNodes: (getNode: (id: string) => IFileNode, srcList: string[], dst: string) => Promise<void>;
@@ -211,7 +211,7 @@ export function TreeNode (props: IProps) {
 
 
 interface IMaybeChildrenProps {
-  node: Node;
+  node: Node_;
   expanded: boolean;
   classes: Classes;
 }

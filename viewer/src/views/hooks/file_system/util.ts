@@ -4,10 +4,10 @@ import {
   RemovedChangeResponse,
   UpsertChangeResponse,
 } from '@/lib';
-import { Node, NodeDict } from './types';
+import { Node_, NodeDict } from './types';
 
 
-export function createNode (node: NodeResponse): Node {
+export function createNode (node: NodeResponse): Node_ {
   return {
     id: node.id,
     name: node.name,
@@ -132,7 +132,7 @@ function getParentId (rawNode: NodeResponse) {
 }
 
 
-export function deepSort (nodes: NodeDict, id: string, cmp: (a: Node, b: Node) => number) {
+export function deepSort (nodes: NodeDict, id: string, cmp: (a: Node_, b: Node_) => number) {
   const node = nodes[id];
   if (!node) {
     return;

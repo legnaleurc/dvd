@@ -8,7 +8,7 @@ export interface IFileNode {
 }
 
 
-export interface Node {
+export interface Node_ {
   id: string;
   name: string;
   parentId: string | null;
@@ -19,7 +19,7 @@ export interface Node {
 }
 
 
-export type NodeDict = { [id: string]: Node };
+export type NodeDict = { [id: string]: Node_ };
 
 
 export const SORT_BY_NAME_ASC = 'SORT_BY_NAME_ASC';

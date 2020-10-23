@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useActions } from './actions';
-import { SortKey, NodeDict, Node, IFileNode } from './types';
+import { SortKey, NodeDict, Node_, IFileNode } from './types';
 
 
 interface IStateContext {
@@ -22,7 +22,7 @@ interface IActionContext {
   copyUrl: (idList: string[]) => Promise<void>;
   download: (idList: string[]) => void;
   openUrl: (node: IFileNode) => Promise<void>;
-  getNode: (id: string) => Node;
+  getNode: (id: string) => Node_;
 }
 const ActionContext = React.createContext<IActionContext | null>(null);
 

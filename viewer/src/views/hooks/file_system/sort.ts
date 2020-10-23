@@ -1,7 +1,7 @@
-import { Node, SortKey } from './types';
+import { Node_, SortKey } from './types';
 
 
-function sortByName (a: Node, b: Node) {
+function sortByName (a: Node_, b: Node_) {
   if (a.name < b.name) {
     return -1;
   }
@@ -12,7 +12,7 @@ function sortByName (a: Node, b: Node) {
 }
 
 
-function sortByDate (a: Node, b: Node) {
+function sortByDate (a: Node_, b: Node_) {
   if (a.modified < b.modified) {
     return -1;
   }
@@ -23,10 +23,10 @@ function sortByDate (a: Node, b: Node) {
 }
 
 
-const TABLE: Record<SortKey, (a: Node, b: Node) => number> = {
+const TABLE: Record<SortKey, (a: Node_, b: Node_) => number> = {
   SORT_BY_NAME_ASC: sortByName,
   SORT_BY_MTIME_ASC: sortByDate,
-  SORT_BY_MTIME_DES: (a: Node, b: Node) => (-1 * sortByDate(a, b)),
+  SORT_BY_MTIME_DES: (a: Node_, b: Node_) => (-1 * sortByDate(a, b)),
 };
 
 
