@@ -1,1 +1,1 @@
-export { Application } from './application';
+export { HotApplication as Application } from './shell';

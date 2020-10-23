@@ -1,7 +1,5 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
-import { hot } from 'react-hot-loader/root';
 import {
   AppBar,
   Box,
@@ -9,19 +7,12 @@ import {
   IconButton,
   Hidden,
 } from '@material-ui/core';
-import {
-  ThemeProvider,
-  createMuiTheme,
-  makeStyles,
-} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { Menu as MenuIcon } from '@material-ui/icons';
 import clsx from 'clsx';
 
 import { getMixins } from '@/lib';
-import {
-  FullScreenProvider,
-  useFullScreen,
-} from '@/views/hooks/fullscreen';
+import { useFullScreen } from '@/views/hooks/fullscreen';
 import { DesktopDrawerMenu, MobileDrawerMenu } from './main_menu';
 import { useSiteMap, ISiteChunk } from './site_map';
 
@@ -94,7 +85,7 @@ interface MatchParams {
   tabId: string;
 }
 type IApplicationProps = RouteComponentProps<MatchParams>
-function Application (props: IApplicationProps) {
+export function Application (props: IApplicationProps) {
   const classes = useStyles();
   const siteMap = useSiteMap();
   const { tabIndex, changeTab } = useTabState(props, siteMap);
@@ -320,47 +311,3 @@ function useTabState (props: IApplicationProps, siteMap: ISiteChunk[]) {
     changeTab,
   };
 }
-
-
-function RoutedApplication (props: {}) {
-  return (
-    <BrowserRouter>
-      <Switch>
-        <Redirect exact from="/" to="/files" />
-        <Route
-          path="/:tabId"
-          component={Application}
-        />
-      </Switch>
-    </BrowserRouter>
-  );
-}
-
-
-function FullscreenApplication (props: {}) {
-  return (
-    <FullScreenProvider>
-      <RoutedApplication />
-    </FullScreenProvider>
-  );
-}
-
-
-const gTheme = createMuiTheme({
-  palette: {
-    type: 'dark',
-  },
-});
-
-
-function ThemedApplication (props: {}) {
-  return (
-    <ThemeProvider theme={gTheme}>
-      <FullscreenApplication />
-    </ThemeProvider>
-  );
-}
-
-
-const HotApplication = hot(ThemedApplication);
-export { HotApplication as Application };
