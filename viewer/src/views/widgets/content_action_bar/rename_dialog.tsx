@@ -41,6 +41,13 @@ export function RenameDialog (props: IProps) {
   const onRename = React.useCallback(async () => {
     await self.current.rename();
   }, [self]);
+  const onKeyPress = React.useCallback(async (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter') {
+      return;
+    }
+    event.preventDefault();
+    await self.current.rename();
+  }, [self]);
 
   React.useEffect(() => {
     setName(props.name);
@@ -62,6 +69,7 @@ export function RenameDialog (props: IProps) {
           fullWidth={true}
           value={name}
           onChange={onChange}
+          onKeyPress={onKeyPress}
         />
         <DialogActions>
           <Button
