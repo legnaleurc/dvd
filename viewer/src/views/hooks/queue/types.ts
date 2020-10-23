@@ -1,11 +1,11 @@
 import React from 'react';
 
-export interface IFileNode {
+export interface INodeLike {
   id: string;
   name: string;
 }
 
-export type GetNode = (id: string) => IFileNode;
+export type GetNode = (id: string) => INodeLike;
 
 interface IProgressData {
   consumerId: number;

@@ -1,5 +1,5 @@
 import { FileSystem, Queue } from '@/lib';
-import { IFileNode, Dispatch, MAX_TASK_COUNT } from './types';
+import { INodeLike, Dispatch, MAX_TASK_COUNT } from './types';
 
 
 type Task = ((consumerId: number) => Promise<void>) | null;
@@ -19,7 +19,7 @@ export class ActionQueue {
     this._q = new Queue<Task>();
   }
 
-  async moveNodes (srcList: IFileNode[], dst: IFileNode) {
+  async moveNodes (srcList: INodeLike[], dst: INodeLike) {
     this._d({
       type: 'ADD_PENDING',
       value: srcList.length,
@@ -52,7 +52,7 @@ export class ActionQueue {
     await this._s();
   }
 
-  async trashNodes (nodeList: IFileNode[]) {
+  async trashNodes (nodeList: INodeLike[]) {
     this._d({
       type: 'ADD_PENDING',
       value: nodeList.length,
