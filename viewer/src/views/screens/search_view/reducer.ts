@@ -62,6 +62,7 @@ function reduce (state: SearchState, action: ActionType) {
       if (rv) {
         return {
           ...state,
+          showCompareDialog: true,
           diff: [],
         };
       }
