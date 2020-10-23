@@ -37,6 +37,13 @@ export class FileSystem {
     return rv;
   }
 
+  async rename (id: string, name: string) {
+    const rv = await this._patch(`/api/v1/nodes/${id}`, {
+      name,
+    });
+    return rv;
+  }
+
   async trash (id: string) {
     const rv = await this._delete(`/api/v1/nodes/${id}`);
     return rv;
