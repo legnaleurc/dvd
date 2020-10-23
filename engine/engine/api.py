@@ -3,6 +3,7 @@ import functools as ft
 import json
 import re
 import shlex
+from typing import Any, Dict, List
 
 import aiohttp.web as aw
 from wcpan.logger import EXCEPTION
@@ -92,9 +93,18 @@ class NodeView(NodeObjectMixin, aw.View):
         node = await self.get_object()
         drive = self.request.app['drive']
         kwargs = await self.request.json()
-        if 'parent_id' in kwargs:
-            parent_node = await drive.get_node_by_id(kwargs['parent_id'])
-            await drive.rename_node(node, parent_node, None)
+        kwargs = unpack_dict(kwargs, (
+            'parent_id',
+            'name',
+        ))
+        if kwargs:
+            parent_node = None
+            name = None
+            if 'parent_id' in kwargs:
+                parent_node = await drive.get_node_by_id(kwargs['parent_id'])
+            if 'name' in kwargs:
+                name = kwargs['name']
+            await drive.rename_node(node, parent_node, name)
         return aw.Response(
             status=204,
             headers={
@@ -321,3 +331,8 @@ def is_valid_range(range_: slice, size: int) -> bool:
     if range_.stop > size:
         return False
     return True
+
+
+def unpack_dict(d: Dict[str, Any], keys: List[str]):
+    common_keys = set(keys) & set(d.keys())
+    return { key: d[key] for key in common_keys }
