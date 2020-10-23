@@ -94,6 +94,7 @@ function createEntry (entry: SearchResponse): Entry {
     hash: entry.hash,
     size: entry.size,
     mimeType: entry.mime_type,
+    modified: new Date(entry.modified),
     path: entry.path,
   };
 }

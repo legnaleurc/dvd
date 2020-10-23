@@ -7,6 +7,7 @@ export interface Entry {
   hash: string;
   size: number;
   mimeType: string;
+  modified: Date;
   path: string;
 }
 

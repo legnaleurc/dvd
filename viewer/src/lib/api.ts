@@ -146,12 +146,9 @@ export interface UpsertChangeResponse extends ChangeResponse {
 }
 
 
-export interface SearchResponse {
-  id: string;
-  name: string;
-  hash: string;
+export interface SearchResponse extends NodeResponse {
   size: number;
-  mime_type: string;
+  hash: string;
   path: string;
 }
 
