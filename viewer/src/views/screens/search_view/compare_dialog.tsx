@@ -4,6 +4,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
+  List,
+  ListItem,
+  ListItemText,
 } from '@material-ui/core';
 
 import { useContext } from './context';
@@ -35,20 +38,21 @@ function InnerCompareList (props: {}): JSX.Element {
   if (compareList.length <= 0) {
     return <React.Fragment />;
   }
-  if (identical) {
-    return (
-      <DialogContentText>
-        OK
-      </DialogContentText>
-    );
-  }
   return (
     <>
-      {compareList.map((id) => (
-        <pre key={id}>
-          {`${dict[id].size}: ${dict[id].path}`}
-        </pre>
-      ))}
+      <DialogContentText>
+        {identical ? 'identical' : 'different'}
+      </DialogContentText>
+      <List>
+        {compareList.map((id) => (
+          <ListItem key={id}>
+            <ListItemText
+              primary={dict[id].path}
+              secondary={`${dict[id].size} - ${dict[id].modified.toLocaleString()}`}
+            />
+          </ListItem>
+        ))}
+      </List>
     </>
   );
 }
