@@ -75,10 +75,3 @@ export class Event_ {
   }
 
 }
-
-
-export function * chunksOf<T> (array: T[], size: number) {
-  for (let i = 0; i < array.length; i += size) {
-    yield array.slice(i, i + size);
-  }
-}
