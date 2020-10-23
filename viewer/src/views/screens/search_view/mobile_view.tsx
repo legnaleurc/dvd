@@ -21,7 +21,7 @@ import {
   SimpleSelectable,
   useSimpleSelectable,
 } from '@/views/hooks/simple_selectable';
-import { useContext } from './hooks';
+import { useContext } from './context';
 import { LoadingBlock, EmptyBlock } from './blocks';
 
 

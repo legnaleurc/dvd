@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Search as SearchIcon } from '@material-ui/icons';
 
 import { getMixins } from '@/lib';
-import { useContext } from './hooks';
+import { useContext } from './context';
 import { DesktopView } from './desktop_view';
 import { MobileView } from './mobile_view';
 import { CompareDialog } from './compare_dialog';

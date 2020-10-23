@@ -13,7 +13,7 @@ import {
   useFileSystemState,
 } from '@/views/hooks/file_system';
 import { useRichSelectableAction } from '@/views/hooks/rich_selectable';
-import { useContext } from './hooks';
+import { useContext } from './context';
 
 
 const useStyles = makeStyles((theme) => ({

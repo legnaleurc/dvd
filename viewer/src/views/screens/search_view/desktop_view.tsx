@@ -7,7 +7,7 @@ import {
   RichSelectableTrigger,
 } from '@/views/hooks/rich_selectable';
 import { ContentActionBar } from '@/views/widgets/content_action_bar';
-import { useContext } from './hooks';
+import { useContext } from './context';
 import { EntryDict } from './types';
 import { LoadingBlock, EmptyBlock } from './blocks';
 

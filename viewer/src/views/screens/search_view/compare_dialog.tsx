@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog } from '@material-ui/core';
 
-import { useContext } from './hooks';
+import { useContext } from './context';
 import { CompareResult } from './types';
 
 
