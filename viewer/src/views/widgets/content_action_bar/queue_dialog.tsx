@@ -1,6 +1,8 @@
 import React from 'react';
 import {
   Dialog,
+  DialogTitle,
+  DialogContent,
   List,
   ListItem,
   ListItemText,
@@ -54,28 +56,31 @@ export function QueueDialog (props: IProps) {
       open={props.open}
       onClose={props.onClose}
     >
-      <div className={classes.body}>
-        <List>
-          {nameList.map((name, index) => (
-            <ListItem key={index}>
-              <ListItemText
-                primary={name}
-              />
-            </ListItem>
-          ))}
-        </List>
-        <div className={classes.info}>
-          <Typography className={classes.pendingText}>
-            {pendingCount}
-          </Typography>
-          <Typography className={classes.rejectedText}>
-            {rejectedCount}
-          </Typography>
-          <Typography className={classes.resolvedText}>
-            {resolvedCount}
-          </Typography>
+      <DialogTitle>Queued Actions</DialogTitle>
+      <DialogContent>
+        <div className={classes.body}>
+          <List>
+            {nameList.map((name, index) => (
+              <ListItem key={index}>
+                <ListItemText
+                  primary={name}
+                />
+              </ListItem>
+            ))}
+          </List>
+          <div className={classes.info}>
+            <Typography className={classes.pendingText}>
+              {pendingCount}
+            </Typography>
+            <Typography className={classes.rejectedText}>
+              {rejectedCount}
+            </Typography>
+            <Typography className={classes.resolvedText}>
+              {resolvedCount}
+            </Typography>
+          </div>
         </div>
-      </div>
+      </DialogContent>
     </Dialog>
   );
 }
