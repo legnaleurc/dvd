@@ -109,14 +109,9 @@ class SearchEngine(object):
 
     async def _make_item(self, node):
         path = await self._drive.get_path(node)
-        return {
-            'id': node.id_,
-            'name': node.name,
-            'hash': node.hash_,
-            'size': node.size,
-            'mime_type': node.mime_type,
-            'path': str(path),
-        }
+        rv = node.to_dict()
+        rv['path'] = str(path)
+        return rv
 
 
 class UnpackEngine(object):
