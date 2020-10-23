@@ -58,5 +58,7 @@ export type ActionType = (
   | IAction<'LOAD_ROOT_END', ILoadRoot>
   | IAction<'LOAD_LIST_BEGIN', null>
   | IAction<'LOAD_LIST_END', ILoadList>
+  | IAction<'RENAME_BEGIN', null>
+  | IAction<'RENAME_END', null>
   | IAction<'SORT', SortKey>
 );

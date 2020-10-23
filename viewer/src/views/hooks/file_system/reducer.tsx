@@ -108,6 +108,16 @@ function reduce (state: IState, action: ActionType) {
         nodes: { ...nodes },
       };
     }
+    case 'RENAME_BEGIN':
+      return {
+        ...state,
+        updating: true,
+      };
+    case 'RENAME_END':
+      return {
+        ...state,
+        updating: false,
+      };
     case 'SORT': {
       const { nodes, rootId } = state;
       const key = action.value;

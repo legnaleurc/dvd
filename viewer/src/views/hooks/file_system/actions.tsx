@@ -80,6 +80,27 @@ export function useActions () {
         });
       }
     },
+    async rename (id: string, name: string) {
+      if (state.updating) {
+        return;
+      }
+      dispatch({
+        type: 'RENAME_BEGIN',
+        value: null,
+      });
+      try {
+        await fileSystem.rename(id, name);
+        dispatch({
+          type: 'RENAME_END',
+          value: null,
+        });
+      } catch (e) {
+        dispatch({
+          type: 'ERROR',
+          value: e,
+        });
+      }
+    },
     setSortKey (key: SortKey) {
       dispatch({
         type: 'SORT',
@@ -133,6 +154,10 @@ export function useActions () {
   const loadList = React.useCallback(async (id: string) => {
     await self.current.loadList(id);
   }, [self]);
+  const rename = React.useCallback(async (id: string, name: string) => {
+    await self.current.rename(id, name);
+    await self.current.sync();
+  }, [self]);
   const setSortKey = React.useCallback((key: SortKey) => {
     self.current.setSortKey(key);
   }, [self]);
@@ -154,6 +179,7 @@ export function useActions () {
     sync,
     loadRoot,
     loadList,
+    rename,
     setSortKey,
     copyUrl,
     download,
