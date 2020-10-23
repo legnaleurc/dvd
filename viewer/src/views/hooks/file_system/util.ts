@@ -67,7 +67,7 @@ function upsertNode (
     return;
   }
 
-  // this is an existing node
+  // this is an existing node, but moved to new position
   if (node.parentId !== newNode.parentId) {
     if (!node.parentId || !newNode.parentId) {
       throw new Error('invalid parent');
@@ -77,7 +77,11 @@ function upsertNode (
     // insert to new parent
     insertNodeToParent(needSort, nodes, newNode.parentId, newNode.id);
   }
-  nodes[newNode.id] = Object.assign({}, newNode);
+  nodes[newNode.id] = {...newNode};
+  // sort for its parent because node data has been changed
+  if (newNode.parentId) {
+    needSort.add(newNode.parentId);
+  }
 }
 
 
@@ -93,9 +97,10 @@ function removeNodeFromParent (
   if (!parent.children) {
     throw new Error('invalid node');
   }
-  nodes[parentId] = Object.assign({}, parent, {
+  nodes[parentId] = {
+    ...parent,
     children: parent.children.filter(id => id !== nodeId),
-  });
+  };
 }
 
 
