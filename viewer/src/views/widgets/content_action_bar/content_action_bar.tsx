@@ -3,11 +3,12 @@ import { Badge, Divider, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   FileCopy as FileCopyIcon,
+  ChangeHistory as ChangeHistoryIcon,
   CloudDownload as CloudDownloadIcon,
   Delete as DeleteIcon,
+  Edit as EditIcon,
   ImportContacts as ImportContactsIcon,
   RemoveShoppingCart as RemoveShoppingCartIcon,
-  ChangeHistory as ChangeHistoryIcon,
 } from '@material-ui/icons';
 
 import { getMixins, useInstance } from '@/lib';
@@ -22,6 +23,7 @@ import {
   useRichSelectableAction,
   useRichSelectableState,
 } from '@/views/hooks/rich_selectable';
+import { RenameDialog } from './rename_dialog';
 import { QueueDialog } from './queue_dialog';
 
 
@@ -53,6 +55,7 @@ interface IPureProps {
   updating: boolean;
   copyUrl: (idList: string[]) => Promise<void>;
   download: (idList: string[]) => void;
+  rename: (id: string, name: string) => Promise<void>;
   trashNodes: (getNode: (id: string) => IFileNode, idList: string[]) => Promise<void>;
   pendingCount: number;
   getNode: (id: string) => IFileNode;
@@ -69,6 +72,7 @@ function useActions (props: IPureProps) {
     updating,
     copyUrl,
     download,
+    rename,
     trashNodes,
     getNode,
     unpacking,
@@ -77,6 +81,7 @@ function useActions (props: IPureProps) {
     clearSelection,
   } = props;
 
+  const [renameOpen, setRenameOpen] = React.useState(false);
   const [queueOpen, setQueueOpen] = React.useState(false);
 
   const self = useInstance(() => ({
@@ -100,9 +105,24 @@ function useActions (props: IPureProps) {
       const list = getSelectionList();
       download(list);
     },
+    async rename (name: string) {
+      const list = getSelectionList();
+      if (list.length !== 1) {
+        return;
+      }
+      await rename(list[0], name);
+    },
     async trash () {
       const list = getSelectionList();
       await trashNodes(getNode, list);
+    },
+    get selectedName () {
+      const list = getSelectionList();
+      if (list.length !== 1) {
+        return '';
+      }
+      const node = getNode(list[0]);
+      return node.name;
     },
   }), [
     unpacking,
@@ -111,6 +131,7 @@ function useActions (props: IPureProps) {
     loadComic,
     copyUrl,
     download,
+    rename,
     trashNodes,
     getNode,
   ]);
@@ -127,6 +148,15 @@ function useActions (props: IPureProps) {
   const trash = React.useCallback(async () => {
     await self.current.trash();
   }, [self]);
+  const rename_ = React.useCallback(async (name: string) => {
+    await self.current.rename(name);
+  }, [self]);
+  const showRename = React.useCallback(() => {
+    setRenameOpen(true);
+  }, [setRenameOpen]);
+  const hideRename = React.useCallback(() => {
+    setRenameOpen(false);
+  }, [setRenameOpen]);
   const showQueue = React.useCallback(() => {
     setQueueOpen(true);
   }, [setQueueOpen]);
@@ -140,10 +170,15 @@ function useActions (props: IPureProps) {
     loadComic: loadComic_,
     copy,
     download: download_,
+    rename: rename_,
     trash,
+    renameOpen,
+    showRename,
+    hideRename,
     queueOpen,
     showQueue,
     hideQueue,
+    selectedName: self.current.selectedName,
   };
 }
 
@@ -158,10 +193,15 @@ function PureContentActionBar(props: IPureProps) {
     loadComic,
     copy,
     download,
+    rename,
     trash,
+    renameOpen,
+    showRename,
+    hideRename,
     queueOpen,
     showQueue,
     hideQueue,
+    selectedName,
   } = useActions(props);
 
   return (
@@ -183,6 +223,12 @@ function PureContentActionBar(props: IPureProps) {
           </Badge>
         </IconButton>
         <Divider />
+        <IconButton
+          disabled={unpacking || count !== 1}
+          onClick={showRename}
+        >
+          <EditIcon />
+        </IconButton>
         <IconButton
           disabled={count <= 0}
           onClick={copy}
@@ -214,6 +260,12 @@ function PureContentActionBar(props: IPureProps) {
           <DeleteIcon />
         </IconButton>
       </div>
+      <RenameDialog
+        open={renameOpen}
+        onClose={hideRename}
+        name={selectedName}
+        rename={rename}
+      />
       <QueueDialog open={queueOpen} onClose={hideQueue} />
     </div>
   );
@@ -227,7 +279,7 @@ interface IProps {
 export function ContentActionBar (props: IProps) {
   const { getNode } = props;
   const { updating } = useFileSystemState();
-  const { copyUrl, download } = useFileSystemAction();
+  const { copyUrl, download, rename } = useFileSystemAction();
   const { trashNodes } = useQueueAction();
   const { pendingCount } = useQueueState();
   const { unpacking } = useComicState();
@@ -239,6 +291,7 @@ export function ContentActionBar (props: IProps) {
       updating={updating}
       copyUrl={copyUrl}
       download={download}
+      rename={rename}
       trashNodes={trashNodes}
       pendingCount={pendingCount}
       getNode={getNode}
