@@ -17,12 +17,6 @@ export type EntryDict = {
 }
 
 
-export interface CompareResult {
-  size: number;
-  path: string;
-}
-
-
 export interface SearchState {
   loading: boolean;
   revision: number;
@@ -30,7 +24,8 @@ export interface SearchState {
   list: string[];
   history: string[];
   showCompareDialog: boolean;
-  diff: CompareResult[] | null;
+  compareList: string[];
+  identical: boolean;
 }
 
 

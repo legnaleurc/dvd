@@ -6,7 +6,6 @@ import {
   ActionType,
   EntryDict,
   Entry,
-  CompareResult,
 } from './types';
 
 
@@ -59,21 +58,11 @@ function reduce (state: SearchState, action: ActionType) {
       const dict = state.dict;
       const hashList = idList.map(id => dict[id].hash);
       const rv = hashList.slice(1).every(hash => hash === hashList[0]);
-      if (rv) {
-        return {
-          ...state,
-          showCompareDialog: true,
-          diff: [],
-        };
-      }
-      const sizeList: CompareResult[] = idList.map(id => ({
-        path: dict[id].path,
-        size: dict[id].size,
-      }));
       return {
         ...state,
         showCompareDialog: true,
-        diff: sizeList,
+        compareList: idList,
+        identical: rv,
       };
     }
     case 'COMPARE_HIDE':
@@ -108,6 +97,7 @@ export function useReducer () {
     list: [],
     history: [],
     showCompareDialog: false,
-    diff: null,
+    compareList: [],
+    identical: false,
   });
 }

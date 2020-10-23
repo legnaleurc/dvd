@@ -7,7 +7,6 @@ import {
 } from '@material-ui/core';
 
 import { useContext } from './context';
-import { CompareResult } from './types';
 
 
 interface IProps {
@@ -16,7 +15,6 @@ interface IProps {
 }
 export function CompareDialog (props: IProps) {
   const { open, onClose } = props;
-  const { diff } = useContext();
   return (
     <Dialog
       open={open}
@@ -24,21 +22,20 @@ export function CompareDialog (props: IProps) {
     >
       <DialogTitle>Compare Result</DialogTitle>
       <DialogContent>
-        <InnerCompareList diff={diff} />
+        <InnerCompareList />
       </DialogContent>
     </Dialog>
   );
 }
 
 
-interface IInnerCompareList {
-  diff: CompareResult[] | null;
-}
-function InnerCompareList (props: IInnerCompareList): JSX.Element {
-  if (!props.diff) {
+function InnerCompareList (props: {}): JSX.Element {
+  const { dict, compareList, identical } = useContext();
+
+  if (compareList.length <= 0) {
     return <React.Fragment />;
   }
-  if (props.diff.length <= 0) {
+  if (identical) {
     return (
       <DialogContentText>
         OK
@@ -47,9 +44,9 @@ function InnerCompareList (props: IInnerCompareList): JSX.Element {
   }
   return (
     <>
-      {props.diff.map(({path, size}, i) => (
-        <pre key={i}>
-          {`${size}: ${path}`}
+      {compareList.map((id) => (
+        <pre key={id}>
+          {`${dict[id].size}: ${dict[id].path}`}
         </pre>
       ))}
     </>

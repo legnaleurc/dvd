@@ -9,7 +9,7 @@ import {
   useFileSystemState,
 } from '@/views/hooks/file_system';
 import { RichSelectableProvider } from '@/views/hooks/rich_selectable';
-import { EntryDict, CompareResult } from './types';
+import { EntryDict } from './types';
 import { useReducer } from './reducer';
 
 
@@ -24,7 +24,8 @@ interface IContext {
   list: string[];
   history: string[];
   showCompareDialog: boolean;
-  diff: CompareResult[] | null;
+  compareList: string[];
+  identical: boolean;
 }
 const Context = React.createContext<IContext | null>(null);
 
@@ -154,7 +155,8 @@ export function ContextProvider (props: React.PropsWithChildren<{}>) {
         list: state.list,
         history: state.history,
         showCompareDialog: state.showCompareDialog,
-        diff: state.diff,
+        compareList: state.compareList,
+        identical: state.identical,
       }}
     >
       <RichSelectableProvider
