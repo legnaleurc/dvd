@@ -47,6 +47,9 @@ const useStyles = makeStyles((theme) => ({
     ]),
     flexGrow: 1,
   },
+  toolBar: {
+    backgroundColor: theme.palette.background.paper,
+  },
   tabPanel: {
     ...getMixins([
       'size-grow',
@@ -67,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
       display: 'initial',
     },
   },
-  toolBar: theme.mixins.toolbar,
+  fakeToolBar: theme.mixins.toolbar,
   drawer: {
     [theme.breakpoints.up('sm')]: {
       width: theme.spacing(7) + 1,
@@ -166,7 +169,7 @@ function Header (props: IHeaderProps) {
         [classes.hidden]: fullScreen,
       })}
     >
-      <Toolbar>
+      <Toolbar className={classes.toolBar}>
         <IconButton
           color="inherit"
           aria-label="open drawer"
@@ -253,7 +256,7 @@ function Content (props: IContentProps) {
   return (
     <Box className={classes.tail}>
       <div
-        className={clsx(classes.toolBar, {
+        className={clsx(classes.fakeToolBar, {
           [classes.hidden]: fullScreen,
         })}
       />
