@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-export function useInstance<T> (fn: () => T, dependeincies: ReadonlyArray<any> ) {
+export function useInstance<T, U extends readonly unknown[]> (fn: () => T, dependeincies: readonly [...U]) {
   const self = React.useRef(fn());
 
   React.useEffect(() => {
