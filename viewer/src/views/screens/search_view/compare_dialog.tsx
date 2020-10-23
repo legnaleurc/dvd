@@ -1,5 +1,10 @@
 import React from 'react';
-import { Dialog } from '@material-ui/core';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+} from '@material-ui/core';
 
 import { useContext } from './context';
 import { CompareResult } from './types';
@@ -17,7 +22,10 @@ export function CompareDialog (props: IProps) {
       open={open}
       onClose={onClose}
     >
-      <InnerCompareList diff={diff} />
+      <DialogTitle>Compare Result</DialogTitle>
+      <DialogContent>
+        <InnerCompareList diff={diff} />
+      </DialogContent>
     </Dialog>
   );
 }
@@ -31,7 +39,11 @@ function InnerCompareList (props: IInnerCompareList): JSX.Element {
     return <React.Fragment />;
   }
   if (props.diff.length <= 0) {
-    return <>OK</>;
+    return (
+      <DialogContentText>
+        OK
+      </DialogContentText>
+    );
   }
   return (
     <>
