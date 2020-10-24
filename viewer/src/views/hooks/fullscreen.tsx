@@ -3,16 +3,15 @@ import React from 'react';
 import { useInstance } from '@/lib';
 
 
-interface IContext {
+interface IStateContext {
   fullScreen: boolean;
+}
+const StateContext = React.createContext<IStateContext | null>(null);
+interface IActionContext {
   toggleFullScreen: () => void;
   leaveFullScreen: () => void;
 }
-const Context = React.createContext<IContext>({
-  fullScreen: true,
-  toggleFullScreen: () => {},
-  leaveFullScreen: () => {},
-});
+const ActionContext = React.createContext<IActionContext | null>(null);
 
 
 export function FullScreenProvider (props: React.PropsWithChildren<{}>) {
@@ -29,18 +28,37 @@ export function FullScreenProvider (props: React.PropsWithChildren<{}>) {
     setFullScreen(false);
   }, [setFullScreen]);
 
+  const actionValue = React.useMemo(() => ({
+    toggleFullScreen: toggle,
+    leaveFullScreen: leave,
+  }), [toggle, leave]);
+  const stateValue = React.useMemo(() => ({
+    fullScreen,
+  }), [fullScreen]);
+
   return (
-    <Context.Provider value={{
-      fullScreen,
-      toggleFullScreen: toggle,
-      leaveFullScreen: leave,
-    }}>
-      {props.children}
-    </Context.Provider>
+    <ActionContext.Provider value={actionValue}>
+      <StateContext.Provider value={stateValue}>
+        {props.children}
+      </StateContext.Provider>
+    </ActionContext.Provider>
   );
 }
 
 
-export function useFullScreen () {
-  return React.useContext(Context);
+export function useFullScreenState () {
+  const context = React.useContext(StateContext);
+  if (!context) {
+    throw new Error('full screen context is not ready');
+  }
+  return context;
+}
+
+
+export function useFullScreenAction () {
+  const context = React.useContext(ActionContext);
+  if (!context) {
+    throw new Error('full screen context is not ready');
+  }
+  return context;
 }
