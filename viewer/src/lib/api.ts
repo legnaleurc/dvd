@@ -31,22 +31,19 @@ export class FileSystem {
   }
 
   async move (src: string, dst: string) {
-    const rv = await this._patch(`/api/v1/nodes/${src}`, {
+    await this._patch(`/api/v1/nodes/${src}`, {
       parent_id: dst,
     });
-    return rv;
   }
 
   async rename (id: string, name: string) {
-    const rv = await this._patch(`/api/v1/nodes/${id}`, {
+    await this._patch(`/api/v1/nodes/${id}`, {
       name,
     });
-    return rv;
   }
 
   async trash (id: string) {
-    const rv = await this._delete(`/api/v1/nodes/${id}`);
-    return rv;
+    await this._delete(`/api/v1/nodes/${id}`);
   }
 
   async imageList (id: string) {
@@ -67,7 +64,7 @@ export class FileSystem {
     return `${this._baseURL}/api/v1/nodes/${id}/images/${imageId}`;
   }
 
-  async apply (command: string, kwargs: object ) {
+  async apply (command: string, kwargs: object) {
     await this._post('/api/v1/apply', {
       command,
       kwargs,
