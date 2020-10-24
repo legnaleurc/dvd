@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { ImportContacts as ImportContactsIcon } from '@material-ui/icons';
 
 import { useInstance, getMixins } from '@/lib';
-import { useFullScreen } from '@/views/hooks/fullscreen';
+import { useFullScreenAction } from '@/views/hooks/fullscreen';
 import { useComicState } from '@/views/hooks/comic';
 import { ImageView } from './image_view';
 
@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 export function MultiPageView (props: {}) {
   const root = React.useRef<HTMLDivElement>(null);
   const classes = useStyles();
-  const { toggleFullScreen } = useFullScreen();
+  const { toggleFullScreen } = useFullScreenAction();
   const { imageList, onIntersect } = useActions(root);
   useObserver(root, onIntersect);
 

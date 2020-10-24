@@ -2,7 +2,7 @@ import React from 'react';
 import { Hidden } from '@material-ui/core';
 import clsx from 'clsx';
 
-import { useFullScreen } from '@/views/hooks/fullscreen';
+import { useFullScreenState } from '@/views/hooks/fullscreen';
 import { Classes } from './hooks';
 import { DesktopDrawerMenu, MobileDrawerMenu } from './main_menu';
 import { ISiteChunk } from './site_map';
@@ -29,7 +29,7 @@ export function SideBar (props: IProps) {
     desktopOpen,
     closeDesktopDrawer,
   } = props;
-  const { fullScreen } = useFullScreen();
+  const { fullScreen } = useFullScreenState();
   return (
     <nav className={clsx(classes.drawer, {
       [classes.hidden]: fullScreen,

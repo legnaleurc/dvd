@@ -7,7 +7,7 @@ import {
 import { Menu as MenuIcon } from '@material-ui/icons';
 import clsx from 'clsx';
 
-import { useFullScreen } from '@/views/hooks/fullscreen';
+import { useFullScreenState } from '@/views/hooks/fullscreen';
 import { Classes } from './hooks';
 
 
@@ -24,7 +24,7 @@ export function Header (props: IProps) {
     toggleDesktopDrawer,
     toolBarRef,
   } = props;
-  const { fullScreen } = useFullScreen();
+  const { fullScreen } = useFullScreenState();
   return (
     <AppBar
       position="fixed"

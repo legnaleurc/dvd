@@ -2,7 +2,7 @@ import React from 'react';
 import { Box } from '@material-ui/core';
 import clsx from 'clsx';
 
-import { useFullScreen } from '@/views/hooks/fullscreen';
+import { useFullScreenState } from '@/views/hooks/fullscreen';
 import { Classes } from './hooks';
 import { TabPanel } from './tab_panel';
 import { ISiteChunk } from './site_map';
@@ -16,7 +16,7 @@ interface IProps {
 }
 export function Content (props: IProps) {
   const { classes, siteMap, tabIndex, toolBarEl } = props;
-  const { fullScreen } = useFullScreen();
+  const { fullScreen } = useFullScreenState();
   return (
     <Box className={classes.tail}>
       <div

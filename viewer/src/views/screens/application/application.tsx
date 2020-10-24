@@ -1,7 +1,7 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router';
 
-import { useFullScreen } from '@/views/hooks/fullscreen';
+import { useFullScreenAction } from '@/views/hooks/fullscreen';
 import { Header } from './header';
 import { SideBar } from './side_bar';
 import { Content } from './content';
@@ -78,7 +78,7 @@ function useTabState (props: IProps, siteMap: ISiteChunk[]) {
     history.push(`/${tabList[newValue]}`);
   }, [history, siteMap]);
 
-  const { leaveFullScreen } = useFullScreen();
+  const { leaveFullScreen } = useFullScreenAction();
 
   React.useEffect(() => {
     return history.listen(() => {
