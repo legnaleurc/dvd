@@ -1,4 +1,4 @@
-import { Future, Event_ } from './common';
+import { Future, Event_ } from './lock';
 
 
 export class Queue<T> {
