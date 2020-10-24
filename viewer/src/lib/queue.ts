@@ -42,7 +42,7 @@ export class Queue<T> {
     return top;
   }
 
-  async taskDone () {
+  taskDone () {
     if (this._unfinishedCount <= 0) {
       throw new Error('taskDone() called too many times');
     }
