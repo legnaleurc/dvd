@@ -5,7 +5,7 @@ import {
   useFileSystemAction,
   useFileSystemState,
 } from '@/views/hooks/file_system';
-import { useSimpleSelectable } from '@/views/hooks/simple_selectable';
+import { useSimpleSelectableAction } from '@/views/hooks/simple_selectable';
 import { useLayoutCache } from './layout_cache';
 
 
@@ -24,7 +24,7 @@ export function ItemCacheProvider (props: IProvider) {
 
   const { loadList } = useFileSystemAction();
   const { nodes } = useFileSystemState();
-  const { clear } = useSimpleSelectable();
+  const { clear } = useSimpleSelectableAction();
   const { cache } = useLayoutCache();
 
   const self = useInstance(() => ({

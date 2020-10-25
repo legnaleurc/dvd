@@ -15,7 +15,10 @@ import {
   useFileSystemState,
   Node_,
 } from '@/views/hooks/file_system';
-import { useSimpleSelectable } from '@/views/hooks/simple_selectable';
+import {
+  useSimpleSelectableAction,
+  useSimpleSelectableState,
+} from '@/views/hooks/simple_selectable';
 
 
 interface IPureProps {
@@ -83,7 +86,8 @@ export function ItemView (props: IProps) {
   } = props;
 
   const { nodes } = useFileSystemState();
-  const { dict, toggle } = useSimpleSelectable();
+  const { toggle } = useSimpleSelectableAction();
+  const { dict } = useSimpleSelectableState();
 
   return (
     <MemorizedPureItemView

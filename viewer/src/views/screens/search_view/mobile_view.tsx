@@ -19,7 +19,8 @@ import { useFileSystemState } from '@/views/hooks/file_system';
 import { useComicState, useComicAction } from '@/views/hooks/comic';
 import {
   SimpleSelectable,
-  useSimpleSelectable,
+  useSimpleSelectableAction,
+  useSimpleSelectableState,
 } from '@/views/hooks/simple_selectable';
 import { useContext } from './context';
 import { LoadingBlock, EmptyBlock } from './blocks';
@@ -136,7 +137,8 @@ interface IResultItemProps {
 }
 function ResultItem (props: IResultItemProps) {
   const { nodeId } = props;
-  const { dict: selection, toggle } = useSimpleSelectable();
+  const { toggle } = useSimpleSelectableAction();
+  const { dict: selection } = useSimpleSelectableState();
   const { dict: resultDict } = useContext();
 
   const onSelect = React.useCallback(() => {
@@ -164,7 +166,8 @@ function ToolBar (props: IToolBarProps) {
   const { updating: fileLoading } = useFileSystemState();
   const { unpacking: fileUnpacking } = useComicState();
   const { loadComic } = useComicAction();
-  const { dict, count, clear } = useSimpleSelectable();
+  const { clear } = useSimpleSelectableAction();
+  const { dict, count } = useSimpleSelectableState();
   const { getNode } = useContext();
 
   const onComic = React.useCallback(async () => {

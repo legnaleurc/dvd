@@ -16,7 +16,8 @@ import {
 } from '@/views/hooks/file_system';
 import { useComicState, useComicAction } from '@/views/hooks/comic';
 import {
-  useSimpleSelectable,
+  useSimpleSelectableAction,
+  useSimpleSelectableState,
 } from '@/views/hooks/simple_selectable';
 import { useItemCache } from './item_cache';
 
@@ -88,7 +89,8 @@ export function ToolBar (props: IProps) {
   const { getNode } = useFileSystemAction();
   const { unpacking } = useComicState();
   const { loadComic } = useComicAction();
-  const { dict, count, clear } = useSimpleSelectable();
+  const { clear } = useSimpleSelectableAction();
+  const { dict, count } = useSimpleSelectableState();
   const { changeRoot } = useItemCache();
 
   const onComic = React.useCallback(async () => {
