@@ -1,18 +1,16 @@
 import React from 'react';
 
 
-interface IContext {
+interface IStateContext {
   dict: Record<string, boolean>;
   count: number;
+}
+const StateContext = React.createContext<IStateContext | null>(null);
+interface IActionContext {
   toggle: (id: string) => void;
   clear: () => void;
 }
-const Context = React.createContext<IContext>({
-  dict: {},
-  count: 0,
-  toggle: (id: string) => {},
-  clear: () => {},
-});
+const ActionContext = React.createContext<IActionContext | null>(null);
 
 
 export function SimpleSelectable (props: React.PropsWithChildren<{}>) {
@@ -34,23 +32,40 @@ export function SimpleSelectable (props: React.PropsWithChildren<{}>) {
     });
   }, [dispatch]);
 
+  const actionValue = React.useMemo(() => ({
+    toggle,
+    clear,
+  }), [toggle, clear]);
+  const stateValue = React.useMemo(() => ({
+    dict: state.dict,
+    count: state.count,
+  }), [state. dict, state.count]);
+
   return (
-    <Context.Provider
-      value={{
-        dict: state.dict,
-        count: state.count,
-        toggle,
-        clear,
-      }}
-    >
-      {props.children}
-    </Context.Provider>
+    <ActionContext.Provider value={actionValue}>
+      <StateContext.Provider value={stateValue}>
+        {props.children}
+      </StateContext.Provider>
+    </ActionContext.Provider>
   );
 }
 
 
-export function useSimpleSelectable () {
-  return React.useContext(Context);
+export function useSimpleSelectableState () {
+  const context = React.useContext(StateContext);
+  if (!context) {
+    throw new Error('simple selectable is not ready');
+  }
+  return context;
+}
+
+
+export function useSimpleSelectableAction () {
+  const context = React.useContext(ActionContext);
+  if (!context) {
+    throw new Error('simple selectable is not ready');
+  }
+  return context;
 }
 
 
