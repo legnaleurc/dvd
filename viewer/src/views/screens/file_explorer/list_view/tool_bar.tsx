@@ -12,7 +12,7 @@ import {
 import {
   useFileSystemAction,
   useFileSystemState,
-  Node,
+  Node_,
 } from '@/views/hooks/file_system';
 import { useComicState, useComicAction } from '@/views/hooks/comic';
 import {
@@ -22,7 +22,7 @@ import { useItemCache } from './item_cache';
 
 
 interface IPureProps {
-  root: Node;
+  root: Node_;
   fileLoading: boolean;
   fileUnpacking: boolean;
   changeRoot: (id: string) => Promise<void>;

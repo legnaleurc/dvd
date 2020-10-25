@@ -13,13 +13,13 @@ import {
 
 import {
   useFileSystemState,
-  Node,
+  Node_,
 } from '@/views/hooks/file_system';
 import { useSimpleSelectable } from '@/views/hooks/simple_selectable';
 
 
 interface IPureProps {
-  node: Node;
+  node: Node_;
   isLast: boolean;
   style: React.CSSProperties;
   itemRef: (element: Element | null) => void;
@@ -100,7 +100,7 @@ export function ItemView (props: IProps) {
 
 
 interface IItemProps {
-  node: Node;
+  node: Node_;
   selected: boolean;
   toggle: (id: string) => void;
   isLast: boolean;
