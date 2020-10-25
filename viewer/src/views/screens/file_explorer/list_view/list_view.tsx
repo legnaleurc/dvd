@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { SELECTION_COLOR, getMixins } from '@/lib';
-import { SimpleSelectable } from '@/views/hooks/simple_selectable';
+import { SimpleSelectableProvider } from '@/views/hooks/simple_selectable';
 import { LayoutCacheProvider } from './layout_cache';
 import { ItemCacheProvider } from './item_cache';
 import { RootList } from './root_list';
@@ -81,7 +81,7 @@ export function ListView (props: IProps) {
       minHeight={50}
       defaultHeight={50}
     >
-      <SimpleSelectable>
+      <SimpleSelectableProvider>
         <ItemCacheProvider setRootId={setNodeId}>
           <div className={classes.listView}>
             <div className={classes.head}>
@@ -95,7 +95,7 @@ export function ListView (props: IProps) {
             </div>
           </div>
         </ItemCacheProvider>
-      </SimpleSelectable>
+      </SimpleSelectableProvider>
     </LayoutCacheProvider>
   );
 }

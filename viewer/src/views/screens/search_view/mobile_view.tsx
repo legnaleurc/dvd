@@ -18,7 +18,7 @@ import { getMixins } from '@/lib';
 import { useFileSystemState } from '@/views/hooks/file_system';
 import { useComicState, useComicAction } from '@/views/hooks/comic';
 import {
-  SimpleSelectable,
+  SimpleSelectableProvider,
   useSimpleSelectableAction,
   useSimpleSelectableState,
 } from '@/views/hooks/simple_selectable';
@@ -90,14 +90,14 @@ export function MobileView (props: IProps) {
 
   return (
     <div className={classes.mobileView}>
-      <SimpleSelectable>
+      <SimpleSelectableProvider>
         <div className={classes.head}>
           <ContentWrapper classes={classes} />
         </div>
         <div className={classes.tail}>
           <ToolBar showHistory={showHistory} />
         </div>
-      </SimpleSelectable>
+      </SimpleSelectableProvider>
       <HistoryDialog open={historyOpen} onClose={hideHistory} />
     </div>
   );

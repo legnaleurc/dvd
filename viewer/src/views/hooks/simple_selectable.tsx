@@ -13,7 +13,7 @@ interface IActionContext {
 const ActionContext = React.createContext<IActionContext | null>(null);
 
 
-export function SimpleSelectable (props: React.PropsWithChildren<{}>) {
+export function SimpleSelectableProvider (props: React.PropsWithChildren<{}>) {
   const [state, dispatch] = React.useReducer(reduce, {
     dict: {},
     count: 0,
