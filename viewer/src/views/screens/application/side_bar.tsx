@@ -3,13 +3,16 @@ import { Hidden } from '@material-ui/core';
 import clsx from 'clsx';
 
 import { useFullScreenState } from '@/views/hooks/fullscreen';
-import { Classes } from './hooks';
 import { DesktopDrawerMenu, MobileDrawerMenu } from './main_menu';
 import { ISiteChunk } from './site_map';
 
 
+interface IClasses {
+  drawer: string;
+  hidden: string;
+}
 interface IProps {
-  classes: Classes;
+  classes: IClasses;
   siteMap: ISiteChunk[];
   tabIndex: number;
   changeTab: (index: number) => void;

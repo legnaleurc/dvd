@@ -1,13 +1,15 @@
 import React from 'react';
 import clsx from 'clsx';
 
-import { Classes } from './hooks';
 
-
+interface IClasses {
+  hidden: string;
+  tabPanel: string;
+}
 interface IProps {
   index: number;
   value: number;
-  classes: Classes;
+  classes: IClasses;
 }
 export function TabPanel (props: React.PropsWithChildren<IProps>) {
   const { children, classes, value, index } = props;

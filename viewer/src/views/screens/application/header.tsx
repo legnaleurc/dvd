@@ -8,11 +8,18 @@ import { Menu as MenuIcon } from '@material-ui/icons';
 import clsx from 'clsx';
 
 import { useFullScreenState } from '@/views/hooks/fullscreen';
-import { Classes } from './hooks';
 
 
+interface IClasses {
+  head: string;
+  hidden: string;
+  toolBar: string;
+  mobileMenuButton: string;
+  desktopMenuButton: string;
+  screenToolBar: string;
+}
 interface IProps {
-  classes: Classes;
+  classes: IClasses;
   toggleMobileDrawer: () => void;
   toggleDesktopDrawer: () => void;
   toolBarRef: React.RefObject<HTMLDivElement>;

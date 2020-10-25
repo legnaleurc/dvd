@@ -3,13 +3,18 @@ import { Box } from '@material-ui/core';
 import clsx from 'clsx';
 
 import { useFullScreenState } from '@/views/hooks/fullscreen';
-import { Classes } from './hooks';
 import { TabPanel } from './tab_panel';
 import { ISiteChunk } from './site_map';
 
 
+interface IClasses {
+  tail: string;
+  hidden: string;
+  fakeToolBar: string;
+  tabPanel: string;
+}
 interface IProps {
-  classes: Classes;
+  classes: IClasses;
   siteMap: ISiteChunk[];
   tabIndex: number;
   toolBarEl?: HTMLDivElement;
