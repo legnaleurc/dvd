@@ -47,7 +47,7 @@ function reduce (state: IState, action: ActionType) {
       return {
         ...state,
         updating: false,
-        nodes: Object.assign({}, nodes),
+        nodes: { ...nodes },
         revision: revision + 1,
       };
     }
@@ -72,12 +72,13 @@ function reduce (state: IState, action: ActionType) {
         nodes[node.id] = node;
       }
 
-      // root changes means all data need reinitialize
+      // root changes means all data need to be flushed
       return {
         ...state,
         updating: false,
         nodes,
         rootId: node.id,
+        revision: state.revision + 1,
       };
     }
     case 'LOAD_LIST_BEGIN':
@@ -97,10 +98,11 @@ function reduce (state: IState, action: ActionType) {
       }
 
       const parent = nodes[id];
-      nodes[id] = Object.assign({}, parent, {
+      nodes[id] = {
+        ...parent,
         fetched: true,
         children: childNodes.map(node => node.id),
-      });
+      };
 
       return {
         ...state,
