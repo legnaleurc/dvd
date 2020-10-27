@@ -22,7 +22,7 @@ function reduce (state: IState, action: ActionType) {
         ...state,
         updating: false,
       };
-    case 'SYNC_BEGIN':
+    case 'REQUEST_BEGIN':
       return {
         ...state,
         updating: true,
@@ -51,11 +51,6 @@ function reduce (state: IState, action: ActionType) {
         revision: revision + 1,
       };
     }
-    case 'LOAD_ROOT_BEGIN':
-      return {
-        ...state,
-        updating: true,
-      };
     case 'LOAD_ROOT_END': {
       const { rawNode, children } = action.value;
       const cmp = getCompareFunction(state.sortKey);
@@ -81,11 +76,6 @@ function reduce (state: IState, action: ActionType) {
         revision: state.revision + 1,
       };
     }
-    case 'LOAD_LIST_BEGIN':
-      return {
-        ...state,
-        updating: true,
-      };
     case 'LOAD_LIST_END': {
       const { nodes, sortKey } = state;
       const { id, children } = action.value;
@@ -110,16 +100,6 @@ function reduce (state: IState, action: ActionType) {
         nodes: { ...nodes },
       };
     }
-    case 'RENAME_BEGIN':
-      return {
-        ...state,
-        updating: true,
-      };
-    case 'RENAME_END':
-      return {
-        ...state,
-        updating: false,
-      };
     case 'SORT': {
       const { nodes, rootId } = state;
       const key = action.value;

@@ -15,7 +15,7 @@ export function useActions () {
         return;
       }
       dispatch({
-        type: 'SYNC_BEGIN',
+        type: 'REQUEST_BEGIN',
         value: null,
       });
       try {
@@ -36,7 +36,7 @@ export function useActions () {
         return;
       }
       dispatch({
-        type: 'LOAD_ROOT_BEGIN',
+        type: 'REQUEST_BEGIN',
         value: null,
       });
       try {
@@ -61,7 +61,7 @@ export function useActions () {
         return;
       }
       dispatch({
-        type: 'LOAD_LIST_BEGIN',
+        type: 'REQUEST_BEGIN',
         value: null,
       });
       try {
@@ -85,14 +85,15 @@ export function useActions () {
         return;
       }
       dispatch({
-        type: 'RENAME_BEGIN',
+        type: 'REQUEST_BEGIN',
         value: null,
       });
       try {
         await fileSystem.rename(id, name);
+        const changeList = await fileSystem.sync();
         dispatch({
-          type: 'RENAME_END',
-          value: null,
+          type: 'SYNC_END',
+          value: changeList,
         });
       } catch (e) {
         dispatch({
@@ -156,7 +157,6 @@ export function useActions () {
   }, [self]);
   const rename = React.useCallback(async (id: string, name: string) => {
     await self.current.rename(id, name);
-    await self.current.sync();
   }, [self]);
   const setSortKey = React.useCallback((key: SortKey) => {
     self.current.setSortKey(key);

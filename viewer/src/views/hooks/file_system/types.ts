@@ -52,13 +52,9 @@ interface ILoadList {
 
 export type ActionType = (
   | IAction<'ERROR', Error>
-  | IAction<'SYNC_BEGIN', null>
+  | IAction<'REQUEST_BEGIN', null>
   | IAction<'SYNC_END', ChangeResponse[]>
-  | IAction<'LOAD_ROOT_BEGIN', null>
   | IAction<'LOAD_ROOT_END', ILoadRoot>
-  | IAction<'LOAD_LIST_BEGIN', null>
   | IAction<'LOAD_LIST_END', ILoadList>
-  | IAction<'RENAME_BEGIN', null>
-  | IAction<'RENAME_END', null>
   | IAction<'SORT', SortKey>
 );
