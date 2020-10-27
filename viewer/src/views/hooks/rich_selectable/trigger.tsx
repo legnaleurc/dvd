@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useInstance } from '@/lib';
-import { useRichSelectableAction, useRichSelectableState } from './context';
+import { useRichSelectableAction } from './context';
 
 
 interface IPureProps {
