@@ -22,16 +22,14 @@ export function createNode (node: NodeResponse): Node_ {
 
 export function applyChange (needSort: Set<string>, nodes: NodeDict, change: ChangeResponse) {
   if (change.removed === true) {
-    const rcr = (change as RemovedChangeResponse);
-    removeNode(nodes, rcr.id);
+    removeNode(nodes, change.id);
     return;
   }
-  const ucr = change as UpsertChangeResponse;
-  if (ucr.node.trashed) {
-    removeNode(nodes, ucr.node.id);
+  if (change.node.trashed) {
+    removeNode(nodes, change.node.id);
     return;
   }
-  upsertNode(needSort, nodes, ucr.node);
+  upsertNode(needSort, nodes, change.node);
 }
 
 

@@ -128,19 +128,19 @@ export interface NodeResponse {
 }
 
 
-export interface ChangeResponse {
-  removed: boolean;
-}
-
-
-export interface RemovedChangeResponse extends ChangeResponse {
+export interface RemovedChangeResponse {
+  removed: true;
   id: string;
 }
 
 
-export interface UpsertChangeResponse extends ChangeResponse {
+export interface UpsertChangeResponse {
+  removed: false;
   node: NodeResponse;
 }
+
+
+export type ChangeResponse = RemovedChangeResponse | UpsertChangeResponse;
 
 
 export interface SearchResponse extends NodeResponse {
