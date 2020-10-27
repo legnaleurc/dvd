@@ -15,7 +15,7 @@ import { getMixins, useInstance } from '@/lib';
 import {
   useFileSystemAction,
   useFileSystemState,
-  IFileNode,
+  INodeLike,
 } from '@/views/hooks/file_system';
 import { useQueueAction, useQueueState } from '@/views/hooks/queue';
 import { useComicState, useComicAction } from '@/views/hooks/comic';
@@ -56,9 +56,9 @@ interface IPureProps {
   copyUrl: (idList: string[]) => Promise<void>;
   download: (idList: string[]) => void;
   rename: (id: string, name: string) => Promise<void>;
-  trashNodes: (getNode: (id: string) => IFileNode, idList: string[]) => Promise<void>;
+  trashNodes: (getNode: (id: string) => INodeLike, idList: string[]) => Promise<void>;
   pendingCount: number;
-  getNode: (id: string) => IFileNode;
+  getNode: (id: string) => INodeLike;
   unpacking: boolean;
   loadComic: (id: string, name: string) => Promise<void>;
   count: number;
@@ -274,7 +274,7 @@ const MemorizedPureContentActionBar = React.memo(PureContentActionBar);
 
 
 interface IProps {
-  getNode: (id: string) => IFileNode;
+  getNode: (id: string) => INodeLike;
 }
 export function ContentActionBar (props: IProps) {
   const { getNode } = props;

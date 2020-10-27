@@ -3,7 +3,7 @@ import React from 'react';
 import { useInstance, getActionList } from '@/lib';
 import { useGlobal } from '@/views/hooks/global';
 import { useReducer } from './reducer';
-import { SortKey, IFileNode } from './types';
+import { SortKey, INodeLike } from './types';
 
 
 export function useActions () {
@@ -121,7 +121,7 @@ export function useActions () {
         window.open(url, '_blank');
       }
     },
-    async openUrl (node: IFileNode) {
+    async openUrl (node: INodeLike) {
       if (!node || !node.mimeType) {
         return;
       }
@@ -167,7 +167,7 @@ export function useActions () {
   const download = React.useCallback((idList: string[]) => {
     self.current.download(idList);
   }, [self]);
-  const openUrl = React.useCallback(async (node: IFileNode) => {
+  const openUrl = React.useCallback(async (node: INodeLike) => {
     await self.current.openUrl(node);
   }, [self]);
   const getNode = React.useCallback((id: string) => {

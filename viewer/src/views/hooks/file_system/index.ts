@@ -9,5 +9,5 @@ export {
   SORT_BY_NAME_ASC,
   SortKey,
   Node_,
-  IFileNode,
+  INodeLike,
 } from './types';

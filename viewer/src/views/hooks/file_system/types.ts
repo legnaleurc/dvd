@@ -1,7 +1,7 @@
 import { ChangeResponse, NodeResponse } from "@/lib";
 
 
-export interface IFileNode {
+export interface INodeLike {
   id: string;
   name: string;
   mimeType: string;
