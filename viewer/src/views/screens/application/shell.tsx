@@ -19,10 +19,10 @@ interface IProps {
 function ShellApplication (props: IProps) {
   return (
     <GlobalProvider fileSystem={props.fileSystem}>
-      <FileSystemProvider>
-        <QueueProvider>
-          <ComicProvider>
-            <ThemeProvider theme={props.theme}>
+      <ThemeProvider theme={props.theme}>
+        <FileSystemProvider>
+          <QueueProvider>
+            <ComicProvider>
               <FullScreenProvider>
                 <BrowserRouter>
                   <Switch>
@@ -34,10 +34,10 @@ function ShellApplication (props: IProps) {
                   </Switch>
                 </BrowserRouter>
               </FullScreenProvider>
-            </ThemeProvider>
-          </ComicProvider>
-        </QueueProvider>
-      </FileSystemProvider>
+            </ComicProvider>
+          </QueueProvider>
+        </FileSystemProvider>
+      </ThemeProvider>
     </GlobalProvider>
   );
 }
