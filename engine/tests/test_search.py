@@ -1,26 +1,22 @@
-import unittest as ut
-import unittest.mock as utm
+from unittest import IsolatedAsyncioTestCase
+from unittest.mock import AsyncMock, Mock, NonCallableMock
 
 from engine.util import SearchEngine
 
-from .util import async_test, async_mock
 
-
-class SearchTest(ut.TestCase):
+class SearchTest(IsolatedAsyncioTestCase):
 
     def setUp(self):
         self._nodes = [
-            utm.Mock(),
+            Mock(),
         ]
         self._drive = create_fake_drive(self._nodes)
         self._engine = SearchEngine(self._drive)
 
-    @async_test
     async def testSearchSingleWord(self):
         nodes = await self._engine.get_nodes_by_regex(r'alice')
         self.assertIsNotNone(nodes)
 
-    @async_test
     async def testSearchCache(self):
         await self._engine.get_nodes_by_regex(r'alice')
         await self._engine.get_nodes_by_regex(r'alice')
@@ -28,6 +24,6 @@ class SearchTest(ut.TestCase):
 
 
 def create_fake_drive(nodes):
-    drive = utm.NonCallableMock()
-    drive.find_nodes_by_regex = async_mock(return_value=nodes)
+    drive = NonCallableMock()
+    drive.find_nodes_by_regex = AsyncMock(return_value=nodes)
     return drive
