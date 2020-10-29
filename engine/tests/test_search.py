@@ -24,7 +24,7 @@ class SearchTest(ut.TestCase):
     async def testSearchCache(self):
         await self._engine.get_nodes_by_regex(r'alice')
         await self._engine.get_nodes_by_regex(r'alice')
-        self.assertEquals(self._drive.find_nodes_by_regex.call_count, 1)
+        self.assertEqual(self._drive.find_nodes_by_regex.call_count, 1)
 
 
 def create_fake_drive(nodes):
