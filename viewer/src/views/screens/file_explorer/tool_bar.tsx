@@ -126,6 +126,7 @@ export function ToolBar (props: IToolBar) {
               value={menu.value}
               selected={menu.value === sortKey}
               onClick={() => {
+                closeMenu();
                 setSortKey(menu.value);
               }}
             >
