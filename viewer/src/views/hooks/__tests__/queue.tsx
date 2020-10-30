@@ -134,6 +134,22 @@ describe('queue', () => {
       };
     }
 
+    function trash (fs: FileSystem, idList: string[]) {
+      const mfs = mocked(fs);
+      const blocker = new Event_();
+      mfs.trash.mockImplementation(async (id: string) => {
+        await blocker.wait();
+      });
+      const btn = screen.getByRole('button', { name: 'trash' });
+      btn.dataset['idList'] = JSON.stringify(idList);
+      userEvent.click(btn);
+      return {
+        unblock () {
+          blocker.set();
+        },
+      };
+    }
+
     function nameList () {
       return screen.getAllByRole('listitem');
     }
@@ -170,7 +186,7 @@ describe('queue', () => {
       expect(resolvedCount()).toHaveValue(0);
     });
 
-    it('should have proper flow', async () => {
+    it('can move items', async () => {
       const fileSystem = newFileSystem({
         move: jest.fn(),
       });
@@ -185,6 +201,31 @@ describe('queue', () => {
       ));
 
       const { unblock } = move(fileSystem, Object.keys(nodeList), '8');
+      expect(pendingCount()).toHaveValue(8);
+
+      unblock();
+      await waitFor(() => {
+        expect(pendingCount()).toHaveValue(0);
+      });
+      expect(resolvedCount()).toHaveValue(8);
+      expect(actionStub).toHaveBeenCalledTimes(1);
+    });
+
+    it('can trash items', async () => {
+      const fileSystem = newFileSystem({
+        trash: jest.fn(),
+      });
+      const { nodeList, getNode } = makeNodeList();
+      const actionStub = jest.fn();
+      render((
+        <Root
+          fileSystem={fileSystem}
+          getNode={getNode}
+          actionStub={actionStub}
+        />
+      ));
+
+      const { unblock } = trash(fileSystem, Object.keys(nodeList));
       expect(pendingCount()).toHaveValue(8);
 
       unblock();
