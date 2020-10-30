@@ -253,6 +253,7 @@ function PureContentActionBar(props: IPureProps) {
       <div className={classes.expand} />
       <div className={classes.group}>
         <IconButton
+          aria-label="trash"
           color="secondary"
           disabled={updating || count <= 0}
           onClick={trash}
