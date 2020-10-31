@@ -122,6 +122,11 @@ function useActions (props: IPureProps) {
         return '';
       }
       const node = getNode(list[0]);
+      if (!node) {
+        // It is possible that node has been removed but the selection haven't
+        // been cleared yet. Should only happen during state update.
+        return '';
+      }
       return node.name;
     },
   }), [
