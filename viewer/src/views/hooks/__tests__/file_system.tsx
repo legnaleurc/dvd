@@ -39,6 +39,7 @@ describe('file_system', () => {
         loadRoot,
         loadList,
         rename,
+        mkdir,
         setSortKey,
         copyUrl,
         download,
@@ -54,6 +55,7 @@ describe('file_system', () => {
         loadRoot,
         loadList,
         rename,
+        mkdir,
         setSortKey,
         copyUrl,
         download,
@@ -69,6 +71,11 @@ describe('file_system', () => {
         const data = event.currentTarget.dataset;
         await rename(data['id']!, data['name']!);
       }, [rename]);
+
+      const onMkdir = makeEventHandler(async (event) => {
+        const data = event.currentTarget.dataset;
+        await mkdir(data['name']!, data['parentId']!);
+      }, [mkdir]);
 
       const onDownload = makeEventHandler((event) => {
         const data = event.currentTarget.dataset;
@@ -106,6 +113,7 @@ describe('file_system', () => {
           <button aria-label="loadRoot" onClick={loadRoot} />
           <button aria-label="loadList" onClick={onLoadList} />
           <button aria-label="rename" onClick={onRename} />
+          <button aria-label="mkdir" onClick={onMkdir} />
           <button aria-label="download" onClick={onDownload} />
           <button aria-label="copyUrl" onClick={onCopyUrl} />
           <button aria-label="openUrl" onClick={onOpenUrl} />
@@ -186,6 +194,18 @@ describe('file_system', () => {
       mfs.rename.mockResolvedValueOnce();
       mfs.sync.mockResolvedValueOnce([
         { removed: false, node: makeNode({ id, name, parent_list: ['1'] }) },
+      ]);
+      userEvent.click(btn);
+    }
+
+    function mkdir (fs: FileSystem, name: string, parentId: string, newId: string) {
+      const mfs = mocked(fs);
+      const btn = screen.getByRole('button', { name: 'mkdir' });
+      btn.dataset['name'] = name;
+      btn.dataset['parentId'] = parentId;
+      mfs.mkdir.mockResolvedValueOnce();
+      mfs.sync.mockResolvedValueOnce([
+        { removed: false, node: makeNode({ id: newId, name, parent_list: [parentId] }) },
       ]);
       userEvent.click(btn);
     }
@@ -433,6 +453,40 @@ describe('file_system', () => {
       expect(screen.getByTestId('2')).toHaveTextContent('bar');
     });
 
+    it('mkdir', async () => {
+      const actionStub = jest.fn();
+      const fileSystem = newFileSystem({
+        root: jest.fn(),
+        list: jest.fn(),
+        mkdir: jest.fn(),
+        sync: jest.fn(),
+      });
+      render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
+
+      loadRoot(fileSystem, '1', [
+        {
+          id: '2',
+          name: 'foo',
+          parent_list: ['1'],
+        },
+      ]);
+      await waitFor(() => {
+        expect(updating()).not.toBeChecked();
+      });
+
+      mkdir(fileSystem, 'bar', '1', '3');
+      expect(actionStub).toHaveBeenCalledTimes(1);
+      expect(updating()).toBeChecked();
+      expect(screen.getByTestId('2')).toHaveTextContent('foo');
+
+      await waitFor(() => {
+        expect(updating()).not.toBeChecked();
+      });
+      expect(actionStub).toHaveBeenCalledTimes(1);
+      expect(fileSystem.mkdir).toHaveBeenLastCalledWith('bar', '1');
+      expect(screen.getByTestId('3')).toHaveTextContent('bar');
+    });
+
     it('download', () => {
       const actionStub = jest.fn();
       const fileSystem = newFileSystem({
@@ -481,6 +535,8 @@ describe('file_system', () => {
         id: '2',
         name: 'foo',
         mimeType: 'video/mp4',
+        parentId: '1',
+        children: null,
       });
       await waitFor(() => {
         expect(fileSystem.apply).toHaveBeenCalledTimes(1);

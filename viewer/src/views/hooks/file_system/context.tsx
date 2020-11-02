@@ -18,6 +18,7 @@ interface IActionContext {
   loadRoot: () => Promise<void>;
   loadList: (id: string) => Promise<void>;
   rename: (id: string, name: string) => Promise<void>;
+  mkdir: (name: string, parentId: string) => Promise<void>;
   setSortKey: (key: SortKey) => void;
   copyUrl: (idList: string[]) => Promise<void>;
   download: (idList: string[]) => void;
@@ -34,6 +35,7 @@ export function FileSystemProvider (props: React.PropsWithChildren<{}>) {
     loadRoot,
     loadList,
     rename,
+    mkdir,
     setSortKey,
     copyUrl,
     download,
@@ -45,6 +47,7 @@ export function FileSystemProvider (props: React.PropsWithChildren<{}>) {
     loadRoot,
     loadList,
     rename,
+    mkdir,
     setSortKey,
     copyUrl,
     download,
@@ -55,6 +58,7 @@ export function FileSystemProvider (props: React.PropsWithChildren<{}>) {
     loadRoot,
     loadList,
     rename,
+    mkdir,
     setSortKey,
     copyUrl,
     download,

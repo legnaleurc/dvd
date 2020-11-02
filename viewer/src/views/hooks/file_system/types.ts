@@ -5,6 +5,8 @@ export interface INodeLike {
   id: string;
   name: string;
   mimeType: string;
+  children: string[] | null;
+  parentId: string | null;
 }
 
 

@@ -102,6 +102,28 @@ export function useActions () {
         });
       }
     },
+    async mkdir (name: string, parentId: string) {
+      if (state.updating) {
+        return;
+      }
+      dispatch({
+        type: 'REQUEST_BEGIN',
+        value: null,
+      });
+      try {
+        await fileSystem.mkdir(name, parentId);
+        const changeList = await fileSystem.sync();
+        dispatch({
+          type: 'SYNC_END',
+          value: changeList,
+        });
+      } catch (e) {
+        dispatch({
+          type: 'ERROR',
+          value: e,
+        });
+      }
+    },
     setSortKey (key: SortKey) {
       dispatch({
         type: 'SORT',
@@ -158,6 +180,9 @@ export function useActions () {
   const rename = React.useCallback(async (id: string, name: string) => {
     await self.current.rename(id, name);
   }, [self]);
+  const mkdir = React.useCallback(async (name: string, parentId: string) => {
+    await self.current.mkdir(name, parentId);
+  }, [self]);
   const setSortKey = React.useCallback((key: SortKey) => {
     self.current.setSortKey(key);
   }, [self]);
@@ -180,6 +205,7 @@ export function useActions () {
     loadRoot,
     loadList,
     rename,
+    mkdir,
     setSortKey,
     copyUrl,
     download,
