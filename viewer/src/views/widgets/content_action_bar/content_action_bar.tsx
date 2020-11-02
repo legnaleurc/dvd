@@ -9,6 +9,7 @@ import {
   Edit as EditIcon,
   ImportContacts as ImportContactsIcon,
   RemoveShoppingCart as RemoveShoppingCartIcon,
+  CreateNewFolder as CreateNewFolderIcon,
 } from '@material-ui/icons';
 
 import { getMixins, useInstance } from '@/lib';
@@ -24,6 +25,7 @@ import {
   useRichSelectableState,
 } from '@/views/hooks/rich_selectable';
 import { RenameDialog } from './rename_dialog';
+import { MakeFolderDialog } from './make_folder_dialog';
 import { QueueDialog } from './queue_dialog';
 
 
@@ -56,6 +58,7 @@ interface IPureProps {
   copyUrl: (idList: string[]) => Promise<void>;
   download: (idList: string[]) => void;
   rename: (id: string, name: string) => Promise<void>;
+  mkdir: (name: string, parentId: string) => Promise<void>;
   trashNodes: (getNode: (id: string) => INodeLike, idList: string[]) => Promise<void>;
   pendingCount: number;
   getNode: (id: string) => INodeLike;
@@ -73,6 +76,7 @@ function useActions (props: IPureProps) {
     copyUrl,
     download,
     rename,
+    mkdir,
     trashNodes,
     getNode,
     unpacking,
@@ -82,6 +86,7 @@ function useActions (props: IPureProps) {
   } = props;
 
   const [renameOpen, setRenameOpen] = React.useState(false);
+  const [mkdirOpen, setMkdirOpen] = React.useState(false);
   const [queueOpen, setQueueOpen] = React.useState(false);
 
   const self = useInstance(() => ({
@@ -112,6 +117,13 @@ function useActions (props: IPureProps) {
       }
       await rename(list[0], name);
     },
+    async mkdir (name: string) {
+      const parentId = this.selectedParentId;
+      if (!parentId) {
+        return;
+      }
+      await mkdir(name, parentId);
+    },
     async trash () {
       const list = getSelectionList();
       await trashNodes(getNode, list);
@@ -122,6 +134,39 @@ function useActions (props: IPureProps) {
         return '';
       }
       const node = getNode(list[0]);
+      if (!node) {
+        // It is possible that node has been removed but the selection haven't
+        // been cleared yet. Should only happen during state update.
+        return '';
+      }
+      return node.name;
+    },
+    get selectedParentId () {
+      const list = getSelectionList();
+      if (list.length !== 1) {
+        return '';
+      }
+      const node = getNode(list[0]);
+      if (!node) {
+        // It is possible that node has been removed but the selection haven't
+        // been cleared yet. Should only happen during state update.
+        return '';
+      }
+      if (node.children) {
+        return node.id;
+      }
+      // not a folder, use its parent
+      if (!node.parentId) {
+        return ''
+      }
+      return node.parentId;
+    },
+    get selectedParentName () {
+      const parentId = this.selectedParentId;
+      if (!parentId) {
+        return '';
+      }
+      const node = getNode(parentId);
       if (!node) {
         // It is possible that node has been removed but the selection haven't
         // been cleared yet. Should only happen during state update.
@@ -156,12 +201,21 @@ function useActions (props: IPureProps) {
   const rename_ = React.useCallback(async (name: string) => {
     await self.current.rename(name);
   }, [self]);
+  const mkdir_ = React.useCallback(async (name: string) => {
+    await self.current.mkdir(name);
+  }, [self]);
   const showRename = React.useCallback(() => {
     setRenameOpen(true);
   }, [setRenameOpen]);
   const hideRename = React.useCallback(() => {
     setRenameOpen(false);
   }, [setRenameOpen]);
+  const showMkdir = React.useCallback(() => {
+    setMkdirOpen(true);
+  }, [setMkdirOpen]);
+  const hideMkdir = React.useCallback(() => {
+    setMkdirOpen(false);
+  }, [setMkdirOpen]);
   const showQueue = React.useCallback(() => {
     setQueueOpen(true);
   }, [setQueueOpen]);
@@ -176,14 +230,19 @@ function useActions (props: IPureProps) {
     copy,
     download: download_,
     rename: rename_,
+    mkdir: mkdir_,
     trash,
     renameOpen,
     showRename,
     hideRename,
+    mkdirOpen,
+    showMkdir,
+    hideMkdir,
     queueOpen,
     showQueue,
     hideQueue,
     selectedName: self.current.selectedName,
+    selectedParentName: self.current.selectedParentName,
   };
 }
 
@@ -199,14 +258,19 @@ function PureContentActionBar(props: IPureProps) {
     copy,
     download,
     rename,
+    mkdir,
     trash,
     renameOpen,
     showRename,
     hideRename,
+    mkdirOpen,
+    showMkdir,
+    hideMkdir,
     queueOpen,
     showQueue,
     hideQueue,
     selectedName,
+    selectedParentName,
   } = useActions(props);
 
   return (
@@ -234,6 +298,13 @@ function PureContentActionBar(props: IPureProps) {
         >
           <EditIcon />
         </IconButton>
+        <IconButton
+          disabled={unpacking || count !== 1}
+          onClick={showMkdir}
+        >
+          <CreateNewFolderIcon />
+        </IconButton>
+        <Divider />
         <IconButton
           disabled={count <= 0}
           onClick={copy}
@@ -272,6 +343,12 @@ function PureContentActionBar(props: IPureProps) {
         name={selectedName}
         rename={rename}
       />
+      <MakeFolderDialog
+        open={mkdirOpen}
+        onClose={hideMkdir}
+        name={selectedParentName}
+        mkdir={mkdir}
+      />
       <QueueDialog open={queueOpen} onClose={hideQueue} />
     </div>
   );
@@ -285,7 +362,7 @@ interface IProps {
 export function ContentActionBar (props: IProps) {
   const { getNode } = props;
   const { updating } = useFileSystemState();
-  const { copyUrl, download, rename } = useFileSystemAction();
+  const { copyUrl, download, rename, mkdir } = useFileSystemAction();
   const { trashNodes } = useQueueAction();
   const { pendingCount } = useQueueState();
   const { unpacking } = useComicState();
@@ -298,6 +375,7 @@ export function ContentActionBar (props: IProps) {
       copyUrl={copyUrl}
       download={download}
       rename={rename}
+      mkdir={mkdir}
       trashNodes={trashNodes}
       pendingCount={pendingCount}
       getNode={getNode}
