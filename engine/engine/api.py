@@ -7,6 +7,7 @@ from typing import Any, Dict, List
 
 from aiohttp.web import Response, StreamResponse, View
 from wcpan.logger import EXCEPTION
+from wcpan.drive.core.drive import Drive
 
 from . import util
 
@@ -156,6 +157,34 @@ class NodeListView(View):
 
         nodes = sorted(nodes, key=lambda _: _['path'])
         return json_response(nodes)
+
+    async def post(self):
+        kwargs = await self.request.json()
+        kwargs = unpack_dict(kwargs, (
+            'parent_id',
+            'name',
+        ))
+        ok = all((k in kwargs for k in (
+            'parent_id',
+            'name',
+        )))
+        if not ok:
+            return Response(status=400)
+
+        drive: Drive = self.request.app['drive']
+        parent_id = kwargs['parent_id']
+        name = kwargs['name']
+        parent = await drive.get_node_by_id(parent_id)
+        try:
+            node = await drive.create_folder(
+                parent_node=parent,
+                folder_name=name,
+                exist_ok=False,
+            )
+            return json_response(node.to_dict())
+        except Exception as e:
+            EXCEPTION('engine', e) << name << parent_id
+            return Response(status=409)
 
 
 class NodeChildrenView(NodeObjectMixin, View):
@@ -333,6 +362,6 @@ def is_valid_range(range_: slice, size: int) -> bool:
     return True
 
 
-def unpack_dict(d: Dict[str, Any], keys: List[str]):
+def unpack_dict(d: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
     common_keys = set(keys) & set(d.keys())
     return { key: d[key] for key in common_keys }
