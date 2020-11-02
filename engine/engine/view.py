@@ -1,11 +1,11 @@
 import os.path as op
 
-import aiohttp.web as aw
+from aiohttp.web import View, FileResponse
 
 
-class IndexView(aw.View):
+class IndexView(View):
 
     async def get(self):
         path = self.request.app['static']
         path = op.join(path, 'index.html')
-        return aw.FileResponse(path=path)
+        return FileResponse(path=path)

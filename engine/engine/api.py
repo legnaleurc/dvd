@@ -1,11 +1,11 @@
 import asyncio
-import functools as ft
+import functools
 import json
 import re
 import shlex
 from typing import Any, Dict, List
 
-import aiohttp.web as aw
+from aiohttp.web import Response, StreamResponse, View
 from wcpan.logger import EXCEPTION
 
 from . import util as u
@@ -17,12 +17,12 @@ class NotFoundError(Exception):
 
 
 def raise_404(fn):
-    @ft.wraps(fn)
+    @functools.wraps(fn)
     async def wrapper(self):
         try:
             return await fn(self)
         except NotFoundError:
-            return aw.Response(status=404)
+            return Response(status=404)
     return wrapper
 
 
@@ -46,8 +46,8 @@ class NodeRandomAccessMixin(object):
     async def create_response(self):
         range_ = self.request.http_range
         if range_.start is None and range_.stop is None:
-            return aw.StreamResponse(status=200)
-        return aw.StreamResponse(status=206)
+            return StreamResponse(status=200)
+        return StreamResponse(status=206)
 
     async def feed(self, response, node):
         range_ = self.request.http_range
@@ -80,7 +80,7 @@ class NodeRandomAccessMixin(object):
                 await response.write(chunk)
 
 
-class NodeView(NodeObjectMixin, aw.View):
+class NodeView(NodeObjectMixin, View):
 
     @raise_404
     async def get(self):
@@ -105,7 +105,7 @@ class NodeView(NodeObjectMixin, aw.View):
             if 'name' in kwargs:
                 name = kwargs['name']
             await drive.rename_node(node, parent_node, name)
-        return aw.Response(
+        return Response(
             status=204,
             headers={
                 'Access-Control-Allow-Origin': '*',
@@ -119,14 +119,14 @@ class NodeView(NodeObjectMixin, aw.View):
         path = await drive.get_path(node)
         se.drop_value(str(path))
         await drive.trash_node(node)
-        return aw.Response(
+        return Response(
             status=204,
             headers={
                 'Access-Control-Allow-Origin': '*',
             })
 
     async def options(self):
-        return aw.Response(
+        return Response(
             status=204,
             headers={
                 'Access-Control-Allow-Origin': '*',
@@ -139,26 +139,26 @@ class NodeView(NodeObjectMixin, aw.View):
             })
 
 
-class NodeListView(aw.View):
+class NodeListView(View):
 
     async def get(self):
         name_filter = self.request.query.get('name', None)
         if not name_filter:
-            return aw.Response(status=400)
+            return Response(status=400)
 
         se = self.request.app['se']
         try:
             nodes = await search_by_name(se, name_filter)
         except u.InvalidPatternError:
-            return aw.Response(status=400)
+            return Response(status=400)
         except u.SearchFailedError:
-            return aw.Response(status=503)
+            return Response(status=503)
 
         nodes = sorted(nodes, key=lambda _: _['path'])
         return json_response(nodes)
 
 
-class NodeChildrenView(NodeObjectMixin, aw.View):
+class NodeChildrenView(NodeObjectMixin, View):
 
     @raise_404
     async def get(self):
@@ -170,26 +170,26 @@ class NodeChildrenView(NodeObjectMixin, aw.View):
         return json_response(children)
 
 
-class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, aw.View):
+class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
 
     @raise_404
     async def get(self):
         node = await self.get_object()
         if node.is_folder:
-            return aw.Response(status=400)
+            return Response(status=400)
 
         response = await self.create_response()
         await self.feed(response, node)
         return response
 
 
-class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, aw.View):
+class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, View):
 
     @raise_404
     async def get(self):
         node = await self.get_object()
         if node.is_folder:
-            return aw.Response(status=400)
+            return Response(status=400)
 
         response = await self.create_response()
         response.headers['Content-Disposition'] = f'attachment; filename="{node.name}"'
@@ -197,7 +197,7 @@ class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, aw.View):
         return response
 
 
-class NodeImageListView(NodeObjectMixin, aw.View):
+class NodeImageListView(NodeObjectMixin, View):
 
     @raise_404
     async def get(self):
@@ -207,7 +207,7 @@ class NodeImageListView(NodeObjectMixin, aw.View):
         try:
             manifest = await ue.get_manifest(node)
         except u.UnpackFailedError:
-            return aw.Response(status=503)
+            return Response(status=503)
 
         manifest = [{
             'width': _['width'],
@@ -216,7 +216,7 @@ class NodeImageListView(NodeObjectMixin, aw.View):
         return json_response(manifest)
 
 
-class NodeImageView(NodeObjectMixin, aw.View):
+class NodeImageView(NodeObjectMixin, View):
 
     @raise_404
     async def get(self):
@@ -224,22 +224,22 @@ class NodeImageView(NodeObjectMixin, aw.View):
 
         image_id = self.request.match_info.get('image_id', None)
         if not image_id:
-            return aw.Response(status=404)
+            return Response(status=404)
         image_id = int(image_id)
 
         ue = self.request.app['ue']
         try:
             manifest = await ue.get_manifest(node)
         except u.UnpackFailedError:
-            return aw.Response(status=503)
+            return Response(status=503)
 
         try:
             data = manifest[image_id]
         except IndexError:
-            return aw.Response(status=404)
+            return Response(status=404)
 
         drive = self.request.app['drive']
-        response = aw.StreamResponse(status=200)
+        response = StreamResponse(status=200)
         response.content_type = data['type']
         response.content_length = data['size']
 
@@ -259,7 +259,7 @@ class NodeImageView(NodeObjectMixin, aw.View):
         return response
 
 
-class ChangesView(aw.View):
+class ChangesView(View):
 
     async def post(self):
         drive = self.request.app['drive']
@@ -269,7 +269,7 @@ class ChangesView(aw.View):
         return json_response(changes)
 
 
-class ApplyView(aw.View):
+class ApplyView(View):
 
     async def post(self):
         kwargs = await self.request.json()
@@ -282,12 +282,12 @@ class ApplyView(aw.View):
         p = await asyncio.create_subprocess_exec(*command)
         await p.communicate()
         assert p.returncode == 0
-        return aw.Response(status=204)
+        return Response(status=204)
 
 
 def json_response(data):
     data = json.dumps(data)
-    return aw.Response(
+    return Response(
         content_type='application/json',
         text=data + '\n',
         headers={

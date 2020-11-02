@@ -1,12 +1,10 @@
 import argparse
 import asyncio
-import logging
-import os.path as op
 import signal
 
-from aiohttp import web as aw
+from aiohttp.web import Application, AppRunner, TCPSite
 from wcpan.drive.core.drive import DriveFactory
-from wcpan.logger import setup as setup_logger, INFO, EXCEPTION
+from wcpan.logger import setup as setup_logger, EXCEPTION
 
 from . import api, util, view
 
@@ -38,7 +36,7 @@ class Daemon(object):
         port = self._kwargs.listen
         unpack_path = self._kwargs.unpack
         static_path = self._kwargs.static
-        app = aw.Application()
+        app = Application()
 
         setup_api_path(app)
         if static_path:
@@ -72,12 +70,12 @@ class ServerContext(object):
         log_format = '%s %r (%b) %Tfs'
         for k, v in context.items():
             app[k] = v
-        self._runner = aw.AppRunner(app, access_log_format=log_format)
+        self._runner = AppRunner(app, access_log_format=log_format)
         self._port = port
 
     async def __aenter__(self):
         await self._runner.setup()
-        site = aw.TCPSite(self._runner, port=self._port)
+        site = TCPSite(self._runner, port=self._port)
         await site.start()
         return self._runner
 

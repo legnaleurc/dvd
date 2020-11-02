@@ -1,14 +1,14 @@
 import asyncio
-import contextlib as cl
-import itertools as it
-import mimetypes as mt
 import os
-import os.path as op
 import pathlib
 import re
 import shutil
 import tempfile
 import time
+from contextlib import AsyncExitStack
+from itertools import zip_longest
+from mimetypes import guess_type
+from os.path import getsize, join as join_path
 
 from PIL import Image
 from wcpan.logger import EXCEPTION, DEBUG
@@ -129,7 +129,7 @@ class UnpackEngine(object):
         self._raii = None
 
     async def __aenter__(self):
-        async with cl.AsyncExitStack() as stack:
+        async with AsyncExitStack() as stack:
             self._tmp = stack.enter_context(tempfile.TemporaryDirectory())
             self._cleaner = await stack.enter_async_context(
                 UnpackCleaner(self._tmp)
@@ -195,13 +195,13 @@ class UnpackEngine(object):
 
     def _scan_local(self, node_id):
         rv = []
-        top = op.join(self._tmp, node_id)
+        top = join_path(self._tmp, node_id)
         for dirpath, dirnames, filenames in os.walk(top):
             dirnames.sort(key=FuzzyName)
             filenames.sort(key=FuzzyName)
             for filename in filenames:
-                path = op.join(dirpath, filename)
-                type_, encoding = mt.guess_type(path)
+                path = join_path(dirpath, filename)
+                type_, encoding = guess_type(path)
                 if type_ is None:
                     continue
                 if not type_.startswith('image/'):
@@ -215,7 +215,7 @@ class UnpackEngine(object):
                 rv.append({
                     'path': path,
                     'type': type_,
-                    'size': op.getsize(path),
+                    'size': getsize(path),
                     'width': width,
                     'height': height,
                 })
@@ -249,7 +249,7 @@ class FuzzyName(object):
         self._seg_list = seg_list
 
     def __lt__(self, that):
-        for l, r in it.zip_longest(self._seg_list, that._seg_list):
+        for l, r in zip_longest(self._seg_list, that._seg_list):
             # compare length: shorter first
             if l is None:
                 return True
