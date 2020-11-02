@@ -1,4 +1,4 @@
-import { Node_, SortKey } from './types';
+import { Node_, SortKey, SortFunction } from './types';
 
 
 function sortByName (a: Node_, b: Node_) {
@@ -23,7 +23,7 @@ function sortByDate (a: Node_, b: Node_) {
 }
 
 
-const TABLE: Record<SortKey, (a: Node_, b: Node_) => number> = {
+const TABLE: Record<SortKey, SortFunction> = {
   SORT_BY_NAME_ASC: sortByName,
   SORT_BY_MTIME_ASC: sortByDate,
   SORT_BY_MTIME_DES: (a: Node_, b: Node_) => (-1 * sortByDate(a, b)),

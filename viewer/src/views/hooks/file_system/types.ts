@@ -32,6 +32,9 @@ export type SortKey = (
 );
 
 
+export type SortFunction = (l: Node_, r: Node_) => number;
+
+
 interface IAction<T, V> {
   type: T;
   value: V;

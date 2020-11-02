@@ -1,10 +1,5 @@
-import {
-  ChangeResponse,
-  NodeResponse,
-  RemovedChangeResponse,
-  UpsertChangeResponse,
-} from '@/lib';
-import { Node_, NodeDict } from './types';
+import { ChangeResponse, NodeResponse } from '@/lib';
+import { Node_, NodeDict, SortFunction } from './types';
 
 
 export function createNode (node: NodeResponse): Node_ {
@@ -20,7 +15,11 @@ export function createNode (node: NodeResponse): Node_ {
 }
 
 
-export function applyChange (needSort: Set<string>, nodes: NodeDict, change: ChangeResponse) {
+export function applyChange (
+  needSort: Set<string>,
+  nodes: NodeDict,
+  change: ChangeResponse,
+) {
   if (change.removed === true) {
     removeNode(nodes, change.id);
     return;
@@ -130,7 +129,7 @@ function getParentId (rawNode: NodeResponse) {
 }
 
 
-export function deepSort (nodes: NodeDict, id: string, cmp: (a: Node_, b: Node_) => number) {
+export function deepSort (nodes: NodeDict, id: string, cmp: SortFunction) {
   const node = nodes[id];
   if (!node) {
     return;
