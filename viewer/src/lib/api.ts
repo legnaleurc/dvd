@@ -42,6 +42,13 @@ export class FileSystem {
     });
   }
 
+  async mkdir (name: string, parent_id: string) {
+    await this._post(`/api/v1/nodes`, {
+      name,
+      parent_id,
+    });
+  }
+
   async trash (id: string) {
     await this._delete(`/api/v1/nodes/${id}`);
   }

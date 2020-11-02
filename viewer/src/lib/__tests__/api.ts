@@ -114,6 +114,28 @@ describe('api', () => {
       expect(args).toEqual(expected);
     });
 
+    it('mkdir', async () => {
+      const parentId = '1';
+      const name = 'test';
+      const expected = {
+        name,
+        parent_id: parentId,
+      };
+      fetchMock.mockOnce(async () => {
+        return '';
+      });
+
+      const fileSystem = new FileSystem();
+      await fileSystem.mkdir(name, parentId);
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const request = fetchMock.mock.calls[0][0] as Request;
+      expect(request.method).toEqual('POST');
+      expect(request.url).toEqual(`http://localhost/api/v1/nodes`);
+      const args = await request.json();
+      expect(args).toEqual(expected);
+    });
+
     it('trash', async () => {
       const id = '1';
       fetchMock.mockOnce(async () => {
