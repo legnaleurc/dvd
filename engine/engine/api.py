@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 from aiohttp.web import Response, StreamResponse, View
 from wcpan.logger import EXCEPTION
 
-from . import util as u
+from . import util
 
 
 class NotFoundError(Exception):
@@ -149,9 +149,9 @@ class NodeListView(View):
         se = self.request.app['se']
         try:
             nodes = await search_by_name(se, name_filter)
-        except u.InvalidPatternError:
+        except util.InvalidPatternError:
             return Response(status=400)
-        except u.SearchFailedError:
+        except util.SearchFailedError:
             return Response(status=503)
 
         nodes = sorted(nodes, key=lambda _: _['path'])
@@ -206,7 +206,7 @@ class NodeImageListView(NodeObjectMixin, View):
         ue = self.request.app['ue']
         try:
             manifest = await ue.get_manifest(node)
-        except u.UnpackFailedError:
+        except util.UnpackFailedError:
             return Response(status=503)
 
         manifest = [{
@@ -230,7 +230,7 @@ class NodeImageView(NodeObjectMixin, View):
         ue = self.request.app['ue']
         try:
             manifest = await ue.get_manifest(node)
-        except u.UnpackFailedError:
+        except util.UnpackFailedError:
             return Response(status=503)
 
         try:
@@ -303,12 +303,12 @@ async def get_node(drive, id_or_root):
 
 
 async def search_by_name(search_engine, pattern):
-    real_pattern = u.normalize_search_pattern(pattern)
+    real_pattern = util.normalize_search_pattern(pattern)
     try:
         re.compile(real_pattern)
     except Exception as e:
         EXCEPTION('engine', e) << real_pattern
-        raise u.InvalidPatternError(real_pattern)
+        raise util.InvalidPatternError(real_pattern)
 
     se = search_engine
     nodes = await se.get_nodes_by_regex(real_pattern)
