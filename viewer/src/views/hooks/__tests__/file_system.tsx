@@ -501,11 +501,13 @@ describe('file_system', () => {
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       loadRoot(fileSystem, '1', [
-        {
-          id: '2',
-          name: 'foo',
-          parent_list: ['1'],
-        },
+        { id: '2', name: 'two', modified: '2', parent_list: ['1'] },
+        { id: '3', name: 'three', modified: '3', parent_list: ['1'] },
+        { id: '4', name: 'four', modified: '4', parent_list: ['1'] },
+        { id: '5', name: 'five', modified: '2', parent_list: ['1'] },
+        { id: '6', name: 'six', modified: '3', parent_list: ['1'] },
+        { id: '7', name: 'seven', modified: '4', parent_list: ['1'] },
+        { id: '77', name: 'seven', modified: '5', parent_list: ['1'] },
       ]);
       await waitFor(() => {
         expect(updating()).not.toBeChecked();
