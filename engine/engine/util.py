@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import os
 import pathlib
@@ -9,48 +11,59 @@ from contextlib import AsyncExitStack
 from itertools import zip_longest
 from mimetypes import guess_type
 from os.path import getsize, join as join_path
+from typing import Dict, List, TypedDict
 
 from PIL import Image
 from wcpan.logger import EXCEPTION, DEBUG
+from wcpan.drive.core.drive import Drive
+from wcpan.drive.core.cache import Node
+
+
+class ImageDict(TypedDict):
+    type: str
+    width: int
+    height: int
+    size: int
+    path: str
 
 
 class InvalidPatternError(Exception):
 
-    def __init__(self, message):
+    def __init__(self, message: str) -> None:
         self._message = message
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._message
 
 
 class SearchFailedError(Exception):
 
-    def __init__(self, message):
+    def __init__(self, message: str) -> None:
         self._message = message
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._message
 
 
 class UnpackFailedError(Exception):
 
-    def __init__(self, message):
+    def __init__(self, message: str) -> None:
         self._message = message
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._message
 
 
 class SearchEngine(object):
 
-    def __init__(self, drive):
+    def __init__(self, drive: Drive) -> None:
         super(SearchEngine, self).__init__()
         # NOTE only takes a reference, not owning
         self._drive = drive
-        self._cache = {}
-        self._searching = {}
+        self._cache: Dict[str, List[Node]] = {}
+        self._searching: Dict[str, asyncio.Condition] = {}
 
-    async def get_nodes_by_regex(self, pattern):
+    async def get_nodes_by_regex(self, pattern: str) -> List[Node]:
         nodes = self._cache.get(pattern, None)
         if nodes is not None:
             return nodes
@@ -69,20 +82,20 @@ class SearchEngine(object):
         asyncio.create_task(self._search(pattern))
         return await self._wait_for_result(lock, pattern)
 
-    async def clear_cache(self):
+    async def clear_cache(self) -> None:
         while len(self._searching) > 0:
             pattern, lock = next(iter(self._searching.items()))
             async with lock:
                 await lock.wait()
         self._cache = {}
 
-    def drop_value(self, value):
+    def drop_value(self, value: str) -> None:
         keys = list(self._cache.keys())
         for k in keys:
             if re.search(k, value, re.I):
                 del self._cache[k]
 
-    async def _search(self, pattern):
+    async def _search(self, pattern: str) -> None:
         lock = self._searching[pattern]
         try:
             nodes = await self._drive.find_nodes_by_regex(pattern)
@@ -99,7 +112,10 @@ class SearchEngine(object):
             async with lock:
                 lock.notify_all()
 
-    async def _wait_for_result(self, lock, pattern):
+    async def _wait_for_result(self,
+        lock: asyncio.Condition,
+        pattern: str,
+    ) -> None:
         async with lock:
             await lock.wait()
         try:
@@ -107,7 +123,7 @@ class SearchEngine(object):
         except KeyError:
             raise SearchFailedError(f'{pattern} canceled search')
 
-    async def _make_item(self, node):
+    async def _make_item(self, node: Node):
         path = await self._drive.get_path(node)
         rv = node.to_dict()
         rv['path'] = str(path)
@@ -116,19 +132,19 @@ class SearchEngine(object):
 
 class UnpackEngine(object):
 
-    def __init__(self, drive, port, unpack_path):
+    def __init__(self, drive: Drive, port: str, unpack_path: str) -> None:
         super(UnpackEngine, self).__init__()
         # NOTE only takes a reference, not owning
         self._drive = drive
         self._port = port
         self._unpack_path = unpack_path
-        self._cache = {}
-        self._unpacking = {}
-        self._tmp = None
-        self._cleaner = None
-        self._raii = None
+        self._cache: Dict[str, List[ImageDict]] = {}
+        self._unpacking: Dict[str, asyncio.Condition] = {}
+        self._tmp: tempfile.TemporaryDirectory = None
+        self._cleaner: UnpackCleaner = None
+        self._raii: AsyncExitStack = None
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> UnpackEngine:
         async with AsyncExitStack() as stack:
             self._tmp = stack.enter_context(tempfile.TemporaryDirectory())
             self._cleaner = await stack.enter_async_context(
@@ -137,13 +153,13 @@ class UnpackEngine(object):
             self._raii = stack.pop_all()
         return self
 
-    async def __aexit__(self, exc, type_, tb):
+    async def __aexit__(self, exc, type_, tb) -> bool:
         await self._raii.aclose()
         self._cleaner = None
         self._tmp = None
         self._raii = None
 
-    async def get_manifest(self, node):
+    async def get_manifest(self, node: Node):
         manifest = self._cache.get(node.id_, None)
         if manifest is not None:
             return manifest
@@ -176,7 +192,10 @@ class UnpackEngine(object):
             async with lock:
                 lock.notify_all()
 
-    async def _wait_for_result(self, lock, node_id):
+    async def _wait_for_result(self,
+        lock: asyncio.Condition,
+        node_id: str,
+    ) -> List[ImageDict]:
         async with lock:
             await lock.wait()
         try:
@@ -184,7 +203,7 @@ class UnpackEngine(object):
         except KeyError:
             raise UnpackFailedError(f'{node_id} canceled unpack')
 
-    async def _unpack_local(self, node_id):
+    async def _unpack_local(self, node_id: str) -> None:
         cmd = [self._unpack_path, str(self._port), node_id, self._tmp]
         DEBUG('engine') << ' '.join(cmd)
         p = await asyncio.create_subprocess_exec(*cmd)
@@ -193,8 +212,8 @@ class UnpackEngine(object):
             raise UnpackFailedError(f'unpack failed code: {p.returncode}')
         self._cache[node_id] = self._scan_local(node_id)
 
-    def _scan_local(self, node_id):
-        rv = []
+    def _scan_local(self, node_id: str) -> List[ImageDict]:
+        rv: List[ImageDict] = []
         top = join_path(self._tmp, node_id)
         for dirpath, dirnames, filenames in os.walk(top):
             dirnames.sort(key=FuzzyName)
@@ -221,11 +240,11 @@ class UnpackEngine(object):
                 })
         return rv
 
-    async def _unpack_remote(self, node):
+    async def _unpack_remote(self, node: Node):
         self._cache[node.id_] = await self._scan_remote(node)
 
-    async def _scan_remote(self, node):
-        rv = []
+    async def _scan_remote(self, node: Node) -> List[ImageDict]:
+        rv: List[ImageDict] = []
         async for root, folders, files in self._drive.walk(node):
             folders.sort(key=lambda _: FuzzyName(_.name))
             files.sort(key=lambda _: FuzzyName(_.name))
@@ -243,12 +262,12 @@ class UnpackEngine(object):
 
 class FuzzyName(object):
 
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         seg_list = re.findall(r'\d+|\D+', name)
         seg_list = [int(_) if _.isdigit() else _ for _ in seg_list]
         self._seg_list = seg_list
 
-    def __lt__(self, that):
+    def __lt__(self, that: FuzzyName) -> bool:
         for l, r in zip_longest(self._seg_list, that._seg_list):
             # compare length: shorter first
             if l is None:
@@ -270,7 +289,7 @@ class UnpackCleaner(object):
 
     def __init__(self, path):
         self._path = pathlib.Path(path)
-        self._task = None
+        self._task: asyncio.Task = None
 
     async def __aenter__(self):
         self._task = asyncio.create_task(self._loop())
@@ -299,7 +318,7 @@ class UnpackCleaner(object):
             self._check()
 
 
-def normalize_search_pattern(raw):
+def normalize_search_pattern(raw: str) -> str:
     rv = re.match(r'(.+?)\s*\((.+)\)', raw)
     if rv:
         rv = rv.groups()
@@ -311,7 +330,7 @@ def normalize_search_pattern(raw):
     return rv
 
 
-def inner_normalize_search_pattern(raw):
+def inner_normalize_search_pattern(raw: str) -> str:
     rv = re.split(r'(?:\s|-)+', raw)
     rv = map(re.escape, rv)
     rv = '.*'.join(rv)
