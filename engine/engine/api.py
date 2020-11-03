@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 from aiohttp.web import Response, StreamResponse, View
 from wcpan.logger import EXCEPTION
 from wcpan.drive.core.drive import Drive
+from wcpan.drive.core.cache import Node
 
 from . import util
 
@@ -29,7 +30,7 @@ def raise_404(fn):
 
 class NodeObjectMixin(object):
 
-    async def get_object(self):
+    async def get_object(self: View):
         id_ = self.request.match_info.get('id', None)
         if not id_:
             raise NotFoundError
@@ -44,13 +45,13 @@ class NodeObjectMixin(object):
 
 class NodeRandomAccessMixin(object):
 
-    async def create_response(self):
+    async def create_response(self: View):
         range_ = self.request.http_range
         if range_.start is None and range_.stop is None:
             return StreamResponse(status=200)
         return StreamResponse(status=206)
 
-    async def feed(self, response, node):
+    async def feed(self: View, response: StreamResponse, node: Node) -> None:
         range_ = self.request.http_range
         offset = 0 if range_.start is None else range_.start
         length = node.size - offset if not range_.stop else range_.stop
@@ -324,14 +325,17 @@ def json_response(data):
         })
 
 
-async def get_node(drive, id_or_root):
+async def get_node(drive: Drive, id_or_root: str) -> Node:
     if id_or_root == 'root':
         return await drive.get_root_node()
     else:
         return await drive.get_node_by_id(id_or_root)
 
 
-async def search_by_name(search_engine, pattern):
+async def search_by_name(
+    search_engine: util.SearchEngine,
+    pattern: str,
+) -> List[Node]:
     real_pattern = util.normalize_search_pattern(pattern)
     try:
         re.compile(real_pattern)
