@@ -5,6 +5,18 @@ describe('queue', () => {
 
   describe('Queue', () => {
 
+    it('should not be full', () => {
+      const queue = new Queue<number>();
+      expect(queue.isFull).toBeFalsy();
+    });
+
+    it('should throw an error if put-taskDone not match', () => {
+      const queue = new Queue<number>();
+      expect(() => {
+        queue.taskDone();
+      }).toThrow();
+    });
+
     it('can be used in producer-consumer', async () => {
       const queue = new Queue<number>();
       const rv: number[] = [];
