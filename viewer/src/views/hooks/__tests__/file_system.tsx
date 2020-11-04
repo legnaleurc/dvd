@@ -344,7 +344,14 @@ describe('file_system', () => {
       expect(nodes().childElementCount).toEqual(2);
 
       sync(fileSystem, [
-        { removed: true, id: '2' },
+        {
+          removed: false,
+          node: makeNode({
+            id: '2',
+            parent_list: ['1'],
+            trashed: true,
+          }),
+        },
       ]);
       expect(actionStub).toHaveBeenCalledTimes(1);
       expect(updating()).toBeChecked();
@@ -356,6 +363,20 @@ describe('file_system', () => {
       expect(actionStub).toHaveBeenCalledTimes(1);
       expect(revision()).toHaveValue(2);
       expect(nodes().childElementCount).toEqual(1);
+
+      sync(fileSystem, [
+        { removed: true, id: '3' },
+      ]);
+      expect(actionStub).toHaveBeenCalledTimes(1);
+      expect(updating()).toBeChecked();
+      expect(revision()).toHaveValue(2);
+
+      await waitFor(() => {
+        expect(updating()).not.toBeChecked();
+      });
+      expect(actionStub).toHaveBeenCalledTimes(1);
+      expect(revision()).toHaveValue(3);
+      expect(nodes().childElementCount).toEqual(0);
     });
 
     it('loadRoot', async () => {
