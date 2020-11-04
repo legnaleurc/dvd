@@ -38,6 +38,14 @@ describe('lock', () => {
       await expect(blocker).resolves.toEqual([1, 2]);
     });
 
+    it('can be set multiple times', async () => {
+      const event = new Event_();
+      event.set();
+      expect(() => {
+        event.set();
+      }).not.toThrow();
+    });
+
   });
 
 });
