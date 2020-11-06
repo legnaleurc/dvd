@@ -4,15 +4,17 @@ TOUCH := touch
 CMAKE := cmake
 YARN := yarn
 PYTHON := python3
+PIP := pip3
 
 VIEWER_ALL_FILES = $(shell find viewer -type d \( -name node_modules -o -name dist \) -prune -o -type f -print)
 VIEWER_CONF_FILES = viewer/package.json
+ENGINE_SITE_PACKAGES = $(shell $(PIP) show pip | grep '^Location' | cut -f2 -d':')
 
-.PHONY: debug unpack-release viewer-release
+.PHONY: debug unpack-release viewer-release engine-release
 
 all: release
 
-release: unpack-release viewer-release
+release: unpack-release viewer-release engine-release
 
 unpack-release: unpack/build/unpack
 
@@ -33,8 +35,18 @@ viewer/node_modules: $(VIEWER_CONF_FILES)
 	$(RM) -rf 'viewer/dist'
 	$(TOUCH) "$@"
 
+engine-release: engine-install
+
+engine-install: $(ENGINE_SITE_PACKAGES)
+
+$(ENGINE_SITE_PACKAGES): engine/requirements.txt
+	$(PIP) install -r engine/requirements.txt
+	touch $(ENGINE_SITE_PACKAGES)
+
 # TODO there is no need to debug unpack for now
-debug: unpack-release viewer/node_modules
+debug: unpack-release viewer/node_modules engine-debug
+
+engine-debug: engine-install
 
 test: engine-test
 
