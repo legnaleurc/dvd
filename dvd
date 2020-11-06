@@ -8,7 +8,7 @@ import pathlib
 import signal
 import sys
 
-import watchgod
+from wcpan.watchdog.watcher import Watcher
 
 
 PUBLIC_PORT = 8000
@@ -125,14 +125,13 @@ async def auto_rerun(cmd, path, stop_event, cwd=None, env=None):
     # Important to be able to stop the watcher.
     assert stop_event
 
-    loop = asyncio.get_running_loop()
     process = await spawn(cmd, cwd=cwd, env=env)
 
-    async for changes in watchgod.awatch(path, stop_event=stop_event,
-                                         loop=loop):
-        print(changes)
-        await kill(process, signal.SIGINT, True)
-        process = await spawn(cmd, cwd=cwd, env=env)
+    async with Watcher() as watcher:
+        async for changes in watcher(path, stop_event=stop_event):
+            print(changes)
+            await kill(process, signal.SIGINT, True)
+            process = await spawn(cmd, cwd=cwd, env=env)
 
     await kill(process, signal.SIGINT, False)
 
