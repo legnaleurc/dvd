@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import signal
+from contextlib import asynccontextmanager
 
 from aiohttp.web import Application, AppRunner, TCPSite
 from wcpan.drive.core.drive import DriveFactory
@@ -33,26 +34,14 @@ class Daemon(object):
         return 1
 
     async def _main(self):
-        port = self._kwargs.listen
-        unpack_path = self._kwargs.unpack
-        static_path = self._kwargs.static
-        app = Application()
+        port: int = self._kwargs.listen
+        unpack_path: str = self._kwargs.unpack
+        static_path: str = self._kwargs.static
 
-        setup_api_path(app)
-        if static_path:
-            app['static'] = static_path
-            setup_static_path(app, static_path)
-
-        factory = DriveFactory()
-        factory.load_config()
-
-        async with factory() as drive, \
-                   util.UnpackEngine(drive, port, unpack_path) as ue, \
-                   ServerContext(app, port, {
-                       'drive': drive,
-                       'se': util.SearchEngine(drive),
-                       'ue': ue,
-                   }):
+        async with application_context(port=port,
+                                       unpack_path=unpack_path,
+                                       static_path=static_path) as app, \
+                   server_context(app, port):
             await self._until_finished()
 
         return 0
@@ -62,25 +51,6 @@ class Daemon(object):
 
     def _close(self):
         self._finished.set()
-
-
-class ServerContext(object):
-
-    def __init__(self, app, port, context):
-        log_format = '%s %r (%b) %Tfs'
-        for k, v in context.items():
-            app[k] = v
-        self._runner = AppRunner(app, access_log_format=log_format)
-        self._port = port
-
-    async def __aenter__(self):
-        await self._runner.setup()
-        site = TCPSite(self._runner, port=self._port)
-        await site.start()
-        return self._runner
-
-    async def __aexit__(self, exc_type, exc, tb):
-        await self._runner.cleanup()
 
 
 def parse_args(args):
@@ -95,7 +65,46 @@ def parse_args(args):
     return args
 
 
-def setup_api_path(app):
+@asynccontextmanager
+async def application_context(port: int, unpack_path: str, static_path: str):
+    app = Application()
+
+    # api
+    setup_api_path(app)
+
+    # static
+    if static_path:
+        app['static'] = static_path
+        setup_static_path(app, static_path)
+
+    # drive
+    factory = DriveFactory()
+    factory.load_config()
+
+    # context
+    async with factory() as drive, \
+               util.UnpackEngine(drive, port, unpack_path) as ue:
+        app['drive'] = drive
+        app['ue'] = ue
+        app['se'] = util.SearchEngine(drive)
+
+        yield app
+
+
+@asynccontextmanager
+async def server_context(app: Application, port: int):
+    log_format = '%s %r (%b) %Tfs'
+    runner = AppRunner(app, access_log_format=log_format)
+    await runner.setup()
+    try:
+        site = TCPSite(runner, port=port)
+        await site.start()
+        yield
+    finally:
+        await runner.cleanup()
+
+
+def setup_api_path(app: Application) -> None:
     app.router.add_view(r'/api/v1/nodes', api.NodeListView)
     app.router.add_view(r'/api/v1/nodes/{id}', api.NodeView)
     app.router.add_view(r'/api/v1/nodes/{id}/children', api.NodeChildrenView)
@@ -108,7 +117,7 @@ def setup_api_path(app):
     app.router.add_view(r'/api/v1/apply', api.ApplyView)
 
 
-def setup_static_path(app, path):
+def setup_static_path(app: Application, path: str) -> None:
     app.router.add_static(r'/static', path)
     app.router.add_view(r'/', view.IndexView)
     app.router.add_view(r'/{name}', view.IndexView)

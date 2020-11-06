@@ -132,7 +132,7 @@ class SearchEngine(object):
 
 class UnpackEngine(object):
 
-    def __init__(self, drive: Drive, port: str, unpack_path: str) -> None:
+    def __init__(self, drive: Drive, port: int, unpack_path: str) -> None:
         super(UnpackEngine, self).__init__()
         # NOTE only takes a reference, not owning
         self._drive = drive
