@@ -54,3 +54,16 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(rv.status, 200)
         body = await rv.text()
         self.assertEqual(body, 'test')
+
+    async def testChangeList(self):
+        drive = self._client.app['drive']
+
+        async def result():
+            for i in []:
+                yield i
+
+        drive.sync = result
+        rv = await self._client.post('/api/v1/changes')
+        self.assertEqual(rv.status, 200)
+        body = await rv.json()
+        self.assertEqual(body, [])
