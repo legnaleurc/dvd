@@ -36,3 +36,12 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(rv.status, 200)
         body = await rv.text()
         self.assertEqual(body, 'test')
+
+    async def testIndexFallback(self):
+        index_path = self._static_path / 'index.html'
+        with index_path.open('w') as fout:
+            fout.write('test')
+        rv = await self._client.get('/search')
+        self.assertEqual(rv.status, 200)
+        body = await rv.text()
+        self.assertEqual(body, 'test')
