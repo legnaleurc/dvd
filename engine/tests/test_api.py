@@ -45,3 +45,12 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(rv.status, 200)
         body = await rv.text()
         self.assertEqual(body, 'test')
+
+    async def testStaticUrl(self):
+        index_path = self._static_path / 'random.txt'
+        with index_path.open('w') as fout:
+            fout.write('test')
+        rv = await self._client.get('/static/random.txt')
+        self.assertEqual(rv.status, 200)
+        body = await rv.text()
+        self.assertEqual(body, 'test')
