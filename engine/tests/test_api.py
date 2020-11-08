@@ -87,6 +87,18 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         body = await rv.json()
         self.assertEqual(body, expected)
 
+    async def testGetNode(self):
+        expected = make_node_dict({})
+
+        drive = self._client.app['drive']
+        drive.get_node_by_id.return_value = Node.from_dict(expected)
+
+        rv = await self._client.get('/api/v1/nodes/1')
+        self.assertEqual(rv.status, 200)
+        body = await rv.json()
+        self.assertEqual(body, expected)
+        drive.get_node_by_id.assert_called_once_with('1')
+
 
 def make_node_dict(d):
     rv = {
