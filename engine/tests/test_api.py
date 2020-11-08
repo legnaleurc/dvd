@@ -29,31 +29,40 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         await self._raii.aclose()
 
     async def testIndex(self):
+        expected = 'test'
+
         index_path = self._static_path / 'index.html'
         with index_path.open('w') as fout:
-            fout.write('test')
+            fout.write(expected)
+
         rv = await self._client.get('/')
         self.assertEqual(rv.status, 200)
         body = await rv.text()
-        self.assertEqual(body, 'test')
+        self.assertEqual(body, expected)
 
     async def testIndexFallback(self):
+        expected = 'test'
+
         index_path = self._static_path / 'index.html'
         with index_path.open('w') as fout:
-            fout.write('test')
+            fout.write(expected)
+
         rv = await self._client.get('/search')
         self.assertEqual(rv.status, 200)
         body = await rv.text()
-        self.assertEqual(body, 'test')
+        self.assertEqual(body, expected)
 
     async def testStaticUrl(self):
+        expected = 'test'
+
         index_path = self._static_path / 'random.txt'
         with index_path.open('w') as fout:
-            fout.write('test')
+            fout.write(expected)
+
         rv = await self._client.get('/static/random.txt')
         self.assertEqual(rv.status, 200)
         body = await rv.text()
-        self.assertEqual(body, 'test')
+        self.assertEqual(body, expected)
 
     async def testChangeList(self):
         drive = self._client.app['drive']
