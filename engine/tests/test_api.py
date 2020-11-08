@@ -5,6 +5,7 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, patch, Mock
 
 from aiohttp.test_utils import TestServer, TestClient
+from wcpan.drive.core.cache import Node
 
 from engine.main import application_context
 
@@ -74,3 +75,34 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(rv.status, 200)
         body = await rv.json()
         self.assertEqual(body, expected)
+
+    async def testGetRoot(self):
+        expected = make_node_dict({})
+
+        drive = self._client.app['drive']
+        drive.get_root_node.return_value = Node.from_dict(expected)
+
+        rv = await self._client.get('/api/v1/nodes/root')
+        self.assertEqual(rv.status, 200)
+        body = await rv.json()
+        self.assertEqual(body, expected)
+
+
+def make_node_dict(d):
+    rv = {
+        'id': '',
+        'name': '',
+        'trashed': False,
+        'created': '1900-01-01T00:00:00+00:00',
+        'modified': '1900-01-01T00:00:00+00:00',
+        'is_folder': False,
+        'mime_type': '',
+        'hash': '',
+        'size': 0,
+        'image': None,
+        'video': None,
+        'parent_list': [],
+        'private': None,
+    }
+    rv.update(d)
+    return rv
