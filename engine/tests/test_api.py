@@ -99,6 +99,13 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(body, expected)
         drive.get_node_by_id.assert_called_once_with('1')
 
+    async def testGetNodeWith404(self):
+        drive = self._client.app['drive']
+        drive.get_node_by_id.return_value = None
+
+        rv = await self._client.get('/api/v1/nodes/1')
+        self.assertEqual(rv.status, 404)
+
 
 def make_node_dict(d):
     rv = {
