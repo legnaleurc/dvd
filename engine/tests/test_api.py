@@ -2,7 +2,7 @@ from contextlib import AsyncExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch, Mock
 
 from aiohttp.test_utils import TestServer, TestClient
 
@@ -65,14 +65,12 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(body, expected)
 
     async def testChangeList(self):
+        expected = []
+
         drive = self._client.app['drive']
+        drive.sync = Mock(return_value=AsyncMock(side_effect=expected))
 
-        async def result():
-            for i in []:
-                yield i
-
-        drive.sync = result
         rv = await self._client.post('/api/v1/changes')
         self.assertEqual(rv.status, 200)
         body = await rv.json()
-        self.assertEqual(body, [])
+        self.assertEqual(body, expected)
