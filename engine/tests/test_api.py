@@ -142,6 +142,20 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             'test',
         )
 
+    async def testTrashNode(self):
+        async def fake_get_node_by_id(id: str):
+            return Node.from_dict(make_node_dict({
+                'id': id,
+            }))
+        drive = self._client.app['drive']
+        drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
+
+        rv = await self._client.delete('/api/v1/nodes/1')
+        self.assertEqual(rv.status, 204)
+        drive.trash_node.assert_called_once_with(
+            Node.from_dict(make_node_dict({ 'id': '1' })),
+        )
+
 
 def make_node_dict(d):
     rv = {
