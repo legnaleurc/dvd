@@ -2,7 +2,7 @@ from contextlib import AsyncExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import AsyncMock, patch, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
 from aiohttp.test_utils import TestServer, TestClient
 from wcpan.drive.core.cache import Node
