@@ -5,7 +5,7 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, Mock, patch
 
 from aiohttp.test_utils import TestServer, TestClient
-from wcpan.drive.core.cache import Node
+from wcpan.drive.core.types import Node
 
 from engine.main import application_context
 

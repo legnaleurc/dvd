@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 from aiohttp.web import Response, StreamResponse, View
 from wcpan.logger import EXCEPTION
 from wcpan.drive.core.drive import Drive
-from wcpan.drive.core.cache import Node
+from wcpan.drive.core.types import Node
 
 from . import util
 

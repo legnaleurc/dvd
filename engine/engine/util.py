@@ -16,7 +16,7 @@ from typing import Dict, List, TypedDict
 from PIL import Image
 from wcpan.logger import EXCEPTION, DEBUG
 from wcpan.drive.core.drive import Drive
-from wcpan.drive.core.cache import Node
+from wcpan.drive.core.types import Node
 
 
 class ImageDict(TypedDict):
