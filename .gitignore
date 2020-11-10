@@ -4,3 +4,4 @@ node_modules
 .vscode
 /unpack/build
 /viewer/dist
+/engine/.lock
