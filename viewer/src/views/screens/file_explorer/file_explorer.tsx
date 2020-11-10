@@ -42,11 +42,6 @@ const useStyles = makeStyles((theme) => ({
         'no-scroll',
       ]),
     },
-    '&$even > $group': {
-      ...getMixins([
-        'w-50',
-      ]),
-    },
   },
   mobile: {
     ...getMixins([
@@ -63,7 +58,9 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   group: {},
-  even: {},
+  hidden: {
+    display: 'none',
+  },
 }));
 
 
@@ -81,15 +78,17 @@ export function FileExplorer (props: {}) {
     <div className={classes.fileExplorer}>
       <div className={classes.tail}>
         <Box
-          className={clsx(classes.desktop, {
-            [classes.even]: two,
-          })}
+          className={classes.desktop}
           display={{ xs: 'none', sm: 'flex' }}
         >
           <div className={classes.group}>
             <TreeView rootId={rootId} />
           </div>
-          <SecondTreeView rootId={rootId} two={two} />
+          <div className={clsx(classes.group, {
+            [classes.hidden]: !two,
+          })}>
+            <TreeView rootId={rootId} />
+          </div>
         </Box>
         <Box
           className={classes.mobile}
@@ -100,23 +99,6 @@ export function FileExplorer (props: {}) {
           </div>
         </Box>
       </div>
-    </div>
-  );
-}
-
-
-interface ISecondTreeView {
-  two: boolean;
-  rootId: string | null;
-}
-function SecondTreeView (props: ISecondTreeView) {
-  const classes = useStyles();
-  if (!props.two) {
-    return null;
-  }
-  return (
-    <div className={classes.group}>
-      <TreeView rootId={props.rootId} />
     </div>
   );
 }
