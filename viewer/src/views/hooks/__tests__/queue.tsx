@@ -104,14 +104,14 @@ describe('queue', () => {
 
     function makeNodeList () {
       const nodeList: Record<string, INodeLike> = {
-        '1': { id: '1', name: 'one', mimeType: '' },
-        '2': { id: '2', name: 'two', mimeType: '' },
-        '3': { id: '3', name: 'three', mimeType: '' },
-        '4': { id: '4', name: 'four', mimeType: '' },
-        '5': { id: '5', name: 'five', mimeType: '' },
-        '6': { id: '6', name: 'six', mimeType: '' },
-        '7': { id: '7', name: 'seven', mimeType: '' },
-        '8': { id: '8', name: 'eight', mimeType: '' },
+        '1': { id: '1', name: 'one', mimeType: '', children: null, parentId: null },
+        '2': { id: '2', name: 'two', mimeType: '', children: null, parentId: null },
+        '3': { id: '3', name: 'three', mimeType: '', children: null, parentId: null },
+        '4': { id: '4', name: 'four', mimeType: '', children: null, parentId: null },
+        '5': { id: '5', name: 'five', mimeType: '', children: null, parentId: null },
+        '6': { id: '6', name: 'six', mimeType: '', children: null, parentId: null },
+        '7': { id: '7', name: 'seven', mimeType: '', children: null, parentId: null },
+        '8': { id: '8', name: 'eight', mimeType: '', children: null, parentId: null },
       };
       const getNode = (id: string) => nodeList[id];
       return { nodeList, getNode };
