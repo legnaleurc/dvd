@@ -1,41 +1,35 @@
 import React from 'react';
 
-import {
-  FileExplorer,
-  FileExplorerContextProvider,
-  FileExplorerIcon,
-  FileExplorerToolBar,
-} from '@/views/screens/file_explorer';
-import {
-  MultiPageView,
-  MultiPageViewIcon,
-  MultiPageViewToolBar,
-} from '@/views/screens/multipage_view';
-import {
-  SearchView,
-  SearchViewProvider,
-  SearchViewIcon,
-  SearchViewToolBar,
-} from '@/views/screens/search_view';
-import {
-  SettingsView,
-  SettingsViewIcon,
-  SettingsViewToolBar,
-} from '@/views/screens/settings_view';
+const FileExplorer = React.lazy(() => import('./lazy/file_explorer'));
+const FileExplorerContextProvider = React.lazy(() => import('./lazy/file_explorer_context_provider'));
+const FileExplorerIcon = React.lazy(() => import('./lazy/file_explorer_icon'));
+const FileExplorerToolBar = React.lazy(() => import('./lazy/file_explorer_tool_bar'));
+const MultiPageView = React.lazy(() => import('./lazy/multi_page'));
+const MultiPageViewIcon = React.lazy(() => import('./lazy/multi_page_icon'));
+const MultiPageViewToolBar = React.lazy(() => import('./lazy/multi_page_tool_bar'));
+const SearchView = React.lazy(() => import('./lazy/search_view'));
+const SearchViewProvider = React.lazy(() => import('./lazy/search_view_provider'));
+const SearchViewIcon = React.lazy(() => import('./lazy/search_view_icon'));
+const SearchViewToolBar = React.lazy(() => import('./lazy/search_view_tool_bar'));
+const SettingsView = React.lazy(() => import('./lazy/settings_view'));
+const SettingsViewIcon = React.lazy(() => import('./lazy/settings_view_icon'));
+const SettingsViewToolBar = React.lazy(() => import('./lazy/settings_view_tool_bar'));
 
 
 interface IToolBarProps {
   anchorEl?: HTMLDivElement;
 }
 
+type Component<T> = React.ComponentType<React.PropsWithChildren<T>>;
+
 
 export interface ISiteChunk {
   id: string;
   name: string;
-  icon: React.ElementType<{}>;
-  context: React.ElementType<React.PropsWithChildren<{}>>;
-  main: React.ElementType<{}>;
-  toolBar: React.ElementType<IToolBarProps>;
+  icon: Component<{}>;
+  context: Component<{}>;
+  main: Component<{}>;
+  toolBar: Component<IToolBarProps>;
 }
 export function useSiteMap (): ISiteChunk[] {
   const siteMap = React.useRef([

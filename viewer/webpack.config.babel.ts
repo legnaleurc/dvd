@@ -85,15 +85,6 @@ const factory: webpack.ConfigurationFactory = (env, argv) => {
         }),
         new OptimizeCSSAssetsPlugin({}),
       ],
-      splitChunks: {
-        cacheGroups: {
-          commons: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-          },
-        },
-      },
       runtimeChunk: {
         name: 'manifest',
       },
