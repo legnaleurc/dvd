@@ -1,7 +1,7 @@
 import React from 'react';
 
 const FileExplorer = React.lazy(() => import('./lazy/file_explorer'));
-const FileExplorerContextProvider = React.lazy(() => import('./lazy/file_explorer_context_provider'));
+const FileExplorerProvider = React.lazy(() => import('./lazy/file_explorer_provider'));
 const FileExplorerIcon = React.lazy(() => import('./lazy/file_explorer_icon'));
 const FileExplorerToolBar = React.lazy(() => import('./lazy/file_explorer_tool_bar'));
 const MultiPageView = React.lazy(() => import('./lazy/multi_page'));
@@ -37,7 +37,7 @@ export function useSiteMap (): ISiteChunk[] {
       id: 'files',
       name: 'File Explorer',
       icon: FileExplorerIcon,
-      context: FileExplorerContextProvider,
+      context: FileExplorerProvider,
       main: FileExplorer,
       toolBar: FileExplorerToolBar,
     },
