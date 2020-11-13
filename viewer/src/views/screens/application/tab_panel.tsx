@@ -11,7 +11,7 @@ interface IProps {
   value: number;
   classes: IClasses;
 }
-export function TabPanel (props: React.PropsWithChildren<IProps>) {
+export const TabPanel: React.FC<IProps> = (props) => {
   const { children, classes, value, index } = props;
   return (
     <div className={clsx(classes.tabPanel, {
@@ -20,4 +20,4 @@ export function TabPanel (props: React.PropsWithChildren<IProps>) {
       {children}
     </div>
   );
-}
+};

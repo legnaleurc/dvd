@@ -10,8 +10,7 @@ const Context = React.createContext({
 });
 
 
-type IProps = React.PropsWithChildren<CellMeasurerCacheParams>;
-export function LayoutCacheProvider (props: IProps) {
+export const LayoutCacheProvider: React.FC<CellMeasurerCacheParams> = (props) => {
   const { children, ...params } = props;
 
   const cache = React.useRef(new CellMeasurerCache(params));
@@ -25,7 +24,7 @@ export function LayoutCacheProvider (props: IProps) {
       {props.children}
     </Context.Provider>
   );
-}
+};
 
 
 export function useLayoutCache () {

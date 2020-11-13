@@ -130,7 +130,7 @@ export function useContext () {
 }
 
 
-export function ContextProvider (props: React.PropsWithChildren<{}>) {
+export const ContextProvider: React.FC<{}> = (props) => {
   const { revision: globalRevision } = useFileSystemState();
   const classes = useStyles();
   const {
@@ -168,4 +168,4 @@ export function ContextProvider (props: React.PropsWithChildren<{}>) {
       </RichSelectableProvider>
     </Context.Provider>
   );
-}
+};

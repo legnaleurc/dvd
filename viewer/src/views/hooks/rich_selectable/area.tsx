@@ -9,7 +9,7 @@ interface IPureProps {
   selected: boolean;
   classes: ISelectionClasses;
 }
-function PureArea (props: React.PropsWithChildren<IPureProps>) {
+const PureArea: React.FC<IPureProps> = React.memo((props) => {
   const { classes, selected } = props;
   return (
     <div className={clsx('selectable-area', {
@@ -18,21 +18,20 @@ function PureArea (props: React.PropsWithChildren<IPureProps>) {
       {props.children}
     </div>
   );
-}
-const MemorizedPureArea = React.memo(PureArea);
+});
 
 
 interface IProps {
   nodeId: string;
 }
-export function Area (props: React.PropsWithChildren<IProps>) {
+export const Area: React.FC<IProps> = (props) => {
   const { dict, classes } = useRichSelectableState();
   return (
-    <MemorizedPureArea
+    <PureArea
       classes={classes}
       selected={dict[props.nodeId]}
     >
       {props.children}
-    </MemorizedPureArea>
+    </PureArea>
   );
-}
+};

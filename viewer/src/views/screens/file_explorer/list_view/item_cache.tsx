@@ -15,11 +15,10 @@ interface IContext {
 const Context = React.createContext<IContext | null>(null);
 
 
-interface IPureProvider {
+interface IProps {
   setRootId: (id: string) => void;
 }
-type IProvider = React.PropsWithChildren<IPureProvider>;
-export function ItemCacheProvider (props: IProvider) {
+export const ItemCacheProvider: React.FC<IProps> = (props) => {
   const { setRootId } = props;
 
   const { loadList } = useFileSystemAction();
@@ -52,7 +51,7 @@ export function ItemCacheProvider (props: IProvider) {
       {props.children}
     </Context.Provider>
   );
-}
+};
 
 
 export function useItemCache () {

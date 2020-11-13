@@ -32,7 +32,7 @@ export function useContext () {
 }
 
 
-export function ContextProvider (props: React.PropsWithChildren<{}>) {
+export const ContextProvider: React.FC<{}> = (props) => {
   const [state, dispatch] = React.useReducer(reducer, {
     two: false,
   });
@@ -50,4 +50,4 @@ export function ContextProvider (props: React.PropsWithChildren<{}>) {
       {props.children}
     </Context.Provider>
   );
-}
+};

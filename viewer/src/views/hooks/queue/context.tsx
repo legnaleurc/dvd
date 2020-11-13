@@ -21,7 +21,7 @@ interface IStateContext {
 const StateContext = React.createContext<IStateContext | null>(null);
 
 
-export function QueueProvider (props: React.PropsWithChildren<{}>) {
+export const QueueProvider: React.FC<{}> = (props) => {
   const { state, moveNodes, trashNodes } = useActions();
   const actionValue = React.useMemo(() => ({
     moveNodes,
@@ -45,7 +45,7 @@ export function QueueProvider (props: React.PropsWithChildren<{}>) {
       </StateContext.Provider>
     </ActionContext.Provider>
   );
-}
+};
 
 
 export function useQueueAction () {

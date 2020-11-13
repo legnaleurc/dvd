@@ -17,7 +17,7 @@ interface IActionContext {
 const ActionContext = React.createContext<IActionContext | null>(null);
 
 
-export function ComicProvider (props: React.PropsWithChildren<{}>) {
+export const ComicProvider: React.FC<{}> = (props) => {
   const { state, loadComic } = useActions();
   const dispatchValue = React.useMemo(() => ({
     loadComic,
@@ -34,7 +34,7 @@ export function ComicProvider (props: React.PropsWithChildren<{}>) {
       </StateContext.Provider>
     </ActionContext.Provider>
   );
-}
+};
 
 
 export function useComicState () {

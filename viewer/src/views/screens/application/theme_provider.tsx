@@ -10,10 +10,10 @@ const gTheme = createMuiTheme({
 });
 
 
-export function ThemeProvider_ (props: React.PropsWithChildren<{}>) {
+export const ThemeProvider_: React.FC<{}> = (props) => {
   return (
     <ThemeProvider theme={gTheme}>
       {props.children}
     </ThemeProvider>
   );
-}
+};

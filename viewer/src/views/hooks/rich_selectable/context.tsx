@@ -25,7 +25,7 @@ interface IProps {
   getSourceList: (id: string) => string[] | null;
   classes: ISelectionClasses;
 }
-export function RichSelectableProvider (props: React.PropsWithChildren<IProps>) {
+export const RichSelectableProvider: React.FC<IProps> = (props) => {
   const {
     dict,
     count,
@@ -55,7 +55,7 @@ export function RichSelectableProvider (props: React.PropsWithChildren<IProps>) 
       </StateContext.Provider>
     </ActionContext.Provider>
   );
-}
+};
 
 
 export function useRichSelectableState () {

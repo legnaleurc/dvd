@@ -9,7 +9,7 @@ interface IPureProps {
   toggle: (id: string) => void;
   selectFromLast: (id: string) => void;
 }
-function PureTrigger (props: React.PropsWithChildren<IPureProps>) {
+const PureTrigger: React.FC<IPureProps> = React.memo((props) => {
   const { onClick } = useActions(props);
 
   return (
@@ -20,8 +20,7 @@ function PureTrigger (props: React.PropsWithChildren<IPureProps>) {
       {props.children}
     </div>
   );
-}
-const MemorizedPureTrigger = React.memo(PureTrigger);
+});
 
 
 function useActions (props: IPureProps) {
@@ -61,15 +60,15 @@ function useActions (props: IPureProps) {
 interface IProps {
   nodeId: string;
 }
-export function Trigger (props: React.PropsWithChildren<IProps>) {
+export const Trigger: React.FC<IProps> = (props) => {
   const { toggle, selectFromLast } = useRichSelectableAction();
   return (
-    <MemorizedPureTrigger
+    <PureTrigger
       nodeId={props.nodeId}
       toggle={toggle}
       selectFromLast={selectFromLast}
     >
       {props.children}
-    </MemorizedPureTrigger>
+    </PureTrigger>
   );
-}
+};

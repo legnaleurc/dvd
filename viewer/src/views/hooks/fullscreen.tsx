@@ -14,7 +14,7 @@ interface IActionContext {
 const ActionContext = React.createContext<IActionContext | null>(null);
 
 
-export function FullScreenProvider (props: React.PropsWithChildren<{}>) {
+export const FullScreenProvider: React.FC<{}> = (props) => {
   const [fullScreen, setFullScreen] = React.useState(false);
   const self = useInstance(() => ({
     toggle () {
@@ -43,7 +43,7 @@ export function FullScreenProvider (props: React.PropsWithChildren<{}>) {
       </StateContext.Provider>
     </ActionContext.Provider>
   );
-}
+};
 
 
 export function useFullScreenState () {

@@ -20,16 +20,14 @@ interface IToolBarProps {
   anchorEl?: HTMLDivElement;
 }
 
-type Component<T> = React.ComponentType<React.PropsWithChildren<T>>;
-
 
 export interface ISiteChunk {
   id: string;
   name: string;
-  icon: Component<{}>;
-  context: Component<{}>;
-  main: Component<{}>;
-  toolBar: Component<IToolBarProps>;
+  icon: React.ComponentType<{}>;
+  context: React.ComponentType<{}>;
+  main: React.ComponentType<{}>;
+  toolBar: React.ComponentType<IToolBarProps>;
 }
 export function useSiteMap (): ISiteChunk[] {
   const siteMap = React.useRef([

@@ -71,7 +71,7 @@ function useActions (
 }
 
 
-export function Dropable (props: React.PropsWithChildren<IProps>) {
+export const Dropable: React.FC<IProps> = (props) => {
   const { children } = props;
   const [dragOver, setDragOver] = React.useState(false);
   const classes = useStyles();
@@ -94,4 +94,4 @@ export function Dropable (props: React.PropsWithChildren<IProps>) {
       {children}
     </div>
   );
-}
+};

@@ -12,7 +12,7 @@ const Context = React.createContext<IContext | null>(null);
 interface IProps {
   fileSystem: FileSystem;
 }
-export function GlobalProvider (props: React.PropsWithChildren<IProps>) {
+export const GlobalProvider: React.FC<IProps> = (props) => {
   const value = React.useMemo(() => ({
     fileSystem: props.fileSystem,
   }), [props.fileSystem]);
@@ -21,7 +21,7 @@ export function GlobalProvider (props: React.PropsWithChildren<IProps>) {
       {props.children}
     </Context.Provider>
   );
-}
+};
 
 
 export function useGlobal () {

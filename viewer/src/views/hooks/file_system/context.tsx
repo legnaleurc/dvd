@@ -28,7 +28,7 @@ interface IActionContext {
 const ActionContext = React.createContext<IActionContext | null>(null);
 
 
-export function FileSystemProvider (props: React.PropsWithChildren<{}>) {
+export const FileSystemProvider: React.FC<{}> = (props) => {
   const {
     state,
     sync,
@@ -79,7 +79,7 @@ export function FileSystemProvider (props: React.PropsWithChildren<{}>) {
       </StateContext.Provider>
     </ActionContext.Provider>
   );
-}
+};
 
 
 export function useFileSystemState () {

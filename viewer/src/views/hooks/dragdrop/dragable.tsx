@@ -62,7 +62,7 @@ function useActions (props: IProps, classes: Classses) {
 }
 
 
-export function Dragable (props: React.PropsWithChildren<IProps>) {
+export const Dragable: React.FC<IProps> = (props) => {
   const { enabled, children } = props;
   const classes = useStyles();
   const { onDragStart, onDragEnd } = useActions(props, classes);
@@ -76,4 +76,4 @@ export function Dragable (props: React.PropsWithChildren<IProps>) {
       {children}
     </div>
   );
-}
+};
