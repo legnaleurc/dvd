@@ -6,6 +6,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 
 import CdnWebpackPlugin from './tools/cdn_webpack_plugin';
 
@@ -61,6 +62,14 @@ const factory: webpack.ConfigurationFactory = (env, argv) => {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
     plugins: [
+      new ForkTsCheckerWebpackPlugin({
+        typescript: {
+          diagnosticOptions: {
+            semantic: true,
+            syntactic: true,
+          },
+        },
+      }),
       new HtmlWebpackPlugin({
         template: './src/html/index.html',
         // this uses the path related to output directory, not source directory
