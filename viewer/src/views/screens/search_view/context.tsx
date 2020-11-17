@@ -1,10 +1,9 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { SELECTION_COLOR, useInstance } from '@/lib';
+import { INodeLike, SELECTION_COLOR, useInstance } from '@/lib';
 import { useGlobal } from '@/views/hooks/global';
 import {
-  INodeLike,
   useFileSystemAction,
   useFileSystemState,
 } from '@/views/hooks/file_system';

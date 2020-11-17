@@ -1,9 +1,7 @@
 import React from 'react';
 
-export interface INodeLike {
-  id: string;
-  name: string;
-}
+import { INodeLike } from '@/lib';
+
 
 export type GetNode = (id: string) => INodeLike;
 

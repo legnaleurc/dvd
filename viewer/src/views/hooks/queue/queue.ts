@@ -1,5 +1,5 @@
-import { FileSystem, Queue } from '@/lib';
-import { INodeLike, Dispatch, MAX_TASK_COUNT } from './types';
+import { FileSystem, INodeLike, Queue } from '@/lib';
+import { Dispatch, MAX_TASK_COUNT } from './types';
 
 
 type Task = ((consumerId: number) => Promise<void>) | null;

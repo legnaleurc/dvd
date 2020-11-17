@@ -84,6 +84,8 @@ function createEntry (entry: SearchResponse): Entry {
     size: entry.size,
     mimeType: entry.mime_type,
     modified: new Date(entry.modified),
+    children: null,
+    parentId: entry.parent_list[0],
     path: entry.path,
   };
 }

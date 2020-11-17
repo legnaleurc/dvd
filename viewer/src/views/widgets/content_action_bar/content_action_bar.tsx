@@ -12,11 +12,10 @@ import {
   CreateNewFolder as CreateNewFolderIcon,
 } from '@material-ui/icons';
 
-import { getMixins, useInstance } from '@/lib';
+import { INodeLike, getMixins, useInstance } from '@/lib';
 import {
   useFileSystemAction,
   useFileSystemState,
-  INodeLike,
 } from '@/views/hooks/file_system';
 import { useQueueAction, useQueueState } from '@/views/hooks/queue';
 import { useComicState, useComicAction } from '@/views/hooks/comic';

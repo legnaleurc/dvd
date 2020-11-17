@@ -2,10 +2,9 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
-import { getMixins, useInstance } from '@/lib';
+import { INodeLike, getMixins, useInstance } from '@/lib';
 import {
   Node_,
-  INodeLike,
   useFileSystemAction,
   useFileSystemState,
 } from '@/views/hooks/file_system';

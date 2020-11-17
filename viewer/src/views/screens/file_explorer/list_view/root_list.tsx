@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { useFileSystemState, Node } from '@/views/hooks/file_system';
+import { useFileSystemState, Node_ } from '@/views/hooks/file_system';
 import { useItemCache } from './item_cache';
 import { VirtualList } from './virtual_list';
 import { ItemView } from './item_view';
 
 
 interface IPureProps {
-  root: Node;
+  root: Node_;
   changeRoot: (id: string) => Promise<void>;
 }
 function PureRootList (props: IPureProps) {

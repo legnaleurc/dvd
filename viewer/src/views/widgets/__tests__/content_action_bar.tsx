@@ -3,12 +3,10 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mocked } from 'ts-jest/utils';
 
-import { FileSystem } from '@/lib';
-import { Event_ } from '@/lib/lock';
+import { FileSystem, INodeLike } from '@/lib';
 import { GlobalProvider } from '@/views/hooks/global';
 import {
   FileSystemProvider,
-  INodeLike,
   useFileSystemState,
 } from '@/views/hooks/file_system';
 import { QueueProvider } from '@/views/hooks/queue';

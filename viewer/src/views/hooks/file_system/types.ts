@@ -1,22 +1,8 @@
-import { ChangeResponse, NodeResponse } from "@/lib";
+import { ChangeResponse, NodeResponse, INodeLike } from "@/lib";
 
 
-export interface INodeLike {
-  id: string;
-  name: string;
-  mimeType: string;
-  children: string[] | null;
-  parentId: string | null;
-}
-
-
-export interface Node_ {
-  id: string;
-  name: string;
-  parentId: string | null;
+export interface Node_ extends INodeLike {
   modified: number;
-  mimeType: string;
-  children: string[] | null;
   fetched: boolean;
 }
 

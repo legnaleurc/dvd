@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { useInstance, getActionList } from '@/lib';
+import { INodeLike, useInstance, getActionList } from '@/lib';
 import { useGlobal } from '@/views/hooks/global';
 import { useReducer } from './reducer';
-import { SortKey, INodeLike } from './types';
+import { SortKey } from './types';
 
 
 export function useActions () {

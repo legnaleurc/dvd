@@ -1,12 +1,9 @@
-import { SearchResponse } from '@/lib';
+import { INodeLike, SearchResponse } from '@/lib';
 
 
-export interface Entry {
-  id: string;
-  name: string;
+export interface Entry extends INodeLike {
   hash: string;
   size: number;
-  mimeType: string;
   modified: Date;
   path: string;
 }

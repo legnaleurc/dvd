@@ -1,7 +1,8 @@
 import React from 'react';
 
+import { INodeLike } from '@/lib';
 import { useActions } from './actions';
-import { SortKey, NodeDict, Node_, INodeLike } from './types';
+import { SortKey, NodeDict, Node_ } from './types';
 
 
 interface IStateContext {

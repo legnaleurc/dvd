@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { ExpandMore, ChevronRight } from '@material-ui/icons';
 
 import { useInstance } from '@/lib';
-import { Node } from '@/views/hooks/file_system';
+import { Node_ } from '@/views/hooks/file_system';
 import { INDICATOR_SIZE } from './types';
 
 
@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 interface IMaybeIndicatorProps {
-  node: Node;
+  node: Node_;
   expanded: boolean;
   toggle: () => void;
   getChildren: (id: string) => Promise<void>;
