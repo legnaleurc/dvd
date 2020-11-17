@@ -162,7 +162,7 @@ interface IToolBarProps {
 }
 function ToolBar (props: IToolBarProps) {
   const { showHistory } = props;
-  const { updating: fileLoading } = useFileSystemState();
+  const { syncing } = useFileSystemState();
   const { loadComic } = useComicAction();
   const { clear } = useSimpleSelectableAction();
   const { dict, count } = useSimpleSelectableState();
@@ -198,7 +198,7 @@ function ToolBar (props: IToolBarProps) {
         </Badge>
       </IconButton>
       <IconButton
-        disabled={fileLoading || count <= 0}
+        disabled={syncing || count <= 0}
         onClick={onComic}
       >
         <ImportContactsIcon />

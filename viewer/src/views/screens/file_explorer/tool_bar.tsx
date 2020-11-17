@@ -52,7 +52,7 @@ interface IToolBar {
   anchorEl?: HTMLDivElement;
 }
 export function ToolBar (props: IToolBar) {
-  const { updating, sortKey } = useFileSystemState();
+  const { syncing, sortKey } = useFileSystemState();
   const { sync, setSortKey } = useFileSystemAction();
   const classes = useStyles();
   const { two, toggle } = useContext();
@@ -106,7 +106,7 @@ export function ToolBar (props: IToolBar) {
           </IconButton>
           <IconButton
             className={classes.icon}
-            disabled={updating}
+            disabled={syncing}
             onClick={sync}
           >
             <RefreshIcon />

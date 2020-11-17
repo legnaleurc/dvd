@@ -115,12 +115,12 @@ function useActions (props: IPureProps) {
 
 interface IPureProps {
   anchorEl?: HTMLDivElement;
-  updating: boolean;
+  syncing: boolean;
   sync: () => Promise<void>;
   getSelection: () => string[];
 }
 function PureToolBar (props: IPureProps) {
-  const { anchorEl, updating, sync } = props;
+  const { anchorEl, syncing, sync } = props;
   const classes = useStyles();
   const {
     inputRef,
@@ -162,7 +162,7 @@ function PureToolBar (props: IPureProps) {
           </IconButton>
           <IconButton
             className={classes.icon}
-            disabled={updating}
+            disabled={syncing}
             onClick={sync}
           >
             <RefreshIcon />
@@ -179,13 +179,13 @@ interface IProps {
   anchorEl?: HTMLDivElement;
 }
 export function ToolBar (props: IProps) {
-  const { updating } = useFileSystemState();
+  const { syncing } = useFileSystemState();
   const { sync } = useFileSystemAction();
   const { getList } = useRichSelectableAction();
   return (
     <MemorizedPureToolBar
       anchorEl={props.anchorEl}
-      updating={updating}
+      syncing={syncing}
       sync={sync}
       getSelection={getList}
     />

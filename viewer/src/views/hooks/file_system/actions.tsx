@@ -11,7 +11,7 @@ export function useActions () {
   const [state, dispatch] = useReducer();
   const self = useInstance(() => ({
     async sync () {
-      if (state.updating) {
+      if (state.syncing) {
         return;
       }
       dispatch({
@@ -32,7 +32,7 @@ export function useActions () {
       }
     },
     async loadRoot () {
-      if (state.updating) {
+      if (state.syncing) {
         return;
       }
       dispatch({
@@ -57,12 +57,12 @@ export function useActions () {
       }
     },
     async loadList (id: string) {
-      if (state.updating) {
+      if (state.syncing) {
         return;
       }
       dispatch({
-        type: 'REQUEST_BEGIN',
-        value: null,
+        type: 'NODE_REQUEST_BEGIN',
+        value: id,
       });
       try {
         const children = await fileSystem.list(id);
@@ -81,7 +81,7 @@ export function useActions () {
       }
     },
     async rename (id: string, name: string) {
-      if (state.updating) {
+      if (state.syncing) {
         return;
       }
       dispatch({
@@ -103,7 +103,7 @@ export function useActions () {
       }
     },
     async mkdir (name: string, parentId: string) {
-      if (state.updating) {
+      if (state.syncing) {
         return;
       }
       dispatch({
@@ -167,7 +167,7 @@ export function useActions () {
     getNode (id: string) {
       return state.nodes[id];
     },
-  }), [fileSystem, dispatch, state.updating, state.nodes]);
+  }), [fileSystem, dispatch, state.syncing, state.nodes]);
 
   const sync = React.useCallback(async () => {
     await self.current.sync();

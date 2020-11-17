@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 interface IPureProps {
-  updating: boolean;
+  syncing: boolean;
   copyUrl: (idList: string[], getNode: (id: string) => INodeLike) => Promise<void>;
   download: (idList: string[]) => void;
   rename: (id: string, name: string) => Promise<void>;
@@ -70,7 +70,7 @@ interface IPureProps {
 
 function useActions (props: IPureProps) {
   const {
-    updating,
+    syncing,
     copyUrl,
     download,
     rename,
@@ -220,7 +220,7 @@ function useActions (props: IPureProps) {
   }, [setQueueOpen]);
 
   return {
-    updating,
+    syncing,
     loadComic: loadComic_,
     copy,
     download: download_,
@@ -247,7 +247,7 @@ function PureContentActionBar(props: IPureProps) {
 
   const classes = useStyles();
   const {
-    updating,
+    syncing,
     loadComic,
     copy,
     download,
@@ -292,7 +292,7 @@ function PureContentActionBar(props: IPureProps) {
           aria-label="rename"
           aria-controls="rename-dialog"
           aria-haspopup="dialog"
-          disabled={updating || count !== 1}
+          disabled={syncing || count !== 1}
           onClick={showRename}
         >
           <EditIcon />
@@ -301,7 +301,7 @@ function PureContentActionBar(props: IPureProps) {
           aria-label="create new folder"
           aria-controls="make-folder-dialog"
           aria-haspopup="dialog"
-          disabled={updating || count !== 1}
+          disabled={syncing || count !== 1}
           onClick={showMkdir}
         >
           <CreateNewFolderIcon />
@@ -338,7 +338,7 @@ function PureContentActionBar(props: IPureProps) {
         <IconButton
           aria-label="trash"
           color="secondary"
-          disabled={updating || count <= 0}
+          disabled={syncing || count <= 0}
           onClick={trash}
         >
           <DeleteIcon />
@@ -368,7 +368,7 @@ interface IProps {
 }
 export function ContentActionBar (props: IProps) {
   const { getNode } = props;
-  const { updating } = useFileSystemState();
+  const { syncing } = useFileSystemState();
   const { copyUrl, download, rename, mkdir } = useFileSystemAction();
   const { trashNodes } = useQueueAction();
   const { pendingCount } = useQueueState();
@@ -377,7 +377,7 @@ export function ContentActionBar (props: IProps) {
   const { getList, clear } = useRichSelectableAction();
   return (
     <MemorizedPureContentActionBar
-      updating={updating}
+      syncing={syncing}
       copyUrl={copyUrl}
       download={download}
       rename={rename}

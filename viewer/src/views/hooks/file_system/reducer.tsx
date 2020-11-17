@@ -1,12 +1,18 @@
 import React from 'react';
 
-import { SORT_BY_MTIME_DES, SortKey, NodeDict, ActionType } from './types';
+import {
+  ActionType,
+  FetchState,
+  NodeDict,
+  SORT_BY_MTIME_DES,
+  SortKey,
+} from './types';
 import { getCompareFunction } from './sort';
 import { applyChange, createNode, deepSort } from './util';
 
 
 interface IState {
-  updating: boolean;
+  syncing: boolean;
   nodes: NodeDict;
   rootId: string | null;
   sortKey: SortKey;
@@ -20,13 +26,24 @@ function reduce (state: IState, action: ActionType) {
     case 'ERROR':
       return {
         ...state,
-        updating: false,
+        syncing: false,
       };
     case 'REQUEST_BEGIN':
       return {
         ...state,
-        updating: true,
+        syncing: true,
       };
+    case 'NODE_REQUEST_BEGIN': {
+      const { nodes } = state;
+      const id = action.value;
+      nodes[id] = {
+        ...nodes[id],
+        fetchState: FetchState.LOADING,
+      };
+      return {
+        ...state,
+      };
+    }
     case 'SYNC_END': {
       const { nodes, sortKey, revision } = state;
       const changeList = action.value;
@@ -46,7 +63,7 @@ function reduce (state: IState, action: ActionType) {
       }
       return {
         ...state,
-        updating: false,
+        syncing: false,
         nodes: { ...nodes },
         revision: revision + 1,
       };
@@ -57,7 +74,7 @@ function reduce (state: IState, action: ActionType) {
       const childNodes = children.map(createNode).sort(cmp);
 
       const node = createNode(rawNode);
-      node.fetched = true;
+      node.fetchState = FetchState.FULL;
       node.children = childNodes.map(node => node.id);
       const nodes = {
         [node.id]: node,
@@ -70,7 +87,7 @@ function reduce (state: IState, action: ActionType) {
       // root changes means all data need to be flushed
       return {
         ...state,
-        updating: false,
+        syncing: false,
         nodes,
         rootId: node.id,
         revision: state.revision + 1,
@@ -90,13 +107,13 @@ function reduce (state: IState, action: ActionType) {
       const parent = nodes[id];
       nodes[id] = {
         ...parent,
-        fetched: true,
+        fetchState: FetchState.FULL,
         children: childNodes.map(node => node.id),
       };
 
       return {
         ...state,
-        updating: false,
+        syncing: false,
         nodes: { ...nodes },
       };
     }
@@ -129,7 +146,7 @@ function reduce (state: IState, action: ActionType) {
 
 export function useReducer () {
   return React.useReducer(reduce, {
-    updating: false,
+    syncing: false,
     nodes: {},
     rootId: null,
     sortKey: SORT_BY_MTIME_DES,

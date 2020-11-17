@@ -195,7 +195,7 @@ describe('file_system', () => {
       const actions = result.current.action;
 
       const state = result.current.state;
-      expect(state.updating).toBeFalsy();
+      expect(state.syncing).toBeFalsy();
       expect(state.rootId).toBeNull();
       expect(state.sortKey).toBe(SORT_BY_MTIME_DES);
       expect(state.revision).toBe(0);
@@ -213,11 +213,11 @@ describe('file_system', () => {
         { removed: false, node: makeNode({ id: '2', parent_list: ['1'] }) },
         { removed: false, node: makeNode({ id: '3', parent_list: ['1'] }) },
       ]);
-      expect(result.current.state.updating).toBeTruthy();
+      expect(result.current.state.syncing).toBeTruthy();
       expect(result.current.state.revision).toBe(0);
 
       await waitForNextUpdate();
-      expect(result.current.state.updating).toBeFalsy();
+      expect(result.current.state.syncing).toBeFalsy();
       expect(result.current.state.revision).toBe(1);
       expect(Object.keys(result.current.state.nodes)).toHaveLength(2);
 
@@ -231,22 +231,22 @@ describe('file_system', () => {
           }),
         },
       ]);
-      expect(result.current.state.updating).toBeTruthy();
+      expect(result.current.state.syncing).toBeTruthy();
       expect(result.current.state.revision).toBe(1);
 
       await waitForNextUpdate();
-      expect(result.current.state.updating).toBeFalsy();
+      expect(result.current.state.syncing).toBeFalsy();
       expect(result.current.state.revision).toBe(2);
       expect(Object.keys(result.current.state.nodes)).toHaveLength(1);
 
       fakeSync(result.current.action, fileSystem, [
         { removed: true, id: '3' },
       ]);
-      expect(result.current.state.updating).toBeTruthy();
+      expect(result.current.state.syncing).toBeTruthy();
       expect(result.current.state.revision).toBe(2);
 
       await waitForNextUpdate();
-      expect(result.current.state.updating).toBeFalsy();
+      expect(result.current.state.syncing).toBeFalsy();
       expect(result.current.state.revision).toBe(3);
       expect(Object.keys(result.current.state.nodes)).toHaveLength(0);
 
@@ -259,12 +259,12 @@ describe('file_system', () => {
       const actions = result.current.action;
 
       fakeLoadRoot(result.current.action, fileSystem, '1', []);
-      expect(result.current.state.updating).toBeTruthy();
+      expect(result.current.state.syncing).toBeTruthy();
       expect(result.current.state.revision).toBe(0);
       expect(result.current.state.rootId).toBeNull();
 
       await waitForNextUpdate();
-      expect(result.current.state.updating).toBeFalsy();
+      expect(result.current.state.syncing).toBeFalsy();
       expect(fileSystem.list).toHaveBeenLastCalledWith('1');
       expect(result.current.state.revision).toBe(1);
       expect(result.current.state.rootId).toBe('1');
@@ -292,12 +292,12 @@ describe('file_system', () => {
           parent_list: ['2'],
         },
       ]);
-      expect(result.current.state.updating).toBeTruthy();
+      expect(result.current.state.syncing).toBeFalsy();
       expect(result.current.state.revision).toBe(1);
       expect(Object.keys(result.current.state.nodes)).toHaveLength(2);
 
       await waitForNextUpdate();
-      expect(result.current.state.updating).toBeFalsy();
+      expect(result.current.state.syncing).toBeFalsy();
       expect(result.current.state.revision).toBe(1);
       expect(Object.keys(result.current.state.nodes)).toHaveLength(3);
 
@@ -319,11 +319,11 @@ describe('file_system', () => {
       await waitForNextUpdate();
 
       fakeRename(result.current.action, fileSystem, '2', 'bar', '1');
-      expect(result.current.state.updating).toBeTruthy();
+      expect(result.current.state.syncing).toBeTruthy();
       expect(result.current.state.nodes['2'].name).toBe('foo');
 
       await waitForNextUpdate();
-      expect(result.current.state.updating).toBeFalsy();
+      expect(result.current.state.syncing).toBeFalsy();
       expect(fileSystem.rename).toHaveBeenLastCalledWith('2', 'bar');
       expect(result.current.state.nodes['2'].name).toBe('bar');
 
@@ -345,11 +345,11 @@ describe('file_system', () => {
       await waitForNextUpdate();
 
       fakeMkdir(result.current.action, fileSystem, 'bar', '1', '3');
-      expect(result.current.state.updating).toBeTruthy();
+      expect(result.current.state.syncing).toBeTruthy();
       expect(result.current.state.nodes['2'].name).toBe('foo');
 
       await waitForNextUpdate();
-      expect(result.current.state.updating).toBeFalsy();
+      expect(result.current.state.syncing).toBeFalsy();
       expect(fileSystem.mkdir).toHaveBeenLastCalledWith('bar', '1');
       expect(result.current.state.nodes['3'].name).toBe('bar');
 

@@ -1,5 +1,5 @@
 import { ChangeResponse, NodeResponse } from '@/lib';
-import { Node_, NodeDict, SortFunction } from './types';
+import { Node_, NodeDict, SortFunction, FetchState } from './types';
 
 
 export function createNode (node: NodeResponse): Node_ {
@@ -10,7 +10,7 @@ export function createNode (node: NodeResponse): Node_ {
     modified: Date.parse(node.modified),
     mimeType: node.mime_type,
     children: node.is_folder ? [] : null,
-    fetched: false,
+    fetchState: FetchState.EMPTY,
   };
 }
 
@@ -88,7 +88,7 @@ function removeNodeFromParent (
   nodeId: string,
 ) {
   const parent = nodes[parentId];
-  if (!parent || !parent.fetched) {
+  if (!parent || !isLoaded(parent)) {
     return;
   }
   if (!parent.children) {
@@ -108,7 +108,7 @@ function insertNodeToParent (
   nodeId: string,
 ) {
   const parent = nodes[parentId];
-  if (!parent || !parent.fetched) {
+  if (!parent || !isLoaded(parent)) {
     return;
   }
   if (!parent.children) {
@@ -134,7 +134,7 @@ export function deepSort (nodes: NodeDict, id: string, cmp: SortFunction) {
   if (!node) {
     return;
   }
-  if (!node.fetched) {
+  if (!isLoaded(node)) {
     return;
   }
   if (!node.children) {
@@ -149,4 +149,14 @@ export function deepSort (nodes: NodeDict, id: string, cmp: SortFunction) {
   for (const node of children) {
     deepSort(nodes, node.id, cmp);
   }
+}
+
+
+export function isLoading (node: Node_) {
+  return node.fetchState === FetchState.LOADING;
+}
+
+
+export function isLoaded (node: Node_) {
+  return node.fetchState === FetchState.FULL;
 }

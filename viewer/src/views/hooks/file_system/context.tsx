@@ -6,7 +6,7 @@ import { SortKey, NodeDict, Node_ } from './types';
 
 
 interface IStateContext {
-  updating: boolean;
+  syncing: boolean;
   nodes: NodeDict;
   rootId: string | null;
   sortKey: SortKey;
@@ -67,7 +67,7 @@ export const FileSystemProvider: React.FC<{}> = (props) => {
     getNode,
   ]);
   const stateValue = React.useMemo(() => ({
-    updating: state.updating,
+    syncing: state.syncing,
     nodes: state.nodes,
     rootId: state.rootId,
     sortKey: state.sortKey,

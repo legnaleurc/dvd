@@ -1,9 +1,17 @@
 import { ChangeResponse, NodeResponse, INodeLike } from "@/lib";
 
 
+export enum FetchState {
+  EMPTY,
+  LOADING,
+  FULL,
+  ERROR,
+}
+
+
 export interface Node_ extends INodeLike {
   modified: number;
-  fetched: boolean;
+  fetchState: FetchState;
 }
 
 
@@ -45,6 +53,7 @@ export type ActionType = (
   | IAction<'ERROR', Error>
   | IAction<'REQUEST_BEGIN', null>
   | IAction<'SYNC_END', ChangeResponse[]>
+  | IAction<'NODE_REQUEST_BEGIN', string>
   | IAction<'LOAD_ROOT_END', ILoadRoot>
   | IAction<'LOAD_LIST_END', ILoadList>
   | IAction<'SORT', SortKey>

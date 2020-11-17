@@ -24,7 +24,7 @@ import { useItemCache } from './item_cache';
 
 interface IPureProps {
   root: Node_;
-  fileLoading: boolean;
+  syncing: boolean;
   changeRoot: (id: string) => Promise<void>;
   onComic: () => void;
   selectedCount: number;
@@ -33,7 +33,7 @@ interface IPureProps {
 function PureToolBar (props: IPureProps) {
   const {
     root,
-    fileLoading,
+    syncing,
     changeRoot,
     onComic,
     selectedCount,
@@ -49,7 +49,7 @@ function PureToolBar (props: IPureProps) {
   return (
     <>
       <IconButton
-        disabled={fileLoading || !root.parentId}
+        disabled={syncing || !root.parentId}
         onClick={onBack}
       >
         <ChevronLeftIcon />
@@ -66,7 +66,7 @@ function PureToolBar (props: IPureProps) {
         </Badge>
       </IconButton>
       <IconButton
-        disabled={fileLoading || selectedCount <= 0}
+        disabled={syncing || selectedCount <= 0}
         onClick={onComic}
       >
         <ImportContactsIcon />
@@ -83,7 +83,7 @@ interface IProps {
 export function ToolBar (props: IProps) {
   const { rootId } = props;
 
-  const { updating, nodes } = useFileSystemState();
+  const { syncing, nodes } = useFileSystemState();
   const { getNode } = useFileSystemAction();
   const { loadComic } = useComicAction();
   const { clear } = useSimpleSelectableAction();
@@ -113,7 +113,7 @@ export function ToolBar (props: IProps) {
   return (
     <MemorizedPureToolBar
       root={nodes[rootId]}
-      fileLoading={updating}
+      syncing={syncing}
       changeRoot={changeRoot}
       onComic={onComic}
       selectedCount={count}

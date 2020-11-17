@@ -12,3 +12,7 @@ export {
   SORT_BY_MTIME_DES,
   SORT_BY_NAME_ASC,
 } from './types';
+export {
+  isLoading,
+  isLoaded,
+} from './util';

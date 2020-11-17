@@ -1,21 +1,33 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { ExpandMore, ChevronRight } from '@material-ui/icons';
+import {
+  ChevronRight as ChevronRightIcon,
+  ExpandMore as ExpandMoreIcon,
+  HourglassFull as HourglassFullIcon,
+} from '@material-ui/icons';
+import clsx from 'clsx';
 
 import { useInstance } from '@/lib';
-import { Node_ } from '@/views/hooks/file_system';
+import { Node_, isLoaded, isLoading } from '@/views/hooks/file_system';
 import { INDICATOR_SIZE } from './types';
 
 
 const useStyles = makeStyles((theme) => ({
   indicator: {
     lineHeight: 0,
-    '& > $icon': {
-      width: INDICATOR_SIZE,
-      height: INDICATOR_SIZE,
+  },
+  icon: {
+    width: INDICATOR_SIZE,
+    height: INDICATOR_SIZE,
+  },
+  spin: {
+    animation: '$spin 4s linear infinite',
+  },
+  '@keyframes spin': {
+    '100%': {
+      transform: 'rotate(360deg)',
     },
   },
-  icon: {},
 }));
 
 
@@ -32,10 +44,10 @@ export function MaybeIndicator (props: IMaybeIndicatorProps) {
   const self = useInstance(() => ({
     async toggle () {
       const { node, toggle, getChildren } = props;
-      if (!node.fetched) {
+      toggle();
+      if (!isLoaded(node) && !isLoading(node)) {
         await getChildren(node.id);
       }
-      toggle();
     },
   }), [
     props.node,
@@ -51,6 +63,15 @@ export function MaybeIndicator (props: IMaybeIndicatorProps) {
   if (!node.children) {
     return null;
   }
+
+  if (isLoading(node)) {
+    return (
+      <div className={classes.indicator}>
+        <HourglassFullIcon className={clsx(classes.icon, classes.spin)} />
+      </div>
+    );
+  }
+
   return (
     <div
       role="button"
@@ -58,9 +79,9 @@ export function MaybeIndicator (props: IMaybeIndicatorProps) {
       className={classes.indicator}
     >
       {expanded ? (
-        <ExpandMore className={classes.icon} />
+        <ExpandMoreIcon className={classes.icon} />
       ) : (
-        <ChevronRight className={classes.icon} />
+        <ChevronRightIcon className={classes.icon} />
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { useInstance } from '@/lib';
 import {
   useFileSystemAction,
   useFileSystemState,
+  isLoaded,
 } from '@/views/hooks/file_system';
 import { useSimpleSelectableAction } from '@/views/hooks/simple_selectable';
 import { useLayoutCache } from './layout_cache';
@@ -37,7 +38,7 @@ export const ItemCacheProvider: React.FC<IProps> = (props) => {
     cache.clearAll();
     setRootId(id);
     const node = self.current.getNode(id);
-    if (!node.fetched) {
+    if (!isLoaded(node)) {
       await loadList(id);
     }
   }, [clear, loadList, setRootId, cache, self]);

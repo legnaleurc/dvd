@@ -60,10 +60,10 @@ describe('content_action_bar', () => {
     }
 
     function Status (props: {}) {
-      const { updating } = useFileSystemState();
+      const { syncing } = useFileSystemState();
       return (
         <>
-          <input type="checkbox" readOnly={true} checked={updating} />
+          <input type="checkbox" readOnly={true} checked={syncing} />
         </>
       );
     }
@@ -118,7 +118,7 @@ describe('content_action_bar', () => {
       userEvent.click(btn);
     }
 
-    function updating () {
+    function syncing () {
       return screen.getByRole('checkbox');
     }
 
@@ -151,7 +151,7 @@ describe('content_action_bar', () => {
       click('2');
       trash(fileSystem);
       await waitFor(() => {
-        expect(updating()).not.toBeChecked();
+        expect(syncing()).not.toBeChecked();
       });
       expect(fileSystem.trash).toHaveBeenCalledTimes(2);
     });
