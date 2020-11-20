@@ -12,6 +12,7 @@ import {
   useQueueAction,
   useQueueState,
 } from '@/views/hooks/queue';
+import { makeEventHandler } from '@/lib/mocks';
 
 
 describe('queue', () => {
@@ -88,14 +89,6 @@ describe('queue', () => {
           <input type="number" readOnly={true} aria-label="resolved" value={resolvedCount} />
         </>
       );
-    }
-
-    type EventHandler = (event: React.MouseEvent<HTMLButtonElement>) => Promise<void>;
-    function makeEventHandler<T extends readonly unknown[]> (
-      handler: EventHandler,
-      dependencies: readonly [...T],
-    ) {
-      return React.useCallback(handler, dependencies);
     }
 
     function newFileSystem (mock: Record<string, any>) {

@@ -14,6 +14,7 @@ import {
   useFileSystemAction,
   useFileSystemState,
 } from '@/views/hooks/file_system';
+import { makeEventHandler, newFileSystem } from '@/lib/mocks';
 
 
 describe('file_system', () => {
@@ -147,8 +148,8 @@ describe('file_system', () => {
       );
     }
 
-    function newFileSystem (mock: Record<string, any>) {
-      return mock as unknown as FileSystem;
+    function makeNode (node: Partial<NodeResponse>): NodeResponse {
+      return node as NodeResponse;
     }
 
     function sync (fs: FileSystem, changeList: ChangeResponse[]) {
@@ -308,7 +309,7 @@ describe('file_system', () => {
 
     it('has good initial state', () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({});
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       expect(actionStub).toHaveBeenCalledTimes(1);
@@ -322,9 +323,7 @@ describe('file_system', () => {
 
     it('sync', async () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({
-        sync: jest.fn(),
-      });
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       sync(fileSystem, [
@@ -380,10 +379,7 @@ describe('file_system', () => {
 
     it('loadRoot', async () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({
-        root: jest.fn(),
-        list: jest.fn(),
-      });
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       loadRoot(fileSystem, '1', []);
@@ -404,10 +400,7 @@ describe('file_system', () => {
 
     it('loadList', async () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({
-        root: jest.fn(),
-        list: jest.fn(),
-      });
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       loadRoot(fileSystem, '1', [
@@ -441,12 +434,7 @@ describe('file_system', () => {
 
     it('rename', async () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({
-        root: jest.fn(),
-        list: jest.fn(),
-        rename: jest.fn(),
-        sync: jest.fn(),
-      });
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       loadRoot(fileSystem, '1', [
@@ -475,12 +463,7 @@ describe('file_system', () => {
 
     it('mkdir', async () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({
-        root: jest.fn(),
-        list: jest.fn(),
-        mkdir: jest.fn(),
-        sync: jest.fn(),
-      });
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       loadRoot(fileSystem, '1', [
@@ -509,9 +492,7 @@ describe('file_system', () => {
 
     it('download', () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({
-        download: jest.fn(),
-      });
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       const fakeOpen = download(fileSystem, ['2']);
@@ -521,11 +502,7 @@ describe('file_system', () => {
 
     it('copyUrl', async () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({
-        root: jest.fn(),
-        list: jest.fn(),
-        stream: jest.fn(),
-      });
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       loadRoot(fileSystem, '1', [
@@ -545,10 +522,7 @@ describe('file_system', () => {
 
     it('openUrl', async () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({
-        apply: jest.fn(),
-        stream: jest.fn(),
-      });
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       const { cleanUp } = openUrl(fileSystem, {
@@ -570,10 +544,7 @@ describe('file_system', () => {
 
     it('setSortKey', async () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({
-        root: jest.fn(),
-        list: jest.fn(),
-      });
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       loadRoot(fileSystem, '1', [
@@ -598,10 +569,7 @@ describe('file_system', () => {
 
     it('getNode', async () => {
       const actionStub = jest.fn();
-      const fileSystem = newFileSystem({
-        root: jest.fn(),
-        list: jest.fn(),
-      });
+      const fileSystem = newFileSystem();
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
       loadRoot(fileSystem, '1', [
@@ -620,18 +588,5 @@ describe('file_system', () => {
     });
 
   });
-
-  type EventHandler = (event: React.MouseEvent<HTMLButtonElement>) => void;
-  type AsyncEventHandler = (event: React.MouseEvent<HTMLButtonElement>) => Promise<void>;
-  function makeEventHandler<T extends readonly unknown[]> (
-    handler: EventHandler | AsyncEventHandler,
-    dependencies: readonly [...T],
-  ) {
-    return React.useCallback(handler, dependencies);
-  }
-
-  function makeNode (node: Partial<NodeResponse>): NodeResponse {
-    return node as NodeResponse;
-  }
 
 });

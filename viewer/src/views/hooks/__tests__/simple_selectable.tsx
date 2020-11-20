@@ -7,6 +7,7 @@ import {
   useSimpleSelectableAction,
   useSimpleSelectableState,
 } from '@/views/hooks/simple_selectable';
+import { makeEventHandler } from '@/lib/mocks';
 
 
 describe('simple_selectable', () => {
@@ -119,10 +120,5 @@ describe('simple_selectable', () => {
     });
 
   });
-
-  type EventHandler = (event: React.MouseEvent<HTMLButtonElement>) => void;
-  function makeEventHandler<T extends readonly unknown[]> (handler: EventHandler, dependencies: readonly [...T]) {
-    return React.useCallback(handler, dependencies);
-  }
 
 });
