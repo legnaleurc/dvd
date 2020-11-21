@@ -143,7 +143,12 @@ function PureTreeNode (props: IPureProps) {
   } = useActions(props);
 
   return (
-    <div className={classes.treeNode}>
+    <div
+      role="treeitem"
+      aria-expanded={expanded ? 'true' : 'false'}
+      aria-selected={selected ? 'true' : 'false'}
+      className={classes.treeNode}
+    >
       <Dragable
         enabled={selected}
         onDragStart={onDragStart}
@@ -223,9 +228,12 @@ function MaybeChildren (props: IMaybeChildrenProps) {
   }
 
   return (
-    <div className={clsx(classes.tail, {
-      [classes.hidden]: !expanded,
-    })}>
+    <div
+      role="group"
+      className={clsx(classes.tail, {
+        [classes.hidden]: !expanded,
+      })}
+    >
       {children.map(nodeId => (
         <TreeNode key={nodeId} nodeId={nodeId} />
       ))}

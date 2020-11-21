@@ -62,7 +62,7 @@ export function TreeView (props: IPropsType) {
         revision={revision}
         classes={classes}
       >
-        <div className={classes.head}>
+        <div role="tree" className={classes.head}>
           {root.children.map(nodeId => (
             <TreeNode key={nodeId} nodeId={nodeId} />
           ))}

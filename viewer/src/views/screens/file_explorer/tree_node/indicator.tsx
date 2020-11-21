@@ -53,6 +53,7 @@ export function MaybeIndicator (props: IMaybeIndicatorProps) {
   }
   return (
     <div
+      role="button"
       onClick={onClickIndicator}
       className={classes.indicator}
     >
