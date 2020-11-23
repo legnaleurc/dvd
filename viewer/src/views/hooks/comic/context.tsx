@@ -5,10 +5,14 @@ import { useGlobal } from '@/views/hooks/global';
 import { ImageData, ActionType } from './types';
 
 
-interface IStateContext {
+interface IComicUnit {
   name: string;
   imageList: ImageData[];
   unpacking: boolean;
+}
+interface IStateContext {
+  idList: string[];
+  comicDict: Record<string, IComicUnit>;
 }
 const StateContext = React.createContext<IStateContext | null>(null);
 interface IActionContext {
@@ -23,9 +27,8 @@ export const ComicProvider: React.FC<{}> = (props) => {
     loadComic,
   }), [loadComic]);
   const stateValue = React.useMemo(() => ({
-    name: state.name,
-    imageList: state.imageList,
-    unpacking: state.unpacking,
+    idList: state.idList,
+    comicDict: state.comicDict,
   }), [state]);
   return (
     <ActionContext.Provider value={dispatchValue}>
@@ -55,33 +58,53 @@ export function useComicAction () {
 }
 
 
-interface IState {
-  name: string;
-  imageList: ImageData[];
-  unpacking: boolean;
-}
-function reduce (state: IState, action: ActionType) {
+function reduce (state: IStateContext, action: ActionType) {
   switch (action.type) {
-    case 'ERROR':
-      return {
-        ...state,
+    case 'ERROR': {
+      const { id } = action.value;
+      const { comicDict } = state;
+      const dict = comicDict[id];
+      comicDict[id] = {
+        ...dict,
         unpacking: false,
-        name: '',
         imageList: [],
       };
-    case 'LOAD_BEGIN':
       return {
         ...state,
+        comicDict: { ...comicDict },
+      };
+    }
+    case 'LOAD_BEGIN': {
+      const { id, name } = action.value;
+      const { idList, comicDict } = state;
+      if (idList.indexOf(id) < 0) {
+        idList.push(id);
+      }
+      comicDict[id] = {
+        name,
         unpacking: true,
-        name: action.value,
         imageList: [],
       };
-    case 'LOAD_END':
       return {
         ...state,
-        unpacking: false,
-        imageList: action.value,
+        idList: [...idList],
+        comicDict: { ...comicDict },
       };
+    }
+    case 'LOAD_END': {
+      const { id, imageList } = action.value;
+      const { comicDict } = state;
+      const dict = comicDict[id];
+      comicDict[id] = {
+        ...dict,
+        unpacking: false,
+        imageList,
+      };
+      return {
+        ...state,
+        comicDict: { ...comicDict },
+      };
+    }
     default:
       return state;
   }
@@ -90,24 +113,33 @@ function reduce (state: IState, action: ActionType) {
 
 function useActions () {
   const { fileSystem } = useGlobal();
+
   const [state, dispatch] = React.useReducer(reduce, {
-    name: '',
-    imageList: [],
-    unpacking: false,
+    idList: [],
+    comicDict: {},
   });
+
   const self = useInstance(() => ({
-    get unpacking () {
-      return state.unpacking;
+    isUnpacking (id: string) {
+      if (!state.comicDict[id]) {
+        return false;
+      }
+      const data = state.comicDict[id];
+      return data.unpacking;
     },
-  }), [state.unpacking]);
+  }), [state.comicDict]);
+
   const loadComic = React.useCallback(async (id: string, name: string) => {
-    if (self.current.unpacking) {
+    if (self.current.isUnpacking(id)) {
       return;
     }
 
     dispatch({
       type: 'LOAD_BEGIN',
-      value: name,
+      value: {
+        id,
+        name,
+      },
     });
     try {
       const imageList = await fileSystem.imageList(id);
@@ -120,12 +152,18 @@ function useActions () {
       });
       dispatch({
         type: 'LOAD_END',
-        value: imageDataList,
+        value: {
+          id,
+          imageList: imageDataList,
+        },
       });
     } catch (e) {
       dispatch({
         type: 'ERROR',
-        value: e,
+        value: {
+          id,
+          error: e,
+        },
       });
     }
   }, [fileSystem, dispatch, self]);
