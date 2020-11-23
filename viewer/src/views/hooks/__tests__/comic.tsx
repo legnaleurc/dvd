@@ -9,13 +9,18 @@ import {
   useComicAction,
   useComicState,
 } from '@/views/hooks/comic';
+import { makeEventHandler } from '@/lib/mocks';
 
 
 describe('comic', () => {
 
   describe('<ComicProvider />', () => {
 
-    function Root (props: { fileSystem: FileSystem, actionStub: () => void }) {
+    interface IRoot {
+      fileSystem: FileSystem;
+      actionStub: () => void;
+    }
+    function Root (props: IRoot) {
       return (
         <GlobalProvider fileSystem={props.fileSystem}>
           <ComicProvider>
@@ -33,40 +38,85 @@ describe('comic', () => {
         props.stub();
       }, [props.stub, loadComic]);
 
-      const onClick = React.useCallback(() => {
-        loadComic('1', 'test.zip');
+      const onClick = makeEventHandler((event) => {
+        const data = event.currentTarget.dataset;
+        const id = data['id']! as string;
+        const name = data['name']! as string;
+        loadComic(id, name);
       }, [loadComic]);
 
       return (
-        <button onClick={onClick} />
+        <button aria-label="load" onClick={onClick} />
       );
     }
 
     function State (props: {}) {
-      const { unpacking, name, imageList } = useComicState();
+      const { idList } = useComicState();
+      const [current, setCurrent] = React.useState('');
+
+      const onClick = makeEventHandler((event) => {
+        const data = event.currentTarget.dataset;
+        const current = data['current']! as string;
+        setCurrent(current);
+      }, [setCurrent]);
+
       return (
         <>
-          <input type="checkbox" readOnly={true} checked={unpacking} />
-          <input type="text" readOnly={true} value={name} />
-          <div>
-            {imageList.map((g, i) => (
-              <img
-                key={i}
-                src={g.url}
-                style={{
-                  width: g.width,
-                  height: g.height,
-                }}
-              />
+          <ul>
+            {idList.map((id) => (
+              <li key={id}>{id}</li>
             ))}
-          </div>
+          </ul>
+          <button aria-label="setCurrent" onClick={onClick} />
+          <MaybeComic id={current} />
         </>
       );
     }
 
-    function load () {
-      const btn = screen.getByRole('button');
+    interface IMaybeComic {
+      id: string;
+    }
+    function MaybeComic (props: IMaybeComic) {
+      const { comicDict } = useComicState();
+      if (!props.id) {
+        return null;
+      }
+      const { unpacking, name, imageList } = comicDict[props.id];
+      return (
+        <>
+          <input type="checkbox" readOnly={true} checked={unpacking} />
+          <input type="text" readOnly={true} value={name} />
+          {imageList.map((g, i) => (
+            <img
+              key={i}
+              src={g.url}
+              style={{
+                width: g.width,
+                height: g.height,
+              }}
+            />
+          ))}
+        </>
+      );
+    }
+
+
+    function load (id: string, name: string) {
+      const btn = screen.getByRole('button', { name: 'load' });
+      btn.dataset.id = id;
+      btn.dataset.name = name;
       userEvent.click(btn);
+    }
+
+
+    function setId (id: string) {
+      const btn = screen.getByRole('button', { name: 'setCurrent' });
+      btn.dataset.current = id;
+      userEvent.click(btn);
+    }
+
+    function idList () {
+      return screen.queryAllByRole('listitem');
     }
 
     function unpacking () {
@@ -92,15 +142,14 @@ describe('comic', () => {
       return mock as unknown as FileSystem;
     }
 
+
     it('has good initial data', () => {
       const actionStub = jest.fn();
       const fileSystem = newFileSystem(() => ({}));
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
+      expect(idList()).toHaveLength(0);
       expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(unpacking()).not.toBeChecked();
-      expect(name()).toHaveValue('');
-      expect(imageList()).toHaveLength(0);
     });
 
     it('can load proper comic', async () => {
@@ -119,8 +168,9 @@ describe('comic', () => {
       }));
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
-      load();
-      expect(actionStub).toHaveBeenCalledTimes(1);
+      load('1', 'test.zip');
+      setId('1');
+
       expect(unpacking()).toBeChecked();
       expect(name()).toHaveValue('test.zip');
       expect(imageList()).toHaveLength(0);
@@ -129,10 +179,10 @@ describe('comic', () => {
         expect(unpacking()).not.toBeChecked();
       });
 
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(unpacking()).not.toBeChecked();
       expect(name()).toHaveValue('test.zip');
       expect(imageList()).toHaveLength(2);
+
+      expect(actionStub).toHaveBeenCalledTimes(1);
     });
 
     it('clears state for bad comic', async () => {
@@ -142,8 +192,9 @@ describe('comic', () => {
       }));
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
-      load();
-      expect(actionStub).toHaveBeenCalledTimes(1);
+      load('1', 'test.zip');
+      setId('1');
+
       expect(unpacking()).toBeChecked();
       expect(name()).toHaveValue('test.zip');
       expect(imageList()).toHaveLength(0);
@@ -152,9 +203,10 @@ describe('comic', () => {
         expect(unpacking()).not.toBeChecked();
       });
 
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(name()).toHaveValue('');
+      expect(name()).toHaveValue('test.zip');
       expect(imageList()).toHaveLength(0);
+
+      expect(actionStub).toHaveBeenCalledTimes(1);
     });
 
   });
