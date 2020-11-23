@@ -4,9 +4,9 @@ const FileExplorer = React.lazy(() => import('./lazy/file_explorer'));
 const FileExplorerProvider = React.lazy(() => import('./lazy/file_explorer_provider'));
 const FileExplorerIcon = React.lazy(() => import('./lazy/file_explorer_icon'));
 const FileExplorerToolBar = React.lazy(() => import('./lazy/file_explorer_tool_bar'));
-const MultiPageView = React.lazy(() => import('./lazy/multi_page'));
-const MultiPageViewIcon = React.lazy(() => import('./lazy/multi_page_icon'));
-const MultiPageViewToolBar = React.lazy(() => import('./lazy/multi_page_tool_bar'));
+const ComicView = React.lazy(() => import('./lazy/comic_view'));
+const ComicViewIcon = React.lazy(() => import('./lazy/comic_view_icon'));
+const ComicViewToolBar = React.lazy(() => import('./lazy/comic_view_tool_bar'));
 const SearchView = React.lazy(() => import('./lazy/search_view'));
 const SearchViewProvider = React.lazy(() => import('./lazy/search_view_provider'));
 const SearchViewIcon = React.lazy(() => import('./lazy/search_view_icon'));
@@ -40,12 +40,12 @@ export function useSiteMap (): ISiteChunk[] {
       toolBar: FileExplorerToolBar,
     },
     {
-      id: 'mpv',
-      name: 'Multi-page Viewer',
-      icon: MultiPageViewIcon,
+      id: 'comic',
+      name: 'Comic Viewer',
+      icon: ComicViewIcon,
       context: React.Fragment,
-      main: MultiPageView,
-      toolBar: MultiPageViewToolBar,
+      main: ComicView,
+      toolBar: ComicViewToolBar,
     },
     {
       id: 'search',

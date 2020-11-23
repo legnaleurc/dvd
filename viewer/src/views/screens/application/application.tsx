@@ -1,11 +1,9 @@
 import React from 'react';
-// HACK: Import from react-router-dom instead of react-router to prevent UMD
-// bundle error.
-import { useHistory, useParams } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
 import { useFullScreenAction } from '@/views/hooks/fullscreen';
+import { useRootParams, useNavigation } from '@/views/hooks/router';
 import { Header } from './header';
 import { SideBar } from './side_bar';
 import { Content } from './content';
@@ -129,26 +127,23 @@ export function Application (props: {}) {
 }
 
 
-interface MatchParams {
-  tabId: string;
-}
 function useTabState (siteMap: ISiteChunk[]) {
-  const history = useHistory();
-  const { tabId } = useParams<MatchParams>();
+  const { absGoTo, listenTo } = useNavigation();
+  const { tabId } = useRootParams();
   const tabList = siteMap.map(chunk => chunk.id);
   const tabIndex = tabList.indexOf(tabId);
 
   const changeTab = React.useCallback((newValue: number) => {
-    history.push(`/${tabList[newValue]}`);
-  }, [history, siteMap]);
+    absGoTo(`/${tabList[newValue]}`);
+  }, [absGoTo, siteMap]);
 
   const { leaveFullScreen } = useFullScreenAction();
 
   React.useEffect(() => {
-    return history.listen(() => {
+    return listenTo(() => {
       leaveFullScreen();
     });
-  }, [history, leaveFullScreen]);
+  }, [listenTo, leaveFullScreen]);
 
   return {
     tabIndex,

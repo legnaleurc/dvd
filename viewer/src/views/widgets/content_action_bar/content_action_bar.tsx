@@ -18,7 +18,7 @@ import {
   useFileSystemState,
 } from '@/views/hooks/file_system';
 import { useQueueAction, useQueueState } from '@/views/hooks/queue';
-import { useComicState, useComicAction } from '@/views/hooks/comic';
+import { useComicAction } from '@/views/hooks/comic';
 import {
   useRichSelectableAction,
   useRichSelectableState,
@@ -61,7 +61,6 @@ interface IPureProps {
   trashNodes: (getNode: (id: string) => INodeLike, idList: string[]) => Promise<void>;
   pendingCount: number;
   getNode: (id: string) => INodeLike;
-  unpacking: boolean;
   loadComic: (id: string, name: string) => Promise<void>;
   count: number;
   getSelectionList: () => string[];
@@ -78,7 +77,6 @@ function useActions (props: IPureProps) {
     mkdir,
     trashNodes,
     getNode,
-    unpacking,
     loadComic,
     getSelectionList,
     clearSelection,
@@ -90,15 +88,15 @@ function useActions (props: IPureProps) {
 
   const self = useInstance(() => ({
     async loadComic () {
-      if (unpacking) {
-        return;
-      }
       const list = getSelectionList();
-      if (list.length !== 1) {
+      if (list.length <= 0) {
         return;
       }
-      const node = getNode(list[0]);
-      await loadComic(node.id, node.name);
+      for (const id of list) {
+        const node = getNode(id);
+        // NOTE no need to wait
+        loadComic(node.id, node.name);
+      }
       clearSelection();
     },
     copy () {
@@ -174,7 +172,6 @@ function useActions (props: IPureProps) {
       return node.name;
     },
   }), [
-    unpacking,
     getSelectionList,
     clearSelection,
     loadComic,
@@ -224,7 +221,6 @@ function useActions (props: IPureProps) {
 
   return {
     updating,
-    unpacking,
     loadComic: loadComic_,
     copy,
     download: download_,
@@ -252,7 +248,6 @@ function PureContentActionBar(props: IPureProps) {
   const classes = useStyles();
   const {
     updating,
-    unpacking,
     loadComic,
     copy,
     download,
@@ -276,7 +271,7 @@ function PureContentActionBar(props: IPureProps) {
     <div className={classes.contentActionBar}>
       <div className={classes.group}>
         <IconButton
-          disabled={unpacking || count !== 1}
+          disabled={count <= 0}
           onClick={loadComic}
         >
           <ImportContactsIcon />
@@ -364,7 +359,6 @@ export function ContentActionBar (props: IProps) {
   const { copyUrl, download, rename, mkdir } = useFileSystemAction();
   const { trashNodes } = useQueueAction();
   const { pendingCount } = useQueueState();
-  const { unpacking } = useComicState();
   const { loadComic } = useComicAction();
   const { count } = useRichSelectableState();
   const { getList, clear } = useRichSelectableAction();
@@ -378,7 +372,6 @@ export function ContentActionBar (props: IProps) {
       trashNodes={trashNodes}
       pendingCount={pendingCount}
       getNode={getNode}
-      unpacking={unpacking}
       loadComic={loadComic}
       count={count}
       getSelectionList={getList}

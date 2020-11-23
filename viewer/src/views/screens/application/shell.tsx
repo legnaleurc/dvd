@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { hot } from 'react-hot-loader/root';
 
 import { FileSystem } from '@/lib';
@@ -8,6 +8,7 @@ import { GlobalProvider } from '@/views/hooks/global';
 import { FileSystemProvider } from '@/views/hooks/file_system';
 import { QueueProvider } from '@/views/hooks/queue';
 import { ComicProvider } from '@/views/hooks/comic';
+import { RootRoute } from '@/views/hooks/router';
 
 const ThemeProvider = React.lazy(() => import('./lazy/theme_provider'));
 const Application = React.lazy(() => import('./lazy/application'));
@@ -26,13 +27,7 @@ function ShellApplication (props: IProps) {
               <ComicProvider>
                 <FullScreenProvider>
                   <BrowserRouter>
-                    <Switch>
-                      <Redirect exact from="/" to="/files" />
-                      <Route
-                        path="/:tabId"
-                        component={Application}
-                      />
-                    </Switch>
+                    <RootRoute component={Application} />
                   </BrowserRouter>
                 </FullScreenProvider>
               </ComicProvider>

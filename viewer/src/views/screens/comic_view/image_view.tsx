@@ -8,12 +8,11 @@ import { useInstance } from '@/lib';
 const useStyles = makeStyles((theme) => ({
   imageView: {
     maxWidth: '100%',
-    '& $image': {
-      maxWidth: '100%',
-      height: 'auto',
-    },
   },
-  image: {},
+  image: {
+    maxWidth: '100%',
+    height: 'auto',
+  },
 }));
 
 
@@ -29,11 +28,11 @@ export function ImageView (props: IPropsType) {
   const { width, height } = props;
   const classes = useStyles();
   const { url, loaded, onIntersect } = useActions(props);
-  const { root } = useObserver(props.rootRef, onIntersect);
+  const { targetRef } = useObserver(props.rootRef, onIntersect);
   return (
     <div
       className={classes.imageView}
-      ref={root}
+      ref={targetRef}
     >
       <img
         className={clsx(classes.image, {
@@ -84,25 +83,26 @@ function useObserver (
   rootRef: React.RefObject<HTMLDivElement>,
   onIntersect: IntersectionObserverCallback,
 ) {
-  const root = React.useRef<HTMLDivElement>(null);
-  const options = {
-    root: rootRef.current,
-    rootMargin: '400% 0px 400% 0px',
-    threshold: 0,
-  };
-  const observer = React.useRef(new IntersectionObserver(onIntersect, options));
+  const targetRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (root.current) {
-      observer.current.observe(root.current);
+    if (!rootRef.current || !targetRef.current) {
+      return;
     }
+
+    const observer = new IntersectionObserver(onIntersect, {
+      root: rootRef.current,
+      rootMargin: '400% 0px 400% 0px',
+      threshold: 0,
+    });
+    observer.observe(targetRef.current);
     return () => {
-      observer.current.disconnect();
+      observer.disconnect();
     };
-  }, [root, observer]);
+  }, [rootRef.current, targetRef.current, onIntersect]);
 
   return {
-    root,
+    targetRef,
   };
 }
 

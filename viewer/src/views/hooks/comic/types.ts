@@ -6,6 +6,16 @@ export type ImageData = ImageResponse & {
 };
 
 
+export interface ComicData {
+  name: string;
+  imageList: ImageData[];
+  unpacking: boolean;
+}
+
+
+export type ComicDict = Record<string, ComicData>;
+
+
 interface LoadBeginData {
   id: string;
   name: string;

@@ -16,7 +16,7 @@ import {
 
 import { getMixins } from '@/lib';
 import { useFileSystemState } from '@/views/hooks/file_system';
-import { useComicState, useComicAction } from '@/views/hooks/comic';
+import { useComicAction } from '@/views/hooks/comic';
 import {
   SimpleSelectableProvider,
   useSimpleSelectableAction,
@@ -164,7 +164,6 @@ interface IToolBarProps {
 function ToolBar (props: IToolBarProps) {
   const { showHistory } = props;
   const { updating: fileLoading } = useFileSystemState();
-  const { unpacking: fileUnpacking } = useComicState();
   const { loadComic } = useComicAction();
   const { clear } = useSimpleSelectableAction();
   const { dict, count } = useSimpleSelectableState();
@@ -201,7 +200,7 @@ function ToolBar (props: IToolBarProps) {
         </Badge>
       </IconButton>
       <IconButton
-        disabled={fileLoading || fileUnpacking || count !== 1}
+        disabled={fileLoading || count <= 0}
         onClick={onComic}
       >
         <ImportContactsIcon />

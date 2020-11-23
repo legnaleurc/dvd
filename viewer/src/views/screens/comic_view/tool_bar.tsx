@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
 import { useComicState } from '@/views/hooks/comic';
+import { ComicRoute, useComicParams } from '@/views/hooks/router';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -28,7 +29,6 @@ interface IToolBar {
 }
 function ToolBar (props: IToolBar) {
   const classes = useStyles();
-  const { name } = useComicState();
   if (!props.anchorEl) {
     return null;
   }
@@ -37,11 +37,29 @@ function ToolBar (props: IToolBar) {
       <div className={classes.multiPageViewToolBar}>
         <div className={classes.group}>
           <Typography variant="h6" noWrap>
-            {name}
+            <ComicRoute
+              defaultComponent={EmptyTitle}
+              component={ComicTitle}
+            />
           </Typography>
         </div>
       </div>
     </Portal>
   );
 }
-export { ToolBar as MultiPageViewToolBar };
+export { ToolBar as ComicViewToolBar };
+
+
+function EmptyTitle () {
+  return <></>;
+}
+
+
+function ComicTitle () {
+  const { comicId } = useComicParams();
+  const { comicDict } = useComicState();
+  if (!comicDict[comicId]) {
+    return <></>;
+  }
+  return <>{comicDict[comicId].name}</>;
+}

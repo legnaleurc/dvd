@@ -14,7 +14,7 @@ import {
   useFileSystemState,
   Node_,
 } from '@/views/hooks/file_system';
-import { useComicState, useComicAction } from '@/views/hooks/comic';
+import { useComicAction } from '@/views/hooks/comic';
 import {
   useSimpleSelectableAction,
   useSimpleSelectableState,
@@ -25,9 +25,8 @@ import { useItemCache } from './item_cache';
 interface IPureProps {
   root: Node_;
   fileLoading: boolean;
-  fileUnpacking: boolean;
   changeRoot: (id: string) => Promise<void>;
-  onComic: () => Promise<void>;
+  onComic: () => void;
   selectedCount: number;
   clearSelection: () => void;
 }
@@ -35,7 +34,6 @@ function PureToolBar (props: IPureProps) {
   const {
     root,
     fileLoading,
-    fileUnpacking,
     changeRoot,
     onComic,
     selectedCount,
@@ -68,7 +66,7 @@ function PureToolBar (props: IPureProps) {
         </Badge>
       </IconButton>
       <IconButton
-        disabled={fileLoading || fileUnpacking || selectedCount !== 1}
+        disabled={fileLoading || selectedCount <= 0}
         onClick={onComic}
       >
         <ImportContactsIcon />
@@ -87,23 +85,24 @@ export function ToolBar (props: IProps) {
 
   const { updating, nodes } = useFileSystemState();
   const { getNode } = useFileSystemAction();
-  const { unpacking } = useComicState();
   const { loadComic } = useComicAction();
   const { clear } = useSimpleSelectableAction();
   const { dict, count } = useSimpleSelectableState();
   const { changeRoot } = useItemCache();
 
-  const onComic = React.useCallback(async () => {
+  const onComic = React.useCallback(() => {
     const list = (
       Object.entries(dict)
       .filter(([id, value]) => value)
       .map(([id, value]) => id)
     );
-    if (list.length !== 1) {
+    if (list.length <= 0) {
       return;
     }
-    const node = getNode(list[0]);
-    await loadComic(node.id, node.name);
+    for (const id of list) {
+      const node = getNode(id);
+      loadComic(node.id, node.name);
+    }
     clear();
   }, [clear, dict, loadComic]);
 
@@ -115,7 +114,6 @@ export function ToolBar (props: IProps) {
     <MemorizedPureToolBar
       root={nodes[rootId]}
       fileLoading={updating}
-      fileUnpacking={unpacking}
       changeRoot={changeRoot}
       onComic={onComic}
       selectedCount={count}

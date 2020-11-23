@@ -2,17 +2,12 @@ import React from 'react';
 
 import { useInstance } from '@/lib';
 import { useGlobal } from '@/views/hooks/global';
-import { ImageData, ActionType } from './types';
+import { ComicDict, ActionType } from './types';
 
 
-interface IComicUnit {
-  name: string;
-  imageList: ImageData[];
-  unpacking: boolean;
-}
 interface IStateContext {
   idList: string[];
-  comicDict: Record<string, IComicUnit>;
+  comicDict: ComicDict;
 }
 const StateContext = React.createContext<IStateContext | null>(null);
 interface IActionContext {
