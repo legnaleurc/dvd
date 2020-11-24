@@ -1,5 +1,5 @@
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
+import { useHistory, useParams } from 'react-router';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
@@ -73,14 +73,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-interface MatchParams {
-  tabId: string;
-}
-type IProps = RouteComponentProps<MatchParams>
-export function Application (props: IProps) {
+export function Application (props: {}) {
   const classes = useStyles();
   const siteMap = useSiteMap();
-  const { tabIndex, changeTab } = useTabState(props, siteMap);
+  const { tabIndex, changeTab } = useTabState(siteMap);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [desktopOpen, setDesktopOpen] = React.useState(false);
   const toolBarRef = React.useRef<HTMLDivElement>(null);
@@ -131,10 +127,13 @@ export function Application (props: IProps) {
 }
 
 
-function useTabState (props: IProps, siteMap: ISiteChunk[]) {
-  const { match, history } = props;
+interface MatchParams {
+  tabId: string;
+}
+function useTabState (siteMap: ISiteChunk[]) {
+  const history = useHistory();
+  const { tabId } = useParams<MatchParams>();
   const tabList = siteMap.map(chunk => chunk.id);
-  const tabId = match.params.tabId;
   const tabIndex = tabList.indexOf(tabId);
 
   const changeTab = React.useCallback((newValue: number) => {
