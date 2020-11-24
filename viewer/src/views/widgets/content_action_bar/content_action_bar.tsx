@@ -292,13 +292,13 @@ function PureContentActionBar(props: IPureProps) {
         </IconButton>
         <Divider />
         <IconButton
-          disabled={unpacking || count !== 1}
+          disabled={updating || count !== 1}
           onClick={showRename}
         >
           <EditIcon />
         </IconButton>
         <IconButton
-          disabled={unpacking || count !== 1}
+          disabled={updating || count !== 1}
           onClick={showMkdir}
         >
           <CreateNewFolderIcon />
