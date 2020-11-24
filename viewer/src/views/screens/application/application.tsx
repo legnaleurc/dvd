@@ -1,5 +1,7 @@
 import React from 'react';
-import { useHistory, useParams } from 'react-router';
+// HACK: Import from react-router-dom instead of react-router to prevent UMD
+// bundle error.
+import { useHistory, useParams } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
