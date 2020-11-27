@@ -13,6 +13,7 @@ from engine.main import application_context
 class ApiTestCase(IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
+        await super().asyncSetUp()
         async with AsyncExitStack() as stack:
             static_path = stack.enter_context(TemporaryDirectory())
             stack.enter_context(patch('engine.main.DriveFactory'))
@@ -28,42 +29,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
 
     async def asyncTearDown(self) -> None:
         await self._raii.aclose()
-
-    async def testIndex(self):
-        expected = 'test'
-
-        index_path = self._static_path / 'index.html'
-        with index_path.open('w') as fout:
-            fout.write(expected)
-
-        rv = await self._client.get('/')
-        self.assertEqual(rv.status, 200)
-        body = await rv.text()
-        self.assertEqual(body, expected)
-
-    async def testIndexFallback(self):
-        expected = 'test'
-
-        index_path = self._static_path / 'index.html'
-        with index_path.open('w') as fout:
-            fout.write(expected)
-
-        rv = await self._client.get('/search')
-        self.assertEqual(rv.status, 200)
-        body = await rv.text()
-        self.assertEqual(body, expected)
-
-    async def testStaticUrl(self):
-        expected = 'test'
-
-        index_path = self._static_path / 'random.txt'
-        with index_path.open('w') as fout:
-            fout.write(expected)
-
-        rv = await self._client.get('/static/random.txt')
-        self.assertEqual(rv.status, 200)
-        body = await rv.text()
-        self.assertEqual(body, expected)
+        await super().asyncTearDown()
 
     async def testChangeList(self):
         expected = []
