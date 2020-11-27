@@ -10,7 +10,14 @@ from wcpan.logger import EXCEPTION
 from wcpan.drive.core.drive import Drive
 from wcpan.drive.core.types import Node
 
-from . import util
+from .util import (
+    InvalidPatternError,
+    SearchEngine,
+    SearchFailedError,
+    UnpackEngine,
+    UnpackFailedError,
+    normalize_search_pattern,
+)
 
 
 class NotFoundError(Exception):
@@ -93,7 +100,7 @@ class NodeView(NodeObjectMixin, View):
     @raise_404
     async def patch(self):
         node = await self.get_object()
-        drive = self.request.app['drive']
+        drive: Drive = self.request.app['drive']
         kwargs = await self.request.json()
         kwargs = unpack_dict(kwargs, (
             'parent_id',
@@ -116,8 +123,8 @@ class NodeView(NodeObjectMixin, View):
     @raise_404
     async def delete(self):
         node = await self.get_object()
-        drive = self.request.app['drive']
-        se = self.request.app['se']
+        drive: Drive = self.request.app['drive']
+        se: SearchEngine = self.request.app['se']
         path = await drive.get_path(node)
         se.drop_value(str(path))
         await drive.trash_node(node)
@@ -151,9 +158,9 @@ class NodeListView(View):
         se = self.request.app['se']
         try:
             nodes = await search_by_name(se, name_filter)
-        except util.InvalidPatternError:
+        except InvalidPatternError:
             return Response(status=400)
-        except util.SearchFailedError:
+        except SearchFailedError:
             return Response(status=503)
 
         nodes = sorted(nodes, key=lambda _: _['path'])
@@ -193,7 +200,7 @@ class NodeChildrenView(NodeObjectMixin, View):
     @raise_404
     async def get(self):
         node = await self.get_object()
-        drive = self.request.app['drive']
+        drive: Drive = self.request.app['drive']
         children = await drive.get_children(node)
         children = filter(lambda _: not _.trashed, children)
         children = [_.to_dict() for _ in children]
@@ -233,10 +240,10 @@ class NodeImageListView(NodeObjectMixin, View):
     async def get(self):
         node = await self.get_object()
 
-        ue = self.request.app['ue']
+        ue: UnpackEngine = self.request.app['ue']
         try:
             manifest = await ue.get_manifest(node)
-        except util.UnpackFailedError:
+        except UnpackFailedError:
             return Response(status=503)
 
         manifest = [{
@@ -257,10 +264,10 @@ class NodeImageView(NodeObjectMixin, View):
             return Response(status=404)
         image_id = int(image_id)
 
-        ue = self.request.app['ue']
+        ue: UnpackEngine = self.request.app['ue']
         try:
             manifest = await ue.get_manifest(node)
-        except util.UnpackFailedError:
+        except UnpackFailedError:
             return Response(status=503)
 
         try:
@@ -268,7 +275,7 @@ class NodeImageView(NodeObjectMixin, View):
         except IndexError:
             return Response(status=404)
 
-        drive = self.request.app['drive']
+        drive: Drive = self.request.app['drive']
         response = StreamResponse(status=200)
         response.content_type = data['type']
         response.content_length = data['size']
@@ -292,8 +299,8 @@ class NodeImageView(NodeObjectMixin, View):
 class ChangesView(View):
 
     async def post(self):
-        drive = self.request.app['drive']
-        se = self.request.app['se']
+        drive: Drive = self.request.app['drive']
+        se: SearchEngine = self.request.app['se']
         await se.clear_cache()
         changes = [_ async for _ in drive.sync()]
         return json_response(changes)
@@ -333,15 +340,15 @@ async def get_node(drive: Drive, id_or_root: str) -> Node:
 
 
 async def search_by_name(
-    search_engine: util.SearchEngine,
+    search_engine: SearchEngine,
     pattern: str,
 ) -> List[Node]:
-    real_pattern = util.normalize_search_pattern(pattern)
+    real_pattern = normalize_search_pattern(pattern)
     try:
         re.compile(real_pattern)
     except Exception as e:
         EXCEPTION('engine', e) << real_pattern
-        raise util.InvalidPatternError(real_pattern)
+        raise InvalidPatternError(real_pattern)
 
     se = search_engine
     nodes = await se.get_nodes_by_regex(real_pattern)
