@@ -2,7 +2,7 @@ from contextlib import AsyncExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from aiohttp.test_utils import TestServer, TestClient
 from wcpan.drive.core.types import Node
@@ -19,7 +19,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             stack.enter_context(patch('engine.main.DriveFactory'))
             app = await stack.enter_async_context(application_context(
                 port=9999,
-                unpack_path='',
+                unpack_path='fake_unpack',
                 static_path=static_path,
             ))
             client = await stack.enter_async_context(TestClient(TestServer(app)))
@@ -35,7 +35,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         expected = []
 
         drive = self._client.app['drive']
-        drive.sync = Mock(return_value=AsyncMock(side_effect=expected))
+        drive.sync = MagicMock(return_value=AsyncMock(side_effect=expected))
 
         rv = await self._client.post('/api/v1/changes')
         self.assertEqual(rv.status, 200)
@@ -158,6 +158,29 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             'width': 640,
             'height': 480,
         })
+
+    @patch('asyncio.create_subprocess_exec')
+    async def testImageListForFiles(self, fake_create_process: MagicMock):
+        async def fake_get_node_by_id(id: str):
+            return Node.from_dict(make_node_dict({
+                'id': id,
+                'is_folder': False,
+            }))
+
+        ue = self._client.app['ue']
+        tmp_path = ue._tmp
+        fake_process = AsyncMock()
+        fake_process.communicate.return_value = None, None
+        fake_process.returncode = 0
+        fake_create_process.return_value = fake_process
+        drive = self._client.app['drive']
+        drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
+
+        rv = await self._client.get('/api/v1/nodes/1/images')
+        self.assertEqual(rv.status, 200)
+        body = await rv.json()
+        self.assertEqual(len(body), 0)
+        fake_create_process.assert_called_once_with('fake_unpack', '9999', '1', tmp_path)
 
 
 def make_node_dict(d):
