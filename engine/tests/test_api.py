@@ -122,6 +122,43 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             Node.from_dict(make_node_dict({ 'id': '1' })),
         )
 
+    async def testImageListForFolders(self):
+        async def fake_get_node_by_id(id: str):
+            return Node.from_dict(make_node_dict({
+                'id': id,
+                'is_folder': True,
+            }))
+        async def fake_walk(node: Node):
+            yield node, [], [
+                Node.from_dict(make_node_dict({
+                    'id': '2',
+                    'name': 'image2',
+                    'mime_type': 'image/png',
+                    'image': {
+                        'width': 640,
+                        'height': 480,
+                    },
+                })),
+                Node.from_dict(make_node_dict({
+                    'id': '3',
+                    'name': 'file3',
+                    'mime_type': 'text/plain',
+                })),
+            ]
+
+        drive = self._client.app['drive']
+        drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
+        drive.walk = fake_walk
+
+        rv = await self._client.get('/api/v1/nodes/1/images')
+        self.assertEqual(rv.status, 200)
+        body = await rv.json()
+        self.assertEqual(len(body), 1)
+        self.assertEqual(body[0], {
+            'width': 640,
+            'height': 480,
+        })
+
 
 def make_node_dict(d):
     rv = {
