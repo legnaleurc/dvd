@@ -169,17 +169,16 @@ function ToolBar (props: IToolBarProps) {
   const { dict, count } = useSimpleSelectableState();
   const { getNode } = useContext();
 
-  const onComic = React.useCallback(async () => {
+  const onComic = React.useCallback(() => {
     const list = (
       Object.entries(dict)
       .filter(([id, value]) => value)
       .map(([id, value]) => id)
     );
-    if (list.length !== 1) {
-      return;
+    for (const id of list) {
+      const node = getNode(id);
+      loadComic(node.id, node.name);
     }
-    const node = getNode(list[0]);
-    await loadComic(node.id, node.name);
     clear();
   }, [clear, dict, loadComic, getNode]);
 
