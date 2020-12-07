@@ -2,6 +2,7 @@ from contextlib import AsyncExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import IsolatedAsyncioTestCase
+from unittest.mock import patch
 
 from aiohttp.test_utils import TestServer, TestClient
 
@@ -14,6 +15,7 @@ class ViewTestCase(IsolatedAsyncioTestCase):
         await super().asyncSetUp()
         async with AsyncExitStack() as stack:
             static_path = stack.enter_context(TemporaryDirectory())
+            stack.enter_context(patch('engine.main.DriveFactory'))
             app = await stack.enter_async_context(application_context(
                 port=9999,
                 unpack_path='',
