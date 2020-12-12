@@ -12,7 +12,12 @@ const useStyles = makeStyles((theme) => ({
   image: {
     maxWidth: '100%',
     height: 'auto',
+    visibility: 'hidden',
+    '&.loaded': {
+      visibility: 'visible',
+    },
   },
+  loaded: {},
 }));
 
 
@@ -57,6 +62,9 @@ function useActions (props: IPropsType) {
       setUrl(props.url);
       setLoaded(true);
     },
+    unloadImage () {
+      setLoaded(false);
+    },
   }), [
     props.url,
     setUrl,
@@ -67,6 +75,8 @@ function useActions (props: IPropsType) {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         self.current.setImageUrl();
+      } else {
+        self.current.unloadImage();
       }
     });
   }, [self]);
