@@ -1,6 +1,5 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { ImportContacts as ImportContactsIcon } from '@material-ui/icons';
 
 import { getMixins } from '@/lib';
 import { useFullScreenAction } from '@/views/hooks/fullscreen';
@@ -10,7 +9,7 @@ import { ImageView } from './image_view';
 
 
 const useStyles = makeStyles((theme) => ({
-  comicDetailView: {
+  imageList: {
     ...getMixins([
       'size-grow',
       'mh-0',
@@ -20,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export function ComicDetailView (props: {}) {
+export function ImageList (props: {}) {
   const root = React.useRef<HTMLDivElement>(null);
   const classes = useStyles();
   const { toggleFullScreen } = useFullScreenAction();
@@ -28,7 +27,7 @@ export function ComicDetailView (props: {}) {
 
   return (
     <div
-      className={classes.comicDetailView}
+      className={classes.imageList}
       ref={root}
       onClick={toggleFullScreen}
     >
@@ -65,6 +64,3 @@ function getImageList (comicDict: ComicDict, id: string) {
   }
   return [];
 }
-
-
-export { ImportContactsIcon as ComicViewIcon };
