@@ -20,18 +20,18 @@ function PureRootList (props: IPureProps) {
   const children = root.children;
 
   return (
-      <VirtualList
-        count={children.length}
-        renderer={({ index, style, itemRef }) => (
-          <ItemView
-            nodeId={children[index]}
-            changeRoot={changeRoot}
-            isLast={index === (children.length - 1)}
-            style={style}
-            itemRef={itemRef}
-          />
-        )}
-      />
+    <VirtualList
+      count={children.length}
+      renderer={({ index, style, itemRef }) => (
+        <ItemView
+          nodeId={children[index]}
+          changeRoot={changeRoot}
+          isLast={index === (children.length - 1)}
+          style={style}
+          itemRef={itemRef}
+        />
+      )}
+    />
   );
 }
 const MemorizedPureRootList = React.memo(PureRootList);
