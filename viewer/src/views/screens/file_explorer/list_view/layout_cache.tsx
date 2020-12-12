@@ -2,12 +2,10 @@ import React from 'react';
 import { CellMeasurerCache, CellMeasurerCacheParams} from 'react-virtualized';
 
 
-const Context = React.createContext({
-  cache: new CellMeasurerCache({
-    fixedHeight: true,
-    fixedWidth: true,
-  }),
-});
+interface IContext {
+  cache: CellMeasurerCache;
+}
+const Context = React.createContext<IContext | null>(null);
 
 
 export const LayoutCacheProvider: React.FC<CellMeasurerCacheParams> = (props) => {
@@ -28,5 +26,9 @@ export const LayoutCacheProvider: React.FC<CellMeasurerCacheParams> = (props) =>
 
 
 export function useLayoutCache () {
-  return React.useContext(Context);
+  const context = React.useContext(Context);
+  if (!context) {
+    throw new Error('LayoutCache is not ready');
+  }
+  return context;
 }
