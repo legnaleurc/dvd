@@ -319,6 +319,9 @@ function PureContentActionBar(props: IPureProps) {
         </IconButton>
         <Divider />
         <IconButton
+          aria-label="queue dialog"
+          aria-controls="queue-dialog"
+          aria-haspopup="dialog"
           onClick={showQueue}
         >
           <Badge badgeContent={pendingCount} color="secondary">

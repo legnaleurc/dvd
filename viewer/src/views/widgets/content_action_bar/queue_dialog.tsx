@@ -52,11 +52,13 @@ export function QueueDialog (props: IProps) {
 
   return (
     <Dialog
+      id="queue-dialog"
+      aria-labelledby="queue-dialog-title"
       className={classes.queueDialog}
       open={props.open}
       onClose={props.onClose}
     >
-      <DialogTitle>Queued Actions</DialogTitle>
+      <DialogTitle id="queue-dialog-title">Queued Actions</DialogTitle>
       <DialogContent>
         <div className={classes.body}>
           <List>
