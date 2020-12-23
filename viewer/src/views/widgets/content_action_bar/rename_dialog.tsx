@@ -55,11 +55,13 @@ export function RenameDialog (props: IProps) {
 
   return (
     <Dialog
+      id="rename-dialog"
+      aria-labelledby="rename-dialog-title"
       className={classes.renameDialog}
       open={props.open}
       onClose={props.onClose}
     >
-      <DialogTitle>Rename</DialogTitle>
+      <DialogTitle id="rename-dialog-title">Rename</DialogTitle>
       <DialogContent>
         <DialogContentText>
           {props.name}

@@ -290,6 +290,8 @@ function PureContentActionBar(props: IPureProps) {
         <Divider />
         <IconButton
           aria-label="rename"
+          aria-controls="rename-dialog"
+          aria-haspopup="dialog"
           disabled={updating || count !== 1}
           onClick={showRename}
         >
