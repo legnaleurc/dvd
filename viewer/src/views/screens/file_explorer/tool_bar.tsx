@@ -99,7 +99,7 @@ export function ToolBar (props: IToolBar) {
             ref={menuButtonRef}
             className={classes.icon}
             onClick={openMenu}
-            aria-controls="file-menu"
+            aria-controls="file-explorer-menu"
             aria-haspopup="true"
           >
             <MoreVertIcon />
@@ -114,7 +114,7 @@ export function ToolBar (props: IToolBar) {
         </div>
 
         <Menu
-          id="file-menu"
+          id="file-explorer-menu"
           open={menuOpen}
           keepMounted={true}
           anchorEl={menuButtonRef.current}

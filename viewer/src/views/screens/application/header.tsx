@@ -42,7 +42,7 @@ export function Header (props: IProps) {
       <Toolbar className={classes.toolBar}>
         <IconButton
           color="inherit"
-          aria-label="open drawer"
+          aria-label="open mobile drawer"
           edge="start"
           className={classes.mobileMenuButton}
           onClick={toggleMobileDrawer}
@@ -51,7 +51,7 @@ export function Header (props: IProps) {
         </IconButton>
         <IconButton
           color="inherit"
-          aria-label="open drawer"
+          aria-label="open desktop drawer"
           edge="start"
           className={classes.desktopMenuButton}
           onClick={toggleDesktopDrawer}
