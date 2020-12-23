@@ -271,6 +271,7 @@ function PureContentActionBar(props: IPureProps) {
     <div className={classes.contentActionBar}>
       <div className={classes.group}>
         <IconButton
+          aria-label="load comic"
           disabled={count <= 0}
           onClick={loadComic}
         >
@@ -278,6 +279,7 @@ function PureContentActionBar(props: IPureProps) {
         </IconButton>
         <Divider />
         <IconButton
+          aria-label="clear selection"
           disabled={count <= 0}
           onClick={clearSelection}
         >
@@ -287,12 +289,14 @@ function PureContentActionBar(props: IPureProps) {
         </IconButton>
         <Divider />
         <IconButton
+          aria-label="rename"
           disabled={updating || count !== 1}
           onClick={showRename}
         >
           <EditIcon />
         </IconButton>
         <IconButton
+          aria-label="create new folder"
           disabled={updating || count !== 1}
           onClick={showMkdir}
         >
@@ -300,12 +304,14 @@ function PureContentActionBar(props: IPureProps) {
         </IconButton>
         <Divider />
         <IconButton
+          aria-label="copy URL"
           disabled={count <= 0}
           onClick={copy}
         >
           <FileCopyIcon />
         </IconButton>
         <IconButton
+          aria-label="download"
           disabled={count <= 0}
           onClick={download}
         >
