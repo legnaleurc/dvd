@@ -55,11 +55,13 @@ export function MakeFolderDialog (props: IProps) {
 
   return (
     <Dialog
+      id="make-folder-dialog"
+      aria-labelledby="make-folder-dialog-title"
       className={classes.makeFolderDialog}
       open={props.open}
       onClose={props.onClose}
     >
-      <DialogTitle>Create New Folder</DialogTitle>
+      <DialogTitle id="make-folder-dialog-title">Create New Folder</DialogTitle>
       <DialogContent>
         <DialogContentText>
           {props.name}

@@ -299,6 +299,8 @@ function PureContentActionBar(props: IPureProps) {
         </IconButton>
         <IconButton
           aria-label="create new folder"
+          aria-controls="make-folder-dialog"
+          aria-haspopup="dialog"
           disabled={updating || count !== 1}
           onClick={showMkdir}
         >
