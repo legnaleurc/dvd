@@ -1,17 +1,34 @@
 import path from 'path';
 import process from 'process';
 
-import webpack from 'webpack';
+import { Configuration } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
-import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 
 import CdnWebpackPlugin from './tools/cdn_webpack_plugin';
 
 
-const factory: webpack.ConfigurationFactory = (env, argv) => {
+interface CliConfigOptions {
+    config?: string;
+    mode?: Configuration["mode"];
+    env?: string;
+    'config-register'?: string;
+    configRegister?: string;
+    'config-name'?: string;
+    configName?: string;
+}
+
+
+type ConfigurationFactory = ((
+    env: string | Record<string, boolean | number | string> | undefined,
+    args: CliConfigOptions,
+) => Configuration | Promise<Configuration>);
+
+
+const factory: ConfigurationFactory = (env, argv) => {
   const backendPort = process.env.BACKEND_PORT;
   const isReleaseMode = argv.mode === 'production';
 
@@ -88,11 +105,10 @@ const factory: webpack.ConfigurationFactory = (env, argv) => {
         new TerserPlugin({
           parallel: true,
           terserOptions: {
-            ecma: 6,
+            ecma: 2020,
           },
-          sourceMap: true,
         }),
-        new OptimizeCSSAssetsPlugin({}),
+        new CssMinimizerPlugin(),
       ],
       runtimeChunk: {
         name: 'manifest',

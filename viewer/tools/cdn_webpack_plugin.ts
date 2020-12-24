@@ -1,80 +1,81 @@
-// @ts-nocheck
-
 import readPkgUp from 'read-pkg-up';
 import resolvePkg from 'resolve-pkg';
 import cdnFromModule from 'module-to-cdn';
-import ExternalModule from 'webpack/lib/ExternalModule';
+import { Compiler, Configuration, ExternalModule } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 
 const PLUGIN_NAME = 'cdn-webpack-plugin';
 const MODULE_REGEX = /^((?:@[a-z0-9][\w-.]+\/)?[a-z0-9][\w-.]*)/;
 
-
 class CdnWebpackPlugin {
+
+  private _modulesFromCdn: OrderedMap;
 
   constructor () {
     this._modulesFromCdn = new OrderedMap();
   }
 
-  apply (compiler) {
+  apply (compiler: Compiler) {
     this._applyMain(compiler);
     this._applyHtmlWebpackPlugin(compiler);
   }
 
-  _applyMain (compiler) {
+  _applyMain (compiler: Compiler) {
     compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, nmf => {
-      nmf.hooks.factory.tap(PLUGIN_NAME, factory => (async (data, cb) => {
+      nmf.hooks.factorize.tapAsync(PLUGIN_NAME, async (data, cb) => {
         const modulePath = data.dependencies[0].request;
         const contextPath = data.context;
 
         const isModulePath = MODULE_REGEX.test(modulePath);
         if (!isModulePath) {
-          return factory(data, cb);
+          return cb();
         }
 
         const varName = await this._addModule(contextPath, modulePath, compiler.options.mode);
-        if (varName === false) {
-          factory(data, cb);
-        } else if (!varName) {
-          cb(null);
+        if (!varName) {
+          return cb();
         } else {
           cb(null, new ExternalModule(varName, 'var', modulePath));
         }
-      }));
+      });
     });
   }
 
-  async _addModule (contextPath, modulePath, mode) {
-    const moduleName = modulePath.match(MODULE_REGEX)[1];
-    const {
-      version,
-      peerDependencies,
-    } = await this._getPkgInfo(contextPath, moduleName);
+  async _addModule (contextPath: string, modulePath: string, mode: Configuration['mode']) {
+    const match = modulePath.match(MODULE_REGEX);
+    if (!match) {
+      return null;
+    }
+    const moduleName = match[0];
+    const info = await this._getPkgInfo(contextPath, moduleName);
+    if (!info) {
+      return null;
+    }
+    const { version, peerDependencies } = info;
 
     const cache = this._modulesFromCdn.get(modulePath);
-    const isModuleAlreadyLoaded = !!cache;
-    if (isModuleAlreadyLoaded) {
+    if (cache) {
       const isSameVersion = cache.version === version;
       if (isSameVersion) {
         return cache.var;
       }
-      return false;
+      return null;
     }
 
     const cdnConfig = await getCDNFromModule(modulePath, version, { env: mode });
     if (!cdnConfig) {
-      return false;
+      return null;
     }
 
     if (peerDependencies) {
-      let jobs = Object.keys(peerDependencies).map(peerDependencyName => (
+      const jobs = Object.keys(peerDependencies).map(peerDependencyName => (
         this._addModule(contextPath, peerDependencyName, mode)
       ));
-      jobs = await Promise.all(jobs);
-      const arePeerDependenciesLoaded = jobs.every(_ => !!_);
+      const rv = await Promise.all(jobs);
+      const arePeerDependenciesLoaded = rv.every(_ => !!_);
       if (!arePeerDependenciesLoaded) {
-        return false;
+        return null;
       }
     }
 
@@ -83,24 +84,28 @@ class CdnWebpackPlugin {
     return cdnConfig.var;
   }
 
-  async _getPkgInfo (contextPath, moduleName) {
+  async _getPkgInfo (contextPath: string, moduleName: string) {
     const cwd = resolvePkg(moduleName, {
       cwd: contextPath,
     });
-    const { packageJson } = await readPkgUp({ cwd });
+    let rv = await readPkgUp({ cwd });
+    if (!rv) {
+      return null;
+    }
+    const { packageJson } = rv;
     return {
       version: packageJson.version,
       peerDependencies: packageJson.peerDependencies,
     };
   }
 
-  _applyHtmlWebpackPlugin (compiler) {
+  _applyHtmlWebpackPlugin (compiler: Compiler) {
     compiler.hooks.compilation.tap(PLUGIN_NAME, compilation => {
       const hwpHooks = HtmlWebpackPlugin.getHooks(compilation);
       hwpHooks.beforeAssetTagGeneration.tapAsync(PLUGIN_NAME, (data, cb) => {
-        let assets = this._modulesFromCdn.values();
-        assets = assets.map(_ => _.url);
-        data.assets.js = assets.concat(data.assets.js);
+        const assets = this._modulesFromCdn.values();
+        const urls = assets.map(_ => _.url);
+        data.assets.js = urls.concat(data.assets.js);
         cb(null, data);
       });
     });
@@ -111,19 +116,22 @@ class CdnWebpackPlugin {
 
 class OrderedMap {
 
+  private _dict: Map<string, ModuleConfig>;
+  private _list: string[];
+
   constructor () {
-    this._dict = new Map();
+    this._dict = new Map<string, ModuleConfig>();
     this._list = [];
   }
 
-  get (key) {
+  get (key: string) {
     if (!this._dict.has(key)) {
       return undefined;
     }
     return this._dict.get(key);
   }
 
-  set (key, value) {
+  set (key: string, value: ModuleConfig) {
     if (!this._dict.has(key)) {
       this._list.push(key);
     }
@@ -131,13 +139,15 @@ class OrderedMap {
   }
 
   values () {
-    return this._list.map(key => this._dict.get(key));
+    return this._list.map(key => this._dict.get(key)).filter(<T>(value: T | undefined): value is T => {
+      return !!value;
+    });
   }
 
 }
 
 
-async function getCDNFromModule (moduleName, version, options) {
+async function getCDNFromModule (moduleName: string, version: string, options: { env: Configuration['mode'] }) {
   if (moduleName === 'react-virtualized') {
     return {
       name: moduleName,
