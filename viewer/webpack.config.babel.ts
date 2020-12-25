@@ -99,7 +99,7 @@ const factory: ConfigurationFactory = (env, argv) => {
       }),
       new CdnWebpackPlugin(),
     ],
-    devtool: isReleaseMode ? 'source-map' : 'inline-source-map',
+    devtool: isReleaseMode ? undefined : 'inline-source-map',
     optimization: {
       minimizer: [
         new TerserPlugin({
