@@ -3,6 +3,13 @@ import { CSSProperties } from '@material-ui/core/styles/withStyles';
 
 export const SELECTION_COLOR = 'hsl(210, 100%, 25%)';
 export const MAIN_MENU_WIDTH = 240;
+export const FONT_FAMILY = [
+  'Roboto',
+  'Hiragino Kaku Gothic Pro',
+  'Meiryo',
+  'Noto Sans CJK JP',
+  'sans-serif',
+].map((s) => `"${s}"`).join(', ');
 
 
 type MixinName = (

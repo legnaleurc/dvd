@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
-import { INodeLike, getMixins, useInstance } from '@/lib';
+import { INodeLike, getMixins, useInstance, FONT_FAMILY } from '@/lib';
 import {
   Node_,
   useFileSystemAction,
@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
     ...getMixins([
       'vbox',
     ]),
-    fontFamily: 'monospace',
+    fontFamily: FONT_FAMILY,
     '& $head': {
       ...getMixins([
         'hbox',

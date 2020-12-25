@@ -121,7 +121,7 @@ function ResultList (props: IResultListProps) {
         >
           <RichSelectableArea nodeId={id}>
             <RichSelectableTrigger nodeId={id}>
-              <code>{dict[id].path}</code>
+              <span>{dict[id].path}</span>
             </RichSelectableTrigger>
           </RichSelectableArea>
         </div>
@@ -157,13 +157,13 @@ interface IHistoryEntryPropsType {
 }
 function HistoryEntry (props: IHistoryEntryPropsType) {
   return (
-    <pre
+    <div
       className="history-entry"
       onClick={event => {
         props.search(props.name);
       }}
     >
       {props.name}
-    </pre>
+    </div>
   );
 }
