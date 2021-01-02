@@ -25,6 +25,13 @@ export function ImageList (props: {}) {
   const { toggleFullScreen } = useFullScreenAction();
   const { imageList } = useActions();
 
+  // Set focus to enable key navigation.
+  React.useEffect(() => {
+    if (root.current) {
+      root.current.focus();
+    }
+  }, [root.current]);
+
   return (
     <div
       className={classes.imageList}
