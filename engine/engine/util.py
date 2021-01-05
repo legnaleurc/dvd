@@ -74,13 +74,7 @@ class SearchEngine(object):
 
         lock = asyncio.Condition()
         self._searching[pattern] = lock
-        # We cannot directly await this task, because if the request connection
-        # resetted (e.g. by timeout), the task will be cancelled, which will
-        # interrupt searching. asyncio.shield can protect searching, but cannot
-        # prevent cancellation to other requests. So we use a lock here to
-        # truely isolate the cancellation.
-        asyncio.create_task(self._search(pattern))
-        return await self._wait_for_result(lock, pattern)
+        return await self._search(pattern)
 
     async def clear_cache(self) -> None:
         while len(self._searching) > 0:
@@ -95,7 +89,7 @@ class SearchEngine(object):
             if re.search(k, value, re.I):
                 del self._cache[k]
 
-    async def _search(self, pattern: str) -> None:
+    async def _search(self, pattern: str) -> List[Node]:
         lock = self._searching[pattern]
         try:
             nodes = await self._drive.find_nodes_by_regex(pattern)
@@ -104,6 +98,7 @@ class SearchEngine(object):
             nodes = list(nodes)
             nodes = await asyncio.gather(*nodes)
             self._cache[pattern] = nodes
+            return nodes
         except Exception as e:
             EXCEPTION('engine', e) << 'search failed, abort'
             raise SearchFailedError(str(e))
