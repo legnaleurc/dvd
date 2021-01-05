@@ -165,18 +165,17 @@ class UnpackEngine(object):
 
         lock = asyncio.Condition()
         self._unpacking[node.id_] = lock
-        # See the comments in SearchEngine to understand why we need a lock
-        # here.
-        asyncio.create_task(self._unpack(node))
-        return await self._wait_for_result(lock, node.id_)
+        return await self._unpack(node)
 
-    async def _unpack(self, node):
+    async def _unpack(self, node) -> List[ImageDict]:
         lock = self._unpacking[node.id_]
         try:
             if node.is_folder:
-                await self._unpack_remote(node)
+                manifest = await self._unpack_remote(node)
             else:
-                await self._unpack_local(node.id_)
+                manifest = await self._unpack_local(node.id_)
+            self._cache[node.id_] = manifest
+            return manifest
         except UnpackFailedError:
             raise
         except Exception as e:
@@ -198,14 +197,14 @@ class UnpackEngine(object):
         except KeyError:
             raise UnpackFailedError(f'{node_id} canceled unpack')
 
-    async def _unpack_local(self, node_id: str) -> None:
+    async def _unpack_local(self, node_id: str) -> List[ImageDict]:
         cmd = [self._unpack_path, str(self._port), node_id, self._tmp]
         DEBUG('engine') << ' '.join(cmd)
         p = await asyncio.create_subprocess_exec(*cmd)
         out, err = await p.communicate()
         if p.returncode != 0:
             raise UnpackFailedError(f'unpack failed code: {p.returncode}')
-        self._cache[node_id] = self._scan_local(node_id)
+        return self._scan_local(node_id)
 
     def _scan_local(self, node_id: str) -> List[ImageDict]:
         rv: List[ImageDict] = []
@@ -235,8 +234,8 @@ class UnpackEngine(object):
                 })
         return rv
 
-    async def _unpack_remote(self, node: Node):
-        self._cache[node.id_] = await self._scan_remote(node)
+    async def _unpack_remote(self, node: Node) -> List[ImageDict]:
+        return await self._scan_remote(node)
 
     async def _scan_remote(self, node: Node) -> List[ImageDict]:
         rv: List[ImageDict] = []
