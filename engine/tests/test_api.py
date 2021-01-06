@@ -168,7 +168,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             }))
 
         ue = self._client.app['ue']
-        tmp_path = ue._tmp
+        tmp_path = ue._storage._tmp
         fake_process = AsyncMock()
         fake_process.communicate.return_value = None, None
         fake_process.returncode = 0
