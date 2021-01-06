@@ -14,7 +14,7 @@ from os.path import getsize, join as join_path
 from typing import Dict, List, TypedDict
 
 from PIL import Image
-from wcpan.logger import EXCEPTION, DEBUG
+from wcpan.logger import EXCEPTION, DEBUG, INFO
 from wcpan.drive.core.drive import Drive
 from wcpan.drive.core.types import Node
 
@@ -305,6 +305,7 @@ class UnpackCleaner(object):
             DEBUG('engine') << 'check' << child << f'({d})'
             if d > DAY:
                 shutil.rmtree(str(child))
+                INFO('engine') << 'prune' << child << f'({d})'
 
     async def _loop(self):
         while True:
