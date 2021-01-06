@@ -11,7 +11,7 @@ from contextlib import AsyncExitStack
 from itertools import zip_longest
 from mimetypes import guess_type
 from os.path import getsize, join as join_path
-from typing import Dict, List, TypedDict
+from typing import Dict, List, TypedDict, Union
 
 from PIL import Image
 from wcpan.logger import EXCEPTION, DEBUG, INFO
@@ -133,29 +133,25 @@ class UnpackEngine(object):
         self._drive = drive
         self._port = port
         self._unpack_path = unpack_path
-        self._cache: Dict[str, List[ImageDict]] = {}
         self._unpacking: Dict[str, asyncio.Condition] = {}
-        self._tmp: tempfile.TemporaryDirectory = None
-        self._cleaner: UnpackCleaner = None
+        self._storage: StorageManager = None
         self._raii: AsyncExitStack = None
 
     async def __aenter__(self) -> UnpackEngine:
         async with AsyncExitStack() as stack:
-            self._tmp = stack.enter_context(tempfile.TemporaryDirectory())
-            self._cleaner = await stack.enter_async_context(
-                UnpackCleaner(self._tmp)
+            self._storage = await stack.enter_async_context(
+                StorageManager()
             )
             self._raii = stack.pop_all()
         return self
 
     async def __aexit__(self, exc, type_, tb) -> bool:
         await self._raii.aclose()
-        self._cleaner = None
-        self._tmp = None
+        self._storage = None
         self._raii = None
 
-    async def get_manifest(self, node: Node):
-        manifest = self._cache.get(node.id_, None)
+    async def get_manifest(self, node: Node) -> List[ImageDict]:
+        manifest = self._storage.get_cache_or_none(node.id_)
         if manifest is not None:
             return manifest
 
@@ -167,14 +163,14 @@ class UnpackEngine(object):
         self._unpacking[node.id_] = lock
         return await self._unpack(node)
 
-    async def _unpack(self, node) -> List[ImageDict]:
+    async def _unpack(self, node: Node) -> List[ImageDict]:
         lock = self._unpacking[node.id_]
         try:
             if node.is_folder:
                 manifest = await self._unpack_remote(node)
             else:
                 manifest = await self._unpack_local(node.id_)
-            self._cache[node.id_] = manifest
+            self._storage.set_cache(node.id_, manifest)
             return manifest
         except UnpackFailedError:
             raise
@@ -193,12 +189,17 @@ class UnpackEngine(object):
         async with lock:
             await lock.wait()
         try:
-            return self._cache[node_id]
+            return self._storage.get_cache(node_id)
         except KeyError:
             raise UnpackFailedError(f'{node_id} canceled unpack')
 
     async def _unpack_local(self, node_id: str) -> List[ImageDict]:
-        cmd = [self._unpack_path, str(self._port), node_id, self._tmp]
+        cmd = [
+            self._unpack_path,
+            str(self._port),
+            node_id,
+            self._storage.root_path,
+        ]
         DEBUG('engine') << ' '.join(cmd)
         p = await asyncio.create_subprocess_exec(*cmd)
         out, err = await p.communicate()
@@ -208,7 +209,7 @@ class UnpackEngine(object):
 
     def _scan_local(self, node_id: str) -> List[ImageDict]:
         rv: List[ImageDict] = []
-        top = join_path(self._tmp, node_id)
+        top = self._storage.get_path(node_id)
         for dirpath, dirnames, filenames in os.walk(top):
             dirnames.sort(key=FuzzyName)
             filenames.sort(key=FuzzyName)
@@ -279,14 +280,23 @@ class FuzzyName(object):
         return False
 
 
-class UnpackCleaner(object):
+class StorageManager(object):
 
-    def __init__(self, path):
-        self._path = pathlib.Path(path)
+    def __init__(self):
+        self._cache: Dict[str, List[ImageDict]] = {}
+        self._tmp: str = None
+        self._path: pathlib.Path = None
         self._task: asyncio.Task = None
+        self._raii: AsyncExitStack = None
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> StorageManager:
+        async with AsyncExitStack() as stack:
+            self._tmp = stack.enter_context(tempfile.TemporaryDirectory())
+            self._path = pathlib.Path(self._tmp)
+            self._raii = stack.pop_all()
+
         self._task = asyncio.create_task(self._loop())
+        return self
 
     async def __aexit__(self, et, e, bt):
         self._task.cancel()
@@ -294,7 +304,32 @@ class UnpackCleaner(object):
             await self._task
         except asyncio.CancelledError:
             self._task = None
-            pass
+
+        await self._raii.aclose()
+        self._path = None
+        self._tmp = None
+        self._raii = None
+
+    def clear_cache(self):
+        self._cache = {}
+
+    def get_cache(self, id_: str) -> List[ImageDict]:
+        return self._cache[id_]
+
+    def get_cache_or_none(self, id_: str) -> Union[List[ImageDict], None]:
+        return self._cache.get(id_, None)
+
+    def set_cache(self, id_: str, manifest: List[ImageDict]) -> None:
+        self._cache[id_] = manifest
+
+    def get_path(self, id_: str) -> str:
+        return join_path(self._tmp, id_)
+
+    @property
+    def root_path(self) -> str:
+        if not self._tmp:
+            return ''
+        return self._tmp
 
     def _check(self):
         DAY = 60 * 60 * 24
@@ -305,6 +340,7 @@ class UnpackCleaner(object):
             DEBUG('engine') << 'check' << child << f'({d})'
             if d > DAY:
                 shutil.rmtree(str(child))
+                del self._cache[child.name]
                 INFO('engine') << 'prune' << child << f'({d})'
 
     async def _loop(self):
