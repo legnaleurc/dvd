@@ -7,7 +7,7 @@ import re
 import shutil
 import tempfile
 import time
-from contextlib import AsyncExitStack
+from contextlib import AsyncExitStack, asynccontextmanager
 from itertools import zip_longest
 from mimetypes import guess_type
 from os.path import getsize, join as join_path
@@ -286,25 +286,17 @@ class StorageManager(object):
         self._cache: Dict[str, List[ImageDict]] = {}
         self._tmp: str = None
         self._path: pathlib.Path = None
-        self._task: asyncio.Task = None
         self._raii: AsyncExitStack = None
 
     async def __aenter__(self) -> StorageManager:
         async with AsyncExitStack() as stack:
             self._tmp = stack.enter_context(tempfile.TemporaryDirectory())
             self._path = pathlib.Path(self._tmp)
+            await stack.enter_async_context(self._watch())
             self._raii = stack.pop_all()
-
-        self._task = asyncio.create_task(self._loop())
         return self
 
     async def __aexit__(self, et, e, bt):
-        self._task.cancel()
-        try:
-            await self._task
-        except asyncio.CancelledError:
-            self._task = None
-
         await self._raii.aclose()
         self._path = None
         self._tmp = None
@@ -330,6 +322,18 @@ class StorageManager(object):
         if not self._tmp:
             return ''
         return self._tmp
+
+    @asynccontextmanager
+    async def _watch(self):
+        task = asyncio.create_task(self._loop())
+        try:
+            yield
+        finally:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                task = None
 
     def _check(self):
         DAY = 60 * 60 * 24
