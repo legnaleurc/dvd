@@ -134,8 +134,8 @@ class UnpackEngine(object):
         self._port = port
         self._unpack_path = unpack_path
         self._unpacking: Dict[str, asyncio.Condition] = {}
-        self._storage: StorageManager = None
-        self._raii: AsyncExitStack = None
+        self._storage: Union[StorageManager, None] = None
+        self._raii: Union[AsyncExitStack, None] = None
 
     async def __aenter__(self) -> UnpackEngine:
         async with AsyncExitStack() as stack:
@@ -145,7 +145,7 @@ class UnpackEngine(object):
             self._raii = stack.pop_all()
         return self
 
-    async def __aexit__(self, exc, type_, tb) -> bool:
+    async def __aexit__(self, exc, type_, tb):
         await self._raii.aclose()
         self._storage = None
         self._raii = None
@@ -239,19 +239,25 @@ class UnpackEngine(object):
         return await self._scan_remote(node)
 
     async def _scan_remote(self, node: Node) -> List[ImageDict]:
+        DEFAULT_MIME_TYPE = 'application/octet-stream'
         rv: List[ImageDict] = []
         async for root, folders, files in self._drive.walk(node):
             folders.sort(key=lambda _: FuzzyName(_.name))
             files.sort(key=lambda _: FuzzyName(_.name))
             for f in files:
-                if f.is_image:
-                    rv.append({
-                        'path': f.id_,
-                        'type': f.mime_type,
-                        'size': f.size,
-                        'width': f.image_width,
-                        'height': f.image_height,
-                    })
+                if not f.is_image:
+                    continue
+                assert f.size is not None
+                assert f.image_width is not None
+                assert f.image_height is not None
+                type_ = DEFAULT_MIME_TYPE if f.mime_type is None else f.mime_type
+                rv.append({
+                    'path': f.id_,
+                    'type': type_,
+                    'size': f.size,
+                    'width': f.image_width,
+                    'height': f.image_height,
+                })
         return rv
 
 
@@ -284,13 +290,14 @@ class StorageManager(object):
 
     def __init__(self):
         self._cache: Dict[str, List[ImageDict]] = {}
-        self._tmp: str = None
-        self._path: pathlib.Path = None
-        self._raii: AsyncExitStack = None
+        self._tmp: Union[str, None] = None
+        self._path: Union[pathlib.Path, None] = None
+        self._raii: Union[AsyncExitStack, None] = None
 
     async def __aenter__(self) -> StorageManager:
         async with AsyncExitStack() as stack:
             self._tmp = stack.enter_context(tempfile.TemporaryDirectory())
+            assert self._tmp is not None
             self._path = pathlib.Path(self._tmp)
             await stack.enter_async_context(self._watch())
             self._raii = stack.pop_all()
@@ -315,6 +322,7 @@ class StorageManager(object):
         self._cache[id_] = manifest
 
     def get_path(self, id_: str) -> str:
+        assert self._tmp is not None
         return join_path(self._tmp, id_)
 
     @property
@@ -368,5 +376,6 @@ def normalize_search_pattern(raw: str) -> str:
 def inner_normalize_search_pattern(raw: str) -> str:
     rv = re.split(r'(?:\s|-)+', raw)
     rv = map(re.escape, rv)
+    rv = map(str, rv)
     rv = '.*'.join(rv)
     return rv
