@@ -3,7 +3,7 @@ import functools
 import json
 import re
 import shlex
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Iterable
 
 from aiohttp.web import Response, StreamResponse, View
 from wcpan.logger import EXCEPTION
@@ -59,6 +59,10 @@ class NodeRandomAccessMixin(object):
         return StreamResponse(status=206)
 
     async def feed(self: View, response: StreamResponse, node: Node) -> None:
+        assert node.size is not None
+
+        DEFAULT_MIME_TYPE = 'application/octet-stream'
+
         range_ = self.request.http_range
         offset = 0 if range_.start is None else range_.start
         length = node.size - offset if not range_.stop else range_.stop
@@ -74,7 +78,7 @@ class NodeRandomAccessMixin(object):
         response.content_length = length
 
         response.headers['Accept-Ranges'] = 'bytes'
-        response.content_type = node.mime_type
+        response.content_type = DEFAULT_MIME_TYPE if not node.mime_type else node.mime_type
         if not good_range:
             response.set_status(416)
 
@@ -373,6 +377,6 @@ def is_valid_range(range_: slice, size: int) -> bool:
     return True
 
 
-def unpack_dict(d: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
+def unpack_dict(d: Dict[str, Any], keys: Iterable[str]) -> Dict[str, Any]:
     common_keys = set(keys) & set(d.keys())
     return { key: d[key] for key in common_keys }
