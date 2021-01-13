@@ -100,7 +100,7 @@ class SearchEngine(object):
             nodes = (_ for _ in nodes if not _.trashed)
             nodes = (self._make_item(_) for _ in nodes)
             nodes = await asyncio.gather(*nodes)
-            nodes = sorted(nodes, key=lambda _: _['path'])
+            nodes = sorted(nodes, key=lambda _: (_['path'], _['name']))
             self._cache[pattern] = nodes
             return nodes
         except Exception as e:
@@ -123,9 +123,10 @@ class SearchEngine(object):
             raise SearchFailedError(f'{pattern} canceled search')
 
     async def _make_item(self, node: Node) -> SearchNodeDict:
-        path = await self._drive.get_path(node)
+        parent_node = await self._drive.get_node_by_id(node.parent_id)
+        parent_path = await self._drive.get_path(parent_node)
         rv = cast(SearchNodeDict, node.to_dict())
-        rv['path'] = str(path)
+        rv['path'] = str(parent_path)
         return rv
 
 
