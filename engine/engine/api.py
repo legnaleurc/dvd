@@ -346,7 +346,7 @@ async def get_node(drive: Drive, id_or_root: str) -> Node:
 async def search_by_name(
     search_engine: SearchEngine,
     pattern: str,
-) -> List[Node]:
+):
     real_pattern = normalize_search_pattern(pattern)
     try:
         re.compile(real_pattern)

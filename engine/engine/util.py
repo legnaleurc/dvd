@@ -11,12 +11,12 @@ from contextlib import AsyncExitStack, asynccontextmanager
 from itertools import zip_longest
 from mimetypes import guess_type
 from os.path import getsize, join as join_path
-from typing import Dict, List, TypedDict, Union
+from typing import Dict, List, TypedDict, Union, cast
 
 from PIL import Image
 from wcpan.logger import EXCEPTION, DEBUG, INFO
 from wcpan.drive.core.drive import Drive
-from wcpan.drive.core.types import Node
+from wcpan.drive.core.types import Node, NodeDict
 
 
 class ImageDict(TypedDict):
@@ -24,6 +24,10 @@ class ImageDict(TypedDict):
     width: int
     height: int
     size: int
+    path: str
+
+
+class SearchNodeDict(NodeDict):
     path: str
 
 
@@ -60,10 +64,10 @@ class SearchEngine(object):
         super(SearchEngine, self).__init__()
         # NOTE only takes a reference, not owning
         self._drive = drive
-        self._cache: Dict[str, List[Node]] = {}
+        self._cache: Dict[str, List[SearchNodeDict]] = {}
         self._searching: Dict[str, asyncio.Condition] = {}
 
-    async def get_nodes_by_regex(self, pattern: str) -> List[Node]:
+    async def get_nodes_by_regex(self, pattern: str) -> List[SearchNodeDict]:
         nodes = self._cache.get(pattern, None)
         if nodes is not None:
             return nodes
@@ -89,7 +93,7 @@ class SearchEngine(object):
             if re.search(k, value, re.I):
                 del self._cache[k]
 
-    async def _search(self, pattern: str) -> List[Node]:
+    async def _search(self, pattern: str) -> List[SearchNodeDict]:
         lock = self._searching[pattern]
         try:
             nodes = await self._drive.find_nodes_by_regex(pattern)
@@ -97,6 +101,7 @@ class SearchEngine(object):
             nodes = (self._make_item(_) for _ in nodes)
             nodes = list(nodes)
             nodes = await asyncio.gather(*nodes)
+            nodes = list(nodes)
             self._cache[pattern] = nodes
             return nodes
         except Exception as e:
@@ -110,7 +115,7 @@ class SearchEngine(object):
     async def _wait_for_result(self,
         lock: asyncio.Condition,
         pattern: str,
-    ) -> None:
+    ) -> List[SearchNodeDict]:
         async with lock:
             await lock.wait()
         try:
@@ -118,9 +123,9 @@ class SearchEngine(object):
         except KeyError:
             raise SearchFailedError(f'{pattern} canceled search')
 
-    async def _make_item(self, node: Node):
+    async def _make_item(self, node: Node) -> SearchNodeDict:
         path = await self._drive.get_path(node)
-        rv = node.to_dict()
+        rv = cast(SearchNodeDict, node.to_dict())
         rv['path'] = str(path)
         return rv
 
