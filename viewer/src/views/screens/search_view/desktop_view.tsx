@@ -1,4 +1,5 @@
 import React from 'react';
+import { List, ListItem, ListItemText } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
@@ -46,6 +47,19 @@ const useStyles = makeStyles((theme) => ({
       'size-grow',
       'y-scroll',
     ]),
+    '& .selectable-trigger': {
+      ...getMixins([
+        'w-100',
+      ]),
+    },
+    '& .selectable-area': {
+      ...getMixins([
+        'w-100',
+        'hbox',
+      ]),
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+    },
   },
 }));
 type Classes = ReturnType<typeof useStyles>;
@@ -110,23 +124,27 @@ function ResultList (props: IResultListProps) {
   }
 
   return (
-    <>
+    <List>
       {list.map(id => (
-        <div
+        <ListItem
           key={id}
+          dense={true}
           onDoubleClick={event => {
             event.preventDefault();
             openFile(id);
           }}
         >
-          <RichSelectableArea nodeId={id}>
-            <RichSelectableTrigger nodeId={id}>
-              <span>{dict[id].path}</span>
-            </RichSelectableTrigger>
-          </RichSelectableArea>
-        </div>
+          <RichSelectableTrigger nodeId={id}>
+            <RichSelectableArea nodeId={id}>
+              <ListItemText
+                primary={dict[id].name}
+                secondary={dict[id].path}
+              />
+            </RichSelectableArea>
+          </RichSelectableTrigger>
+        </ListItem>
       ))}
-    </>
+    </List>
   );
 }
 
