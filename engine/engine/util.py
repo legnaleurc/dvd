@@ -99,9 +99,8 @@ class SearchEngine(object):
             nodes = await self._drive.find_nodes_by_regex(pattern)
             nodes = (_ for _ in nodes if not _.trashed)
             nodes = (self._make_item(_) for _ in nodes)
-            nodes = list(nodes)
             nodes = await asyncio.gather(*nodes)
-            nodes = list(nodes)
+            nodes = sorted(nodes, key=lambda _: _['path'])
             self._cache[pattern] = nodes
             return nodes
         except Exception as e:

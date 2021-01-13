@@ -167,7 +167,6 @@ class NodeListView(View):
         except SearchFailedError:
             return Response(status=503)
 
-        nodes = sorted(nodes, key=lambda _: _['path'])
         return json_response(nodes)
 
     async def post(self):
