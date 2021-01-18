@@ -78,6 +78,12 @@ export class FileSystem {
     });
   }
 
+  async fetchCache () {
+    const r = await this._get('/api/v1/cache');
+    const rv: CacheResponse[] = await r.json();
+    return rv;
+  }
+
   async sync () {
     const r = await this._post('/api/v1/changes');
     const rv: ChangeResponse[] = await r.json();
@@ -160,4 +166,11 @@ export interface SearchResponse extends NodeResponse {
 export interface ImageResponse {
   width: number;
   height: number;
+}
+
+
+export interface CacheResponse {
+  id: string;
+  name: string;
+  image_list: ImageResponse[];
 }
