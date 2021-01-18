@@ -12,15 +12,17 @@ interface IStateContext {
 const StateContext = React.createContext<IStateContext | null>(null);
 interface IActionContext {
   loadComic: (id: string, name: string) => Promise<void>;
+  loadCache: () => Promise<void>;
 }
 const ActionContext = React.createContext<IActionContext | null>(null);
 
 
 export const ComicProvider: React.FC<{}> = (props) => {
-  const { state, loadComic } = useActions();
+  const { state, loadComic, loadCache } = useActions();
   const dispatchValue = React.useMemo(() => ({
     loadComic,
-  }), [loadComic]);
+    loadCache,
+  }), [loadComic, loadCache]);
   const stateValue = React.useMemo(() => ({
     idList: state.idList,
     comicDict: state.comicDict,
@@ -100,6 +102,27 @@ function reduce (state: IStateContext, action: ActionType) {
         comicDict: { ...comicDict },
       };
     }
+    case 'LOAD_CACHE_END': {
+      const cacheList = action.value;
+      const { comicDict, idList } = state;
+      for (const cache of cacheList) {
+        // skip existing record
+        if (comicDict[cache.id]) {
+          continue;
+        }
+        idList.push(cache.id);
+        comicDict[cache.id] = {
+          name: cache.name,
+          unpacking: false,
+          imageList: cache.imageList,
+        }
+      }
+      return {
+        ...state,
+        idList: [...idList],
+        comicDict: { ...comicDict },
+      };
+    }
     default:
       return state;
   }
@@ -122,7 +145,13 @@ function useActions () {
       const data = state.comicDict[id];
       return data.unpacking;
     },
-  }), [state.comicDict]);
+    get idList () {
+      return state.idList;
+    },
+    getName (id: string) {
+      return state.comicDict[id].name;
+    },
+  }), [state.comicDict, state.idList]);
 
   const loadComic = React.useCallback(async (id: string, name: string) => {
     if (self.current.isUnpacking(id)) {
@@ -163,8 +192,43 @@ function useActions () {
     }
   }, [fileSystem, dispatch, self]);
 
+  const loadCache = React.useCallback(async () => {
+    dispatch({
+      type: 'LOAD_CACHE_BEGIN',
+      value: null,
+    });
+
+    for (const id of self.current.idList) {
+      loadComic(id, self.current.getName(id));
+    }
+
+    try {
+      const cacheList = await fileSystem.fetchCache();
+      dispatch({
+        type: 'LOAD_CACHE_END',
+        value: cacheList.map((m) => ({
+          id: m.id,
+          name: m.name,
+          imageList: m.image_list.map((n, i) => ({
+            ...n,
+            url: fileSystem.image(m.id, i),
+          })),
+        })),
+      });
+    } catch (e) {
+      dispatch({
+        type: 'ERROR',
+        value: {
+          id: '',
+          error: e,
+        },
+      });
+    }
+  }, [fileSystem, dispatch, self, loadComic]);
+
   return {
     state,
     loadComic,
+    loadCache,
   };
 };
