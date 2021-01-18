@@ -167,6 +167,10 @@ class UnpackEngine(object):
         self._unpacking[node.id_] = lock
         return await self._unpack(node)
 
+    @property
+    def cache(self):
+        return self._storage.cache
+
     async def _unpack(self, node: Node) -> List[ImageDict]:
         lock = self._unpacking[node.id_]
         try:
@@ -328,6 +332,10 @@ class StorageManager(object):
     def get_path(self, id_: str) -> str:
         assert self._tmp is not None
         return join_path(self._tmp, id_)
+
+    @property
+    def cache(self):
+        return self._cache
 
     @property
     def root_path(self) -> str:
