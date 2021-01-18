@@ -28,6 +28,13 @@ interface LoadEndData {
 }
 
 
+interface LoadCacheEndData {
+  id: string;
+  name: string;
+  imageList: ImageData[];
+}
+
+
 interface ErrorData {
   id: string;
   error: Error;
@@ -43,5 +50,7 @@ interface IAction<T, V> {
 export type ActionType = (
   | IAction<'LOAD_BEGIN', LoadBeginData>
   | IAction<'LOAD_END', LoadEndData>
+  | IAction<'LOAD_CACHE_BEGIN', null>
+  | IAction<'LOAD_CACHE_END', LoadCacheEndData[]>
   | IAction<'ERROR', ErrorData>
 );
