@@ -1,9 +1,10 @@
 import React from 'react';
-import { Typography, Portal } from '@material-ui/core';
+import { Typography, Portal, IconButton } from '@material-ui/core';
+import { SyncAlt as SyncIcon } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
-import { useComicState } from '@/views/hooks/comic';
+import { useComicState, useComicAction } from '@/views/hooks/comic';
 import { ComicRoute, useComicParams } from '@/views/hooks/router';
 
 
@@ -14,7 +15,14 @@ const useStyles = makeStyles((theme) => ({
       'hbox',
     ]),
   },
-  group: {
+  titleGroup: {
+    ...getMixins([
+      'size-grow',
+      'hbox',
+    ]),
+    alignItems: 'center',
+  },
+  buttonGroup: {
     ...getMixins([
       'size-shrink',
       'hbox',
@@ -35,13 +43,19 @@ function ToolBar (props: IToolBar) {
   return (
     <Portal container={props.anchorEl}>
       <div className={classes.multiPageViewToolBar}>
-        <div className={classes.group}>
+        <div className={classes.titleGroup}>
           <Typography variant="h6" noWrap>
             <ComicRoute
-              defaultComponent={EmptyTitle}
+              defaultComponent={EmptyBlock}
               component={ComicTitle}
             />
           </Typography>
+        </div>
+        <div className={classes.buttonGroup}>
+          <ComicRoute
+            defaultComponent={ButtonGroup}
+            component={EmptyBlock}
+          />
         </div>
       </div>
     </Portal>
@@ -50,8 +64,22 @@ function ToolBar (props: IToolBar) {
 export { ToolBar as ComicViewToolBar };
 
 
-function EmptyTitle () {
+function EmptyBlock (props: {}) {
   return <></>;
+}
+
+
+function ButtonGroup (props: {}) {
+  const { loadCache } = useComicAction();
+  return (
+    <div>
+      <IconButton
+        onClick={loadCache}
+      >
+        <SyncIcon />
+      </IconButton>
+    </div>
+  );
 }
 
 
