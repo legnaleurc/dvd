@@ -325,6 +325,25 @@ class ApplyView(View):
         return Response(status=204)
 
 
+class CacheView(View):
+
+    async def get(self):
+        ue: UnpackEngine = self.request.app['ue']
+        drive: Drive = self.request.app['drive']
+        cache = ue.cache
+        node_list = (drive.get_node_by_id(_) for _ in cache.keys())
+        node_list = await asyncio.gather(*node_list)
+        rv = [{
+            'id': _.id_,
+            'name': _.name,
+            'image_list': [{
+                'width': __['width'],
+                'height': __['height'],
+            } for __ in cache[_.id_]],
+        } for _ in node_list]
+        return json_response(rv)
+
+
 def json_response(data):
     data = json.dumps(data)
     return Response(
