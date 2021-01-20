@@ -46,9 +46,12 @@ function ComicListItem (props: IComicListItem) {
     relGoTo(`/${id}`);
   }, [relGoTo, id]);
 
+  const isReady = !comicDict[id].unpacking;
+
   return (
     <ListItem
       button={true}
+      disabled={!isReady}
       onClick={onClick}
     >
       <ListItemText primary={comicDict[id].name} />
