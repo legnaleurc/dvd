@@ -343,6 +343,11 @@ class CacheView(View):
         } for _ in node_list]
         return json_response(rv)
 
+    async def delete(self):
+        ue: UnpackEngine = self.request.app['ue']
+        ue.clear_cache()
+        return Response(status=204)
+
 
 def json_response(data):
     data = json.dumps(data)

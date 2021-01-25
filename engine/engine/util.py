@@ -171,6 +171,9 @@ class UnpackEngine(object):
     def cache(self):
         return self._storage.cache
 
+    def clear_cache(self):
+        self._storage.clear_cache()
+
     async def _unpack(self, node: Node) -> List[ImageDict]:
         lock = self._unpacking[node.id_]
         try:
