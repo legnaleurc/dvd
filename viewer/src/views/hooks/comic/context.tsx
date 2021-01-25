@@ -13,16 +13,18 @@ const StateContext = React.createContext<IStateContext | null>(null);
 interface IActionContext {
   loadComic: (id: string, name: string) => Promise<void>;
   loadCache: () => Promise<void>;
+  clearCache: () => Promise<void>;
 }
 const ActionContext = React.createContext<IActionContext | null>(null);
 
 
 export const ComicProvider: React.FC<{}> = (props) => {
-  const { state, loadComic, loadCache } = useActions();
+  const { state, loadComic, loadCache, clearCache } = useActions();
   const dispatchValue = React.useMemo(() => ({
     loadComic,
     loadCache,
-  }), [loadComic, loadCache]);
+    clearCache,
+  }), [loadComic, loadCache, clearCache]);
   const stateValue = React.useMemo(() => ({
     idList: state.idList,
     comicDict: state.comicDict,
@@ -123,6 +125,11 @@ function reduce (state: IStateContext, action: ActionType) {
         comicDict: { ...comicDict },
       };
     }
+    case 'CLEAR_CACHE_END':
+      return {
+        idList: [],
+        comicDict: {},
+      };
     default:
       return state;
   }
@@ -226,9 +233,33 @@ function useActions () {
     }
   }, [fileSystem, dispatch, self, loadComic]);
 
+  const clearCache = React.useCallback(async () => {
+    dispatch({
+      type: 'CLEAR_CACHE_BEGIN',
+      value: null,
+    });
+    try {
+      await fileSystem.clearCache();
+      dispatch({
+        type: 'CLEAR_CACHE_END',
+        value: null,
+      });
+    } catch (e) {
+      dispatch({
+        type: 'ERROR',
+        value: {
+          id: '',
+          error: e,
+        },
+      });
+    }
+  }, [fileSystem, dispatch]);
+
+
   return {
     state,
     loadComic,
     loadCache,
+    clearCache,
   };
 };

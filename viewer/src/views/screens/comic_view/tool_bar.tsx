@@ -1,6 +1,9 @@
 import React from 'react';
 import { Typography, Portal, IconButton } from '@material-ui/core';
-import { SyncAlt as SyncIcon } from '@material-ui/icons';
+import {
+  DeleteForever as ClearIcon,
+  SyncAlt as SyncIcon,
+} from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
@@ -70,9 +73,14 @@ function EmptyBlock (props: {}) {
 
 
 function ButtonGroup (props: {}) {
-  const { loadCache } = useComicAction();
+  const { loadCache, clearCache } = useComicAction();
   return (
     <div>
+      <IconButton
+        onClick={clearCache}
+      >
+        <ClearIcon />
+      </IconButton>
       <IconButton
         onClick={loadCache}
       >

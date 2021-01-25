@@ -84,6 +84,10 @@ export class FileSystem {
     return rv;
   }
 
+  async clearCache () {
+    await this._delete('/api/v1/cache');
+  }
+
   async sync () {
     const r = await this._post('/api/v1/changes');
     const rv: ChangeResponse[] = await r.json();
