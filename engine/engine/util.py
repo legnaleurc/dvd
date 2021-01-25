@@ -322,6 +322,8 @@ class StorageManager(object):
 
     def clear_cache(self):
         self._cache = {}
+        for child in self._path.iterdir():
+            shutil.rmtree(str(child))
 
     def get_cache(self, id_: str) -> List[ImageDict]:
         return self._cache[id_]
