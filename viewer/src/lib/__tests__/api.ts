@@ -235,6 +235,34 @@ describe('api', () => {
       expect(args).toEqual(expected);
     });
 
+    it('fetchCache', async () => {
+      fetchMock.mockOnce(async () => {
+        return '[]';
+      });
+
+      const fileSystem = new FileSystem();
+      const rv = await fileSystem.fetchCache();
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const request = fetchMock.mock.calls[0][0] as Request;
+      expect(request.method).toEqual('GET');
+      expect(request.url).toEqual(`http://localhost/api/v1/cache`);
+    });
+
+    it('clearCache', async () => {
+      fetchMock.mockOnce(async () => {
+        return '';
+      });
+
+      const fileSystem = new FileSystem();
+      await fileSystem.clearCache();
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const request = fetchMock.mock.calls[0][0] as Request;
+      expect(request.method).toEqual('DELETE');
+      expect(request.url).toEqual(`http://localhost/api/v1/cache`);
+    });
+
   });
 
 });
