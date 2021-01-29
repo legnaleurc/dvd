@@ -147,11 +147,13 @@ function ResultItem (props: IResultItemProps) {
 
   return (
     <ListItem
+      dense={true}
       selected={selection[nodeId]}
       onClick={onSelect}
     >
       <ListItemText
-        primary={resultDict[nodeId].path}
+        primary={resultDict[nodeId].name}
+        secondary={resultDict[nodeId].path}
       />
     </ListItem>
   );
