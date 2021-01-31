@@ -147,7 +147,6 @@ function ResultItem (props: IResultItemProps) {
 
   return (
     <ListItem
-      dense={true}
       selected={selection[nodeId]}
       onClick={onSelect}
     >
