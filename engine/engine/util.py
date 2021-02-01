@@ -213,10 +213,16 @@ class UnpackEngine(object):
             self._storage.root_path,
         ]
         DEBUG('engine') << ' '.join(cmd)
-        p = await asyncio.create_subprocess_exec(*cmd)
+        p = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
         out, err = await p.communicate()
         if p.returncode != 0:
-            raise UnpackFailedError(f'unpack failed code: {p.returncode}')
+            raise UnpackFailedError(
+                f'unpack failed code: {p.returncode}\n\n{err.decode("utf-8")}'
+            )
         return self._scan_local(node_id)
 
     def _scan_local(self, node_id: str) -> List[ImageDict]:
