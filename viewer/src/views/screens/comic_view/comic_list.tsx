@@ -1,6 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { List, ListItem, ListItemText } from '@material-ui/core';
+import clsx from 'clsx';
 
 import { getMixins } from '@/lib';
 import { useComicState } from '@/views/hooks/comic';
@@ -15,7 +16,11 @@ const useStyles = makeStyles((theme) => ({
       'y-scroll',
     ]),
   },
+  unavailable: {
+    textDecoration: 'line-through',
+  },
 }));
+type Classes = ReturnType<typeof useStyles>;
 
 
 export function ComicList () {
@@ -26,7 +31,7 @@ export function ComicList () {
     <div className={classes.comicList}>
       <List>
         {idList.map((id) => (
-          <ComicListItem key={id} id={id} />
+          <ComicListItem key={id} classes={classes} id={id} />
         ))}
       </List>
     </div>
@@ -35,23 +40,28 @@ export function ComicList () {
 
 
 interface IComicListItem {
+  classes: Classes;
   id: string;
 }
 function ComicListItem (props: IComicListItem) {
   const { relGoTo } = useNavigation();
   const { comicDict } = useComicState();
-  const { id } = props;
+  const { classes, id } = props;
 
   const onClick = React.useCallback(() => {
     relGoTo(`/${id}`);
   }, [relGoTo, id]);
 
   const isReady = !comicDict[id].unpacking;
+  const unavailable = isReady && comicDict[id].imageList.length <= 0;
 
   return (
     <ListItem
       button={true}
-      disabled={!isReady}
+      disabled={!isReady || unavailable}
+      className={clsx({
+        [classes.unavailable]: unavailable,
+      })}
       onClick={onClick}
     >
       <ListItemText primary={comicDict[id].name} />
