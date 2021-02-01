@@ -59,7 +59,7 @@ export function useComicAction () {
 
 function reduce (state: IStateContext, action: ActionType) {
   switch (action.type) {
-    case 'ERROR': {
+    case 'ERROR_WITH_ID': {
       const { id } = action.value;
       const { comicDict } = state;
       const dict = comicDict[id];
@@ -190,7 +190,7 @@ function useActions () {
       });
     } catch (e) {
       dispatch({
-        type: 'ERROR',
+        type: 'ERROR_WITH_ID',
         value: {
           id,
           error: e,
@@ -226,7 +226,6 @@ function useActions () {
       dispatch({
         type: 'ERROR',
         value: {
-          id: '',
           error: e,
         },
       });
@@ -248,7 +247,6 @@ function useActions () {
       dispatch({
         type: 'ERROR',
         value: {
-          id: '',
           error: e,
         },
       });

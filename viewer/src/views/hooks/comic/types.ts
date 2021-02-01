@@ -36,8 +36,12 @@ interface LoadCacheEndData {
 
 
 interface ErrorData {
-  id: string;
   error: Error;
+}
+
+
+interface ErrorWithIdData extends ErrorData {
+  id: string;
 }
 
 
@@ -55,4 +59,5 @@ export type ActionType = (
   | IAction<'CLEAR_CACHE_BEGIN', null>
   | IAction<'CLEAR_CACHE_END', null>
   | IAction<'ERROR', ErrorData>
+  | IAction<'ERROR_WITH_ID', ErrorWithIdData>
 );
