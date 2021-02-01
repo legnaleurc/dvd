@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import AsyncExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -180,7 +181,11 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(rv.status, 200)
         body = await rv.json()
         self.assertEqual(len(body), 0)
-        fake_create_process.assert_called_once_with('fake_unpack', '9999', '1', tmp_path)
+        fake_create_process.assert_called_once_with(
+            'fake_unpack', '9999', '1', tmp_path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
 
 
 def make_node_dict(d):
