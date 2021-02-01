@@ -55,6 +55,10 @@ export class FileSystem {
 
   async imageList (id: string) {
     const r = await this._get(`/api/v1/nodes/${id}/images`);
+    if (r.status !== 200) {
+      const rv: ImageListError = await r.json();
+      throw new Error(rv.message);
+    }
     const rv: ImageResponse[] = await r.json();
     return rv;
   }
@@ -164,6 +168,12 @@ export interface SearchResponse extends NodeResponse {
   size: number;
   hash: string;
   path: string;
+}
+
+
+export interface ImageListError {
+  type: string;
+  message: string;
 }
 
 
