@@ -246,8 +246,11 @@ class NodeImageListView(NodeObjectMixin, View):
         ue: UnpackEngine = self.request.app['ue']
         try:
             manifest = await ue.get_manifest(node)
-        except UnpackFailedError:
-            return Response(status=503)
+        except UnpackFailedError as e:
+            return json_response({
+                'type': 'UnpackFailedError',
+                'message': str(e),
+            }, status=503)
 
         manifest = [{
             'width': _['width'],
@@ -349,9 +352,10 @@ class CacheView(View):
         return Response(status=204)
 
 
-def json_response(data):
+def json_response(data, status=200):
     data = json.dumps(data)
     return Response(
+        status=status,
         content_type='application/json',
         text=data + '\n',
         headers={
