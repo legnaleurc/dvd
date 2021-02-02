@@ -4,9 +4,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, MagicMock, patch
+from typing import cast
 
 from aiohttp.test_utils import TestServer, TestClient
-from wcpan.drive.core.types import Node
+from wcpan.drive.core.types import Node, NodeDict
 
 from engine.main import application_context
 
@@ -205,4 +206,4 @@ def make_node_dict(d):
         'private': None,
     }
     rv.update(d)
-    return rv
+    return cast(NodeDict, rv)
