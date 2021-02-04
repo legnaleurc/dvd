@@ -32,13 +32,13 @@ describe('comic', () => {
     }
 
     function Action (props: { stub: () => void }) {
-      const { loadComic } = useComicAction();
+      const { loadComic, loadCache, clearCache } = useComicAction();
 
       React.useEffect(() => {
         props.stub();
-      }, [props.stub, loadComic]);
+      }, [props.stub, loadComic, loadCache, clearCache]);
 
-      const onClick = makeEventHandler((event) => {
+      const onLoadComic = makeEventHandler((event) => {
         const data = event.currentTarget.dataset;
         const id = data['id']! as string;
         const name = data['name']! as string;
@@ -46,7 +46,11 @@ describe('comic', () => {
       }, [loadComic]);
 
       return (
-        <button aria-label="load" onClick={onClick} />
+        <>
+          <button aria-label="loadComic" onClick={onLoadComic} />
+          <button aria-label="loadCache" onClick={loadCache} />
+          <button aria-label="clearCache" onClick={clearCache} />
+        </>
       );
     }
 
@@ -101,10 +105,22 @@ describe('comic', () => {
     }
 
 
-    function load (id: string, name: string) {
-      const btn = screen.getByRole('button', { name: 'load' });
+    function loadComic (id: string, name: string) {
+      const btn = screen.getByRole('button', { name: 'loadComic' });
       btn.dataset.id = id;
       btn.dataset.name = name;
+      userEvent.click(btn);
+    }
+
+
+    function loadCache () {
+      const btn = screen.getByRole('button', { name: 'loadCache' });
+      userEvent.click(btn);
+    }
+
+
+    function clearCache () {
+      const btn = screen.getByRole('button', { name: 'clearCache' });
       userEvent.click(btn);
     }
 
@@ -168,7 +184,7 @@ describe('comic', () => {
       }));
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
-      load('1', 'test.zip');
+      loadComic('1', 'test.zip');
       setId('1');
 
       expect(unpacking()).toBeChecked();
@@ -192,7 +208,7 @@ describe('comic', () => {
       }));
       render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
 
-      load('1', 'test.zip');
+      loadComic('1', 'test.zip');
       setId('1');
 
       expect(unpacking()).toBeChecked();
@@ -205,6 +221,83 @@ describe('comic', () => {
 
       expect(name()).toHaveValue('test.zip');
       expect(imageList()).toHaveLength(0);
+
+      expect(actionStub).toHaveBeenCalledTimes(1);
+    });
+
+    it('can load cache from server', async () => {
+      const actionStub = jest.fn();
+      const expected = [
+        {
+          id: '1',
+          name: '1.zip',
+          image_list: [
+            { width: 100, height: 100 },
+            { width: 100, height: 100 },
+          ],
+        },
+        {
+          id: '2',
+          name: '2.zip',
+          image_list: [
+            { width: 100, height: 100 },
+            { width: 100, height: 100 },
+            { width: 100, height: 100 },
+            { width: 100, height: 100 },
+          ],
+        },
+      ];
+      const fileSystem = newFileSystem((fs) => ({
+        fetchCache: jest.fn().mockResolvedValue(expected),
+      }));
+      render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
+
+      loadCache();
+
+      await waitFor(() => {
+        expect(idList()).toHaveLength(2);
+      });
+
+      for (const book of expected) {
+        setId(book.id);
+        expect(name()).toHaveValue(book.name);
+        expect(imageList()).toHaveLength(book.image_list.length);
+      }
+
+      expect(actionStub).toHaveBeenCalledTimes(1);
+    });
+
+    it('can clear comic list', async () => {
+      const actionStub = jest.fn();
+      const fileSystem = newFileSystem((fs) => ({
+        imageList: jest.fn().mockResolvedValue([
+          {
+            width: 100,
+            height: 200,
+          },
+          {
+            width: 300,
+            height: 400,
+          },
+        ]),
+        clearCache: jest.fn().mockResolvedValue(null),
+      }));
+      render(<Root fileSystem={fileSystem} actionStub={actionStub} />);
+
+      loadComic('1', 'test.zip');
+
+      setId('1');
+      await waitFor(() => {
+        expect(unpacking()).not.toBeChecked();
+      });
+      expect(idList()).toHaveLength(1);
+
+      setId('');
+      clearCache();
+
+      await waitFor(() => {
+        expect(idList()).toHaveLength(0);
+      });
 
       expect(actionStub).toHaveBeenCalledTimes(1);
     });
