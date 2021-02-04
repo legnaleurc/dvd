@@ -168,6 +168,27 @@ describe('api', () => {
       expect(rv).toEqual(expected);
     });
 
+    it('imageList (error)', async () => {
+      const id = '1';
+      const expected = 'unknown error';
+      fetchMock.mockOnce(async () => {
+        return makeJsonErrorResponse(503, {
+          type: 'UnknownError',
+          message: expected,
+        });
+      });
+
+      const fileSystem = new FileSystem();
+      expect(async () => {
+        await fileSystem.imageList(id);
+      }).rejects.toThrow(expected);
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const request = fetchMock.mock.calls[0][0] as Request;
+      expect(request.method).toEqual('GET');
+      expect(request.url).toEqual(`http://localhost/api/v1/nodes/${id}/images`);
+    });
+
     it('image', () => {
       const id = '1';
       const imageId = 0;
@@ -270,6 +291,17 @@ describe('api', () => {
 
 function makeJsonResponse (expected: any) {
   return {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(expected),
+  };
+}
+
+
+function makeJsonErrorResponse (status: number, expected: any) {
+  return {
+    status,
     headers: {
       'Content-Type': 'application/json',
     },
