@@ -30,7 +30,7 @@ type ConfigurationFactory = ((
 
 const factory: ConfigurationFactory = (env, argv) => {
   const backendPort = process.env.BACKEND_PORT;
-  const isReleaseMode = argv.mode === 'production';
+  const isReleaseMode = process.env.NODE_ENV === 'production';
 
   return {
     entry: './src/index.tsx',
