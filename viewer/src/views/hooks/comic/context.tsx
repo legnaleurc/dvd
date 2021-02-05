@@ -205,9 +205,10 @@ function useActions () {
       value: null,
     });
 
-    for (const id of self.current.idList) {
-      loadComic(id, self.current.getName(id));
-    }
+    const reloadList = self.current.idList.map((id) => (
+      loadComic(id, self.current.getName(id))
+    ));
+    await Promise.all(reloadList);
 
     try {
       const cacheList = await fileSystem.fetchCache();
