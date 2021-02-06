@@ -20,3 +20,13 @@ target_link_libraries(unpack PRIVATE
     Boost::filesystem
     Boost::chrono)
 target_sources(unpack PRIVATE ${SOURCES})
+
+add_executable(local)
+target_compile_features(local PUBLIC cxx_std_11)
+target_include_directories(local PRIVATE ${LibArchive_INCLUDE_DIRS})
+target_link_libraries(local PRIVATE
+    ${LibArchive_LIBRARIES}
+    Boost::thread
+    Boost::filesystem
+    Boost::chrono)
+target_sources(local PRIVATE "src/local.cpp")
