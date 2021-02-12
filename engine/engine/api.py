@@ -3,7 +3,7 @@ import functools
 import json
 import re
 import shlex
-from typing import Any, Dict, List, Iterable
+from typing import Any, Dict, Iterable
 
 from aiohttp.web import Response, StreamResponse, View
 from wcpan.logger import EXCEPTION
