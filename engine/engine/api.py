@@ -65,15 +65,15 @@ class NodeRandomAccessMixin(object):
 
         range_ = self.request.http_range
         offset = 0 if range_.start is None else range_.start
-        length = node.size - offset if not range_.stop else range_.stop
-        stop = range_.stop if range_.stop else node.size - 1
+        stop = node.size if range_.stop is None else range_.stop
+        length = stop - offset
         # Not out of range.
         good_range = is_valid_range(range_, node.size)
         # The response needs Content-Range.
         want_range = range_.start is not None or range_.stop is not None
 
         if want_range:
-            response.headers['Content-Range'] = f'bytes {offset}-{stop}/{node.size}'
+            response.headers['Content-Range'] = f'bytes {offset}-{stop - 1}/{node.size}'
 
         response.content_length = length
 
