@@ -22,7 +22,7 @@ public:
 
     web::http::http_response & getResponse ();
     int64_t readChunk (const void ** buffer);
-    bool seek (int64_t offset, int whence);
+    int64_t seek (int64_t offset, int whence);
     void reset ();
 
 private:
@@ -209,8 +209,11 @@ la_int64_t seekCallback (struct archive * handle, void * context,
                          la_int64_t offset, int whence)
 {
     auto ctx = static_cast<Context *>(context);
-    auto ok = ctx->seek(offset, whence);
-    return ok ? offset : ARCHIVE_FATAL;
+    auto rv = ctx->seek(offset, whence);
+    if (rv < 0) {
+        return ARCHIVE_FATAL;
+    }
+    return rv;
 }
 
 
@@ -304,7 +307,7 @@ int64_t Context::readChunk (const void ** buffer) {
 }
 
 
-bool Context::seek (int64_t offset, int whence) {
+int64_t Context::seek (int64_t offset, int whence) {
     this->response = web::http::http_response();
 
     switch (whence) {
@@ -316,14 +319,14 @@ bool Context::seek (int64_t offset, int whence) {
         break;
     case SEEK_END:
         if (this->length < 0) {
-            return false;
+            return -1;
         }
         this->offset = this->length + offset;
         break;
     default:
-        return false;
+        return -1;
     }
-    return this->offset >= 0;
+    return this->offset;
 }
 
 
