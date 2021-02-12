@@ -195,8 +195,6 @@ int	closeCallback (struct archive * handle, void * context) {
 la_ssize_t readCallback (struct archive * handle, void * context,
                          const void ** buffer)
 {
-    using Buffer = Concurrency::streams::rawptr_buffer<uint8_t>;
-
     auto ctx = static_cast<Context *>(context);
     try {
         return ctx->readChunk(buffer);
