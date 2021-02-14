@@ -8,7 +8,6 @@
 #include <cpprest/http_client.h>
 #include <cpprest/rawptrstream.h>
 #include <boost/filesystem.hpp>
-#include <boost/locale.hpp>
 
 #include "types.hpp"
 #include "exception.hpp"
