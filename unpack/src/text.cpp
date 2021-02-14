@@ -8,6 +8,7 @@
 const char * TEXT_CODEC_LIST[] = {
     "UTF-8",
     "Shift-JIS",
+    "CP932",
     "EUC-JP",
     "GB2312",
 };
