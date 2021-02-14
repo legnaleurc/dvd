@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import asyncio
 import functools
 import json
 import re
 import shlex
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, Union, Tuple
 
 from aiohttp.web import Response, StreamResponse, View
 from wcpan.logger import EXCEPTION
@@ -58,7 +60,10 @@ class NodeRandomAccessMixin(object):
             return StreamResponse(status=200)
         return StreamResponse(status=206)
 
-    async def feed(self: View, response: StreamResponse, node: Node) -> None:
+    async def setup_headers(self: View,
+        response: StreamResponse,
+        node: Node,
+    ) -> Union[Tuple[int, int], None]:
         assert node.size is not None
 
         DEFAULT_MIME_TYPE = 'application/octet-stream'
@@ -72,25 +77,39 @@ class NodeRandomAccessMixin(object):
         # The response needs Content-Range.
         want_range = range_.start is not None or range_.stop is not None
 
+        response.content_type = DEFAULT_MIME_TYPE if not node.mime_type else node.mime_type
+        response.content_length = length
         if want_range:
             response.headers['Content-Range'] = f'bytes {offset}-{stop - 1}/{node.size}'
-
-        response.content_length = length
-
         response.headers['Accept-Ranges'] = 'bytes'
-        response.content_type = DEFAULT_MIME_TYPE if not node.mime_type else node.mime_type
+
         if not good_range:
             response.set_status(416)
+            return None
 
-        drive = self.request.app['drive']
+        return offset, length
 
+    async def feed(self: View,
+        response: StreamResponse,
+        node: Node,
+        good_range: Union[Tuple[int, int], None],
+    ) -> None:
         await response.prepare(self.request)
         if not good_range:
             return
+
+        offset, length = good_range
+        drive: Drive = self.request.app['drive']
         async with await drive.download(node) as stream:
             await stream.seek(offset)
             async for chunk in stream:
-                await response.write(chunk)
+                if len(chunk) < length:
+                    await response.write(chunk)
+                    length -= len(chunk)
+                else:
+                    chunk = chunk[:length]
+                    await response.write(chunk)
+                    break
 
 
 class NodeView(NodeObjectMixin, View):
@@ -213,13 +232,25 @@ class NodeChildrenView(NodeObjectMixin, View):
 class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
 
     @raise_404
+    async def head(self):
+        node = await self.get_object()
+        if node.is_folder:
+            return Response(status=400)
+
+        response = await self.create_response()
+        await self.setup_headers(response, node)
+        await response.prepare(self.request)
+        return response
+
+    @raise_404
     async def get(self):
         node = await self.get_object()
         if node.is_folder:
             return Response(status=400)
 
         response = await self.create_response()
-        await self.feed(response, node)
+        good_range = await self.setup_headers(response, node)
+        await self.feed(response, node, good_range)
         return response
 
 
@@ -232,8 +263,9 @@ class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, View):
             return Response(status=400)
 
         response = await self.create_response()
+        good_range = await self.setup_headers(response, node)
         response.headers['Content-Disposition'] = f'attachment; filename="{node.name}"'
-        await self.feed(response, node)
+        await self.feed(response, node, good_range)
         return response
 
 
