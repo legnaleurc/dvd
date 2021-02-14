@@ -18,10 +18,12 @@ Text::Text(): index(std::begin(TEXT_CODEC_LIST)) {}
 
 
 std::string Text::toUtf8(const std::string & encoded) {
+    namespace Conv = boost::locale::conv;
+
     while (index != std::end(TEXT_CODEC_LIST)) {
         const auto codec = *index;
         try {
-            auto decoded = boost::locale::conv::to_utf<char>(encoded, codec, boost::locale::conv::stop);
+            auto decoded = Conv::to_utf<char>(encoded, codec, Conv::stop);
             return decoded;
         } catch (std::exception & e) {
             std::advance(index, 1);
