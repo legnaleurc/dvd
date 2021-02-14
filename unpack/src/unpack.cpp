@@ -8,9 +8,11 @@
 #include <cpprest/http_client.h>
 #include <cpprest/rawptrstream.h>
 #include <boost/filesystem.hpp>
+#include <boost/locale.hpp>
 
 #include "types.hpp"
 #include "exception.hpp"
+#include "text.hpp"
 
 
 const uint64_t CHUNK_SIZE = 65536;
@@ -38,8 +40,8 @@ using ContextHandle = std::shared_ptr<Context>;
 
 ArchiveHandle createArchiveReader (ContextHandle context);
 ArchiveHandle createDiskWriter ();
-std::string resolvePath (const std::string & localPath, const std::string & id,
-                         const std::string & entryName);
+std::string resolvePath (Text & text, const std::string & localPath,
+                         const std::string & id, const std::string & entryName);
 void extractArchive (ArchiveHandle reader, ArchiveHandle writer);
 web::uri makeBase (uint16_t port);
 web::uri makePath (const std::string & id);
@@ -57,6 +59,7 @@ unpackTo (uint16_t port, const std::string & id,
           const std::string & localPath)
 {
     ContextHandle context = std::make_shared<Context>(port, id);
+    Text text;
     auto reader = createArchiveReader(context);
     auto writer = createDiskWriter();
 
@@ -75,7 +78,7 @@ unpackTo (uint16_t port, const std::string & id,
             throw EntryError("archive_entry_pathname", "nullptr");
         }
 
-        auto entryPath = resolvePath(localPath, id, entryName);
+        auto entryPath = resolvePath(text, localPath, id, entryName);
         rv = archive_entry_update_pathname_utf8(entry, entryPath.c_str());
         if (!rv) {
             throw EntryError("archive_entry_update_pathname_utf8", entryPath);
@@ -235,12 +238,13 @@ web::uri makePath (const std::string & id) {
 }
 
 
-std::string resolvePath (const std::string & localPath, const std::string & id,
-                         const std::string & entryName)
+std::string resolvePath (Text & text, const std::string & localPath,
+                         const std::string & id, const std::string & entryName)
 {
+    auto newEntryName = text.toUtf8(entryName);
     boost::filesystem::path path = localPath;
     path /= id;
-    path /= entryName;
+    path /= newEntryName;
     return path.string();
 }
 

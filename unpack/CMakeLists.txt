@@ -3,11 +3,12 @@ project(unpack)
 
 find_package(LibArchive REQUIRED)
 find_package(cpprestsdk REQUIRED)
-find_package(Boost REQUIRED thread filesystem chrono)
+find_package(Boost REQUIRED thread filesystem chrono locale)
 
 set(SOURCES
     "src/exception.cpp"
     "src/unpack.cpp"
+    "src/text.cpp"
     "src/main.cpp")
 
 add_executable(unpack)
@@ -18,5 +19,6 @@ target_link_libraries(unpack PRIVATE
     cpprestsdk::cpprest
     Boost::thread
     Boost::filesystem
-    Boost::chrono)
+    Boost::chrono
+    Boost::locale)
 target_sources(unpack PRIVATE ${SOURCES})
