@@ -72,13 +72,13 @@ unpackTo (uint16_t port, const std::string & id,
 
         const char * entryName = archive_entry_pathname(entry);
         if (!entryName) {
-            throw new EntryError("archive_entry_pathname", "nullptr");
+            throw EntryError("archive_entry_pathname", "nullptr");
         }
 
         auto entryPath = resolvePath(localPath, id, entryName);
         rv = archive_entry_update_pathname_utf8(entry, entryPath.c_str());
         if (!rv) {
-            throw new EntryError("archive_entry_update_pathname_utf8", entryPath);
+            throw EntryError("archive_entry_update_pathname_utf8", entryPath);
         }
 
         rv = archive_write_header(writer.get(), entry);
