@@ -3,7 +3,7 @@ project(unpack)
 
 find_package(LibArchive REQUIRED)
 find_package(cpprestsdk REQUIRED)
-find_package(Boost REQUIRED thread filesystem chrono locale)
+find_package(Boost REQUIRED filesystem chrono locale)
 
 set(SOURCES
     "src/exception.cpp"
@@ -17,7 +17,6 @@ target_include_directories(unpack PRIVATE ${LibArchive_INCLUDE_DIRS})
 target_link_libraries(unpack PRIVATE
     ${LibArchive_LIBRARIES}
     cpprestsdk::cpprest
-    Boost::thread
     Boost::filesystem
     Boost::chrono
     Boost::locale)
