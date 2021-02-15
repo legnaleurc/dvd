@@ -11,6 +11,8 @@ const char * TEXT_CODEC_LIST[] = {
     "CP932",
     "EUC-JP",
     "GB2312",
+    "GBK",
+    "GB18030",
 };
 
 
