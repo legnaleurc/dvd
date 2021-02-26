@@ -173,6 +173,18 @@ function useActions () {
       },
     });
     try {
+      // If we dont know the name yet, fetch the name first.
+      if (!name) {
+        const node = await fileSystem.node(id);
+        dispatch({
+          type: 'LOAD_BEGIN',
+          value: {
+            id,
+            name: node.name,
+          },
+        });
+      }
+
       const imageList = await fileSystem.imageList(id);
       const imageDataList = imageList.map((data, index) => {
         const url = fileSystem.image(id, index);
