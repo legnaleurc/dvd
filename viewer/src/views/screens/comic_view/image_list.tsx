@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
 import { useFullScreenAction } from '@/views/hooks/fullscreen';
-import { ComicDict, useComicState } from '@/views/hooks/comic';
+import { ComicDict, useComicState, useComicAction } from '@/views/hooks/comic';
 import { useComicParams } from '@/views/hooks/router';
 import { ImageView } from './image_view';
 
@@ -56,8 +56,15 @@ export function ImageList (props: {}) {
 function useActions () {
   const { comicId } = useComicParams();
   const { comicDict } = useComicState();
+  const { loadComic } = useComicAction();
 
   const imageList = getImageList(comicDict, comicId);
+
+  React.useEffect(() => {
+    if (!comicDict[comicId]) {
+      loadComic(comicId, '');
+    }
+  }, [comicDict, comicId]);
 
   return {
     imageList,
