@@ -38,6 +38,24 @@ describe('api', () => {
       expect(rv).toEqual(expected);
     });
 
+    it('node', async () => {
+      const expected = {
+        id: '1',
+      };
+      fetchMock.mockOnce(async () => {
+        return makeJsonResponse(expected);
+      });
+
+      const fileSystem = new FileSystem();
+      const rv = await fileSystem.node('1');
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const request = fetchMock.mock.calls[0][0] as Request;
+      expect(request.method).toEqual('GET');
+      expect(request.url).toEqual('http://localhost/api/v1/nodes/1');
+      expect(rv).toEqual(expected);
+    });
+
     it('list', async () => {
       const id = '1';
       const expected: NodeResponse[] = [];

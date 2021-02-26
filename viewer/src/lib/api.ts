@@ -16,6 +16,12 @@ export class FileSystem {
     return rv;
   }
 
+  async node (id: string) {
+    const r = await this._get(`/api/v1/nodes/${id}`);
+    const rv: NodeResponse = await r.json();
+    return rv;
+  }
+
   async list (id: string) {
     const r = await this._get(`/api/v1/nodes/${id}/children`);
     const rv: NodeResponse[] = await r.json();
