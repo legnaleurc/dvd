@@ -23,6 +23,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                 port=9999,
                 unpack_path='fake_unpack',
                 static_path=static_path,
+                token='1234',
             ))
             client = await stack.enter_async_context(TestClient(TestServer(app)))
             self._client = client
@@ -40,6 +41,10 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         drive.sync = MagicMock(return_value=AsyncMock(side_effect=expected))
 
         rv = await self._client.post('/api/v1/changes')
+        self.assertEqual(rv.status, 401)
+        rv = await self._client.post('/api/v1/changes', headers={
+            'Authorization': f'Token 1234',
+        })
         self.assertEqual(rv.status, 200)
         body = await rv.json()
         self.assertEqual(body, expected)
@@ -51,6 +56,10 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         drive.get_root_node.return_value = Node.from_dict(expected)
 
         rv = await self._client.get('/api/v1/nodes/root')
+        self.assertEqual(rv.status, 401)
+        rv = await self._client.get('/api/v1/nodes/root', headers={
+            'Authorization': f'Token 1234',
+        })
         self.assertEqual(rv.status, 200)
         body = await rv.json()
         self.assertEqual(body, expected)
@@ -62,6 +71,10 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         drive.get_node_by_id.return_value = Node.from_dict(expected)
 
         rv = await self._client.get('/api/v1/nodes/1')
+        self.assertEqual(rv.status, 401)
+        rv = await self._client.get('/api/v1/nodes/1', headers={
+            'Authorization': f'Token 1234',
+        })
         self.assertEqual(rv.status, 200)
         body = await rv.json()
         self.assertEqual(body, expected)
@@ -72,6 +85,10 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         drive.get_node_by_id.return_value = None
 
         rv = await self._client.get('/api/v1/nodes/1')
+        self.assertEqual(rv.status, 401)
+        rv = await self._client.get('/api/v1/nodes/1', headers={
+            'Authorization': f'Token 1234',
+        })
         self.assertEqual(rv.status, 404)
 
     async def testMoveNode(self):
@@ -85,6 +102,16 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         rv = await self._client.patch('/api/v1/nodes/1', json={
             'parent_id': '2',
         })
+        self.assertEqual(rv.status, 401)
+        rv = await self._client.patch(
+            '/api/v1/nodes/1',
+            json={
+                'parent_id': '2',
+            },
+            headers={
+                'Authorization': f'Token 1234',
+            },
+        )
         self.assertEqual(rv.status, 204)
         drive.rename_node.assert_called_once_with(
             Node.from_dict(make_node_dict({ 'id': '1' })),
@@ -103,6 +130,16 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         rv = await self._client.patch('/api/v1/nodes/1', json={
             'name': 'test',
         })
+        self.assertEqual(rv.status, 401)
+        rv = await self._client.patch(
+            '/api/v1/nodes/1',
+            json={
+                'name': 'test',
+            },
+            headers={
+                'Authorization': f'Token 1234',
+            },
+        )
         self.assertEqual(rv.status, 204)
         drive.rename_node.assert_called_once_with(
             Node.from_dict(make_node_dict({ 'id': '1' })),
@@ -119,6 +156,10 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
 
         rv = await self._client.delete('/api/v1/nodes/1')
+        self.assertEqual(rv.status, 401)
+        rv = await self._client.delete('/api/v1/nodes/1', headers={
+            'Authorization': f'Token 1234',
+        })
         self.assertEqual(rv.status, 204)
         drive.trash_node.assert_called_once_with(
             Node.from_dict(make_node_dict({ 'id': '1' })),
@@ -153,6 +194,10 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         drive.walk = fake_walk
 
         rv = await self._client.get('/api/v1/nodes/1/images')
+        self.assertEqual(rv.status, 401)
+        rv = await self._client.get('/api/v1/nodes/1/images', headers={
+            'Authorization': f'Token 1234',
+        })
         self.assertEqual(rv.status, 200)
         body = await rv.json()
         self.assertEqual(len(body), 1)
@@ -179,6 +224,10 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
 
         rv = await self._client.get('/api/v1/nodes/1/images')
+        self.assertEqual(rv.status, 401)
+        rv = await self._client.get('/api/v1/nodes/1/images', headers={
+            'Authorization': f'Token 1234',
+        })
         self.assertEqual(rv.status, 200)
         body = await rv.json()
         self.assertEqual(len(body), 0)

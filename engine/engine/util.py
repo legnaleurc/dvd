@@ -403,3 +403,10 @@ def inner_normalize_search_pattern(raw: str) -> str:
     rv = map(str, rv)
     rv = '.*'.join(rv)
     return rv
+
+
+async def get_node(drive: Drive, id_or_root: str) -> Node:
+    if id_or_root == 'root':
+        return await drive.get_root_node()
+    else:
+        return await drive.get_node_by_id(id_or_root)

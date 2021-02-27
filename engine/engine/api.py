@@ -1,17 +1,29 @@
 from __future__ import annotations
 
 import asyncio
-import functools
-import json
 import re
 import shlex
-from typing import Any, Dict, Iterable, Union, Tuple
+from typing import Any, Dict, Iterable
 
 from aiohttp.web import Response, StreamResponse, View
+from aiohttp.web_exceptions import (
+    HTTPBadRequest,
+    HTTPConflict,
+    HTTPNoContent,
+    HTTPServiceUnavailable, HTTPUnauthorized,
+)
 from wcpan.logger import EXCEPTION
 from wcpan.drive.core.drive import Drive
-from wcpan.drive.core.types import Node
 
+from .mixins import NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin
+from .rest import (
+    CreateAPIMixin,
+    RetriveAPIMixin,
+    PartialUpdateAPIMixin,
+    DestroyAPIMixin,
+    ListAPIMixin,
+    json_response,
+)
 from .util import (
     InvalidPatternError,
     SearchEngine,
@@ -19,109 +31,17 @@ from .util import (
     UnpackEngine,
     UnpackFailedError,
     normalize_search_pattern,
+    get_node,
 )
 
 
-class NotFoundError(Exception):
+class NodeView(NodeObjectMixin, HasTokenMixin, RetriveAPIMixin, PartialUpdateAPIMixin, DestroyAPIMixin, View):
 
-    pass
-
-
-def raise_404(fn):
-    @functools.wraps(fn)
-    async def wrapper(self):
-        try:
-            return await fn(self)
-        except NotFoundError:
-            return Response(status=404)
-    return wrapper
-
-
-class NodeObjectMixin(object):
-
-    async def get_object(self: View):
-        id_ = self.request.match_info.get('id', None)
-        if not id_:
-            raise NotFoundError
-
-        drive = self.request.app['drive']
-        node = await get_node(drive, id_)
-        if not node:
-            raise NotFoundError
-
-        return node
-
-
-class NodeRandomAccessMixin(object):
-
-    async def create_response(self: View):
-        range_ = self.request.http_range
-        if range_.start is None and range_.stop is None:
-            return StreamResponse(status=200)
-        return StreamResponse(status=206)
-
-    async def setup_headers(self: View,
-        response: StreamResponse,
-        node: Node,
-    ) -> Union[Tuple[int, int], None]:
-        assert node.size is not None
-
-        DEFAULT_MIME_TYPE = 'application/octet-stream'
-
-        range_ = self.request.http_range
-        offset = 0 if range_.start is None else range_.start
-        stop = node.size if range_.stop is None else range_.stop
-        length = stop - offset
-        # Not out of range.
-        good_range = is_valid_range(range_, node.size)
-        # The response needs Content-Range.
-        want_range = range_.start is not None or range_.stop is not None
-
-        response.content_type = DEFAULT_MIME_TYPE if not node.mime_type else node.mime_type
-        response.content_length = length
-        if want_range:
-            response.headers['Content-Range'] = f'bytes {offset}-{stop - 1}/{node.size}'
-        response.headers['Accept-Ranges'] = 'bytes'
-
-        if not good_range:
-            response.set_status(416)
-            return None
-
-        return offset, length
-
-    async def feed(self: View,
-        response: StreamResponse,
-        node: Node,
-        good_range: Union[Tuple[int, int], None],
-    ) -> None:
-        await response.prepare(self.request)
-        if not good_range:
-            return
-
-        offset, length = good_range
-        drive: Drive = self.request.app['drive']
-        async with await drive.download(node) as stream:
-            await stream.seek(offset)
-            async for chunk in stream:
-                if len(chunk) < length:
-                    await response.write(chunk)
-                    length -= len(chunk)
-                else:
-                    chunk = chunk[:length]
-                    await response.write(chunk)
-                    break
-
-
-class NodeView(NodeObjectMixin, View):
-
-    @raise_404
-    async def get(self):
+    async def retrive(self):
         node = await self.get_object()
-        dict_ = node.to_dict()
-        return json_response(dict_)
+        return node.to_dict()
 
-    @raise_404
-    async def patch(self):
+    async def partial_update(self):
         node = await self.get_object()
         drive: Drive = self.request.app['drive']
         kwargs = await self.request.json()
@@ -137,58 +57,48 @@ class NodeView(NodeObjectMixin, View):
             if 'name' in kwargs:
                 name = kwargs['name']
             await drive.rename_node(node, parent_node, name)
-        return Response(
-            status=204,
-            headers={
-                'Access-Control-Allow-Origin': '*',
-            })
+        raise HTTPNoContent()
 
-    @raise_404
-    async def delete(self):
+    async def destory(self):
         node = await self.get_object()
         drive: Drive = self.request.app['drive']
         se: SearchEngine = self.request.app['se']
         path = await drive.get_path(node)
         se.drop_value(str(path))
         await drive.trash_node(node)
-        return Response(
-            status=204,
-            headers={
-                'Access-Control-Allow-Origin': '*',
-            })
 
-    async def options(self):
-        return Response(
-            status=204,
-            headers={
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': ', '.join([
-                    'GET',
-                    'DELETE',
-                    'PATCH',
-                    'OPTIONS',
-                ]),
-            })
+    # async def options(self):
+    #     return Response(
+    #         status=204,
+    #         headers={
+    #             'Access-Control-Allow-Origin': '*',
+    #             'Access-Control-Allow-Methods': ', '.join([
+    #                 'GET',
+    #                 'DELETE',
+    #                 'PATCH',
+    #                 'OPTIONS',
+    #             ]),
+    #         })
 
 
-class NodeListView(View):
+class NodeListView(HasTokenMixin, ListAPIMixin, CreateAPIMixin, View):
 
-    async def get(self):
+    async def list_(self):
         name_filter = self.request.query.get('name', None)
         if not name_filter:
-            return Response(status=400)
+            raise HTTPBadRequest()
 
         se = self.request.app['se']
         try:
             nodes = await search_by_name(se, name_filter)
         except InvalidPatternError:
-            return Response(status=400)
+            raise HTTPBadRequest()
         except SearchFailedError:
-            return Response(status=503)
+            raise HTTPServiceUnavailable()
 
-        return json_response(nodes)
+        return nodes
 
-    async def post(self):
+    async def create(self):
         kwargs = await self.request.json()
         kwargs = unpack_dict(kwargs, (
             'parent_id',
@@ -199,7 +109,7 @@ class NodeListView(View):
             'name',
         )))
         if not ok:
-            return Response(status=400)
+            raise HTTPBadRequest()
 
         drive: Drive = self.request.app['drive']
         parent_id = kwargs['parent_id']
@@ -211,42 +121,45 @@ class NodeListView(View):
                 folder_name=name,
                 exist_ok=False,
             )
-            return json_response(node.to_dict())
+            return node.to_dict()
         except Exception as e:
             EXCEPTION('engine', e) << name << parent_id
-            return Response(status=409)
+            raise HTTPConflict() from e
 
 
-class NodeChildrenView(NodeObjectMixin, View):
+class NodeChildrenView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
 
-    @raise_404
-    async def get(self):
+    async def list_(self):
         node = await self.get_object()
         drive: Drive = self.request.app['drive']
         children = await drive.get_children(node)
         children = filter(lambda _: not _.trashed, children)
         children = [_.to_dict() for _ in children]
-        return json_response(children)
+        return children
 
 
-class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
+class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin, View):
 
-    @raise_404
     async def head(self):
+        if not await self.has_permission():
+            raise HTTPUnauthorized()
+
         node = await self.get_object()
         if node.is_folder:
-            return Response(status=400)
+            raise HTTPBadRequest()
 
         response = await self.create_response()
         await self.setup_headers(response, node)
         await response.prepare(self.request)
         return response
 
-    @raise_404
     async def get(self):
+        if not await self.has_permission():
+            raise HTTPUnauthorized()
+
         node = await self.get_object()
         if node.is_folder:
-            return Response(status=400)
+            raise HTTPBadRequest()
 
         response = await self.create_response()
         good_range = await self.setup_headers(response, node)
@@ -254,13 +167,15 @@ class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
         return response
 
 
-class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, View):
+class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin, View):
 
-    @raise_404
     async def get(self):
+        if not await self.has_permission():
+            raise HTTPUnauthorized()
+
         node = await self.get_object()
         if node.is_folder:
-            return Response(status=400)
+            raise HTTPBadRequest()
 
         response = await self.create_response()
         good_range = await self.setup_headers(response, node)
@@ -269,10 +184,9 @@ class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, View):
         return response
 
 
-class NodeImageListView(NodeObjectMixin, View):
+class NodeImageListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
 
-    @raise_404
-    async def get(self):
+    async def list_(self):
         node = await self.get_object()
 
         ue: UnpackEngine = self.request.app['ue']
@@ -288,20 +202,21 @@ class NodeImageListView(NodeObjectMixin, View):
             'width': _['width'],
             'height': _['height'],
         } for _ in manifest]
-        return json_response(manifest)
+        return manifest
 
 
-class NodeImageView(NodeObjectMixin, View):
+class NodeImageView(NodeObjectMixin, HasTokenMixin, View):
 
-    @raise_404
     async def get(self):
-        node = await self.get_object()
+        if not await self.has_permission():
+            raise HTTPUnauthorized()
 
         image_id = self.request.match_info.get('image_id', None)
         if not image_id:
-            return Response(status=404)
+            raise HTTPBadRequest()
         image_id = int(image_id)
 
+        node = await self.get_object()
         ue: UnpackEngine = self.request.app['ue']
         try:
             manifest = await ue.get_manifest(node)
@@ -334,9 +249,12 @@ class NodeImageView(NodeObjectMixin, View):
         return response
 
 
-class ChangesView(View):
+class ChangesView(HasTokenMixin, View):
 
     async def post(self):
+        if not await self.has_permission():
+            raise HTTPUnauthorized()
+
         drive: Drive = self.request.app['drive']
         se: SearchEngine = self.request.app['se']
         await se.clear_cache()
@@ -344,9 +262,12 @@ class ChangesView(View):
         return json_response(changes)
 
 
-class ApplyView(View):
+class ApplyView(HasTokenMixin, View):
 
     async def post(self):
+        if not await self.has_permission():
+            raise HTTPUnauthorized()
+
         kwargs = await self.request.json()
         command = kwargs['command']
         kwargs = kwargs['kwargs']
@@ -357,12 +278,12 @@ class ApplyView(View):
         p = await asyncio.create_subprocess_exec(*command)
         await p.communicate()
         assert p.returncode == 0
-        return Response(status=204)
+        raise HTTPNoContent
 
 
-class CacheView(View):
+class CacheView(HasTokenMixin, ListAPIMixin, DestroyAPIMixin, View):
 
-    async def get(self):
+    async def list_(self):
         ue: UnpackEngine = self.request.app['ue']
         drive: Drive = self.request.app['drive']
         cache = ue.cache
@@ -376,30 +297,11 @@ class CacheView(View):
                 'height': __['height'],
             } for __ in cache[_.id_]],
         } for _ in node_list]
-        return json_response(rv)
+        return rv
 
-    async def delete(self):
+    async def destory(self):
         ue: UnpackEngine = self.request.app['ue']
         ue.clear_cache()
-        return Response(status=204)
-
-
-def json_response(data, status=200):
-    data = json.dumps(data)
-    return Response(
-        status=status,
-        content_type='application/json',
-        text=data + '\n',
-        headers={
-            'Access-Control-Allow-Origin': '*',
-        })
-
-
-async def get_node(drive: Drive, id_or_root: str) -> Node:
-    if id_or_root == 'root':
-        return await drive.get_root_node()
-    else:
-        return await drive.get_node_by_id(id_or_root)
 
 
 async def search_by_name(
@@ -416,24 +318,6 @@ async def search_by_name(
     se = search_engine
     nodes = await se.get_nodes_by_regex(real_pattern)
     return nodes
-
-
-def is_valid_range(range_: slice, size: int) -> bool:
-    if range_.start is None and range_.stop is None:
-        return True
-    if range_.start is None:
-        return False
-    if range_.start < 0:
-        return False
-    if range_.start >= size:
-        return False
-    if range_.stop is None:
-        return True
-    if range_.stop <= 0:
-        return False
-    if range_.stop > size:
-        return False
-    return True
 
 
 def unpack_dict(d: Dict[str, Any], keys: Iterable[str]) -> Dict[str, Any]:

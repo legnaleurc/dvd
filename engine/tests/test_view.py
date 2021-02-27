@@ -20,6 +20,7 @@ class ViewTestCase(IsolatedAsyncioTestCase):
                 port=9999,
                 unpack_path='',
                 static_path=static_path,
+                token='1234',
             ))
             client = await stack.enter_async_context(TestClient(TestServer(app)))
             self._client = client
