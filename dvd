@@ -34,11 +34,17 @@ async def main(args=None):
 
     try:
         if not args.debug:
-            await run_release(public_listen=args.public_listen)
+            await run_release(
+                public_listen=args.public_listen,
+                token=args.token,
+            )
         else:
-            await run_debug(public_listen=args.public_listen,
-                            private_listen=args.private_listen,
-                            stop_event=stop_event)
+            await run_debug(
+                public_listen=args.public_listen,
+                private_listen=args.private_listen,
+                stop_event=stop_event,
+                token=args.token,
+            )
     except Exception as e:
         print(e)
         return 1
@@ -64,32 +70,41 @@ def parse_args(args):
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('--public-listen', type=int, default=PUBLIC_PORT)
     parser.add_argument('--private-listen', type=int, default=PRIVATE_PORT)
+    parser.add_argument('--token', type=str)
     args = parser.parse_args(args[1:])
     return args
 
 
-async def run_release(public_listen):
+async def run_release(public_listen: int, token: str):
     await run_or_die(['make', '-j'])
-    await run_or_die(
-        [
-            'python3', '-m', 'engine',
-                '-u', '../unpack/build/unpack',
-                '-s', '../viewer/dist',
-                '-l', str(public_listen),
-        ],
-        cwd=pathlib.Path('./engine'),
-    )
+    cmd = [
+        'python3', '-m', 'engine',
+            '-u', '../unpack/build/unpack',
+            '-s', '../viewer/dist',
+            '-l', str(public_listen),
+    ]
+    if token:
+        cmd.extend(['-t', token])
+    await run_or_die(cmd, cwd=pathlib.Path('./engine'))
 
 
-async def run_debug(public_listen, private_listen, stop_event):
+async def run_debug(
+    public_listen: int,
+    private_listen: int,
+    stop_event: asyncio.Event,
+    token: str,
+):
     await run_or_die(['make', '-j', 'debug'])
 
+    cmd = [
+        'python3', '-m', 'engine',
+            '-u', '../unpack/build/unpack',
+            '-l', str(private_listen),
+    ]
+    if token:
+        cmd.extend(['-t', token])
     backend = auto_rerun(
-        [
-            'python3', '-m', 'engine',
-                '-u', '../unpack/build/unpack',
-                '-l', str(private_listen),
-        ],
+        cmd,
         cwd=pathlib.Path('./engine'),
         path='./engine',
         stop_event=stop_event,
