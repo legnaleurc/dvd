@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import re
 import shlex
 from typing import Any, Dict, Iterable
@@ -10,7 +11,8 @@ from aiohttp.web_exceptions import (
     HTTPBadRequest,
     HTTPConflict,
     HTTPNoContent,
-    HTTPServiceUnavailable, HTTPUnauthorized,
+    HTTPServiceUnavailable,
+    HTTPUnauthorized,
 )
 from wcpan.logger import EXCEPTION
 from wcpan.drive.core.drive import Drive
@@ -193,10 +195,10 @@ class NodeImageListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
         try:
             manifest = await ue.get_manifest(node)
         except UnpackFailedError as e:
-            return json_response({
+            raise HTTPServiceUnavailable(text=json.dumps({
                 'type': 'UnpackFailedError',
                 'message': str(e),
-            }, status=503)
+            }))
 
         manifest = [{
             'width': _['width'],
