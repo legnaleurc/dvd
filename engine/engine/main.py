@@ -37,10 +37,12 @@ class Daemon(object):
         port: int = self._kwargs.listen
         unpack_path: str = self._kwargs.unpack
         static_path: str = self._kwargs.static
+        token: str = self._kwargs.token
 
         async with application_context(port=port,
                                        unpack_path=unpack_path,
-                                       static_path=static_path) as app, \
+                                       static_path=static_path,
+                                       token=token) as app, \
                    server_context(app, port):
             await self._until_finished()
 
@@ -59,6 +61,7 @@ def parse_args(args):
     parser.add_argument('-l', '--listen', required=True, type=int)
     parser.add_argument('-u', '--unpack', required=True, type=str)
     parser.add_argument('-s', '--static', type=str)
+    parser.add_argument('-t', '--token', type=str, default='')
 
     args = parser.parse_args(args)
 
@@ -66,7 +69,12 @@ def parse_args(args):
 
 
 @asynccontextmanager
-async def application_context(port: int, unpack_path: str, static_path: str):
+async def application_context(
+    port: int,
+    unpack_path: str,
+    static_path: str,
+    token: str,
+):
     app = Application()
 
     # api
@@ -87,6 +95,7 @@ async def application_context(port: int, unpack_path: str, static_path: str):
         app['drive'] = drive
         app['ue'] = ue
         app['se'] = util.SearchEngine(drive)
+        app['token'] = token
 
         yield app
 
