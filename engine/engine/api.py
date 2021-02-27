@@ -140,12 +140,9 @@ class NodeChildrenView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
         return children
 
 
-class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin, View):
+class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
 
     async def head(self):
-        if not await self.has_permission():
-            raise HTTPUnauthorized()
-
         node = await self.get_object()
         if node.is_folder:
             raise HTTPBadRequest()
@@ -169,12 +166,9 @@ class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin, View
         return response
 
 
-class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin, View):
+class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, View):
 
     async def get(self):
-        if not await self.has_permission():
-            raise HTTPUnauthorized()
-
         node = await self.get_object()
         if node.is_folder:
             raise HTTPBadRequest()
@@ -207,12 +201,9 @@ class NodeImageListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
         return manifest
 
 
-class NodeImageView(NodeObjectMixin, HasTokenMixin, View):
+class NodeImageView(NodeObjectMixin, View):
 
     async def get(self):
-        if not await self.has_permission():
-            raise HTTPUnauthorized()
-
         image_id = self.request.match_info.get('image_id', None)
         if not image_id:
             raise HTTPBadRequest()
