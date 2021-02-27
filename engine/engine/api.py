@@ -153,9 +153,6 @@ class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
         return response
 
     async def get(self):
-        if not await self.has_permission():
-            raise HTTPUnauthorized()
-
         node = await self.get_object()
         if node.is_folder:
             raise HTTPBadRequest()
