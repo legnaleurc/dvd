@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Box,
   Divider,
-  FormGroup,
   IconButton,
   TextField,
 } from '@material-ui/core';
@@ -10,12 +9,15 @@ import { makeStyles } from '@material-ui/core/styles';
 import {
   Add as AddIcon,
   Settings as SettingsIcon,
+  SaveAlt as SaveAltIcon,
 } from '@material-ui/icons';
 
 import {
   getActionList,
   getMixins,
+  getToken,
   setActionList,
+  setToken,
   useInstance,
 } from '@/lib';
 import { ActionItem } from './action_item';
@@ -38,10 +40,14 @@ const useStyles = makeStyles((theme) => ({
 
 
 function useActions () {
+  const [newToken, setNewToken] = React.useState('');
   const [newCategory, setNewCategory] = React.useState('');
   const [newCommand, setNewCommand] = React.useState('');
   const [actionDict, setActionDict] = React.useState<Record<string, string>>({});
 
+  const onTokenChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setNewToken(event.currentTarget.value);
+  }, [setNewToken]);
   const onCategoryChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setNewCategory(event.currentTarget.value);
   }, [setNewCategory]);
@@ -74,11 +80,16 @@ function useActions () {
       setActionDict(newActionDict);
       setActionList(newActionDict);
     },
+    updateToken () {
+      setToken(newToken);
+    },
   }), [
     actionDict,
     setActionDict,
     newCategory,
     newCommand,
+    newToken,
+    setToken,
   ]);
 
   const addAction = React.useCallback(() => {
@@ -90,17 +101,24 @@ function useActions () {
   const updateAction = React.useCallback((category: string, command: string) => {
     self.current.updateAction(category, command);
   }, [self]);
+  const updateToken = React.useCallback(() => {
+    self.current.updateToken();
+  }, [self]);
 
   return {
+    newToken,
     newCategory,
     newCommand,
     actionDict,
     setActionDict,
     onCategoryChange,
     onCommandChange,
+    onTokenChange,
     addAction,
     removeAction,
     updateAction,
+    updateToken,
+    setNewToken,
   };
 }
 
@@ -109,15 +127,19 @@ interface IPropsType {}
 export function SettingsView (props: IPropsType) {
   const classes = useStyles();
   const {
+    newToken,
     newCategory,
     newCommand,
     actionDict,
     setActionDict,
     onCategoryChange,
     onCommandChange,
+    onTokenChange,
     addAction,
     removeAction,
     updateAction,
+    updateToken,
+    setNewToken,
   } = useActions();
 
   React.useEffect(() => {
@@ -125,11 +147,25 @@ export function SettingsView (props: IPropsType) {
     if (actionDict) {
       setActionDict(actionDict);
     }
+    const token = getToken();
+    if (token) {
+      setNewToken(token);
+    }
   }, []);
 
   return (
     <div className={classes.settingsView}>
-      <FormGroup className={classes.actionForm}>
+      <div className={classes.actionForm}>
+        <TextField
+          label="Token"
+          value={newToken}
+          onChange={onTokenChange}
+        />
+        <IconButton onClick={updateToken}>
+          <SaveAltIcon />
+        </IconButton>
+      </div>
+      <div className={classes.actionForm}>
         <Box className={classes.actionRow}>
           <TextField
             label="Category"
@@ -156,7 +192,7 @@ export function SettingsView (props: IPropsType) {
             onUpdate={updateAction}
           />
         ))}
-      </FormGroup>
+      </div>
     </div>
   );
 }

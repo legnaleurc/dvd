@@ -1,4 +1,5 @@
 import { Dict } from './common';
+import { getToken } from './storage';
 
 
 export class FileSystem {
@@ -122,6 +123,7 @@ export class FileSystem {
 
   private async _ajax (method: string, path: string, params?: Dict<any>) {
     const url = new URL(`${this._baseURL}${path}`);
+
     let body = null;
     if (params) {
       if (method === 'GET') {
@@ -132,8 +134,16 @@ export class FileSystem {
         body = JSON.stringify(params);
       }
     }
+
+    const headers: Record<string, string> = {};
+    const token = getToken();
+    if (token) {
+      headers['Authorization'] = `Token ${token}`;
+    }
+
     const rqst = new Request(url.toString(), {
       method,
+      headers,
       cache: 'no-cache',
       body,
       mode: 'cors',

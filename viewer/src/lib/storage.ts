@@ -14,3 +14,17 @@ export function setActionList (actionList: Dict<string>) {
   const rv = JSON.stringify(actionList);
   localStorage.setItem('actionList', rv);
 }
+
+
+export function getToken (): string {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return '';
+  }
+  return token;
+}
+
+
+export function setToken (token: string) {
+  localStorage.setItem('token', token);
+}
