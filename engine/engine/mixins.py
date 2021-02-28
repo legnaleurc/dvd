@@ -3,7 +3,11 @@ from typing import Tuple, Union
 
 from aiohttp.abc import AbstractView
 from aiohttp.web import StreamResponse
-from aiohttp.web_exceptions import HTTPBadRequest, HTTPNotFound
+from aiohttp.web_exceptions import (
+    HTTPBadRequest,
+    HTTPNotFound,
+    HTTPUnauthorized,
+)
 from wcpan.drive.core.types import Node
 from wcpan.drive.core.drive import Drive
 
@@ -99,6 +103,11 @@ class HasTokenMixin(PermissionMixin, AbstractView):
         if not rv:
             return False
         return rv.group(1) == token
+
+    async def raise_permission_error(self):
+        raise HTTPUnauthorized(headers={
+            'WWW-Authenticate': f'Token realm=api',
+        })
 
 
 def is_valid_range(range_: slice, size: int) -> bool:

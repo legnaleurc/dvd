@@ -2,7 +2,7 @@ import abc
 import json
 
 from aiohttp.web import Response
-from aiohttp.web_exceptions import HTTPNoContent, HTTPUnauthorized
+from aiohttp.web_exceptions import HTTPNoContent
 
 
 class PermissionMixin(abc.ABC):
@@ -10,12 +10,16 @@ class PermissionMixin(abc.ABC):
     async def has_permission(self) -> bool:
         return True
 
+    @abc.abstractmethod
+    async def raise_permission_error(self):
+        ...
+
 
 class RetriveAPIMixin(PermissionMixin, abc.ABC):
 
     async def get(self):
         if not await self.has_permission():
-            raise HTTPUnauthorized()
+            await self.raise_permission_error()
         rv = await self.retrive()
         return json_response(rv, status=200)
 
@@ -28,7 +32,7 @@ class ListAPIMixin(PermissionMixin, abc.ABC):
 
     async def get(self):
         if not await self.has_permission():
-            raise HTTPUnauthorized()
+            await self.raise_permission_error()
         rv = await self.list_()
         return json_response(rv, status=200)
 
@@ -41,7 +45,7 @@ class PartialUpdateAPIMixin(PermissionMixin, abc.ABC):
 
     async def patch(self):
         if not await self.has_permission():
-            raise HTTPUnauthorized()
+            await self.raise_permission_error()
         rv = await self.partial_update()
         return json_response(rv, status=200)
 
@@ -54,7 +58,7 @@ class CreateAPIMixin(PermissionMixin, abc.ABC):
 
     async def post(self):
         if not await self.has_permission():
-            raise HTTPUnauthorized()
+            await self.raise_permission_error()
         rv = await self.create()
         return json_response(rv, status=201)
 
@@ -67,7 +71,7 @@ class DestroyAPIMixin(PermissionMixin, abc.ABC):
 
     async def delete(self):
         if not await self.has_permission():
-            raise HTTPUnauthorized()
+            await self.raise_permission_error()
         await self.destory()
         raise HTTPNoContent()
 
