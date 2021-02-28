@@ -177,7 +177,10 @@ export function SettingsView (props: IPropsType) {
             value={newCommand}
             onChange={onCommandChange}
           />
-          <IconButton onClick={addAction}>
+          <IconButton
+            disabled={!newCategory || !newCommand}
+            onClick={addAction}
+          >
             <AddIcon />
           </IconButton>
         </Box>
