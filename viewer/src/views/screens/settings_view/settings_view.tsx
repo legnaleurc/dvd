@@ -157,6 +157,8 @@ export function SettingsView (props: IPropsType) {
     <div className={classes.settingsView}>
       <div className={classes.actionForm}>
         <TextField
+          type="password"
+          autoComplete="off"
           label="Token"
           value={newToken}
           onChange={onTokenChange}
