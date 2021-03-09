@@ -72,6 +72,12 @@ unpackTo (uint16_t port, const std::string & id,
             throw ArchiveError(reader, "archive_read_next_header");
         }
 
+        // skip folders
+        auto fileType = archive_entry_filetype(entry);
+        if (fileType & AE_IFDIR) {
+            continue;
+        }
+
         const char * entryName = archive_entry_pathname(entry);
         if (!entryName) {
             throw EntryError("archive_entry_pathname", "nullptr");
