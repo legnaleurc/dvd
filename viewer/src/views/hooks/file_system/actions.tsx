@@ -130,10 +130,11 @@ export function useActions () {
         value: key,
       });
     },
-    async copyUrl (idList: string[]) {
-      const urlList = idList.map((id) => (
-        fileSystem.stream(id, state.nodes[id].name
-      )));
+    async copyUrl (idList: string[], getNode: (id: string) => INodeLike) {
+      const urlList = idList.map((id) => {
+        const node = getNode(id);
+        return fileSystem.stream(id, node.name);
+      });
       const content = urlList.join('\n');
       await window.navigator.clipboard.writeText(content);
     },
@@ -186,8 +187,8 @@ export function useActions () {
   const setSortKey = React.useCallback((key: SortKey) => {
     self.current.setSortKey(key);
   }, [self]);
-  const copyUrl = React.useCallback(async (idList: string[]) => {
-    await self.current.copyUrl(idList);
+  const copyUrl = React.useCallback(async (idList: string[], getNode: (id: string) => INodeLike) => {
+    await self.current.copyUrl(idList, getNode);
   }, [self]);
   const download = React.useCallback((idList: string[]) => {
     self.current.download(idList);

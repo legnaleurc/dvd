@@ -86,8 +86,8 @@ describe('file_system', () => {
       const onCopyUrl = makeEventHandler(async (event) => {
         const data = event.currentTarget.dataset;
         const idList: string[] = JSON.parse(data['idList']!);
-        await copyUrl(idList);
-      }, [copyUrl]);
+        await copyUrl(idList, getNode);
+      }, [copyUrl, getNode]);
 
       const onOpenUrl = makeEventHandler(async (event) => {
         const data = event.currentTarget.dataset;

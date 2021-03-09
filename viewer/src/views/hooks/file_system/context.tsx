@@ -21,7 +21,7 @@ interface IActionContext {
   rename: (id: string, name: string) => Promise<void>;
   mkdir: (name: string, parentId: string) => Promise<void>;
   setSortKey: (key: SortKey) => void;
-  copyUrl: (idList: string[]) => Promise<void>;
+  copyUrl: (idList: string[], getNode: (id: string) => INodeLike) => Promise<void>;
   download: (idList: string[]) => void;
   openUrl: (node: INodeLike) => Promise<void>;
   getNode: (id: string) => Node_;

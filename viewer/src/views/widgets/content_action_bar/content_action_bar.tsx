@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
 
 interface IPureProps {
   updating: boolean;
-  copyUrl: (idList: string[]) => Promise<void>;
+  copyUrl: (idList: string[], getNode: (id: string) => INodeLike) => Promise<void>;
   download: (idList: string[]) => void;
   rename: (id: string, name: string) => Promise<void>;
   mkdir: (name: string, parentId: string) => Promise<void>;
@@ -101,7 +101,7 @@ function useActions (props: IPureProps) {
     },
     copy () {
       const list = getSelectionList();
-      copyUrl(list);
+      copyUrl(list, getNode);
     },
     download () {
       const list = getSelectionList();
