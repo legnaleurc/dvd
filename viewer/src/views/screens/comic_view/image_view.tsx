@@ -2,7 +2,10 @@ import React from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { useInstance } from '@/lib';
+import { useInstance, debounce } from '@/lib';
+
+
+const MS_DEBOUNCE_TIME = 500;
 
 
 const useStyles = makeStyles((theme) => ({
@@ -71,7 +74,7 @@ function useActions (props: IPropsType) {
     setLoaded,
   ]);
 
-  const onIntersect = React.useCallback((entries: IntersectionObserverEntry[]) => {
+  const onIntersect = React.useCallback(debounce((entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         self.current.setImageUrl();
@@ -79,7 +82,7 @@ function useActions (props: IPropsType) {
         self.current.unloadImage();
       }
     });
-  }, [self]);
+  }, MS_DEBOUNCE_TIME), [self]);
 
   return {
     url,
