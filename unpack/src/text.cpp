@@ -19,6 +19,15 @@ const char * TEXT_CODEC_LIST[] = {
 Text::Text(): index(std::begin(TEXT_CODEC_LIST)) {}
 
 
+Text::Text(Text && that): index(that.index) {}
+
+
+Text & Text::operator = (Text && that) {
+    this->index = that.index;
+    return *this;
+}
+
+
 std::string Text::toUtf8(const std::string & encoded) {
     namespace Conv = boost::locale::conv;
 
