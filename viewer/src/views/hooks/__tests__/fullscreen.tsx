@@ -1,6 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import {
   FullScreenProvider,
@@ -13,81 +12,64 @@ describe('fullscreen', () => {
 
   describe('<FullScreenProvider />', () => {
 
-    function Root (props: { actionStub: () => void }) {
+    const Root: React.FC = ({ children }) => {
       return (
         <FullScreenProvider>
-          <Action stub={props.actionStub} />
-          <State />
+          {children}
         </FullScreenProvider>
       );
-    }
+    };
 
-    function Action (props: { stub: () => void }) {
-      const { toggleFullScreen, leaveFullScreen } = useFullScreenAction();
-      React.useEffect(() => {
-        props.stub();
-      }, [props.stub, toggleFullScreen, leaveFullScreen]);
-      return (
-        <>
-          <button aria-label="toggle" onClick={toggleFullScreen} />
-          <button aria-label="leave" onClick={leaveFullScreen} />
-        </>
-      );
-    }
-
-    function State (props: {}) {
-      const { fullScreen } = useFullScreenState();
-      return (
-        <input type="checkbox" readOnly={true} checked={fullScreen} />
-      );
-    }
-
-    function toggle () {
-      const btn = screen.getByRole('button', { name: 'toggle' });
-      userEvent.click(btn);
-    }
-    function leave () {
-      const btn = screen.getByRole('button', { name: 'leave' });
-      userEvent.click(btn);
-    }
-    function checkbox () {
-      return screen.getByRole('checkbox');
+    function renderFullScreenHook () {
+      return renderHook(() => ({
+        state: useFullScreenState(),
+        action: useFullScreenAction(),
+      }), {
+        wrapper: Root,
+      });
     }
 
     it('can toggle fullscreen', () => {
-      const actionStub = jest.fn();
-      render(<Root actionStub={actionStub} />);
+      const { result } = renderFullScreenHook();
+      const actions = result.current.action;
 
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(checkbox()).not.toBeChecked();
+      expect(result.current.state.fullScreen).toBeFalsy();
 
-      toggle();
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(checkbox()).toBeChecked();
+      act(() => {
+        result.current.action.toggleFullScreen();
+      });
+      expect(result.current.state.fullScreen).toBeTruthy();
 
-      toggle();
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(checkbox()).not.toBeChecked();
+      act(() => {
+        result.current.action.toggleFullScreen();
+      });
+      expect(result.current.state.fullScreen).toBeFalsy();
+
+      expect(result.current.action).toMatchObject(actions);
     });
 
     it('can leave fullscreen', () => {
-      const actionStub = jest.fn();
-      render(<Root actionStub={actionStub} />);
+      const { result } = renderFullScreenHook();
+      const actions = result.current.action;
 
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(checkbox()).not.toBeChecked();
+      expect(result.current.state.fullScreen).toBeFalsy();
 
-      leave();
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(checkbox()).not.toBeChecked();
+      act(() => {
+        result.current.action.leaveFullScreen();
+      });
+      expect(result.current.state.fullScreen).toBeFalsy();
 
-      toggle();
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(checkbox()).toBeChecked();
+      act(() => {
+        result.current.action.toggleFullScreen();
+      });
+      expect(result.current.state.fullScreen).toBeTruthy();
 
-      leave();
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(checkbox()).not.toBeChecked();
+      act(() => {
+        result.current.action.leaveFullScreen();
+      });
+      expect(result.current.state.fullScreen).toBeFalsy();
+
+      expect(result.current.action).toMatchObject(actions);
     });
 
   });
