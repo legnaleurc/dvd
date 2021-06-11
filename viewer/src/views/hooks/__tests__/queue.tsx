@@ -1,6 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { mocked } from 'ts-jest/utils';
 
 import { FileSystem, INodeLike } from '@/lib';
@@ -12,82 +11,26 @@ import {
   useQueueAction,
   useQueueState,
 } from '@/views/hooks/queue';
-import { makeEventHandler } from '@/lib/mocks';
 
 
 describe('queue', () => {
 
   describe('<QueueProvider />', () => {
 
+    type IActionContext = ReturnType<typeof useQueueAction>;
+
     interface IRoot {
       fileSystem: FileSystem;
-      getNode: (id: string) => INodeLike;
-      actionStub: () => void;
     }
-    function Root (props: IRoot) {
-      const { fileSystem, getNode, actionStub } = props;
+    const Root: React.FC<IRoot> = ({ children, fileSystem }) => {
       return (
         <GlobalProvider fileSystem={fileSystem}>
           <FileSystemProvider>
             <QueueProvider>
-              <Action getNode={getNode} stub={actionStub} />
-              <State />
+              {children}
             </QueueProvider>
           </FileSystemProvider>
         </GlobalProvider>
-      );
-    }
-
-    interface IAction {
-      stub: () => void;
-      getNode: (id: string) => INodeLike;
-    }
-    function Action (props: IAction) {
-      const { stub, getNode } = props;
-      const { moveNodes, trashNodes } = useQueueAction();
-
-      const onMove = makeEventHandler(async (event) => {
-        const data = event.currentTarget.dataset;
-        const srcList: string[] = JSON.parse(data['srcList']!);
-        const dst = data['dst']!;
-        await moveNodes(getNode, srcList, dst);
-      }, [moveNodes, getNode]);
-      const onTrash = makeEventHandler(async (event) => {
-        const data = event.currentTarget.dataset;
-        const idList: string[] = JSON.parse(data['idList']!);
-        await trashNodes(getNode, idList);
-      }, [trashNodes, getNode]);
-
-      React.useEffect(() => {
-        stub();
-      }, [stub, moveNodes, trashNodes]);
-
-      return (
-        <>
-          <button aria-label="move" onClick={onMove} />
-          <button aria-label="trash" onClick={onTrash} />
-        </>
-      );
-    }
-
-    function State (props: {}) {
-      const {
-        nameList,
-        pendingCount,
-        rejectedCount,
-        resolvedCount,
-      } = useQueueState();
-      return (
-        <>
-          <ul>
-            {nameList.map((name, index) => (
-              <li key={index}>{name}</li>
-            ))}
-          </ul>
-          <input type="number" readOnly={true} aria-label="pending" value={pendingCount} />
-          <input type="number" readOnly={true} aria-label="rejected" value={rejectedCount} />
-          <input type="number" readOnly={true} aria-label="resolved" value={resolvedCount} />
-        </>
       );
     }
 
@@ -110,16 +53,33 @@ describe('queue', () => {
       return { nodeList, getNode };
     }
 
-    function move (fs: FileSystem, srcList: string[], dst: string) {
-      const mfs = mocked(fs);
+    function renderQueueHook (fileSystem: FileSystem) {
+      return renderHook(() => ({
+        state: useQueueState(),
+        action: useQueueAction(),
+      }), {
+        wrapper: Root,
+        initialProps: {
+          fileSystem,
+        },
+      });
+    }
+
+    function fakeMove (
+      actions: IActionContext,
+      fileSystem: FileSystem,
+      getNode: (id: string) => INodeLike,
+      srcList: string[],
+      dst: string,
+    ) {
+      const mfs = mocked(fileSystem);
       const blocker = new Event_();
-      mfs.move.mockImplementation(async (src: string, dst: string) => {
+      mfs.move.mockImplementationOnce(async (src: string, dst: string) => {
         await blocker.wait();
       });
-      const btn = screen.getByRole('button', { name: 'move' });
-      btn.dataset['srcList'] = JSON.stringify(srcList);
-      btn.dataset['dst'] = dst;
-      userEvent.click(btn);
+      act(() => {
+        actions.moveNodes(getNode, srcList, dst);
+      });
       return {
         unblock () {
           blocker.set();
@@ -127,56 +87,40 @@ describe('queue', () => {
       };
     }
 
-    function trash (fs: FileSystem, idList: string[]) {
-      const mfs = mocked(fs);
+    function fakeTrash (
+      actions: IActionContext,
+      fileSystem: FileSystem,
+      getNode: (id: string) => INodeLike,
+      srcList: string[],
+    ) {
+      const mfs = mocked(fileSystem);
       const blocker = new Event_();
-      mfs.trash.mockImplementation(async (id: string) => {
+      mfs.trash.mockImplementationOnce(async (src: string) => {
         await blocker.wait();
       });
-      const btn = screen.getByRole('button', { name: 'trash' });
-      btn.dataset['idList'] = JSON.stringify(idList);
-      userEvent.click(btn);
+      act(() => {
+        actions.trashNodes(getNode, srcList);
+      });
       return {
         unblock () {
           blocker.set();
         },
       };
-    }
-
-    function nameList () {
-      return screen.getAllByRole('listitem');
-    }
-
-    function pendingCount () {
-      return screen.getByRole('spinbutton', { name: 'pending' });
-    }
-
-    function rejectedCount () {
-      return screen.getByRole('spinbutton', { name: 'rejected' });
-    }
-
-    function resolvedCount () {
-      return screen.getByRole('spinbutton', { name: 'resolved' });
     }
 
     it('should have empty initial state', () => {
       const fileSystem = newFileSystem({});
-      const { getNode } = makeNodeList();
-      const actionStub = jest.fn();
-      render((
-        <Root
-          fileSystem={fileSystem}
-          getNode={getNode}
-          actionStub={actionStub}
-        />
-      ));
+      const { result } = renderQueueHook(fileSystem);
+      const actions = result.current.action;
 
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      const rv = nameList().every((el) => !el.textContent);
+      const state = result.current.state;
+      const rv = state.nameList.every((el) => !el);
       expect(rv).toBeTruthy();
-      expect(pendingCount()).toHaveValue(0);
-      expect(rejectedCount()).toHaveValue(0);
-      expect(resolvedCount()).toHaveValue(0);
+      expect(state.pendingCount).toBe(0);
+      expect(state.rejectedCount).toBe(0);
+      expect(state.resolvedCount).toBe(0);
+
+      expect(result.current.action).toMatchObject(actions);
     });
 
     it('can move items', async () => {
@@ -184,24 +128,24 @@ describe('queue', () => {
         move: jest.fn(),
       });
       const { nodeList, getNode } = makeNodeList();
-      const actionStub = jest.fn();
-      render((
-        <Root
-          fileSystem={fileSystem}
-          getNode={getNode}
-          actionStub={actionStub}
-        />
-      ));
+      const { result, waitForNextUpdate } = renderQueueHook(fileSystem);
+      const actions = result.current.action;
 
-      const { unblock } = move(fileSystem, Object.keys(nodeList), '8');
-      expect(pendingCount()).toHaveValue(8);
+      const { unblock } = fakeMove(
+        result.current.action,
+        fileSystem,
+        getNode,
+        Object.keys(nodeList),
+        '8',
+      );
+      expect(result.current.state.pendingCount).toBe(8);
 
       unblock();
-      await waitFor(() => {
-        expect(pendingCount()).toHaveValue(0);
-      });
-      expect(resolvedCount()).toHaveValue(8);
-      expect(actionStub).toHaveBeenCalledTimes(1);
+      await waitForNextUpdate();
+      expect(result.current.state.pendingCount).toBe(0);
+      expect(result.current.state.resolvedCount).toBe(8);
+
+      expect(result.current.action).toMatchObject(actions);
     });
 
     it('can trash items', async () => {
@@ -209,24 +153,23 @@ describe('queue', () => {
         trash: jest.fn(),
       });
       const { nodeList, getNode } = makeNodeList();
-      const actionStub = jest.fn();
-      render((
-        <Root
-          fileSystem={fileSystem}
-          getNode={getNode}
-          actionStub={actionStub}
-        />
-      ));
+      const { result, waitForNextUpdate } = renderQueueHook(fileSystem);
+      const actions = result.current.action;
 
-      const { unblock } = trash(fileSystem, Object.keys(nodeList));
-      expect(pendingCount()).toHaveValue(8);
+      const { unblock } = fakeTrash(
+        result.current.action,
+        fileSystem,
+        getNode,
+        Object.keys(nodeList),
+      );
+      expect(result.current.state.pendingCount).toBe(8);
 
       unblock();
-      await waitFor(() => {
-        expect(pendingCount()).toHaveValue(0);
-      });
-      expect(resolvedCount()).toHaveValue(8);
-      expect(actionStub).toHaveBeenCalledTimes(1);
+      await waitForNextUpdate();
+      expect(result.current.state.pendingCount).toBe(0);
+      expect(result.current.state.resolvedCount).toBe(8);
+
+      expect(result.current.action).toMatchObject(actions);
     });
 
   });
