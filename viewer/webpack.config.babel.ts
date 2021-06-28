@@ -87,11 +87,7 @@ const factory: ConfigurationFactory = (env, argv) => {
           },
         },
       }),
-      new HtmlWebpackPlugin({
-        template: './src/html/index.html',
-        // this uses the path related to output directory, not source directory
-        filename: 'index.html',
-      }),
+      new HtmlWebpackPlugin(),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
