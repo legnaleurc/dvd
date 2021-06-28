@@ -46,7 +46,7 @@
     "module-to-cdn": "^3.1.5",
     "read-pkg-up": "^7.0.1",
     "resolve-pkg": "^2.0.0",
-    "style-loader": "^2.0.0",
+    "style-loader": "^3.0.0",
     "terser-webpack-plugin": "^5.0.3",
     "ts-jest": "^26.4.3",
     "ts-node": "^10.0.0",
