@@ -33,6 +33,7 @@
     "@types/react-router-dom": "^5.1.5",
     "@types/react-virtualized": "^9.21.10",
     "@types/terser-webpack-plugin": "^5.0.2",
+    "@types/webpack-dev-server": "^3.11.4",
     "babel-loader": "^8.1.0",
     "babel-plugin-transform-imports": "^2.0.0",
     "css-loader": "^5.0.0",
