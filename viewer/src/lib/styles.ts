@@ -1,4 +1,4 @@
-import { CSSProperties } from '@material-ui/core/styles/withStyles';
+import { StyleRules } from '@material-ui/core/styles';
 
 
 export const SELECTION_COLOR = 'hsl(210, 100%, 25%)';
@@ -10,6 +10,9 @@ export const FONT_FAMILY = [
   'Noto Sans CJK JP',
   'sans-serif',
 ].map((s) => `"${s}"`).join(', ');
+
+
+type CSSRules = StyleRules[keyof StyleRules];
 
 
 type MixinName = (
@@ -28,7 +31,7 @@ type MixinName = (
 
 
 export function getMixins (nameList: MixinName[]) {
-  const rv: CSSProperties = {};
+  const rv: CSSRules = {};
   for (const name of nameList) {
     switch (name) {
       case 'hbox':
