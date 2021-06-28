@@ -32,7 +32,7 @@ const factory: ConfigurationFactory = (env, argv) => {
   const backendPort = process.env.BACKEND_PORT;
   const isReleaseMode = process.env.NODE_ENV === 'production';
 
-  return {
+  const config: Configuration = {
     entry: './src/index.tsx',
     output: {
       filename: isReleaseMode ? '[name].[contenthash].js' : '[name].js',
@@ -79,14 +79,6 @@ const factory: ConfigurationFactory = (env, argv) => {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
     plugins: [
-      new ForkTsCheckerWebpackPlugin({
-        typescript: {
-          diagnosticOptions: {
-            semantic: true,
-            syntactic: true,
-          },
-        },
-      }),
       new HtmlWebpackPlugin(),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
@@ -111,6 +103,19 @@ const factory: ConfigurationFactory = (env, argv) => {
       },
     },
   };
+
+  if (config.plugins && !isReleaseMode) {
+    config.plugins.push(new ForkTsCheckerWebpackPlugin({
+      typescript: {
+        diagnosticOptions: {
+          semantic: true,
+          syntactic: true,
+        },
+      },
+    }));
+  }
+
+  return config;
 }
 
 
