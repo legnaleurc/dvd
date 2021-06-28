@@ -4,4 +4,6 @@ node_modules
 .vscode
 /unpack/build
 /viewer/dist
+/viewer/coverage
 /engine/.lock
+/engine/.coverage
