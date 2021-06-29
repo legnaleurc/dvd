@@ -48,8 +48,11 @@ debug: unpack-release viewer/node_modules engine-debug
 
 engine-debug: engine-install
 
-test: engine-test
+test: engine-test viewer-test
 
 engine-test:
 	$(CD) engine && $(PYTHON) -m compileall engine
 	$(CD) engine && $(PYTHON) -m unittest
+
+viewer-test:
+	$(CD) viewer && $(YARN) test
