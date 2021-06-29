@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { hot } from 'react-hot-loader/root';
 
 import { FileSystem } from '@/lib';
 import { FullScreenProvider } from '@/views/hooks/fullscreen';
@@ -40,7 +39,7 @@ function ShellApplication (props: IProps) {
 }
 
 
-export const HotApplication = hot(React.memo(ShellApplication));
+export const HotApplication = React.memo(ShellApplication);
 
 
 function LoadingBlock (props: {}) {
