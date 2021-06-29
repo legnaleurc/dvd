@@ -14,12 +14,6 @@
           "preventFullImport": true
         }
       }
-    ],
-    "@babel/plugin-transform-modules-commonjs",
-    "react-hot-loader/babel"
-  ],
-  "presets": [
-    "@babel/react",
-    "@babel/typescript"
+    ]
   ]
 }

@@ -10,5 +10,4 @@ declare module 'module-to-cdn' {
 
   const cdnFromModule: (moduleName: string, version: string, options: { env: Configuration['mode'] }) => Promise<ModuleConfig>;
   export default cdnFromModule;
-
 }

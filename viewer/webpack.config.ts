@@ -7,6 +7,8 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import ReactRefreshTypeScript from 'react-refresh-typescript';
 
 import CdnWebpackPlugin from './tools/cdn_webpack_plugin';
 
@@ -47,13 +49,26 @@ const factory: ConfigurationFactory = (env, argv) => {
     },
     module: {
       rules: [
-        // js, jsx, ts, tsx
+        // ts, tsx
         {
-          test: /\.[jt]sx?$/,
+          test: /\.tsx?$/,
           exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-          },
+          use: [
+            {
+              loader: 'babel-loader',
+            },
+            {
+              loader: 'ts-loader',
+              options: {
+                transpileOnly: true,
+                getCustomTransformers () {
+                  return {
+                    before: isReleaseMode ? [] : [ReactRefreshTypeScript()],
+                  };
+                },
+              },
+            },
+          ],
         },
         // html
         {
@@ -76,7 +91,7 @@ const factory: ConfigurationFactory = (env, argv) => {
       alias: {
         '@': path.resolve(__dirname, 'src'),
       },
-      extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      extensions: ['.js', '.ts', '.tsx'],
     },
     plugins: [
       new HtmlWebpackPlugin(),
@@ -113,6 +128,7 @@ const factory: ConfigurationFactory = (env, argv) => {
         },
       },
     }));
+    config.plugins.push(new ReactRefreshWebpackPlugin());
   }
 
   return config;
