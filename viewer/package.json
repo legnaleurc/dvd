@@ -8,7 +8,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "build": "webpack --node-env=production",
-    "start": "webpack-dev-server --mode=development --hot --history-api-fallback"
+    "start": "webpack-dev-server --node-env=development --hot --history-api-fallback"
   },
   "keywords": [],
   "author": "",
