@@ -1,2 +1,2 @@
 export { ComicProvider, useComicState, useComicAction } from './context';
-export { ComicDict } from './types';
+export type { ComicDict } from './types';

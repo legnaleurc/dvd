@@ -3,10 +3,12 @@ export {
   useFileSystemAction,
   useFileSystemState,
 } from './context';
+export type {
+  SortKey,
+  Node_,
+} from './types';
 export {
   SORT_BY_MTIME_ASC,
   SORT_BY_MTIME_DES,
   SORT_BY_NAME_ASC,
-  SortKey,
-  Node_,
 } from './types';
