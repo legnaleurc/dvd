@@ -60,13 +60,13 @@ export function getMixins (nameList: MixinName[]) {
         rv.minHeight = 0;
         break;
       case 'scrollable':
-        rv.overflow = 'scroll';
+        rv.overflow = 'auto';
         break;
       case 'no-scroll':
         rv.overflow = 'hidden';
         break;
       case 'y-scroll':
-        rv.overflowY = 'scroll';
+        rv.overflowY = 'auto';
         break;
       default:
         break;

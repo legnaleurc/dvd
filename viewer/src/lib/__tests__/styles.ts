@@ -27,7 +27,7 @@ describe('styles', () => {
         width: '100%',
         height: '100%',
         minHeight: 0,
-        overflow: 'scroll',
+        overflow: 'auto',
       };
       expect(rv).toEqual(excpected);
 
@@ -44,7 +44,7 @@ describe('styles', () => {
         flex: '0 0 auto',
         width: '50%',
         overflow: 'hidden',
-        overflowY: 'scroll',
+        overflowY: 'auto',
       };
       expect(rv).toEqual(excpected);
     });
