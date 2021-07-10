@@ -1,11 +1,11 @@
 import React from 'react';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/core/styles';
 
 import { FONT_FAMILY } from '@/lib';
 
 
-const gTheme = createMuiTheme({
+const gTheme = createTheme({
   palette: {
     type: 'dark',
   },
