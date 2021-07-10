@@ -63,8 +63,6 @@ const useStyles = makeStyles((theme) => ({
   },
   resultList: {
     ...getMixins([
-      // 'size-grow',
-      // 'mh-0',
       'y-scroll',
     ]),
   },
