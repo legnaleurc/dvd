@@ -151,11 +151,13 @@ class UnpackEngine(object):
         return self
 
     async def __aexit__(self, exc, type_, tb):
+        assert self._raii is not None
         await self._raii.aclose()
         self._storage = None
         self._raii = None
 
     async def get_manifest(self, node: Node) -> List[ImageDict]:
+        assert self._storage is not None
         manifest = self._storage.get_cache_or_none(node.id_)
         if manifest is not None:
             return manifest
@@ -170,12 +172,15 @@ class UnpackEngine(object):
 
     @property
     def cache(self):
+        assert self._storage is not None
         return self._storage.cache
 
     def clear_cache(self):
+        assert self._storage is not None
         self._storage.clear_cache()
 
     async def _unpack(self, node: Node) -> List[ImageDict]:
+        assert self._storage is not None
         lock = self._unpacking[node.id_]
         try:
             if node.is_folder:
@@ -198,6 +203,7 @@ class UnpackEngine(object):
         lock: asyncio.Condition,
         node_id: str,
     ) -> List[ImageDict]:
+        assert self._storage is not None
         async with lock:
             await lock.wait()
         try:
@@ -206,6 +212,7 @@ class UnpackEngine(object):
             raise UnpackFailedError(f'{node_id} canceled unpack')
 
     async def _unpack_local(self, node_id: str) -> List[ImageDict]:
+        assert self._storage is not None
         cmd = [
             self._unpack_path,
             str(self._port),
@@ -226,6 +233,7 @@ class UnpackEngine(object):
         return self._scan_local(node_id)
 
     def _scan_local(self, node_id: str) -> List[ImageDict]:
+        assert self._storage is not None
         rv: List[ImageDict] = []
         top = self._storage.get_path(node_id)
         for dirpath, dirnames, filenames in os.walk(top):
@@ -321,13 +329,15 @@ class StorageManager(object):
             self._raii = stack.pop_all()
         return self
 
-    async def __aexit__(self, et, e, bt):
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        assert self._raii is not None
         await self._raii.aclose()
         self._path = None
         self._tmp = None
         self._raii = None
 
     def clear_cache(self):
+        assert self._path is not None
         self._cache = {}
         for child in self._path.iterdir():
             shutil.rmtree(str(child))
@@ -368,6 +378,7 @@ class StorageManager(object):
                 task = None
 
     def _check(self):
+        assert self._path is not None
         DAY = 60 * 60 * 24
         now = time.time()
         for child in self._path.iterdir():

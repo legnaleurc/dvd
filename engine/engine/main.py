@@ -34,6 +34,7 @@ class Daemon(object):
         return 1
 
     async def _main(self):
+        assert self._kwargs is not None
         port: int = self._kwargs.listen
         unpack_path: str = self._kwargs.unpack
         static_path: str = self._kwargs.static
@@ -49,9 +50,11 @@ class Daemon(object):
         return 0
 
     async def _until_finished(self):
+        assert self._finished is not None
         await self._finished.wait()
 
     def _close(self):
+        assert self._finished is not None
         self._finished.set()
 
 
