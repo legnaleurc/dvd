@@ -69,19 +69,6 @@ class NodeView(NodeObjectMixin, HasTokenMixin, RetriveAPIMixin, PartialUpdateAPI
         se.drop_value(str(path))
         await drive.trash_node(node)
 
-    # async def options(self):
-    #     return Response(
-    #         status=204,
-    #         headers={
-    #             'Access-Control-Allow-Origin': '*',
-    #             'Access-Control-Allow-Methods': ', '.join([
-    #                 'GET',
-    #                 'DELETE',
-    #                 'PATCH',
-    #                 'OPTIONS',
-    #             ]),
-    #         })
-
 
 class NodeListView(HasTokenMixin, ListAPIMixin, CreateAPIMixin, View):
 
