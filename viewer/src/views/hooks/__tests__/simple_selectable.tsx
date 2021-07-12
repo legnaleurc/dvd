@@ -1,122 +1,91 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import {
   SimpleSelectableProvider,
   useSimpleSelectableAction,
   useSimpleSelectableState,
 } from '@/views/hooks/simple_selectable';
-import { makeEventHandler } from '@/lib/mocks';
 
 
 describe('simple_selectable', () => {
 
   describe('<SimpleSelectableProvider />', () => {
 
-    function Root (props: { actionStub: () => void }) {
+    const Root: React.FC = ({ children }) => {
       return (
         <SimpleSelectableProvider>
-          <Action stub={props.actionStub} />
-          <State />
+          {children}
         </SimpleSelectableProvider>
       );
-    }
+    };
 
-    function Action (props: { stub: () => void }) {
-      const { toggle, clear } = useSimpleSelectableAction();
-
-      const onToggleClicked = makeEventHandler((event) => {
-        toggle(event.currentTarget.dataset['id']!);
-      }, [toggle]);
-
-      React.useEffect(() => {
-        props.stub();
-      }, [props.stub, toggle, clear]);
-
-      return (
-        <>
-          <button
-            aria-label="toggle"
-            onClick={onToggleClicked}
-          />
-          <button aria-label="clear" onClick={clear} />
-        </>
-      );
-    }
-
-    function State (props: {}) {
-      const { dict, count } = useSimpleSelectableState();
-      return (
-        <>
-          <input type="text" readOnly={true} value={JSON.stringify(dict)} />
-          <input type="number" readOnly={true} value={count} />
-        </>
-      );
-    }
-
-    function toggle (id: string) {
-      const btn = screen.getByRole('button', { name: 'toggle' });
-      btn.dataset['id'] = id;
-      userEvent.click(btn);
-    }
-
-    function clear () {
-      const btn = screen.getByRole('button', { name: 'clear' });
-      userEvent.click(btn);
-    }
-
-    function dict () {
-      return screen.getByRole('textbox');
-    }
-
-    function count () {
-      return screen.getByRole('spinbutton');
+    function renderSimpleSelectableHook () {
+      return renderHook(() => ({
+        state: useSimpleSelectableState(),
+        action: useSimpleSelectableAction(),
+      }), {
+        wrapper: Root,
+      });
     }
 
     it('can modify selection', () => {
-      const actionStub = jest.fn();
-      render(<Root actionStub={actionStub} />);
+      const { result } = renderSimpleSelectableHook();
+      const actions = result.current.action;
 
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(dict()).toHaveValue(JSON.stringify({}));
-      expect(count()).toHaveValue(0);
+      expect(result.current.state.dict).toStrictEqual({});
+      expect(result.current.state.count).toStrictEqual(0);
 
-      toggle('1');
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(dict()).toHaveValue(JSON.stringify({'1': true}));
-      expect(count()).toHaveValue(1);
+      act(() => {
+        result.current.action.toggle('1');
+      });
+      expect(result.current.state.dict).toStrictEqual({
+        '1': true,
+      });
+      expect(result.current.state.count).toStrictEqual(1);
 
-      toggle('2');
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(dict()).toHaveValue(JSON.stringify({'1': true, '2': true}));
-      expect(count()).toHaveValue(2);
+      act(() => {
+        result.current.action.toggle('2');
+      });
+      expect(result.current.state.dict).toStrictEqual({
+        '1': true,
+        '2': true,
+      });
+      expect(result.current.state.count).toStrictEqual(2);
 
-      toggle('1');
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(dict()).toHaveValue(JSON.stringify({'2': true}));
-      expect(count()).toHaveValue(1);
+      act(() => {
+        result.current.action.toggle('1');
+      });
+      expect(result.current.state.dict).toStrictEqual({
+        '2': true,
+      });
+      expect(result.current.state.count).toStrictEqual(1);
 
-      toggle('2');
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(dict()).toHaveValue(JSON.stringify({}));
-      expect(count()).toHaveValue(0);
+      act(() => {
+        result.current.action.toggle('2');
+      });
+      expect(result.current.state.dict).toStrictEqual({});
+      expect(result.current.state.count).toStrictEqual(0);
+
+      expect(result.current.action).toStrictEqual(actions);
     });
 
     it('can clear selection', () => {
-      const actionStub = jest.fn();
-      render(<Root actionStub={actionStub} />);
+      const { result } = renderSimpleSelectableHook();
+      const actions = result.current.action;
 
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(dict()).toHaveValue(JSON.stringify({}));
-      expect(count()).toHaveValue(0);
+      expect(result.current.state.dict).toStrictEqual({});
+      expect(result.current.state.count).toStrictEqual(0);
 
-      toggle('1');
-      toggle('2');
-      clear();
-      expect(actionStub).toHaveBeenCalledTimes(1);
-      expect(dict()).toHaveValue(JSON.stringify({}));
-      expect(count()).toHaveValue(0);
+      act(() => {
+        result.current.action.toggle('1');
+        result.current.action.toggle('2');
+        result.current.action.clear();
+      });
+      expect(result.current.state.dict).toStrictEqual({});
+      expect(result.current.state.count).toStrictEqual(0);
+
+      expect(result.current.action).toStrictEqual(actions);
     });
 
   });
