@@ -19,5 +19,6 @@ target_link_libraries(unpack PRIVATE
     cpprestsdk::cpprest
     Boost::filesystem
     Boost::chrono
-    Boost::locale)
+    Boost::locale
+    OpenSSL::Crypto)
 target_sources(unpack PRIVATE ${SOURCES})
