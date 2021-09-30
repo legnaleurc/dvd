@@ -8,8 +8,6 @@ import pathlib
 import signal
 import sys
 
-from wcpan.watchdog.watcher import Watcher
-
 
 PUBLIC_PORT = 8000
 PRIVATE_PORT = 9000
@@ -97,17 +95,17 @@ async def run_debug(
     await run_or_die(['make', '-j', 'debug'])
 
     cmd = [
-        'python3', '-m', 'engine',
-            '-u', '../unpack/build/unpack',
-            '-l', str(private_listen),
+        'python3', '-m', 'wcpan.watchdog',
+            '--',
+            'python3', '-m', 'engine',
+                '-u', '../unpack/build/unpack',
+                '-l', str(private_listen),
     ]
     if token:
         cmd.extend(['-t', token])
-    backend = auto_rerun(
+    backend = run_or_die(
         cmd,
         cwd=pathlib.Path('./engine'),
-        path='./engine',
-        stop_event=stop_event,
     )
 
     frontend = run_or_die(
@@ -134,21 +132,6 @@ async def run_debug(
 async def run_or_die(cmd, cwd=None, env=None):
     p = await spawn(cmd, cwd=cwd, env=env)
     await ok_or_die(p)
-
-
-async def auto_rerun(cmd, path, stop_event, cwd=None, env=None):
-    # Important to be able to stop the watcher.
-    assert stop_event
-
-    process = await spawn(cmd, cwd=cwd, env=env)
-
-    async with Watcher() as watcher:
-        async for changes in watcher(path, stop_event=stop_event):
-            print(changes)
-            await kill(process, signal.SIGINT, True)
-            process = await spawn(cmd, cwd=cwd, env=env)
-
-    await kill(process, signal.SIGINT, False)
 
 
 async def spawn(cmd, cwd=None, env=None):

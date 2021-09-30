@@ -1,1 +1,0 @@
-wcpan.watchdog~=1.0
