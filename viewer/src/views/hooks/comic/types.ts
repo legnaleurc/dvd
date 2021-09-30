@@ -36,7 +36,7 @@ interface LoadCacheEndData {
 
 
 interface ErrorData {
-  error: Error;
+  error: unknown;
 }
 
 

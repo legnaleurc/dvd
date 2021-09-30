@@ -50,7 +50,7 @@ interface ILoadList {
 
 
 export type ActionType = (
-  | IAction<'ERROR', Error>
+  | IAction<'ERROR', unknown>
   | IAction<'REQUEST_BEGIN', null>
   | IAction<'SYNC_END', ChangeResponse[]>
   | IAction<'NODE_REQUEST_BEGIN', string>
