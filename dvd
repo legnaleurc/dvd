@@ -144,15 +144,6 @@ async def ok_or_die(p):
         raise ProcessError(rv)
 
 
-async def kill(process, signal_, verbose):
-    rc = process.returncode
-    if rc is None:
-        process.send_signal(signal_)
-        await process.wait()
-    elif verbose:
-        print(f'process already exited with code: {rc}')
-
-
 def stop_backend(frontend_task, *, stop_event):
     if frontend_task.exception():
         stop_event.set()
