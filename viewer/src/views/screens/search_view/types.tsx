@@ -33,7 +33,7 @@ interface Action<T, V> {
 
 
 export type ActionType = (
-  | Action<'ERROR', Error>
+  | Action<'ERROR', unknown>
   | Action<'SEARCH_BEGIN', string>
   | Action<'SEARCH_END', SearchResponse[]>
   | Action<'COMPARE_SHOW', string[]>
