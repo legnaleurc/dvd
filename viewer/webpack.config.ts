@@ -31,6 +31,7 @@ type ConfigurationFactory = ((
 
 
 const factory: ConfigurationFactory = (env, argv) => {
+  const backendHost = process.env.BACKEND_HOST;
   const backendPort = process.env.BACKEND_PORT;
   const isReleaseMode = process.env.NODE_ENV === 'production';
 
@@ -43,7 +44,7 @@ const factory: ConfigurationFactory = (env, argv) => {
     devServer: {
       proxy: {
         '/api': {
-          target: `http://localhost:${backendPort}`,
+          target: `http://${backendHost}:${backendPort}`,
         },
       },
     },

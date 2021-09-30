@@ -116,6 +116,7 @@ async def run_debug(
         ],
         cwd=pathlib.Path('./viewer'),
         env=clone_env({
+            'BACKEND_HOST': 'localhost',
             'BACKEND_PORT': str(private_listen),
         }),
     )
