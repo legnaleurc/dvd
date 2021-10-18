@@ -101,7 +101,6 @@ const factory: ConfigurationFactory = (env, argv) => {
         // both options are optional
         filename: isReleaseMode ? '[name].[contenthash].css' : '[name].css',
       }),
-      new CdnWebpackPlugin(),
     ],
     devtool: isReleaseMode ? undefined : 'inline-source-map',
     optimization: {
@@ -130,6 +129,9 @@ const factory: ConfigurationFactory = (env, argv) => {
       },
     }));
     config.plugins.push(new ReactRefreshWebpackPlugin());
+  }
+  if (config.plugins && isReleaseMode) {
+    config.plugins.push(new CdnWebpackPlugin());
   }
 
   return config;
