@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Box,
   IconButton,
   TextField,
 } from '@material-ui/core';
@@ -12,11 +11,7 @@ import {
 import { useInstance } from '@/lib';
 
 
-type IClasses = Record<(
-  | 'actionRow'
-), string>;
 interface IProps {
-  classes: IClasses;
   category: string;
   command: string;
   onUpdate: (category: string, command: string) => void;
@@ -83,7 +78,7 @@ export function ActionItem (props: IProps) {
   }, [setCommand, props.command]);
 
   return (
-    <Box className={props.classes.actionRow}>
+    <div>
       <TextField
         label="Category"
         value={category}
@@ -100,6 +95,6 @@ export function ActionItem (props: IProps) {
       <IconButton onClick={onRemove}>
         <DeleteIcon />
       </IconButton>
-    </Box>
+    </div>
   );
 }

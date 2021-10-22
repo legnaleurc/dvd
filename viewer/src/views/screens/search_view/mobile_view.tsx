@@ -6,16 +6,21 @@ import {
   List,
   ListItem,
   ListItemText,
+  Menu,
+  MenuItem,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
+  Delete as DeleteIcon,
   History as HistoryIcon,
   ImportContacts as ImportContactsIcon,
+  MoreVert as MoreVertIcon,
   RemoveShoppingCart as RemoveShoppingCartIcon,
 } from '@material-ui/icons';
 
-import { getMixins } from '@/lib';
+import { getMixins, loadMoveList } from '@/lib';
 import { useFileSystemState } from '@/views/hooks/file_system';
+import { useQueueAction } from '@/views/hooks/queue';
 import { useComicAction } from '@/views/hooks/comic';
 import {
   SimpleSelectableProvider,
@@ -163,10 +168,14 @@ interface IToolBarProps {
 function ToolBar (props: IToolBarProps) {
   const { showHistory } = props;
   const { syncing } = useFileSystemState();
+  const { trashNodes, moveNodes } = useQueueAction();
   const { loadComic } = useComicAction();
   const { clear } = useSimpleSelectableAction();
   const { dict, count } = useSimpleSelectableState();
   const { getNode } = useContext();
+  const menuButtonRef = React.useRef<HTMLButtonElement>(null);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [moveList, setMoveList] = React.useState<string[]>([]);
 
   const onComic = React.useCallback(() => {
     const list = (
@@ -181,10 +190,49 @@ function ToolBar (props: IToolBarProps) {
     clear();
   }, [clear, dict, loadComic, getNode]);
 
+  const onTrash = React.useCallback(async () => {
+    const list = (
+      Object.entries(dict)
+      .filter(([id, value]) => value)
+      .map(([id, value]) => id)
+    );
+    await trashNodes(getNode, list);
+    clear();
+  }, [dict, trashNodes, getNode, clear]);
+
+  const moveTo = React.useCallback(async (destination: string) => {
+    const list = (
+      Object.entries(dict)
+      .filter(([id, value]) => value)
+      .map(([id, value]) => id)
+    );
+    await moveNodes(getNode, list, destination);
+    clear();
+  }, []);
+
+  const openMenu = React.useCallback(() => {
+    setMenuOpen(true);
+  }, []);
+  const closeMenu = React.useCallback(() => {
+    setMenuOpen(false);
+  }, []);
+
+  React.useEffect(() => {
+    setMoveList(loadMoveList());
+  }, []);
+
   return (
     <>
       <IconButton onClick={showHistory}>
         <HistoryIcon />
+      </IconButton>
+      <IconButton
+        aria-label="trash"
+        color="secondary"
+        disabled={syncing || count <= 0}
+        onClick={onTrash}
+      >
+        <DeleteIcon />
       </IconButton>
       <IconButton
         disabled={count === 0}
@@ -199,10 +247,38 @@ function ToolBar (props: IToolBarProps) {
       </IconButton>
       <IconButton
         disabled={syncing || count <= 0}
+        onClick={openMenu}
+        ref={menuButtonRef}
+      >
+        <MoreVertIcon />
+      </IconButton>
+      <IconButton
+        disabled={syncing || count <= 0}
         onClick={onComic}
       >
         <ImportContactsIcon />
       </IconButton>
+
+      <Menu
+        id="move-list-menu"
+        open={menuOpen}
+        keepMounted={true}
+        anchorEl={menuButtonRef.current}
+        onClose={closeMenu}
+      >
+        {moveList.map((destination, index) => (
+          <MenuItem
+            key={index}
+            value={index}
+            onClick={() => {
+              closeMenu();
+              moveTo(destination);
+            }}
+          >
+            {destination}
+          </MenuItem>
+        ))}
+      </Menu>
     </>
   );
 }

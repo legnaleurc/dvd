@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { INodeLike, useInstance, getActionList } from '@/lib';
+import { INodeLike, useInstance, loadActionList } from '@/lib';
 import { useGlobal } from '@/views/hooks/global';
 import { useReducer } from './reducer';
 import { SortKey } from './types';
@@ -148,7 +148,7 @@ export function useActions () {
       if (!node || !node.mimeType) {
         return;
       }
-      const actionList = getActionList();
+      const actionList = loadActionList();
       if (!actionList) {
         // has no action
         return;

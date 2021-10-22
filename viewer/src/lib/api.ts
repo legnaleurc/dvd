@@ -1,5 +1,5 @@
 import { Dict } from './common';
-import { getToken } from './storage';
+import { loadToken } from './storage';
 
 
 export class FileSystem {
@@ -136,7 +136,7 @@ export class FileSystem {
     }
 
     const headers: Record<string, string> = {};
-    const token = getToken();
+    const token = loadToken();
     if (token) {
       headers['Authorization'] = `Token ${token}`;
     }
