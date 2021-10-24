@@ -17,6 +17,14 @@ export class FileSystem {
     return rv;
   }
 
+  async path (path: string) {
+    const r = await this._get('/api/v1/nodes', {
+      path,
+    });
+    const rv: NodeResponse[] = await r.json();
+    return rv;
+  }
+
   async node (id: string) {
     const r = await this._get(`/api/v1/nodes/${id}`);
     const rv: NodeResponse = await r.json();

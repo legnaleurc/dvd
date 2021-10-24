@@ -13,6 +13,7 @@ export {
   SORT_BY_NAME_ASC,
 } from './types';
 export {
+  createNode,
   isLoading,
   isLoaded,
 } from './util';

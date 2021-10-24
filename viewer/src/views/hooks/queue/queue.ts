@@ -1,4 +1,5 @@
 import { FileSystem, INodeLike, Queue } from '@/lib';
+import { createNode } from '@/views/hooks/file_system';
 import { Dispatch, MAX_TASK_COUNT } from './types';
 
 
@@ -34,6 +35,44 @@ export class ActionQueue {
           },
         });
         try {
+          await this._fs.move(src.id, dst.id);
+          this._d({
+            type: 'RESOLVE',
+            value: consumerId,
+          });
+        } catch (e) {
+          this._d({
+            type: 'REJECT',
+            value: consumerId,
+          });
+          throw e;
+        }
+      });
+    }
+    await this._q.join();
+    await this._s();
+  }
+
+  async moveNodesToPath (srcList: INodeLike[], dstPath: string) {
+    this._d({
+      type: 'ADD_PENDING',
+      value: srcList.length,
+    });
+    for (const src of srcList) {
+      await this._q.put(async (consumerId) => {
+        this._d({
+          type: 'SET_PROGRESS',
+          value: {
+            consumerId,
+            name: src.name,
+          },
+        });
+        try {
+          const rawNodeList = await this._fs.path(dstPath);
+          if (rawNodeList.length < 1) {
+            throw new Error('unknown');
+          }
+          const dst = createNode(rawNodeList[0]);
           await this._fs.move(src.id, dst.id);
           this._d({
             type: 'RESOLVE',

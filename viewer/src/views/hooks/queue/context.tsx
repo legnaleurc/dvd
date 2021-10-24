@@ -9,6 +9,7 @@ import { ActionQueue } from './queue';
 
 interface IActionContext {
   moveNodes: (getNode: GetNode, srcList: string[], dst: string) => Promise<void>;
+  moveNodesToPath: (getNode: GetNode, srcList: string[], dstPath: string) => Promise<void>;
   trashNodes: (getNode: GetNode, idList: string[]) => Promise<void>;
 }
 const ActionContext = React.createContext<IActionContext | null>(null);
@@ -22,11 +23,12 @@ const StateContext = React.createContext<IStateContext | null>(null);
 
 
 export const QueueProvider: React.FC<{}> = (props) => {
-  const { state, moveNodes, trashNodes } = useActions();
+  const { state, moveNodes, moveNodesToPath, trashNodes } = useActions();
   const actionValue = React.useMemo(() => ({
     moveNodes,
+    moveNodesToPath,
     trashNodes,
-  }), [moveNodes, trashNodes]);
+  }), [moveNodes, moveNodesToPath, trashNodes]);
   const stateValue = React.useMemo(() => ({
     nameList: state.nameList,
     pendingCount: state.pendingCount,
@@ -82,6 +84,14 @@ function useActions () {
     await actionQueue.moveNodes(srcList.map(getNode), getNode(dst));
   }, [actionQueue]);
 
+  const moveNodesToPath = React.useCallback(async (
+    getNode: GetNode,
+    srcList: string[],
+    dstPath: string,
+  ) => {
+    await actionQueue.moveNodesToPath(srcList.map(getNode), dstPath);
+  }, [actionQueue]);
+
   const trashNodes = React.useCallback(async (
     getNode: GetNode,
     idList: string[],
@@ -98,6 +108,7 @@ function useActions () {
 
   return {
     moveNodes,
+    moveNodesToPath,
     trashNodes,
     state,
   };

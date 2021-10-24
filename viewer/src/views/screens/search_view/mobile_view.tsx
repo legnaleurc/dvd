@@ -168,7 +168,7 @@ interface IToolBarProps {
 function ToolBar (props: IToolBarProps) {
   const { showHistory } = props;
   const { syncing } = useFileSystemState();
-  const { trashNodes, moveNodes } = useQueueAction();
+  const { trashNodes, moveNodesToPath } = useQueueAction();
   const { loadComic } = useComicAction();
   const { clear } = useSimpleSelectableAction();
   const { dict, count } = useSimpleSelectableState();
@@ -206,9 +206,9 @@ function ToolBar (props: IToolBarProps) {
       .filter(([id, value]) => value)
       .map(([id, value]) => id)
     );
-    await moveNodes(getNode, list, destination);
+    await moveNodesToPath(getNode, list, destination);
     clear();
-  }, []);
+  }, [dict]);
 
   const openMenu = React.useCallback(() => {
     setMenuOpen(true);
