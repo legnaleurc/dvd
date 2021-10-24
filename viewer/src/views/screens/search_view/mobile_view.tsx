@@ -260,7 +260,7 @@ function ToolBar (props: IToolBarProps) {
       </IconButton>
 
       <Menu
-        id="move-list-menu"
+        id="move-list-menu-in-search"
         open={menuOpen}
         keepMounted={true}
         anchorEl={menuButtonRef.current}
@@ -278,6 +278,7 @@ function ToolBar (props: IToolBarProps) {
             {destination}
           </MenuItem>
         ))}
+        <MenuItem disabled={true}>Move Selected Items</MenuItem>
       </Menu>
     </>
   );
