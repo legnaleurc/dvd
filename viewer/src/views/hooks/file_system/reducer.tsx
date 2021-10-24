@@ -54,7 +54,12 @@ function reduce (state: IState, action: ActionType) {
       const cmp = getCompareFunction(sortKey);
       for (const id of needSort) {
         const node = nodes[id];
+        if (!node) {
+          // the parent is not loaded into the view yet, nothing to update
+          continue;
+        }
         if (!node.children) {
+          // all node in this set should be folder, this is an error
           throw new Error('no children');
         }
         const children = node.children.map(id => nodes[id]);

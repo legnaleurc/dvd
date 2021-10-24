@@ -89,6 +89,7 @@ function removeNodeFromParent (
 ) {
   const parent = nodes[parentId];
   if (!parent || !isLoaded(parent)) {
+    // the parent is not loaded into the view yet, nothing to update
     return;
   }
   if (!parent.children) {
@@ -109,6 +110,7 @@ function insertNodeToParent (
 ) {
   const parent = nodes[parentId];
   if (!parent || !isLoaded(parent)) {
+    // the parent is not loaded into the view yet, nothing to update
     return;
   }
   if (!parent.children) {
