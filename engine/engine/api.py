@@ -74,18 +74,28 @@ class NodeListView(HasTokenMixin, ListAPIMixin, CreateAPIMixin, View):
 
     async def list_(self):
         name_filter = self.request.query.get('name', None)
-        if not name_filter:
+        path_filter = self.request.query.get('path', None)
+        if name_filter and path_filter:
+            raise HTTPBadRequest()
+        if not name_filter and not path_filter:
             raise HTTPBadRequest()
 
-        se = self.request.app['se']
-        try:
-            nodes = await search_by_name(se, name_filter)
-        except InvalidPatternError:
-            raise HTTPBadRequest()
-        except SearchFailedError:
-            raise HTTPServiceUnavailable()
+        if name_filter:
+            se = self.request.app['se']
+            try:
+                nodes = await search_by_name(se, name_filter)
+                return nodes
+            except InvalidPatternError:
+                raise HTTPBadRequest()
+            except SearchFailedError:
+                raise HTTPServiceUnavailable()
 
-        return nodes
+        if path_filter:
+            se: SearchEngine = self.request.app['se']
+            nodes = await se.get_nodes_by_path(path_filter)
+            return nodes
+
+        raise HTTPBadRequest()
 
     async def create(self):
         kwargs = await self.request.json()

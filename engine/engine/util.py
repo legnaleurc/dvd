@@ -80,6 +80,18 @@ class SearchEngine(object):
         self._searching[pattern] = lock
         return await self._search(pattern)
 
+    async def get_nodes_by_path(self, path: str) -> List[SearchNodeDict]:
+        if not path:
+            return []
+
+        node = await self._drive.get_node_by_path(path)
+        if not node:
+            return []
+
+        rv = cast(SearchNodeDict, node.to_dict())
+        rv['path'] = path
+        return [rv]
+
     async def clear_cache(self) -> None:
         while len(self._searching) > 0:
             pattern, lock = next(iter(self._searching.items()))
