@@ -153,13 +153,14 @@ export function useActions () {
         // has no action
         return;
       }
+      const url = fileSystem.stream(node.id, node.name);
       const [category, __] = node.mimeType.split('/');
       const command = actionList[category];
       if (!command) {
-        // no command to run
+        // default action: open in new tab
+        window.open(url, '_blank');
         return;
       }
-      const url = fileSystem.stream(node.id, node.name);
       await fileSystem.apply(command, {
         url,
       });
