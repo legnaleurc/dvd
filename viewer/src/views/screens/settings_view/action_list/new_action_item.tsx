@@ -31,7 +31,7 @@ export function NewActionItem (props: INewActionItem) {
         onChange={onCommandChange}
       />
       <IconButton
-        disabled={!newCategory || !newCommand}
+        disabled={!newCategory}
         onClick={addAction}
       >
         <AddIcon />

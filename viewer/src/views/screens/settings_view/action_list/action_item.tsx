@@ -89,7 +89,7 @@ export function ActionItem (props: IProps) {
         value={command}
         onChange={onCommandChange}
       />
-      <IconButton onClick={onUpdate}>
+      <IconButton onClick={onUpdate} disabled={!category}>
         <SaveAltIcon />
       </IconButton>
       <IconButton onClick={onRemove}>
