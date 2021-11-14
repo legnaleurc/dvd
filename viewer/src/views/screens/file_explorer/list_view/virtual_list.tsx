@@ -17,11 +17,11 @@ interface IChildProps {
 
 
 interface IVirtualListProps {
-  count: number;
+  idList: string[];
   renderer: (props: IChildProps) => React.ReactNode;
 }
 export function VirtualList (props: IVirtualListProps) {
-  const { count, renderer } = props;
+  const { idList, renderer } = props;
 
   const { cache } = useLayoutCache();
 
@@ -32,13 +32,13 @@ export function VirtualList (props: IVirtualListProps) {
           <List
             width={width}
             height={height}
-            rowCount={count}
+            rowCount={idList.length}
             rowHeight={cache.rowHeight}
             deferredMeasurementCache={cache}
-            rowRenderer={({ index, style, key, parent }) => (
+            rowRenderer={({ index, style, parent }) => (
               <CellMeasurer
                 cache={cache}
-                key={key}
+                key={idList[index]}
                 parent={parent}
                 columnIndex={0}
                 rowIndex={index}

@@ -4,6 +4,7 @@ import { useFileSystemState, Node_ } from '@/views/hooks/file_system';
 import { useItemCache } from './item_cache';
 import { VirtualList } from './virtual_list';
 import { ItemView } from './item_view';
+import { useLayoutCache } from './layout_cache';
 
 
 interface IPureProps {
@@ -13,15 +14,19 @@ interface IPureProps {
 function PureRootList (props: IPureProps) {
   const { root, changeRoot } = props;
 
+  const { updateIdList } = useLayoutCache();
+
   if (!root.children) {
     return null;
   }
 
   const children = root.children;
+  // FIXME: cannot put this in useEffect?
+  updateIdList(children);
 
   return (
     <VirtualList
-      count={children.length}
+      idList={children}
       renderer={({ index, style, itemRef }) => (
         <ItemView
           nodeId={children[index]}

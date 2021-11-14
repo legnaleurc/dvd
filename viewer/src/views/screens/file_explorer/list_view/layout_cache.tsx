@@ -4,6 +4,7 @@ import { CellMeasurerCache, CellMeasurerCacheParams} from 'react-virtualized';
 
 interface IContext {
   cache: CellMeasurerCache;
+  updateIdList: (idList: string[]) => void;
 }
 const Context = React.createContext<IContext | null>(null);
 
@@ -11,12 +12,23 @@ const Context = React.createContext<IContext | null>(null);
 export const LayoutCacheProvider: React.FC<CellMeasurerCacheParams> = (props) => {
   const { children, ...params } = props;
 
-  const cache = React.useRef(new CellMeasurerCache(params));
+  const idList = React.useRef<string[]>([]);
+  const updateIdList = React.useCallback((newIdList: string[]) => {
+    idList.current = newIdList;
+  }, []);
+  const keyMapper = React.useCallback((rowIndex: number, columnIndex: number) => {
+    return idList.current[rowIndex];
+  }, []);
+  const cache = React.useRef(new CellMeasurerCache({
+    ...params,
+    keyMapper,
+  }));
 
   return (
     <Context.Provider
       value={{
         cache: cache.current,
+        updateIdList,
       }}
     >
       {props.children}
