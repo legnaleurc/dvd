@@ -7,7 +7,6 @@ import {
 } from '@material-ui/core';
 import {
   ChevronLeft as ChevronLeftIcon,
-  Delete as DeleteIcon,
   ImportContacts as ImportContactsIcon,
   MoreVert as MoreVertIcon,
   RemoveShoppingCart as RemoveShoppingCartIcon,
@@ -34,6 +33,7 @@ interface IPureProps {
   changeRoot: (id: string) => Promise<void>;
   onComic: () => void;
   onTrash: () => void;
+  onNewTab: () => void;
   moveTo: (destintation: string) => void;
   selectedCount: number;
   clearSelection: () => void;
@@ -45,12 +45,15 @@ function PureToolBar (props: IPureProps) {
     changeRoot,
     onComic,
     onTrash,
+    onNewTab,
     moveTo,
     selectedCount,
     clearSelection,
   } = props;
-  const menuButtonRef = React.useRef<HTMLButtonElement>(null);
-  const [menuOpen, setMenuOpen] = React.useState(false);
+  const listMenuButtonRef = React.useRef<HTMLButtonElement>(null);
+  const singleMenuButtonRef = React.useRef<HTMLButtonElement>(null);
+  const [listMenuOpen, setListMenuOpen] = React.useState(false);
+  const [singleMenuOpen, setSingleMenuOpen] = React.useState(false);
   const [moveList, setMoveList] = React.useState<string[]>([]);
 
   const onBack = React.useCallback(async () => {
@@ -59,11 +62,18 @@ function PureToolBar (props: IPureProps) {
     }
   }, [root, changeRoot]);
 
-  const openMenu = React.useCallback(() => {
-    setMenuOpen(true);
+  const openListMenu = React.useCallback(() => {
+    setListMenuOpen(true);
   }, []);
-  const closeMenu = React.useCallback(() => {
-    setMenuOpen(false);
+  const closeListMenu = React.useCallback(() => {
+    setListMenuOpen(false);
+  }, []);
+
+  const openSingleMenu = React.useCallback(() => {
+    setSingleMenuOpen(true);
+  }, []);
+  const closeSingleMenu = React.useCallback(() => {
+    setSingleMenuOpen(false);
   }, []);
 
   React.useEffect(() => {
@@ -79,12 +89,11 @@ function PureToolBar (props: IPureProps) {
         <ChevronLeftIcon />
       </IconButton>
       <IconButton
-        aria-label="trash"
-        color="secondary"
         disabled={syncing || selectedCount <= 0}
-        onClick={onTrash}
+        onClick={openSingleMenu}
+        ref={singleMenuButtonRef}
       >
-        <DeleteIcon />
+        <MoreVertIcon />
       </IconButton>
       <IconButton
         disabled={selectedCount === 0}
@@ -99,8 +108,8 @@ function PureToolBar (props: IPureProps) {
       </IconButton>
       <IconButton
         disabled={syncing || selectedCount <= 0}
-        onClick={openMenu}
-        ref={menuButtonRef}
+        onClick={openListMenu}
+        ref={listMenuButtonRef}
       >
         <MoreVertIcon />
       </IconButton>
@@ -112,18 +121,37 @@ function PureToolBar (props: IPureProps) {
       </IconButton>
 
       <Menu
-        id="move-list-menu-in-explorer"
-        open={menuOpen}
+        id="action-single-menu-in-explorer"
+        open={singleMenuOpen}
         keepMounted={true}
-        anchorEl={menuButtonRef.current}
-        onClose={closeMenu}
+        anchorEl={singleMenuButtonRef.current}
+        onClose={closeSingleMenu}
+      >
+        <MenuItem
+          color="secondary"
+          onClick={onTrash}
+          disabled={syncing || selectedCount <= 0}
+        >
+          Trash
+        </MenuItem>
+        <MenuItem onClick={onNewTab} disabled={selectedCount !== 1}>
+          Open in New Tab
+        </MenuItem>
+      </Menu>
+
+      <Menu
+        id="move-list-menu-in-explorer"
+        open={listMenuOpen}
+        keepMounted={true}
+        anchorEl={listMenuButtonRef.current}
+        onClose={closeListMenu}
       >
         {moveList.map((destination, index) => (
           <MenuItem
             key={index}
             value={index}
             onClick={() => {
-              closeMenu();
+              closeListMenu();
               moveTo(destination);
             }}
           >
@@ -145,7 +173,7 @@ export function ToolBar (props: IProps) {
   const { rootId } = props;
 
   const { syncing, nodes } = useFileSystemState();
-  const { getNode } = useFileSystemAction();
+  const { getNode, openUrl } = useFileSystemAction();
   const { loadComic } = useComicAction();
   const { clear } = useSimpleSelectableAction();
   const { dict, count } = useSimpleSelectableState();
@@ -178,6 +206,20 @@ export function ToolBar (props: IProps) {
     clear();
   }, [dict]);
 
+  const onNewTab = React.useCallback(async () => {
+    const list = (
+      Object.entries(dict)
+      .filter(([id, value]) => value)
+      .map(([id, value]) => id)
+    );
+    if (list.length < 1) {
+      return;
+    }
+    const node = getNode(list[0]);
+    await openUrl(node);
+    clear();
+  }, [dict]);
+
   const moveTo = React.useCallback(async (destination: string) => {
     const list = (
       Object.entries(dict)
@@ -199,6 +241,7 @@ export function ToolBar (props: IProps) {
       changeRoot={changeRoot}
       onComic={onComic}
       onTrash={onTrash}
+      onNewTab={onNewTab}
       moveTo={moveTo}
       selectedCount={count}
       clearSelection={clear}
