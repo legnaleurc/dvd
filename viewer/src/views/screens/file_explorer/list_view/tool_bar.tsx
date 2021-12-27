@@ -129,12 +129,21 @@ function PureToolBar (props: IPureProps) {
       >
         <MenuItem
           color="secondary"
-          onClick={onTrash}
+          onClick={() => {
+            closeSingleMenu();
+            onTrash();
+          }}
           disabled={syncing || selectedCount <= 0}
         >
           Trash
         </MenuItem>
-        <MenuItem onClick={onNewTab} disabled={selectedCount !== 1}>
+        <MenuItem
+          onClick={() => {
+            closeSingleMenu();
+            onNewTab();
+          }}
+          disabled={selectedCount !== 1}
+        >
           Open in New Tab
         </MenuItem>
       </Menu>
