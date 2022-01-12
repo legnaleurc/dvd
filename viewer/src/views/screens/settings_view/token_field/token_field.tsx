@@ -48,9 +48,11 @@ export function TokenField (props: {}) {
   return (
     <div>
       <TextField
+        aria-autocomplete="none"
         type="password"
         autoComplete="off"
         label="Token"
+        name="token"
         value={newToken}
         onChange={onTokenChange}
       />

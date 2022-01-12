@@ -146,7 +146,12 @@ function PureToolBar (props: IPureProps) {
                 root: classes.inputRoot,
                 input: classes.inputInput,
               }}
-              inputProps={{ 'aria-label': 'search' }}
+              inputProps={{
+                'aria-label': 'search',
+                'aria-autocomplete': 'none',
+                name: 'search',
+                autocompelete: 'off',
+              }}
               inputRef={inputRef}
               onKeyPress={onInputReturn}
             />
