@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme) => ({
   settingsView: {
     ...getMixins([
       'size-grow',
+      'y-scroll',
     ]),
   },
   actionForm: {
