@@ -1,6 +1,17 @@
 import { Node_, SortKey, SortFunction } from './types';
 
 
+function sortById (a: Node_, b: Node_) {
+  if (a.id < b.id) {
+    return -1;
+  }
+  if (a.id > b.id) {
+    return 1;
+  }
+  return 0;
+}
+
+
 function sortByName (a: Node_, b: Node_) {
   if (a.name < b.name) {
     return -1;
@@ -8,7 +19,7 @@ function sortByName (a: Node_, b: Node_) {
   if (a.name > b.name) {
     return 1;
   }
-  return 0;
+  return sortById(a, b);
 }
 
 
@@ -19,7 +30,7 @@ function sortByDate (a: Node_, b: Node_) {
   if (a.modified > b.modified) {
     return 1;
   }
-  return 0;
+  return sortById(a, b);
 }
 
 
