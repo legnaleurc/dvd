@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
     ]),
     position: 'fixed',
     height: TOOLBAR_HEIGHT,
-    bottom: 0,
+    bottom: 'env(safe-area-inset-bottom)',
     backgroundColor: theme.palette.background.paper,
     boxSizing: 'border-box',
     padding: '0.25rem',
