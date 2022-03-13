@@ -73,7 +73,7 @@ const factory: ConfigurationFactory = (env, argv) => {
         },
         // html
         {
-          test: /\.html$/,
+          test: /\.ejs$/,
           use: {
             loader: 'html-loader',
           },
@@ -104,7 +104,6 @@ const factory: ConfigurationFactory = (env, argv) => {
         meta: {
           viewport: 'width=device-width, initial-scale=1.0, viewport-fit=cover',
         },
-        favicon: 'src/favicon.svg',
       }),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
