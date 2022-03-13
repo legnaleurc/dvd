@@ -86,6 +86,11 @@ const factory: ConfigurationFactory = (env, argv) => {
             'css-loader',
           ],
         },
+        // svg
+        {
+          test: /\.svg$/,
+          type: 'asset/resource',
+        },
       ],
     },
     resolve: {
@@ -95,7 +100,12 @@ const factory: ConfigurationFactory = (env, argv) => {
       extensions: ['.js', '.ts', '.tsx'],
     },
     plugins: [
-      new HtmlWebpackPlugin(),
+      new HtmlWebpackPlugin({
+        meta: {
+          viewport: 'width=device-width, initial-scale=1.0, viewport-fit=cover',
+        },
+        favicon: 'src/favicon.svg',
+      }),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
