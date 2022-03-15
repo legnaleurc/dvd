@@ -1,7 +1,8 @@
 import path from 'path';
 import process from 'process';
 
-import { Configuration } from 'webpack';
+import type { Configuration as DevServerConfiguration } from "webpack-dev-server";
+import type { Configuration } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -35,19 +36,20 @@ const factory: ConfigurationFactory = (env, argv) => {
   const backendPort = process.env.BACKEND_PORT;
   const isReleaseMode = process.env.NODE_ENV === 'production';
 
+  const devServer: DevServerConfiguration = {
+    proxy: {
+      '/api': {
+        target: `http://${backendHost}:${backendPort}`,
+      },
+    },
+  };
   const config: Configuration = {
     entry: './src/index.tsx',
     output: {
       filename: isReleaseMode ? '[name].[contenthash].js' : '[name].js',
       publicPath: isReleaseMode ? '/static/' : '/',
     },
-    devServer: {
-      proxy: {
-        '/api': {
-          target: `http://${backendHost}:${backendPort}`,
-        },
-      },
-    },
+    devServer,
     module: {
       rules: [
         // ts, tsx
