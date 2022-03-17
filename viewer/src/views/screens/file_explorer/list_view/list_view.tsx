@@ -39,9 +39,7 @@ const useStyles = makeStyles((theme) => ({
       'w-100',
       'hbox',
     ]),
-    position: 'fixed',
     height: TOOLBAR_HEIGHT,
-    bottom: 'env(safe-area-inset-bottom)',
     backgroundColor: theme.palette.background.paper,
     boxSizing: 'border-box',
     padding: '0.25rem',
@@ -49,10 +47,6 @@ const useStyles = makeStyles((theme) => ({
   },
   selected: {
     backgroundColor: SELECTION_COLOR,
-  },
-  fakeToolBar: {
-    // Safari need more space
-    height: TOOLBAR_HEIGHT,
   },
   virtualList: {
     ...getMixins([
@@ -88,7 +82,6 @@ export function ListView (props: IProps) {
               <div className={classes.virtualList}>
                 <RootList rootId={nodeId} />
               </div>
-              <div className={classes.fakeToolBar} />
             </div>
             <div className={classes.tail}>
               <ToolBar rootId={nodeId} />

@@ -58,9 +58,7 @@ const useStyles = makeStyles((theme) => ({
       'w-100',
       'hbox',
     ]),
-    position: 'fixed',
     height: TOOLBAR_HEIGHT,
-    bottom: 'env(safe-area-inset-bottom)',
     backgroundColor: theme.palette.background.paper,
     boxSizing: 'border-box',
     padding: '0.25rem',
@@ -70,9 +68,6 @@ const useStyles = makeStyles((theme) => ({
     ...getMixins([
       'y-scroll',
     ]),
-  },
-  fakeToolBar: {
-    height: TOOLBAR_HEIGHT,
   },
 }));
 type Classes = ReturnType<typeof useStyles>;
@@ -129,7 +124,6 @@ function ContentWrapper (props: IContentWrapperProps) {
           <ResultItem key={id} nodeId={id} />
         ))}
       </List>
-      <div className={classes.fakeToolBar} />
     </div>
   );
 }
