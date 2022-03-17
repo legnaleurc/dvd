@@ -9,3 +9,9 @@ html, body, body > .body {
 
   overflow: hidden;
 }
+
+@media all and (display-mode: standalone) {
+  html, body, body > .body {
+    height: calc(100% - env(safe-area-inset-bottom));
+  }
+}
