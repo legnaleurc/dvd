@@ -1,5 +1,5 @@
 {
-    "start_url": "https://atecomic.wcpan.me/",
     "name": "Drive Viewer",
+    "start_url": "../",
     "display": "standalone"
 }
