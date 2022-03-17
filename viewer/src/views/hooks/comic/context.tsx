@@ -77,7 +77,7 @@ function reduce (state: IStateContext, action: ActionType) {
       const { id, name } = action.value;
       const { idList, comicDict } = state;
       if (idList.indexOf(id) < 0) {
-        idList.push(id);
+        idList.unshift(id);
       }
       comicDict[id] = {
         name,
@@ -112,7 +112,7 @@ function reduce (state: IStateContext, action: ActionType) {
         if (comicDict[cache.id]) {
           continue;
         }
-        idList.push(cache.id);
+        idList.unshift(cache.id);
         comicDict[cache.id] = {
           name: cache.name,
           unpacking: false,
