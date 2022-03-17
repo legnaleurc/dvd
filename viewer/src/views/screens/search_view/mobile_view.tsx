@@ -18,7 +18,7 @@ import {
   RemoveShoppingCart as RemoveShoppingCartIcon,
 } from '@material-ui/icons';
 
-import { getMixins, loadMoveList } from '@/lib';
+import { getMixins } from '@/lib';
 import { useFileSystemState } from '@/views/hooks/file_system';
 import { useQueueAction } from '@/views/hooks/queue';
 import { useComicAction } from '@/views/hooks/comic';
@@ -27,6 +27,7 @@ import {
   useSimpleSelectableAction,
   useSimpleSelectableState,
 } from '@/views/hooks/simple_selectable';
+import { useMoveListState } from '@/views/hooks/move_list';
 import { useContext } from './context';
 import { LoadingBlock, EmptyBlock } from './blocks';
 
@@ -166,10 +167,10 @@ function ToolBar (props: IToolBarProps) {
   const { loadComic } = useComicAction();
   const { clear } = useSimpleSelectableAction();
   const { dict, count } = useSimpleSelectableState();
+  const { moveList } = useMoveListState();
   const { getNode } = useContext();
   const menuButtonRef = React.useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const [moveList, setMoveList] = React.useState<string[]>([]);
 
   const onComic = React.useCallback(() => {
     const list = (
@@ -209,10 +210,6 @@ function ToolBar (props: IToolBarProps) {
   }, []);
   const closeMenu = React.useCallback(() => {
     setMenuOpen(false);
-  }, []);
-
-  React.useEffect(() => {
-    setMoveList(loadMoveList());
   }, []);
 
   return (

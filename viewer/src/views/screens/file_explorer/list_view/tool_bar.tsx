@@ -12,7 +12,6 @@ import {
   RemoveShoppingCart as RemoveShoppingCartIcon,
 } from '@material-ui/icons';
 
-import { loadMoveList } from '@/lib';
 import { useQueueAction } from '@/views/hooks/queue';
 import {
   useFileSystemAction,
@@ -24,6 +23,7 @@ import {
   useSimpleSelectableAction,
   useSimpleSelectableState,
 } from '@/views/hooks/simple_selectable';
+import { useMoveListState } from '@/views/hooks/move_list';
 import { useItemCache } from './item_cache';
 
 
@@ -37,6 +37,7 @@ interface IPureProps {
   moveTo: (destintation: string) => void;
   selectedCount: number;
   clearSelection: () => void;
+  moveList: string[];
 }
 function PureToolBar (props: IPureProps) {
   const {
@@ -49,12 +50,12 @@ function PureToolBar (props: IPureProps) {
     moveTo,
     selectedCount,
     clearSelection,
+    moveList,
   } = props;
   const listMenuButtonRef = React.useRef<HTMLButtonElement>(null);
   const singleMenuButtonRef = React.useRef<HTMLButtonElement>(null);
   const [listMenuOpen, setListMenuOpen] = React.useState(false);
   const [singleMenuOpen, setSingleMenuOpen] = React.useState(false);
-  const [moveList, setMoveList] = React.useState<string[]>([]);
 
   const onBack = React.useCallback(async () => {
     if (root.parentId) {
@@ -74,10 +75,6 @@ function PureToolBar (props: IPureProps) {
   }, []);
   const closeSingleMenu = React.useCallback(() => {
     setSingleMenuOpen(false);
-  }, []);
-
-  React.useEffect(() => {
-    setMoveList(loadMoveList());
   }, []);
 
   return (
@@ -188,6 +185,7 @@ export function ToolBar (props: IProps) {
   const { dict, count } = useSimpleSelectableState();
   const { changeRoot } = useItemCache();
   const { trashNodes, moveNodesToPath } = useQueueAction();
+  const { moveList } = useMoveListState();
 
   const onComic = React.useCallback(() => {
     const list = (
@@ -254,6 +252,7 @@ export function ToolBar (props: IProps) {
       moveTo={moveTo}
       selectedCount={count}
       clearSelection={clear}
+      moveList={moveList}
     />
   );
 }

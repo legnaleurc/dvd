@@ -1,11 +1,13 @@
 import React from 'react';
 
-import { loadMoveList, saveMoveList, useInstance } from '@/lib';
+import { useInstance } from '@/lib';
+import { useMoveListAction, useMoveListState } from '@/views/hooks/move_list';
 
 
 export function useActions () {
+  const { setMoveList } = useMoveListAction();
+  const { moveList } = useMoveListState();
   const [newDestination, setNewDestination] = React.useState('');
-  const [moveList, setMoveList] = React.useState<string[]>([]);
 
   const onDestinationChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setNewDestination(event.currentTarget.value);
@@ -15,7 +17,6 @@ export function useActions () {
     addDestination () {
       const newMoveList = [...moveList, newDestination];
       setMoveList(newMoveList);
-      saveMoveList(newMoveList);
     },
     removeDestination (index: number) {
       if (index < 0 || index >= moveList.length) {
@@ -23,7 +24,6 @@ export function useActions () {
       }
       const newMoveList = [...moveList.slice(0, index), ...moveList.slice(index + 1)];
       setMoveList(newMoveList);
-      saveMoveList(newMoveList);
     },
     updateDestination (index: number, destination: string) {
       if (index < 0 || index >= moveList.length) {
@@ -32,7 +32,6 @@ export function useActions () {
       const newMoveList = [...moveList];
       newMoveList[index] = destination;
       setMoveList(newMoveList);
-      saveMoveList(newMoveList);
     },
   }), [
     moveList,
@@ -48,11 +47,6 @@ export function useActions () {
   const removeDestination = React.useCallback((index: number) => {
     self.current.removeDestination(index);
   }, [self]);
-
-  React.useEffect(() => {
-    const rv = loadMoveList();
-    setMoveList(rv);
-  }, []);
 
   return {
     newDestination,

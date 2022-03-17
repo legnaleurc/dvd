@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { FileSystem } from '@/lib';
 import { FullScreenProvider } from '@/views/hooks/fullscreen';
+import { MoveListProvider } from '@/views/hooks/move_list';
 import { GlobalProvider } from '@/views/hooks/global';
 import { FileSystemProvider } from '@/views/hooks/file_system';
 import { QueueProvider } from '@/views/hooks/queue';
@@ -22,15 +23,17 @@ function ShellApplication (props: IProps) {
       <React.Suspense fallback={<LoadingBlock />}>
         <ThemeProvider>
           <FileSystemProvider>
-            <QueueProvider>
-              <ComicProvider>
-                <FullScreenProvider>
-                  <BrowserRouter>
-                    <RootRoute component={Application} />
-                  </BrowserRouter>
-                </FullScreenProvider>
-              </ComicProvider>
-            </QueueProvider>
+            <MoveListProvider>
+              <QueueProvider>
+                <ComicProvider>
+                  <FullScreenProvider>
+                    <BrowserRouter>
+                      <RootRoute component={Application} />
+                    </BrowserRouter>
+                  </FullScreenProvider>
+                </ComicProvider>
+              </QueueProvider>
+            </MoveListProvider>
           </FileSystemProvider>
         </ThemeProvider>
       </React.Suspense>
