@@ -48,6 +48,7 @@ const factory: ConfigurationFactory = (env, argv) => {
     output: {
       filename: isReleaseMode ? '[name].[contenthash].js' : '[name].js',
       publicPath: isReleaseMode ? '/static/' : '/',
+      assetModuleFilename: isReleaseMode ? '[name].[contenthash][ext][query]' : '[name][ext][query]',
     },
     devServer,
     module: {
@@ -88,9 +89,9 @@ const factory: ConfigurationFactory = (env, argv) => {
             'css-loader',
           ],
         },
-        // svg
+        // svg, png, webmanifest
         {
-          test: /\.svg$/,
+          test: /\.(svg|png|webmanifest)$/,
           type: 'asset/resource',
         },
       ],
