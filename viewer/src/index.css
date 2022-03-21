@@ -10,9 +10,17 @@ html, body, body > .body {
   overflow: hidden;
 }
 
-@media screen and (display-mode: standalone) {
+@media screen and (display-mode: standalone) and (orientation: portrait) {
   html {
     box-sizing: border-box;
     padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media screen and (display-mode: standalone) and (orientation: landscape) {
+  html {
+    box-sizing: border-box;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
