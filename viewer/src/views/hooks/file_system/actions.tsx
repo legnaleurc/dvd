@@ -7,6 +7,9 @@ import { SortKey } from './types';
 
 
 function isPWA () {
+  if (!window.matchMedia) {
+    return false;
+  }
   return window.matchMedia('screen and (display-mode: standalone)').matches;
 }
 
