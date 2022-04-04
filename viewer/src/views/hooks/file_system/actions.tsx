@@ -149,13 +149,7 @@ export function useActions () {
     download (idList: string[]) {
       for (const id of idList) {
         const url = fileSystem.download(id);
-        if (!isPWA()) {
-          window.open(url, '_blank');
-        } else {
-          const vlc = new URL('vlc-x-callback://x-callback-url/stream');
-          vlc.searchParams.set('url', url);
-          window.open(vlc.toString(), '_blank');
-        }
+        window.open(url, '_blank');
       }
     },
     async openUrl (node: INodeLike) {
@@ -172,7 +166,13 @@ export function useActions () {
       const command = actionList[category];
       if (!command) {
         // default action: open in new tab
-        window.open(url, '_blank');
+        if (!isPWA()) {
+          window.open(url, '_blank');
+        } else {
+          const vlc = new URL('vlc-x-callback://x-callback-url/stream');
+          vlc.searchParams.set('url', url);
+          window.open(vlc.toString(), '_blank');
+        }
         return;
       }
       await fileSystem.apply(command, {
