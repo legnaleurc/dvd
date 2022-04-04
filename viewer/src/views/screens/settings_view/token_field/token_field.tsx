@@ -1,6 +1,9 @@
 import React from 'react';
 import { TextField, IconButton } from '@material-ui/core';
-import { SaveAlt as SaveIcon } from '@material-ui/icons';
+import {
+  Refresh as RefreshIcon,
+  SaveAlt as SaveIcon,
+} from '@material-ui/icons';
 
 import { loadToken, saveToken, useInstance } from '@/lib';
 
@@ -24,6 +27,10 @@ function useActions () {
     self.current.updateToken();
   }, [self]);
 
+  const reloadWindow = React.useCallback(() => {
+    location.reload();
+  }, []);
+
   React.useEffect(() => {
     const token = loadToken();
     if (token) {
@@ -35,6 +42,7 @@ function useActions () {
     newToken,
     onTokenChange,
     updateToken,
+    reloadWindow,
   };
 }
 
@@ -44,6 +52,7 @@ export function TokenField (props: {}) {
     newToken,
     onTokenChange,
     updateToken,
+    reloadWindow,
   } = useActions();
   return (
     <div>
@@ -58,6 +67,9 @@ export function TokenField (props: {}) {
       />
       <IconButton onClick={updateToken}>
         <SaveIcon />
+      </IconButton>
+      <IconButton onClick={reloadWindow}>
+        <RefreshIcon />
       </IconButton>
     </div>
   );
