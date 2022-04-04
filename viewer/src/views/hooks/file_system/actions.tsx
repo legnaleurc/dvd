@@ -6,6 +6,11 @@ import { useReducer } from './reducer';
 import { SortKey } from './types';
 
 
+function isPWA () {
+  return window.matchMedia('screen and (display-mode: standalone)').matches;
+}
+
+
 export function useActions () {
   const { fileSystem } = useGlobal();
   const [state, dispatch] = useReducer();
@@ -141,7 +146,13 @@ export function useActions () {
     download (idList: string[]) {
       for (const id of idList) {
         const url = fileSystem.download(id);
-        window.open(url, '_blank');
+        if (!isPWA()) {
+          window.open(url, '_blank');
+        } else {
+          const vlc = new URL('vlc-x-callback://x-callback-url/stream');
+          vlc.searchParams.set('url', url);
+          window.open(vlc.toString(), '_blank');
+        }
       }
     },
     async openUrl (node: INodeLike) {
