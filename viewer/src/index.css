@@ -1,3 +1,9 @@
+:root {
+  --inset-bottom: env(safe-area-inset-bottom);
+  --inset-left: env(safe-area-inset-left);
+  --inset-right: env(safe-area-inset-right);
+}
+
 html, body, body > .body {
   margin: 0;
   padding: 0;
@@ -13,14 +19,28 @@ html, body, body > .body {
 @media screen and (display-mode: standalone) and (orientation: portrait) {
   html {
     box-sizing: border-box;
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: var(--inset-bottom);
   }
 }
 
 @media screen and (display-mode: standalone) and (orientation: landscape) {
-  html, .pwa-width-hack {
+  html {
     box-sizing: border-box;
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    padding-left: var(--inset-left);
+    padding-right: var(--inset-right);
+  }
+
+  .pwa-hack-header {
+    padding-left: var(--inset-left);
+    padding-right: var(--inset-right);
+  }
+
+  .pwa-hack-drawer-root {
+    position: absolute;
+    inset: 0 var(--inset-right) 0 var(--inset-left);
+  }
+
+  .pwa-hack-drawer-paper {
+    position: absolute;
   }
 }

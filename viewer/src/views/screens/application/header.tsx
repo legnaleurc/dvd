@@ -38,7 +38,7 @@ export function Header (props: IProps) {
       position="fixed"
       color="transparent"
       className={clsx(
-        'pwa-width-hack',
+        'pwa-hack-header',
         classes.head,
         {
           [classes.hidden]: fullScreen,

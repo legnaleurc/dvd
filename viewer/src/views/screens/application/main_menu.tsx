@@ -72,7 +72,8 @@ export function MobileDrawerMenu (props: IMobileDrawerMenuProps) {
     <Drawer
       variant="temporary"
       classes={{
-        paper: classes.drawerPaper,
+        root: 'pwa-hack-drawer-root',
+        paper: clsx('pwa-hack-drawer-paper', classes.drawerPaper),
       }}
       open={props.open}
       anchor="left"
