@@ -36,9 +36,14 @@ export function Header (props: IProps) {
   return (
     <AppBar
       position="fixed"
-      className={clsx(classes.head, {
-        [classes.hidden]: fullScreen,
-      })}
+      color="transparent"
+      className={clsx(
+        'pwa-width-hack',
+        classes.head,
+        {
+          [classes.hidden]: fullScreen,
+        },
+      )}
     >
       <Toolbar className={classes.toolBar}>
         <div className={classes.headerMenuButton}>

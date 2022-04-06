@@ -18,7 +18,7 @@ html, body, body > .body {
 }
 
 @media screen and (display-mode: standalone) and (orientation: landscape) {
-  html {
+  html, .pwa-width-hack {
     box-sizing: border-box;
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
