@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(2),
     marginLeft: 0,
     width: '100%',
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('md')]: {
       marginLeft: theme.spacing(3),
       width: 'auto',
     },
@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   inputRoot: {
     color: 'inherit',
     width: '15ch',
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('md')]: {
       width: 'auto',
     },
   },

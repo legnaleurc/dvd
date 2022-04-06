@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.default,
   },
   head: {
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('md')]: {
       zIndex: theme.zIndex.drawer + 1,
     },
   },
@@ -41,22 +41,12 @@ const useStyles = makeStyles((theme) => ({
       'vbox',
     ]),
   },
-  mobileMenuButton: {
+  headerMenuButton: {
     marginRight: theme.spacing(2),
-    [theme.breakpoints.up('sm')]: {
-      display: 'none',
-    },
-  },
-  desktopMenuButton: {
-    display: 'none',
-    marginRight: theme.spacing(2),
-    [theme.breakpoints.up('sm')]: {
-      display: 'initial',
-    },
   },
   fakeToolBar: theme.mixins.toolbar,
   drawer: {
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('md')]: {
       width: theme.spacing(7) + 1,
       flexShrink: 0,
     },
@@ -69,6 +59,17 @@ const useStyles = makeStyles((theme) => ({
   },
   hidden: {
     display: 'none',
+  },
+  mobileOnlyBlock: {
+    [theme.breakpoints.up('md')]: {
+      display: 'none',
+    },
+  },
+  desktopOnlyBlock: {
+    display: 'none',
+    [theme.breakpoints.up('md')]: {
+      display: 'block',
+    },
   },
 }));
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Box } from '@material-ui/core';
 import clsx from 'clsx';
 
 import { useFullScreenState } from '@/views/hooks/fullscreen';
@@ -23,7 +22,7 @@ export function Content (props: IProps) {
   const { classes, siteMap, tabIndex, toolBarEl } = props;
   const { fullScreen } = useFullScreenState();
   return (
-    <Box className={classes.tail}>
+    <div className={classes.tail}>
       <div
         className={clsx(classes.fakeToolBar, {
           [classes.hidden]: fullScreen,
@@ -44,6 +43,6 @@ export function Content (props: IProps) {
           </chunk.context>
         </TabPanel>
       ))}
-    </Box>
+    </div>
   );
 }

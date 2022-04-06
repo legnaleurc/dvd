@@ -1,5 +1,4 @@
 import React from 'react';
-import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Search as SearchIcon } from '@material-ui/icons';
 
@@ -20,16 +19,24 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: FONT_FAMILY,
   },
   desktopBlock: {
-    ...getMixins([
-      'size-grow',
-      'mh-0',
-    ]),
+    display: 'none',
+    [theme.breakpoints.up('md')]: {
+      ...getMixins([
+        'vbox',
+        'size-grow',
+        'mh-0',
+      ]),
+    },
   },
   mobileBlock: {
     ...getMixins([
+      'vbox',
       'size-grow',
       'mh-0',
     ]),
+    [theme.breakpoints.up('md')]: {
+      display: 'none',
+    },
   },
 }));
 
@@ -42,18 +49,12 @@ export function SearchView (props: {}) {
   } = useContext();
   return (
     <div className={classes.searchView}>
-      <Box
-        className={classes.desktopBlock}
-        display={{ xs: 'none', sm: 'flex' }}
-      >
+      <div className={classes.desktopBlock}>
         <DesktopView />
-      </Box>
-      <Box
-        className={classes.mobileBlock}
-        display={{ xs: 'flex', sm: 'none' }}
-      >
+      </div>
+      <div className={classes.mobileBlock}>
         <MobileView />
-      </Box>
+      </div>
       <CompareDialog
         open={showCompareDialog}
         onClose={hideCompare}

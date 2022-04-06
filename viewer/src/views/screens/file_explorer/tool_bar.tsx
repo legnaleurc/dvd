@@ -80,7 +80,7 @@ export function ToolBar (props: IToolBar) {
         </div>
         <div className={classes.expand} />
         <div className={classes.group}>
-          <Hidden xsDown={true} implementation="css">
+          <Hidden mdDown={true} implementation="css">
             <FormGroup row={true}>
               <FormControlLabel
                 label="Two Column"

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Hidden } from '@material-ui/core';
 import clsx from 'clsx';
 
 import { useFullScreenState } from '@/views/hooks/fullscreen';
@@ -10,6 +9,8 @@ import { ISiteChunk } from './site_map';
 interface IClasses {
   drawer: string;
   hidden: string;
+  mobileOnlyBlock: string;
+  desktopOnlyBlock: string;
 }
 interface IProps {
   classes: IClasses;
@@ -37,7 +38,7 @@ export function SideBar (props: IProps) {
     <nav className={clsx(classes.drawer, {
       [classes.hidden]: fullScreen,
     })}>
-      <Hidden smUp={true} implementation="css">
+      <div className={classes.mobileOnlyBlock}>
         <MobileDrawerMenu
           open={mobileOpen}
           closeMenu={toggleMobileDrawer}
@@ -45,8 +46,8 @@ export function SideBar (props: IProps) {
           tabIndex={tabIndex}
           changeTab={changeTab}
         />
-      </Hidden>
-      <Hidden xsDown={true} implementation="css">
+      </div>
+      <div className={classes.desktopOnlyBlock}>
         <DesktopDrawerMenu
           open={desktopOpen}
           closeMenu={closeDesktopDrawer}
@@ -54,7 +55,7 @@ export function SideBar (props: IProps) {
           tabIndex={tabIndex}
           changeTab={changeTab}
         />
-      </Hidden>
+      </div>
     </nav>
   );
 }

@@ -14,8 +14,9 @@ interface IClasses {
   head: string;
   hidden: string;
   toolBar: string;
-  mobileMenuButton: string;
-  desktopMenuButton: string;
+  mobileOnlyBlock: string;
+  desktopOnlyBlock: string;
+  headerMenuButton: string;
   screenToolBar: string;
 }
 interface IProps {
@@ -40,24 +41,28 @@ export function Header (props: IProps) {
       })}
     >
       <Toolbar className={classes.toolBar}>
-        <IconButton
-          color="inherit"
-          aria-label="open mobile drawer"
-          edge="start"
-          className={classes.mobileMenuButton}
-          onClick={toggleMobileDrawer}
-        >
-          <MenuIcon />
-        </IconButton>
-        <IconButton
-          color="inherit"
-          aria-label="open desktop drawer"
-          edge="start"
-          className={classes.desktopMenuButton}
-          onClick={toggleDesktopDrawer}
-        >
-          <MenuIcon />
-        </IconButton>
+        <div className={classes.headerMenuButton}>
+          <div className={classes.mobileOnlyBlock}>
+            <IconButton
+              color="inherit"
+              aria-label="open mobile drawer"
+              edge="start"
+              onClick={toggleMobileDrawer}
+            >
+              <MenuIcon />
+            </IconButton>
+          </div>
+          <div className={classes.desktopOnlyBlock}>
+            <IconButton
+              color="inherit"
+              aria-label="open desktop drawer"
+              edge="start"
+              onClick={toggleDesktopDrawer}
+            >
+              <MenuIcon />
+            </IconButton>
+          </div>
+        </div>
         <div className={classes.screenToolBar} ref={toolBarRef} />
       </Toolbar>
     </AppBar>

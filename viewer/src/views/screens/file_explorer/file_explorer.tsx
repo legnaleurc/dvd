@@ -1,6 +1,5 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { getMixins } from '@/lib';
@@ -31,10 +30,14 @@ const useStyles = makeStyles((theme) => ({
     ]),
   },
   desktop: {
-    ...getMixins([
-      'size-grow',
-      'mh-0',
-    ]),
+    display: 'none',
+    [theme.breakpoints.up('md')]: {
+      ...getMixins([
+        'vbox',
+        'size-grow',
+        'mh-0',
+      ]),
+    },
     '& > $group': {
       ...getMixins([
         'w-100',
@@ -45,10 +48,13 @@ const useStyles = makeStyles((theme) => ({
   },
   mobile: {
     ...getMixins([
+      'vbox',
       'size-grow',
       'mh-0',
     ]),
-    flexDirection: 'column',
+    [theme.breakpoints.up('md')]: {
+      display: 'none',
+    },
     '& > $group': {
       ...getMixins([
         'size-grow',
@@ -77,10 +83,7 @@ export function FileExplorer (props: {}) {
   return (
     <div className={classes.fileExplorer}>
       <div className={classes.tail}>
-        <Box
-          className={classes.desktop}
-          display={{ xs: 'none', sm: 'flex' }}
-        >
+        <div className={classes.desktop}>
           <div className={classes.group}>
             <TreeView rootId={rootId} />
           </div>
@@ -89,15 +92,12 @@ export function FileExplorer (props: {}) {
           })}>
             <TreeView rootId={rootId} />
           </div>
-        </Box>
-        <Box
-          className={classes.mobile}
-          display={{ xs: 'flex', sm: 'none' }}
-        >
+        </div>
+        <div className={classes.mobile}>
           <div className={classes.group}>
             <ListView rootId={rootId} />
           </div>
-        </Box>
+        </div>
       </div>
     </div>
   );
