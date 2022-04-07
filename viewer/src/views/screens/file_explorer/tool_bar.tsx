@@ -2,7 +2,6 @@ import React from 'react';
 import {
   FormControlLabel,
   FormGroup,
-  Hidden,
   IconButton,
   Menu,
   MenuItem,
@@ -45,6 +44,12 @@ const useStyles = makeStyles((theme) => ({
     ]),
   },
   icon: {},
+  desktopOnlyBlock: {
+    display: 'none',
+    [theme.breakpoints.up('md')]: {
+      display: 'block',
+    },
+  },
 }));
 
 
@@ -80,7 +85,7 @@ export function ToolBar (props: IToolBar) {
         </div>
         <div className={classes.expand} />
         <div className={classes.group}>
-          <Hidden mdDown={true} implementation="css">
+          <div className={classes.desktopOnlyBlock}>
             <FormGroup row={true}>
               <FormControlLabel
                 label="Two Column"
@@ -92,7 +97,7 @@ export function ToolBar (props: IToolBar) {
                 }
               />
             </FormGroup>
-          </Hidden>
+          </div>
         </div>
         <div className={classes.group}>
           <IconButton
