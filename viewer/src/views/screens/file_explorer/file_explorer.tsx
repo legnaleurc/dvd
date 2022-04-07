@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'none',
     [theme.breakpoints.up('md')]: {
       ...getMixins([
-        'vbox',
+        'hbox',
         'size-grow',
         'mh-0',
       ]),
