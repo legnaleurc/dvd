@@ -47,6 +47,9 @@ const useStyles = makeStyles((theme) => ({
     }),
     overflowX: 'hidden',
   },
+  pwaHackDrawerPaper: {
+    left: 'var(--inset-right)',
+  },
 }));
 type Classes = ReturnType<typeof useStyles>;
 
@@ -72,8 +75,7 @@ export function MobileDrawerMenu (props: IMobileDrawerMenuProps) {
     <Drawer
       variant="temporary"
       classes={{
-        root: 'pwa-hack-drawer-root',
-        paper: clsx('pwa-hack-drawer-paper', classes.drawerPaper),
+        paper: clsx(classes.pwaHackDrawerPaper, classes.drawerPaper),
       }}
       open={props.open}
       anchor="left"
