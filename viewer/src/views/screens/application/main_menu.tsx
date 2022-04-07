@@ -49,6 +49,7 @@ const useStyles = makeStyles((theme) => ({
   },
   pwaHackDrawerPaper: {
     left: 'var(--inset-right)',
+    height: 'calc(100% - var(--inset-bottom))',
   },
 }));
 type Classes = ReturnType<typeof useStyles>;
