@@ -49,6 +49,7 @@ export function ImageView (props: IPropsType) {
         src={url}
         width={width}
         height={height}
+        loading="lazy"
       />
     </div>
   );
