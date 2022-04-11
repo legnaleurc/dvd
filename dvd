@@ -78,8 +78,8 @@ async def run_release(public_listen: int, token: str):
     cmd = [
         'python3', '-m', 'engine',
             '-u', '../unpack/build/unpack',
-            '-s', '../viewer/dist',
-            '-l', str(public_listen),
+            '-s', '../viewer/build',
+            '-p', str(public_listen),
     ]
     if token:
         cmd.extend(['-t', token])
@@ -99,7 +99,7 @@ async def run_debug(
             '--',
             'python3', '-m', 'engine',
                 '-u', '../unpack/build/unpack',
-                '-l', str(private_listen),
+                '-p', str(private_listen),
     ]
     if token:
         cmd.extend(['-t', token])
@@ -110,14 +110,13 @@ async def run_debug(
 
     frontend = run_or_die(
         [
-            'yarn', 'start',
+            'npm', 'run', 'dev', '--',
                 '--host=0.0.0.0',
                 f'--port={public_listen}',
         ],
         cwd=pathlib.Path('./viewer'),
         env=clone_env({
-            'BACKEND_HOST': 'localhost',
-            'BACKEND_PORT': str(private_listen),
+            'BACKEND_BASE_URL': f'http://localhost:{private_listen}',
         }),
     )
     frontend_task = asyncio.create_task(frontend)

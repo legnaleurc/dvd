@@ -86,6 +86,4 @@ def json_response(data, status=200):
         status=status,
         content_type='application/json',
         text=data + '\n',
-        headers={
-            'Access-Control-Allow-Origin': '*',
-        })
+    )

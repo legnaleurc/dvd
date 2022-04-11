@@ -63,7 +63,7 @@ class ViewTestCase(IsolatedAsyncioTestCase):
         with index_path.open('w') as fout:
             fout.write(expected)
 
-        rv = await self._client.get('/static/random.txt')
+        rv = await self._client.get('/random.txt')
         self.assertEqual(rv.status, 200)
         body = await rv.text()
         self.assertEqual(body, expected)

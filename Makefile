@@ -2,11 +2,11 @@ CD := cd
 MKDIR := mkdir
 TOUCH := touch
 CMAKE := cmake
-YARN := yarn
+NPM := npm
 PYTHON := python3
 PIP := pip3
 
-VIEWER_ALL_FILES = $(shell find viewer -type d \( -name node_modules -o -name dist \) -prune -o -type f -print)
+VIEWER_ALL_FILES = $(shell find viewer -type d \( -name node_modules -o -name build \) -prune -o -type f -print)
 VIEWER_CONF_FILES = viewer/package.json
 ENGINE_LOCK_FILE = engine/.lock
 
@@ -24,15 +24,15 @@ unpack/build/unpack: unpack/build unpack/CMakeLists.txt unpack/src/*.cpp unpack/
 unpack/build:
 	$(MKDIR) "$@"
 
-viewer-release: viewer/dist
+viewer-release: viewer/build
 
-viewer/dist: viewer/node_modules $(VIEWER_ALL_FILES)
-	$(CD) viewer && $(YARN) build
+viewer/build: viewer/node_modules $(VIEWER_ALL_FILES)
+	$(CD) viewer && $(NPM) run build
 	$(TOUCH) "$@"
 
 viewer/node_modules: $(VIEWER_CONF_FILES)
-	$(CD) viewer && $(YARN) install
-	$(RM) -rf 'viewer/dist'
+	$(CD) viewer && $(NPM) install
+	$(RM) -rf 'viewer/build'
 	$(TOUCH) "$@"
 
 engine-release: engine-install

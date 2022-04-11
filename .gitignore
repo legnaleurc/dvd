@@ -3,7 +3,5 @@ node_modules
 .DS_Store
 .vscode
 /unpack/build
-/viewer/dist
-/viewer/coverage
 /engine/.lock
 /engine/.coverage

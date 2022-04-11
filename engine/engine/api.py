@@ -236,6 +236,40 @@ class NodeImageView(NodeObjectMixin, View):
         return response
 
 
+class NodeVideoListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
+
+    async def list_(self):
+        node = await self.get_object()
+
+        if node.is_video:
+            return [{
+                'id': node.id_,
+                'name': node.name,
+                'mime_type': node.mime_type,
+                'width': node.video_width,
+                'height': node.video_height,
+            }]
+
+        if node.is_file:
+            return []
+
+        drive: Drive = self.request.app['drive']
+        manifest = []
+        async for _root, _folders, files in drive.walk(node):
+            for f in files:
+                if not f.is_video:
+                    continue
+                manifest.append({
+                    'id': f.id_,
+                    'name': f.name,
+                    'mime_type': f.mime_type,
+                    'width': f.video_width,
+                    'height': f.video_height,
+                })
+
+        return manifest
+
+
 class ChangesView(HasTokenMixin, View):
 
     async def post(self):

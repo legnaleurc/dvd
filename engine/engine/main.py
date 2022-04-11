@@ -35,7 +35,7 @@ class Daemon(object):
 
     async def _main(self):
         assert self._kwargs is not None
-        port: int = self._kwargs.listen
+        port: int = self._kwargs.port
         unpack_path: str = self._kwargs.unpack
         static_path: str = self._kwargs.static
         token: str = self._kwargs.token
@@ -61,7 +61,7 @@ class Daemon(object):
 def parse_args(args):
     parser = argparse.ArgumentParser('engine')
 
-    parser.add_argument('-l', '--listen', required=True, type=int)
+    parser.add_argument('-p', '--port', required=True, type=int)
     parser.add_argument('-u', '--unpack', required=True, type=str)
     parser.add_argument('-s', '--static', type=str)
     parser.add_argument('-t', '--token', type=str, default='')
@@ -109,8 +109,10 @@ async def server_context(app: Application, port: int):
     runner = AppRunner(app, access_log_format=log_format)
     await runner.setup()
     try:
-        site = TCPSite(runner, port=port)
-        await site.start()
+        v4 = TCPSite(runner, host='127.1', port=port)
+        await v4.start()
+        v6 = TCPSite(runner, host='::1', port=port)
+        await v6.start()
         yield
     finally:
         await runner.cleanup()
@@ -125,19 +127,20 @@ def setup_api_path(app: Application) -> None:
     app.router.add_view(r'/api/v1/nodes/{id}/download', api.NodeDownloadView)
     app.router.add_view(r'/api/v1/nodes/{id}/images', api.NodeImageListView)
     app.router.add_view(r'/api/v1/nodes/{id}/images/{image_id}', api.NodeImageView)
+    app.router.add_view(r'/api/v1/nodes/{id}/videos', api.NodeVideoListView)
     app.router.add_view(r'/api/v1/changes', api.ChangesView)
     app.router.add_view(r'/api/v1/apply', api.ApplyView)
     app.router.add_view(r'/api/v1/cache', api.CacheView)
 
 
 def setup_static_path(app: Application, path: str) -> None:
-    app.router.add_static(r'/static', path)
     app.router.add_view(r'/', view.IndexView)
     app.router.add_view(r'/files', view.IndexView)
     app.router.add_view(r'/search', view.IndexView)
     app.router.add_view(r'/settings', view.IndexView)
     app.router.add_view(r'/comic', view.IndexView)
     app.router.add_view(r'/comic/{id}', view.IndexView)
+    app.router.add_static(r'/', path)
 
 
 main = Daemon()
