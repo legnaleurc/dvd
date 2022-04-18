@@ -1,7 +1,6 @@
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mocked } from 'ts-jest/utils';
 
 import { FileSystem, INodeLike } from '@/lib';
 import { GlobalProvider } from '@/views/hooks/global';
@@ -111,7 +110,7 @@ describe('content_action_bar', () => {
     }
 
     function trash (fs: FileSystem) {
-      const mfs = mocked(fs);
+      const mfs = jest.mocked(fs);
       mfs.trash.mockResolvedValue();
       mfs.sync.mockResolvedValueOnce([]);
       const btn = screen.getByRole('button', { name: 'trash' });

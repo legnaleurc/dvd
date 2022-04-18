@@ -1,6 +1,5 @@
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { mocked } from 'ts-jest/utils';
 
 import { FileSystem, INodeLike } from '@/lib';
 import { Event_ } from '@/lib/lock';
@@ -72,7 +71,7 @@ describe('queue', () => {
       srcList: string[],
       dst: string,
     ) {
-      const mfs = mocked(fileSystem);
+      const mfs = jest.mocked(fileSystem);
       const blocker = new Event_();
       mfs.move.mockImplementationOnce(async (src: string, dst: string) => {
         await blocker.wait();
@@ -93,7 +92,7 @@ describe('queue', () => {
       getNode: (id: string) => INodeLike,
       srcList: string[],
     ) {
-      const mfs = mocked(fileSystem);
+      const mfs = jest.mocked(fileSystem);
       const blocker = new Event_();
       mfs.trash.mockImplementationOnce(async (src: string) => {
         await blocker.wait();

@@ -1,6 +1,5 @@
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { mocked } from 'ts-jest/utils';
 
 import { ChangeResponse, FileSystem, INodeLike, NodeResponse } from '@/lib';
 import { GlobalProvider } from '@/views/hooks/global';
@@ -55,7 +54,7 @@ describe('file_system', () => {
       fileSystem: FileSystem,
       changeList: ChangeResponse[],
     ) {
-      const mfs = mocked(fileSystem);
+      const mfs = jest.mocked(fileSystem);
       mfs.sync.mockResolvedValueOnce(changeList);
       act(() => {
         actions.sync();
@@ -68,7 +67,7 @@ describe('file_system', () => {
       rootId: string,
       children: Partial<NodeResponse>[],
     ) {
-      const mfs = mocked(fileSystem);
+      const mfs = jest.mocked(fileSystem);
       mfs.root.mockResolvedValueOnce(makeNode({
         id: rootId,
         parent_list: [],
@@ -85,7 +84,7 @@ describe('file_system', () => {
       id: string,
       children: Partial<NodeResponse>[],
     ) {
-      const mfs = mocked(fileSystem);
+      const mfs = jest.mocked(fileSystem);
       mfs.list.mockResolvedValueOnce(children.map(makeNode));
       act(() => {
         actions.loadList(id);
@@ -99,7 +98,7 @@ describe('file_system', () => {
       name: string,
       parentId: string,
     ) {
-      const mfs = mocked(fileSystem);
+      const mfs = jest.mocked(fileSystem);
       mfs.rename.mockResolvedValueOnce();
       mfs.sync.mockResolvedValueOnce([
         { removed: false, node: makeNode({ id, name, parent_list: [parentId] }) },
@@ -116,7 +115,7 @@ describe('file_system', () => {
       parentId: string,
       newId: string,
     ) {
-      const mfs = mocked(fileSystem);
+      const mfs = jest.mocked(fileSystem);
       mfs.mkdir.mockResolvedValueOnce();
       mfs.sync.mockResolvedValueOnce([
         { removed: false, node: makeNode({ id: newId, name, parent_list: [parentId] }) },
@@ -131,7 +130,7 @@ describe('file_system', () => {
       fileSystem: FileSystem,
       idList: string[],
     ) {
-      const mfs = mocked(fileSystem);
+      const mfs = jest.mocked(fileSystem);
       mfs.download.mockImplementationOnce((id: string) => id);
       const fakeOpen = jest.spyOn(window, 'open').mockReturnValueOnce(null);
       act(() => {
@@ -145,7 +144,7 @@ describe('file_system', () => {
       fileSystem: FileSystem,
       idList: string[],
     ) {
-      const mfs = mocked(fileSystem);
+      const mfs = jest.mocked(fileSystem);
       mfs.stream.mockImplementationOnce((id: string) => id);
       const fakeWriteText = jest.fn();
       fakeWriteText.mockResolvedValueOnce(null);
@@ -166,7 +165,7 @@ describe('file_system', () => {
       fileSystem: FileSystem,
       node: INodeLike,
     ) {
-      const mfs = mocked(fileSystem);
+      const mfs = jest.mocked(fileSystem);
       mfs.apply.mockResolvedValueOnce();
       mfs.stream.mockImplementationOnce((id: string, name: string) => `${id}:${name}`);
 

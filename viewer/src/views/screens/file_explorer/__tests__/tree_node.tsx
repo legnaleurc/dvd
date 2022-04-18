@@ -1,7 +1,6 @@
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mocked } from 'ts-jest/utils';
 
 import { FileSystem, NodeResponse } from '@/lib';
 import { GlobalProvider } from '@/views/hooks/global';
@@ -70,7 +69,7 @@ describe('tree_node', () => {
     }
 
     function mockRoot (fs: FileSystem, rootId: string, children: Partial<NodeResponse>[]) {
-      const mfs = mocked(fs);
+      const mfs = jest.mocked(fs);
       mfs.root.mockResolvedValueOnce(makeNode({
         id: rootId,
         parent_list: [],
@@ -79,7 +78,7 @@ describe('tree_node', () => {
     }
 
     function mockList(fs: FileSystem, id: string, children: Partial<NodeResponse>[]) {
-      const mfs = mocked(fs);
+      const mfs = jest.mocked(fs);
       mfs.list.mockResolvedValueOnce(children.map((node) => {
         node.parent_list = [id];
         return node;
