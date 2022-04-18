@@ -50,7 +50,7 @@ python3 -m wcpan.drive.google sync
 
 ### viewer
 
-This module uses Node.js 10 or later. It also uses yarn instead of npm.
+This module uses Node.js 14 or later. It also uses yarn instead of npm.
 
 ```sh
 cd viewer
