@@ -313,6 +313,14 @@ describe('file_system', () => {
           id: '2',
           name: 'foo',
           parent_list: ['1'],
+          is_folder: true,
+        },
+      ]);
+      await waitForNextUpdate();
+      fakeLoadList(result.current.action, fileSystem, '2', [
+        {
+          id: '3',
+          parent_list: ['2'],
         },
       ]);
       await waitForNextUpdate();
@@ -320,11 +328,13 @@ describe('file_system', () => {
       fakeRename(result.current.action, fileSystem, '2', 'bar', '1');
       expect(result.current.state.syncing).toBeTruthy();
       expect(result.current.state.nodes['2'].name).toBe('foo');
+      expect(result.current.state.nodes['2'].children?.length).toBe(1);
 
       await waitForNextUpdate();
       expect(result.current.state.syncing).toBeFalsy();
       expect(fileSystem.rename).toHaveBeenLastCalledWith('2', 'bar');
       expect(result.current.state.nodes['2'].name).toBe('bar');
+      expect(result.current.state.nodes['2'].children?.length).toBe(1);
 
       expect(result.current.action).toMatchObject(actions);
     });

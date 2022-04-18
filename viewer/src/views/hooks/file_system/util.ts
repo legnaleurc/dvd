@@ -74,7 +74,11 @@ function upsertNode (
     // insert to new parent
     insertNodeToParent(needSort, nodes, newNode.parentId, newNode.id);
   }
-  nodes[newNode.id] = {...newNode};
+  // update node content, but keep existing children
+  nodes[newNode.id] = {
+    ...newNode,
+    children: node.children,
+  };
   // sort for its parent because node data has been changed
   if (newNode.parentId) {
     needSort.add(newNode.parentId);
