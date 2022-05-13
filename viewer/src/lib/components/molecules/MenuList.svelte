@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from "svelte";
   import {
     useBodyScrolling,
     useMountedStore,
@@ -67,6 +68,16 @@
   function inRange(n: number, range: Range) {
     return range[0] <= n && n < range[1];
   }
+
+  // It is possible to unmount without hide(), e.g. the parent was unmounted.
+  // In this case we need to manually cleanup detached elements and global
+  // styles.
+  onDestroy(() => {
+    if (present) {
+      rootEl.remove();
+    }
+    bodyScrolling.release();
+  });
 
   $: {
     if ($isMounted) {

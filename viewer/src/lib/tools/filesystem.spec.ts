@@ -89,7 +89,7 @@ describe("filesystem", () => {
       test("existing node", () => {
         const nodeMap = {
           __node__: fileNode("__node__", "__ROOT__", {
-            name:"old",
+            name: "old",
           }),
         };
         const childrenMap = {};

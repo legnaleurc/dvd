@@ -25,9 +25,6 @@ export const handlers = [
   rest.get("/api/v1/nodes", (req, res, ctx) => {
     const path = req.url.searchParams.get("path");
     assertIsString(path);
-    return res(
-      ctx.status(200),
-      ctx.json([folderResponse(path, "__ROOT__")]),
-    );
+    return res(ctx.status(200), ctx.json([folderResponse(path, "__ROOT__")]));
   }),
 ];

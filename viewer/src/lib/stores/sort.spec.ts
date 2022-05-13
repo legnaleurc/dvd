@@ -4,7 +4,6 @@ import { fileNode } from "$lib/mocks/utils";
 import { createStore, getCompareFunction } from "./sort";
 
 describe("sort", () => {
-
   test("has good initial value", () => {
     const store = createStore();
     expect(get(store.method)).toEqual("BY_DATE_DESC");
@@ -68,7 +67,7 @@ describe("sort", () => {
     const compare = getCompareFunction("BY_NAME_ASC");
     const list = [
       fileNode("a", "", {
-        name: "2"
+        name: "2",
       }),
       fileNode("b", "", {
         name: "2",
@@ -83,12 +82,11 @@ describe("sort", () => {
         name: "1",
       }),
       fileNode("a", "", {
-        name: "2"
+        name: "2",
       }),
       fileNode("b", "", {
         name: "2",
       }),
     ]);
   });
-
 });

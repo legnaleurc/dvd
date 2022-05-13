@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onDestroy } from "svelte";
 
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import Icon from "$lib/components/atoms/Icon.svelte";
@@ -26,6 +26,16 @@
   const isMounted = useMountedStore();
 
   let backdrop: HTMLDivElement = null;
+
+  // It is possible to unmount without hide(), e.g. the parent was unmounted.
+  // In this case we need to manually cleanup detached elements and global
+  // styles.
+  onDestroy(() => {
+    if (show) {
+      backdrop.remove();
+    }
+    bodyScrolling.release();
+  });
 
   $: {
     if ($isMounted) {

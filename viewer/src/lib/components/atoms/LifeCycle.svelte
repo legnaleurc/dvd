@@ -4,13 +4,22 @@
 
   export function useBodyScrolling() {
     let overflow: string = "";
+    let lock = false;
     return {
       acquire() {
+        if (lock) {
+          return;
+        }
         overflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
+        lock = true;
       },
       release() {
+        if (!lock) {
+          return;
+        }
         document.body.style.overflow = overflow;
+        lock = false;
       },
     };
   }

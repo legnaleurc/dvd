@@ -20,8 +20,6 @@
   const dispatch = createEventDispatcher<Events>();
 
   const moveTarget = writable("");
-  // Prevent reopen menu before the move is done.
-  let lock = false;
 
   $: isSelectionEmpty = $selectedId.size <= 0;
 
@@ -31,7 +29,6 @@
     await moveNodesToPath(idList, shortcut);
     deselectList(idList);
     dispatch("aftermove");
-    lock = false;
   }
 </script>
 
@@ -40,11 +37,8 @@
   on:shortcut={(event) => moveTarget.set(event.detail)}
 >
   <IconButton
-    disabled={isSelectionEmpty || lock}
-    on:click={(e) => {
-      lock = true;
-      showMenu(e.clientX, e.clientY);
-    }}
+    disabled={isSelectionEmpty}
+    on:click={(e) => showMenu(e.clientX, e.clientY)}
   >
     <Icon name="drive_file_move" />
   </IconButton>

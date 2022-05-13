@@ -1,11 +1,7 @@
 import { rest } from "msw";
 
 import type { ChangeResponse, NodeResponse } from "$lib/types/api";
-import {
-  assertIsString,
-  fileResponse,
-  rootResponse,
-} from "./utils";
+import { assertIsString, fileResponse, rootResponse } from "./utils";
 
 const TABLE: Record<string, NodeResponse> = {
   __ROOT__: rootResponse(),
