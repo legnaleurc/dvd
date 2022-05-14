@@ -4,6 +4,7 @@
   export let count: number;
   export let variant: Variants = "vanilla";
 
+  let countText: string = "";
   let bgColor: string = "";
 
   $: {
@@ -21,12 +22,15 @@
         bgColor = "";
     }
   }
+  $: {
+    countText = count > 100 ? "99+" : `${count}`;
+  }
 </script>
 
 <span class="inline-flex relative">
   <slot />
   <span
     class="flex absolute top-0 right-0 translate-x-2/4 -translate-y-2/4 h-4 px-1 rounded-full text-xs {bgColor}"
-    class:hidden={count <= 0}>{count}</span
+    class:hidden={count <= 0}>{countText}</span
   >
 </span>
