@@ -5,12 +5,18 @@
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import SearchInput from "$lib/components/atoms/SearchInput.svelte";
+  import LabeledSwitch from "$lib/components/atoms/LabeledSwitch.svelte";
   import HistoryModal from "./HistoryModal.svelte";
 
-  const { searchName } = getSearchContext();
+  const { searchName, showDetail } = getSearchContext();
 
-  let text: string = "";
+  let text = "";
+  let showMenu = false;
   const showHistory = writable(false);
+
+  function toggleMenu() {
+    showMenu = !showMenu;
+  }
 
   function handleSearch() {
     if (!text) {
@@ -20,17 +26,37 @@
   }
 </script>
 
-<div class="flex bg-paper-800">
-  <SearchInput
-    class="flex-1"
-    placeholder="Search"
-    bind:value={text}
-    on:enterpressed={handleSearch}
-  />
-  <div class="flex-0">
-    <IconButton on:click={() => showHistory.set(true)}>
-      <Icon name="history" />
-    </IconButton>
-    <HistoryModal show={$showHistory} on:hide={() => showHistory.set(false)} />
+<div class="flex flex-col bg-paper-800">
+  <div class="flex">
+    <SearchInput
+      class="flex-1"
+      placeholder="Search"
+      bind:value={text}
+      on:enterpressed={handleSearch}
+    />
+    <div class="flex-0">
+      <IconButton on:click={toggleMenu}>
+        <Icon name={showMenu ? "expand_less" : "expand_more"} />
+      </IconButton>
+    </div>
+  </div>
+  <div class:flex={showMenu} class:hidden={!showMenu}>
+    <div class="flex-0">
+      <LabeledSwitch
+        id="search-item-mode"
+        label="View Detail"
+        bind:checked={$showDetail}
+      />
+    </div>
+    <div class="flex-1" />
+    <div class="flex-0">
+      <IconButton on:click={() => showHistory.set(true)}>
+        <Icon name="history" />
+      </IconButton>
+      <HistoryModal
+        show={$showHistory}
+        on:hide={() => showHistory.set(false)}
+      />
+    </div>
   </div>
 </div>
