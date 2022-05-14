@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let id: string = "";
+  export let id = "";
   export let checked: boolean = undefined;
   export let disabled: boolean = undefined;
 </script>

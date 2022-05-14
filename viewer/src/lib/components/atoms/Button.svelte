@@ -5,10 +5,10 @@
   export let label: string;
   export let icon: string;
   export let variant: Variants = "vanilla";
-  export let disabled: boolean = false;
+  export let disabled = false;
 
-  let color: string = "";
-  let bgColor: string = "";
+  let color = "";
+  let bgColor = "";
 
   $: {
     switch (variant) {

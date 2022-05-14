@@ -4,8 +4,8 @@
   export let count: number;
   export let variant: Variants = "vanilla";
 
-  let countText: string = "";
-  let bgColor: string = "";
+  let countText = "";
+  let bgColor = "";
 
   $: {
     switch (variant) {

@@ -36,7 +36,7 @@ describe("storage", () => {
       saveActionMap(expected);
       const rv = localStorage.getItem("actionMap");
       expect(rv).not.toBeNull();
-      expect(JSON.parse(rv!)).toEqual(expected);
+      expect(JSON.parse(rv)).toEqual(expected);
     });
   });
 
@@ -60,7 +60,7 @@ describe("storage", () => {
       saveShortcutList(expected);
       const rv = localStorage.getItem("shortcutList");
       expect(rv).not.toBeNull();
-      expect(JSON.parse(rv!)).toEqual(expected);
+      expect(JSON.parse(rv)).toEqual(expected);
     });
   });
 

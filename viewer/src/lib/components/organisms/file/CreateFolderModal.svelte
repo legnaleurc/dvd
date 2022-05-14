@@ -20,7 +20,7 @@
 
   const dispatch = createEventDispatcher<Events>();
 
-  let newName: string = "";
+  let newName = "";
 
   function handleAccept() {
     if (!newName) {

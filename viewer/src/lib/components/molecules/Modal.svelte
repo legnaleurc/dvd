@@ -14,9 +14,9 @@
   };
   type $$Events = SvelteCustomEvents<Events>;
   type $$Slots = {
-    title: {};
-    body: {};
-    footer: {};
+    title: Record<string, never>;
+    body: Record<string, never>;
+    footer: Record<string, never>;
   };
 
   export let show: boolean;

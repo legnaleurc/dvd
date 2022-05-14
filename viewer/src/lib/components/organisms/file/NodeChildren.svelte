@@ -6,8 +6,8 @@
 
   const { selectedId } = getSelectionContext();
 
-  let beginId: string = "";
-  let endId: string = "";
+  let beginId = "";
+  let endId = "";
 
   function selectRange() {
     if (!beginId || !endId) {

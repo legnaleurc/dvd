@@ -1,11 +1,9 @@
 export class Future<T> {
   private _promise: Promise<T>;
   private _resolve: (rv: T) => void;
-  private _reject: (e: any) => void;
+  private _reject: (e: unknown) => void;
 
   constructor() {
-    this._resolve = () => {};
-    this._reject = () => {};
     this._promise = new Promise((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;
@@ -20,7 +18,7 @@ export class Future<T> {
     this._resolve(rv);
   }
 
-  reject(reason: any) {
+  reject(reason: unknown) {
     this._reject(reason);
   }
 }

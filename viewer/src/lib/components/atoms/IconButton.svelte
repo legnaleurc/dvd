@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { Variants } from "$lib/types/button";
 
-  export let disabled: boolean = false;
+  export let disabled = false;
   export let variant: Variants = "primary";
 
-  let color: string = "";
+  let color = "";
 
   $: {
     switch (variant) {

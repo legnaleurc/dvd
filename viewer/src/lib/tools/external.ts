@@ -6,7 +6,7 @@ export async function callExternal(id: string, name: string, mimeType: string) {
     return;
   }
   const actionMap = loadActionMap();
-  const [category, __] = mimeType.split("/");
+  const [category] = mimeType.split("/");
   const command = actionMap[category];
   if (!command) {
     return;

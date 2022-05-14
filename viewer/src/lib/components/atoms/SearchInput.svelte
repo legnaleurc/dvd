@@ -9,10 +9,10 @@
   };
   type $$Events = SvelteCustomEvents<Events>;
 
-  let klass: string = "";
+  let klass = "";
   export { klass as class };
   export let value: string = undefined;
-  export let placeholder: string = "";
+  export let placeholder = "";
 
   const dispatch = createEventDispatcher<Events>();
 </script>

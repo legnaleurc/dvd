@@ -9,7 +9,7 @@
 
   const { shortcutList, addShortcut } = getShortcutContext();
 
-  let newShortcut: string = "";
+  let newShortcut = "";
 
   function handleNew() {
     if (!newShortcut) {

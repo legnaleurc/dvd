@@ -11,8 +11,8 @@
   import QuickCommandMenu from "./QuickCommandMenu.svelte";
 
   let actionMap: Record<string, string> = {};
-  let newType: string = "";
-  let newCommand: string = "";
+  let newType = "";
+  let newCommand = "";
 
   function handleAdd() {
     if (!newType || !newCommand) {

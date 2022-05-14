@@ -4,7 +4,7 @@
   import SyncButton from "./SyncButton.svelte";
   import QueueButton from "./QueueButton.svelte";
 
-  let twoColumn: boolean = false;
+  let twoColumn = false;
 </script>
 
 <div class="w-full h-full flex flex-col">

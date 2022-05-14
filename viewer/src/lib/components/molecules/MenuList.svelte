@@ -22,8 +22,8 @@
   let rootEl: HTMLDivElement = null;
   let menuEl: HTMLDivElement = null;
   let present: boolean;
-  let cursorX: number = 0;
-  let cursorY: number = 0;
+  let cursorX = 0;
+  let cursorY = 0;
 
   function show(x: number, y: number) {
     cursorX = x;

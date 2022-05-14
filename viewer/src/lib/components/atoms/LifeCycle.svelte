@@ -3,7 +3,7 @@
   import { writable } from "svelte/store";
 
   export function useBodyScrolling() {
-    let overflow: string = "";
+    let overflow = "";
     let lock = false;
     return {
       acquire() {

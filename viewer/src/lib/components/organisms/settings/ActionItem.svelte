@@ -21,7 +21,7 @@
 
   const dispatch = createEventDispatcher<Events>();
 
-  let newCommand: string = "";
+  let newCommand = "";
 
   function restoreDefault() {
     newCommand = command;

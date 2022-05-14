@@ -7,7 +7,7 @@
 
   const { videoMap, openVideo } = getVideoContext();
 
-  let url: string = "";
+  let url = "";
 
   $: id = $page.params.videoId;
   $: video = $videoMap[id];

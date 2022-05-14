@@ -24,8 +24,8 @@
 
   export let id: string;
 
-  let loading: boolean = false;
-  let expanded: boolean = false;
+  let loading = false;
+  let expanded = false;
 
   $: node = $nodeMap[id];
   $: selected = $selectedId.has(id);
