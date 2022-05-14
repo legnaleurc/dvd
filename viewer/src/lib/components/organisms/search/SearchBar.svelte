@@ -1,22 +1,13 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import { writable } from "svelte/store";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
+  import { getSearchContext } from "$lib/stores/search";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import SearchInput from "$lib/components/atoms/SearchInput.svelte";
   import HistoryModal from "./HistoryModal.svelte";
 
-  type Events = {
-    search: string;
-    history: number;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
-
-  export let historyList: string[];
-
-  const dispatch = createEventDispatcher<Events>();
+  const { searchName } = getSearchContext();
 
   let text: string = "";
   const showHistory = writable(false);
@@ -25,7 +16,7 @@
     if (!text) {
       return;
     }
-    dispatch("search", text);
+    searchName(text);
   }
 </script>
 
@@ -42,8 +33,6 @@
     </IconButton>
     <HistoryModal
       show={$showHistory}
-      {historyList}
-      on:search={(event) => dispatch("history", event.detail)}
       on:hide={() => showHistory.set(false)}
     />
   </div>

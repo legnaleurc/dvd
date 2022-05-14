@@ -1,17 +1,17 @@
 <script lang="ts">
-  import type { SearchResponse } from "$lib/types/api";
   import { getSelectionContext } from "$lib/stores/selection";
+  import { getSearchContext } from "$lib/stores/search";
 
   export let id: string;
-  export let resultMap: Record<string, SearchResponse>;
 
+  const { resultMap } = getSearchContext();
   const { selectedId, toggleId } = getSelectionContext();
 
   function handleClick() {
     toggleId(id);
   }
 
-  $: result = resultMap[id];
+  $: result = $resultMap[id];
   $: selected = $selectedId.has(id);
 </script>
 

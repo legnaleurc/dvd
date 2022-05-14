@@ -1,15 +1,15 @@
 <script lang="ts">
-  import type { SearchResponse } from "$lib/types/api";
+  import { getSearchContext } from "$lib/stores/search";
   import ToolBar from "$lib/components/organisms/widget/ToolBar.svelte";
 
-  export let resultMap: Record<string, SearchResponse>;
+  const { resultMap } = getSearchContext();
 
   function getNameById(id: string) {
-    return resultMap[id].name;
+    return $resultMap[id].name;
   }
 
   function getMimeTypeById(id: string) {
-    return resultMap[id].mime_type;
+    return $resultMap[id].mime_type;
   }
 </script>
 
