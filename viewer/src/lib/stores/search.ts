@@ -40,11 +40,7 @@ export function createStore() {
     const _historyList = get(historyList);
     const text = _historyList[index];
     historyList.update((self) => {
-      return [
-        text,
-        ...self.slice(0, index),
-        ...self.slice(index + 1),
-      ];
+      return [text, ...self.slice(0, index), ...self.slice(index + 1)];
     });
     await searchText(text);
   }

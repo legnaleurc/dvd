@@ -31,9 +31,6 @@
     <IconButton on:click={() => showHistory.set(true)}>
       <Icon name="history" />
     </IconButton>
-    <HistoryModal
-      show={$showHistory}
-      on:hide={() => showHistory.set(false)}
-    />
+    <HistoryModal show={$showHistory} on:hide={() => showHistory.set(false)} />
   </div>
 </div>

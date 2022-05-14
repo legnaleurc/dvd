@@ -1,0 +1,50 @@
+import { get } from "svelte/store";
+import { setupServer } from "msw/node";
+
+import { handlers } from "$lib/mocks/search";
+import { createStore } from "./search";
+
+describe("search", () => {
+  const server = setupServer(...handlers);
+  beforeAll(() => {
+    server.listen();
+  });
+  afterAll(() => {
+    server.close();
+  });
+  afterEach(() => {
+    localStorage.clear();
+    server.resetHandlers();
+  });
+
+  test("has good initial value", () => {
+    const store = createStore();
+    expect(get(store.searching)).toBeFalsy();
+    expect(get(store.idList)).toHaveLength(0);
+    expect(get(store.resultMap)).toEqual({});
+    expect(get(store.historyList)).toHaveLength(0);
+  });
+
+  test("search name", async () => {
+    const store = createStore();
+
+    const promise = store.searchName("name");
+    expect(get(store.searching)).toBeTruthy();
+
+    await promise;
+    expect(get(store.historyList)).toHaveLength(1);
+    expect(get(store.searching)).toBeFalsy();
+  });
+
+  test("search history", async () => {
+    const store = createStore();
+    store.historyList.set(["b", "a"]);
+
+    const promise = store.searchHistory(1);
+    expect(get(store.searching)).toBeTruthy();
+
+    await promise;
+    expect(get(store.historyList)).toEqual(["a", "b"]);
+    expect(get(store.searching)).toBeFalsy();
+  });
+});
