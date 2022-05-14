@@ -20,7 +20,7 @@
     transition: background-color 150ms ease;
 
     appearance: none;
-    color-adjust: exact;
+    // color-adjust: exact;
 
     cursor: pointer;
 
