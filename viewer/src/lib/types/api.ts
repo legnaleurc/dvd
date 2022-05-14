@@ -9,6 +9,8 @@ export interface NodeResponse {
 }
 
 export interface SearchResponse extends NodeResponse {
+  hash: string;
+  size: number;
   path: string;
 }
 
