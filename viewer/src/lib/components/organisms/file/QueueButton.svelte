@@ -13,7 +13,7 @@
 </script>
 
 <IconButton on:click={() => showQueue.set(true)}>
-  <IconBadge count={$pendingCount}>
+  <IconBadge count={$pendingCount} variant="warning">
     <Icon name="pending" />
   </IconBadge>
 </IconButton>

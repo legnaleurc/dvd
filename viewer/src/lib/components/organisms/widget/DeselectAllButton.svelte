@@ -10,7 +10,7 @@
 </script>
 
 <IconButton disabled={isSelectionEmpty} on:click={deselectAll}>
-  <IconBadge count={$selectedId.size}>
+  <IconBadge count={$selectedId.size} variant="primary">
     <Icon name="deselect" />
   </IconBadge>
 </IconButton>
