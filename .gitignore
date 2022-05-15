@@ -1,7 +1,2 @@
-*.pyc
-node_modules
 .DS_Store
 .vscode
-/unpack/build
-/engine/.lock
-/engine/.coverage
