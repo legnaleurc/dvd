@@ -142,6 +142,8 @@ def setup_static_path(app: Application, path: str) -> None:
     app.router.add_view(r'/settings', view.IndexView)
     app.router.add_view(r'/comic', view.IndexView)
     app.router.add_view(r'/comic/{id}', view.IndexView)
+    app.router.add_view(r'/video', view.IndexView)
+    app.router.add_view(r'/video/{id}', view.IndexView)
     app.router.add_static(r'/', path)
 
 
