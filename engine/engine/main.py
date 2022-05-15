@@ -115,6 +115,8 @@ async def server_context(app: Application, port: int):
         await v6.start()
         yield
     finally:
+        await v6.stop()
+        await v4.stop()
         await runner.cleanup()
 
 
