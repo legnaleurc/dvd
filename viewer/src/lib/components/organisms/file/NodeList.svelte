@@ -27,7 +27,6 @@
   {:else}
     <VirtualScroll
       data={idList.map((id) => ({ id }))}
-      key="id"
       estimateSize={48}
       let:data
     >
