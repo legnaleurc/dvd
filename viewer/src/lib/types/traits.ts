@@ -1,16 +1,16 @@
 import type { SvelteComponentTyped } from "svelte";
 
 export type SvelteComponentConstructor<
-  Props extends Record<string, any> = any,
-  Events extends Record<string, any> = any,
-  Slots extends Record<string, any> = any,
+  Props extends Record<string, unknown> = Record<string, unknown>,
+  Events extends Record<string, unknown> = Record<string, unknown>,
+  Slots extends Record<string, unknown> = Record<string, unknown>,
 > = new (...args: unknown[]) => SvelteComponentTyped<Props, Events, Slots>;
 
-export type SvelteCustomEvents<Events extends Record<string, any>> = {
+export type SvelteCustomEvents<Events extends Record<string, unknown>> = {
   [key in keyof Events]: CustomEvent<Events[key]>;
 };
 
-export type SvelteEventDispatcher<Events extends Record<string, any>> = <
+export type SvelteEventDispatcher<Events extends Record<string, unknown>> = <
   K extends keyof Events,
 >(
   type: K,
