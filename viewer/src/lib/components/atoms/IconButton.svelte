@@ -18,7 +18,7 @@
 </script>
 
 <button
-  class="w-12 h-12 p-3 rounded-full flex-0 inline-flex justify-center items-center {color} disabled:opacity-30"
+  class="w-12 h-12 p-3 rounded-full flex-0 inline-flex justify-center items-center {color} disabled:opacity-30 active:bg-action-focus"
   {disabled}
   on:click
 >

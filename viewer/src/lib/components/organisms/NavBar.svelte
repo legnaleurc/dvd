@@ -39,7 +39,7 @@
     {#each TAB_MAP as tab (tab.path)}
       <li class="flex-grow">
         <a
-          class="w-full h-full flex justify-center items-center"
+          class="w-full h-full flex justify-center items-center active:bg-action-focus"
           class:text-primary-500={$page.url.pathname.startsWith(tab.path)}
           href={tab.path}
         >
