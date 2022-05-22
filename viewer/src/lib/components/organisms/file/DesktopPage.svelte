@@ -1,8 +1,8 @@
 <script lang="ts">
   import LabeledSwitch from "$lib/components/atoms/LabeledSwitch.svelte";
+  import QueueButton from "$lib/components/organisms/widget/QueueButton.svelte";
   import TreeFrame from "./TreeFrame.svelte";
   import SyncButton from "./SyncButton.svelte";
-  import QueueButton from "./QueueButton.svelte";
 
   let twoColumn = false;
 </script>

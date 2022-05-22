@@ -4,9 +4,9 @@
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
+  import QueueButton from "$lib/components/organisms/widget/QueueButton.svelte";
   import Breadcrumb from "./Breadcrumb.svelte";
   import SyncButton from "./SyncButton.svelte";
-  import QueueButton from "./QueueButton.svelte";
   import SortButton from "./SortButton.svelte";
 
   type Events = {
