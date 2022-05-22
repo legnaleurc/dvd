@@ -1,6 +1,7 @@
 <script lang="ts">
   import { writable } from "svelte/store";
 
+  import { getSelectionContext } from "$lib/stores/selection";
   import { getSearchContext } from "$lib/stores/search";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
@@ -8,6 +9,7 @@
   import LabeledSwitch from "$lib/components/atoms/LabeledSwitch.svelte";
   import HistoryModal from "./HistoryModal.svelte";
 
+  const { deselectAll } = getSelectionContext();
   const { searchName, showDetail } = getSearchContext();
 
   let text = "";
@@ -22,6 +24,7 @@
     if (!text) {
       return;
     }
+    deselectAll();
     searchName(text);
   }
 </script>
