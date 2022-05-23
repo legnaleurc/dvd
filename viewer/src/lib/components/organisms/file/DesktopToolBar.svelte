@@ -2,19 +2,21 @@
   import { getComicContext } from "$lib/stores/comic";
   import { getFileSystemContext } from "$lib/stores/filesystem";
   import { getSelectionContext } from "$lib/stores/selection";
+  import { getVideoContext } from "$lib/stores/video";
   import CopyUrlButton from "$lib/components/molecules/CopyUrlButton.svelte";
   import DeselectAllButton from "$lib/components/molecules/DeselectAllButton.svelte";
   import DownloadButton from "$lib/components/molecules/DownloadButton.svelte";
   import InternalImageButton from "$lib/components/molecules/InternalImageButton.svelte";
+  import InternalVideoButton from "$lib/components/molecules/InternalVideoButton.svelte";
   import RenameButton from "$lib/components/organisms/widget/RenameButton.svelte";
   import TrashButton from "$lib/components/organisms/widget/TrashButton.svelte";
-  import InternalVideoButton from "$lib/components/organisms/widget/InternalVideoButton.svelte";
   import SortButton from "./SortButton.svelte";
   import CreateFolderButton from "./CreateFolderButton.svelte";
 
   const { openComic } = getComicContext();
   const { nodeMap, sync } = getFileSystemContext();
   const { selectedId, deselectAll } = getSelectionContext();
+  const { openVideo } = getVideoContext();
 
   function getNameById(id: string) {
     return $nodeMap[id]?.name ?? "";
@@ -43,7 +45,7 @@
       {deselectAll}
       {openComic}
     />
-    <InternalVideoButton />
+    <InternalVideoButton selectedId={$selectedId} {deselectAll} {openVideo} />
     <RenameButton {getNameById} on:afterrename={handleAfterAction} />
     <CreateFolderButton
       {getNameById}
