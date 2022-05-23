@@ -1,10 +1,20 @@
 <script lang="ts">
+  import { getFileSystemContext } from "$lib/stores/filesystem";
+  import { getQueueContext } from "$lib/stores/queue";
   import LabeledSwitch from "$lib/components/atoms/LabeledSwitch.svelte";
-  import QueueButton from "$lib/components/organisms/widget/QueueButton.svelte";
+  import QueueButton from "$lib/components/molecules/QueueButton.svelte";
   import TreeFrame from "./TreeFrame.svelte";
   import SyncButton from "./SyncButton.svelte";
 
+  const { nodeMap } = getFileSystemContext();
+  const { pendingList, pendingCount, resolvedCount, rejectedCount } =
+    getQueueContext();
+
   let twoColumn = false;
+
+  function getNameById(id: string) {
+    return $nodeMap[id].name;
+  }
 </script>
 
 <div class="w-full h-full flex flex-col">
@@ -18,7 +28,13 @@
     </div>
     <div class="flex-1" />
     <div class="flex-0 flex">
-      <QueueButton />
+      <QueueButton
+        {getNameById}
+        pendingList={$pendingList}
+        pendingCount={$pendingCount}
+        resolvedCount={$resolvedCount}
+        rejectedCount={$rejectedCount}
+      />
       <SyncButton />
     </div>
   </div>
