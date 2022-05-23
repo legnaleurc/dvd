@@ -2,9 +2,8 @@
   import { createEventDispatcher } from "svelte";
 
   import type { SvelteCustomEvents } from "$lib/types/traits";
-  import { getSelectionContext } from "$lib/stores/selection";
-  import Modal from "$lib/components/molecules/Modal.svelte";
   import Button from "$lib/components/atoms/Button.svelte";
+  import Modal from "./Modal.svelte";
 
   type Events = {
     hide: null;
@@ -13,14 +12,14 @@
   type $$Events = SvelteCustomEvents<Events>;
 
   export let shortcut: string;
+  export let selectedId: Set<string>;
 
-  const { selectedId } = getSelectionContext();
   const dispatch = createEventDispatcher<Events>();
 </script>
 
 <Modal show={shortcut.length > 0} on:hide>
   <span slot="title">Warning</span>
-  <div slot="body">About to move {$selectedId.size} item(s) to {shortcut}!</div>
+  <div slot="body">About to move {selectedId.size} item(s) to {shortcut}!</div>
   <div slot="footer" class="flex">
     <div class="flex-0">
       <Button

@@ -1,13 +1,17 @@
 <script lang="ts">
   import { getComicContext } from "$lib/stores/comic";
+  import { getQueueContext } from "$lib/stores/queue";
   import { getSearchContext } from "$lib/stores/search";
   import { getSelectionContext } from "$lib/stores/selection";
+  import { getShortcutContext } from "$lib/stores/shortcut";
   import { getVideoContext } from "$lib/stores/video";
   import ToolBar from "$lib/components/organisms/widget/ToolBar.svelte";
 
   const { openComic } = getComicContext();
   const { resultMap } = getSearchContext();
+  const { moveNodesToPath } = getQueueContext();
   const { selectedId, deselectAll, deselectList } = getSelectionContext();
+  const { shortcutList } = getShortcutContext();
   const { openVideo } = getVideoContext();
 
   function getNameById(id: string) {
@@ -26,5 +30,7 @@
   {deselectList}
   {openComic}
   {openVideo}
+  {moveNodesToPath}
+  shortcutList={$shortcutList}
   selectedId={$selectedId}
 />

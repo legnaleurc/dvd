@@ -5,7 +5,7 @@
   import InternalImageButton from "$lib/components/molecules/InternalImageButton.svelte";
   import InternalVideoButton from "$lib/components/molecules/InternalVideoButton.svelte";
   import RenameButton from "$lib/components/molecules/RenameButton.svelte";
-  import ShortcutButton from "./ShortcutButton.svelte";
+  import ShortcutButton from "$lib/components/molecules/ShortcutButton.svelte";
   import TrashButton from "./TrashButton.svelte";
 
   type Events = {
@@ -22,6 +22,11 @@
   export let selectedId: Set<string>;
   export let openComic: (id: string, name: string) => void;
   export let openVideo: (id: string) => void;
+  export let shortcutList: string[];
+  export let moveNodesToPath: (
+    idList: string[],
+    dstPath: string,
+  ) => Promise<void>;
 </script>
 
 <div class="flex bg-paper-800">
@@ -34,7 +39,13 @@
     <ExternalOpenButton {getNameById} {getMimeTypeById} {selectedId} />
     <InternalVideoButton {selectedId} {deselectAll} {openVideo} />
     <RenameButton {getNameById} {selectedId} {deselectList} on:afterrename />
-    <ShortcutButton on:aftermove />
+    <ShortcutButton
+      {selectedId}
+      {shortcutList}
+      {deselectList}
+      {moveNodesToPath}
+      on:aftermove
+    />
     <InternalImageButton {getNameById} {selectedId} {deselectAll} {openComic} />
   </div>
 </div>
