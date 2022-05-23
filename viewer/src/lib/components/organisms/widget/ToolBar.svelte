@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import DeselectAllButton from "$lib/components/molecules/DeselectAllButton.svelte";
+  import ExternalOpenButton from "$lib/components/molecules/ExternalOpenButton.svelte";
   import RenameButton from "./RenameButton.svelte";
   import ShortcutButton from "./ShortcutButton.svelte";
   import TrashButton from "./TrashButton.svelte";
-  import ExternalOpenButton from "./ExternalOpenButton.svelte";
   import InternalImageButton from "./InternalImageButton.svelte";
   import InternalVideoButton from "./InternalVideoButton.svelte";
 
@@ -28,7 +28,7 @@
   <div class="flex-1" />
   <div class="flex-0">
     <TrashButton on:aftertrash />
-    <ExternalOpenButton {getNameById} {getMimeTypeById} />
+    <ExternalOpenButton {getNameById} {getMimeTypeById} {selectedId} />
     <InternalVideoButton />
     <RenameButton {getNameById} on:afterrename />
     <ShortcutButton on:aftermove />
