@@ -6,7 +6,7 @@
   import InternalVideoButton from "$lib/components/molecules/InternalVideoButton.svelte";
   import RenameButton from "$lib/components/molecules/RenameButton.svelte";
   import ShortcutButton from "$lib/components/molecules/ShortcutButton.svelte";
-  import TrashButton from "./TrashButton.svelte";
+  import TrashButton from "$lib/components/molecules/TrashButton.svelte";
 
   type Events = {
     aftermove: null;
@@ -27,6 +27,7 @@
     idList: string[],
     dstPath: string,
   ) => Promise<void>;
+  export let trashNodes: (idList: string[]) => Promise<void>;
 </script>
 
 <div class="flex bg-paper-800">
@@ -35,7 +36,7 @@
   </div>
   <div class="flex-1" />
   <div class="flex-0">
-    <TrashButton on:aftertrash />
+    <TrashButton {selectedId} {deselectList} {trashNodes} on:aftertrash />
     <ExternalOpenButton {getNameById} {getMimeTypeById} {selectedId} />
     <InternalVideoButton {selectedId} {deselectAll} {openVideo} />
     <RenameButton {getNameById} {selectedId} {deselectList} on:afterrename />

@@ -9,7 +9,7 @@
 
   const { openComic } = getComicContext();
   const { nodeMap, sync } = getFileSystemContext();
-  const { moveNodesToPath } = getQueueContext();
+  const { moveNodesToPath, trashNodes } = getQueueContext();
   const { selectedId, deselectAll, deselectList } = getSelectionContext();
   const { shortcutList } = getShortcutContext();
   const { openVideo } = getVideoContext();
@@ -35,6 +35,7 @@
   {openComic}
   {openVideo}
   {moveNodesToPath}
+  {trashNodes}
   selectedId={$selectedId}
   shortcutList={$shortcutList}
   on:aftermove={handleAfterAction}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getComicContext } from "$lib/stores/comic";
   import { getFileSystemContext } from "$lib/stores/filesystem";
+  import { getQueueContext } from "$lib/stores/queue";
   import { getSelectionContext } from "$lib/stores/selection";
   import { getVideoContext } from "$lib/stores/video";
   import CopyUrlButton from "$lib/components/molecules/CopyUrlButton.svelte";
@@ -9,12 +10,13 @@
   import InternalImageButton from "$lib/components/molecules/InternalImageButton.svelte";
   import InternalVideoButton from "$lib/components/molecules/InternalVideoButton.svelte";
   import RenameButton from "$lib/components/molecules/RenameButton.svelte";
-  import TrashButton from "$lib/components/organisms/widget/TrashButton.svelte";
+  import TrashButton from "$lib/components/molecules/TrashButton.svelte";
   import SortButton from "./SortButton.svelte";
   import CreateFolderButton from "./CreateFolderButton.svelte";
 
   const { openComic } = getComicContext();
   const { nodeMap, sync } = getFileSystemContext();
+  const { trashNodes } = getQueueContext();
   const { selectedId, deselectAll, deselectList } = getSelectionContext();
   const { openVideo } = getVideoContext();
 
@@ -63,6 +65,11 @@
   </div>
   <div class="flex-1" />
   <div class="flex-0 flex flex-col">
-    <TrashButton on:aftertrash={handleAfterAction} />
+    <TrashButton
+      selectedId={$selectedId}
+      {deselectList}
+      {trashNodes}
+      on:aftertrash={handleAfterAction}
+    />
   </div>
 </div>
