@@ -5,7 +5,7 @@
   import { getSelectionContext } from "$lib/stores/selection";
   import { getShortcutContext } from "$lib/stores/shortcut";
   import { getVideoContext } from "$lib/stores/video";
-  import ToolBar from "$lib/components/organisms/widget/ToolBar.svelte";
+  import HorizontalToolBar from "$lib/components/molecules/HorizontalToolBar.svelte";
 
   const { openComic } = getComicContext();
   const { resultMap } = getSearchContext();
@@ -23,7 +23,7 @@
   }
 </script>
 
-<ToolBar
+<HorizontalToolBar
   {getNameById}
   {getMimeTypeById}
   {deselectAll}

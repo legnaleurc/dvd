@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { SvelteCustomEvents } from "$lib/types/traits";
-  import DeselectAllButton from "$lib/components/molecules/DeselectAllButton.svelte";
-  import ExternalOpenButton from "$lib/components/molecules/ExternalOpenButton.svelte";
-  import InternalImageButton from "$lib/components/molecules/InternalImageButton.svelte";
-  import InternalVideoButton from "$lib/components/molecules/InternalVideoButton.svelte";
-  import RenameButton from "$lib/components/molecules/RenameButton.svelte";
-  import ShortcutButton from "$lib/components/molecules/ShortcutButton.svelte";
-  import TrashButton from "$lib/components/molecules/TrashButton.svelte";
+  import DeselectAllButton from "./DeselectAllButton.svelte";
+  import ExternalOpenButton from "./ExternalOpenButton.svelte";
+  import InternalImageButton from "./InternalImageButton.svelte";
+  import InternalVideoButton from "./InternalVideoButton.svelte";
+  import RenameButton from "./RenameButton.svelte";
+  import ShortcutButton from "./ShortcutButton.svelte";
+  import TrashButton from "./TrashButton.svelte";
 
   type Events = {
     aftermove: null;
