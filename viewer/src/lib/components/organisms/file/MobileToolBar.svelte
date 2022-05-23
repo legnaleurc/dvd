@@ -7,7 +7,7 @@
 
   const { openComic } = getComicContext();
   const { nodeMap, sync } = getFileSystemContext();
-  const { selectedId, deselectAll } = getSelectionContext();
+  const { selectedId, deselectAll, deselectList } = getSelectionContext();
   const { openVideo } = getVideoContext();
 
   function getNameById(id: string) {
@@ -27,6 +27,7 @@
   {getNameById}
   {getMimeTypeById}
   {deselectAll}
+  {deselectList}
   {openComic}
   {openVideo}
   selectedId={$selectedId}

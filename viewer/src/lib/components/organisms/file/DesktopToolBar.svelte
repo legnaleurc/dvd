@@ -8,14 +8,14 @@
   import DownloadButton from "$lib/components/molecules/DownloadButton.svelte";
   import InternalImageButton from "$lib/components/molecules/InternalImageButton.svelte";
   import InternalVideoButton from "$lib/components/molecules/InternalVideoButton.svelte";
-  import RenameButton from "$lib/components/organisms/widget/RenameButton.svelte";
+  import RenameButton from "$lib/components/molecules/RenameButton.svelte";
   import TrashButton from "$lib/components/organisms/widget/TrashButton.svelte";
   import SortButton from "./SortButton.svelte";
   import CreateFolderButton from "./CreateFolderButton.svelte";
 
   const { openComic } = getComicContext();
   const { nodeMap, sync } = getFileSystemContext();
-  const { selectedId, deselectAll } = getSelectionContext();
+  const { selectedId, deselectAll, deselectList } = getSelectionContext();
   const { openVideo } = getVideoContext();
 
   function getNameById(id: string) {
@@ -46,7 +46,12 @@
       {openComic}
     />
     <InternalVideoButton selectedId={$selectedId} {deselectAll} {openVideo} />
-    <RenameButton {getNameById} on:afterrename={handleAfterAction} />
+    <RenameButton
+      {getNameById}
+      selectedId={$selectedId}
+      {deselectList}
+      on:afterrename={handleAfterAction}
+    />
     <CreateFolderButton
       {getNameById}
       {isFolderById}

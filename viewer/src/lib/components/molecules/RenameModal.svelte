@@ -4,7 +4,7 @@
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import Button from "$lib/components/atoms/Button.svelte";
   import TextInput from "$lib/components/atoms/TextInput.svelte";
-  import Modal from "$lib/components/molecules/Modal.svelte";
+  import Modal from "./Modal.svelte";
 
   type Events = {
     hide: null;

@@ -4,7 +4,7 @@
   import ExternalOpenButton from "$lib/components/molecules/ExternalOpenButton.svelte";
   import InternalImageButton from "$lib/components/molecules/InternalImageButton.svelte";
   import InternalVideoButton from "$lib/components/molecules/InternalVideoButton.svelte";
-  import RenameButton from "./RenameButton.svelte";
+  import RenameButton from "$lib/components/molecules/RenameButton.svelte";
   import ShortcutButton from "./ShortcutButton.svelte";
   import TrashButton from "./TrashButton.svelte";
 
@@ -18,6 +18,7 @@
   export let getNameById: (id: string) => string;
   export let getMimeTypeById: (id: string) => string;
   export let deselectAll: () => void;
+  export let deselectList: (idList: string[]) => void;
   export let selectedId: Set<string>;
   export let openComic: (id: string, name: string) => void;
   export let openVideo: (id: string) => void;
@@ -32,7 +33,7 @@
     <TrashButton on:aftertrash />
     <ExternalOpenButton {getNameById} {getMimeTypeById} {selectedId} />
     <InternalVideoButton {selectedId} {deselectAll} {openVideo} />
-    <RenameButton {getNameById} on:afterrename />
+    <RenameButton {getNameById} {selectedId} {deselectList} on:afterrename />
     <ShortcutButton on:aftermove />
     <InternalImageButton {getNameById} {selectedId} {deselectAll} {openComic} />
   </div>

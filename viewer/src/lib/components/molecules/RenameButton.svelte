@@ -4,7 +4,6 @@
 
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import { renameNode } from "$lib/tools/api";
-  import { getSelectionContext } from "$lib/stores/selection";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import RenameModal from "./RenameModal.svelte";
@@ -15,16 +14,17 @@
   type $$Events = SvelteCustomEvents<Events>;
 
   export let getNameById: (id: string) => string;
+  export let selectedId: Set<string>;
+  export let deselectList: (idList: string[]) => void;
 
-  const { selectedId, deselectList } = getSelectionContext();
   const dispatch = createEventDispatcher<Events>();
 
   const renamingId = writable("");
 
-  $: isSelectingOne = $selectedId.size === 1;
+  $: isSelectingOne = selectedId.size === 1;
 
   function handleShowRename() {
-    const idList = Array.from($selectedId);
+    const idList = Array.from(selectedId);
     const id = idList[0];
     renamingId.set(id);
   }
