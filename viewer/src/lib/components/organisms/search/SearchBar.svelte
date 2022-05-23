@@ -1,16 +1,20 @@
 <script lang="ts">
   import { writable } from "svelte/store";
 
+  import { getQueueContext } from "$lib/stores/queue";
   import { getSelectionContext } from "$lib/stores/selection";
   import { getSearchContext } from "$lib/stores/search";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import SearchInput from "$lib/components/atoms/SearchInput.svelte";
   import LabeledSwitch from "$lib/components/atoms/LabeledSwitch.svelte";
+  import QueueButton from "$lib/components/molecules/QueueButton.svelte";
   import HistoryModal from "./HistoryModal.svelte";
 
+  const { pendingList, pendingCount, resolvedCount, rejectedCount } =
+    getQueueContext();
   const { deselectAll } = getSelectionContext();
-  const { searchName, showDetail } = getSearchContext();
+  const { searchName, showDetail, resultMap } = getSearchContext();
 
   let text = "";
   let showMenu = false;
@@ -26,6 +30,10 @@
     }
     deselectAll();
     searchName(text);
+  }
+
+  function getNameById(id: string) {
+    return $resultMap[id]?.name ?? "";
   }
 </script>
 
@@ -53,6 +61,13 @@
     </div>
     <div class="flex-1" />
     <div class="flex-0">
+      <QueueButton
+        {getNameById}
+        pendingList={$pendingList}
+        pendingCount={$pendingCount}
+        rejectedCount={$rejectedCount}
+        resolvedCount={$resolvedCount}
+      />
       <IconButton on:click={() => showHistory.set(true)}>
         <Icon name="history" />
       </IconButton>
