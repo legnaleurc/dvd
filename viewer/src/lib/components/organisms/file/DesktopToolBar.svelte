@@ -1,16 +1,18 @@
 <script lang="ts">
+  import { getComicContext } from "$lib/stores/comic";
   import { getFileSystemContext } from "$lib/stores/filesystem";
   import { getSelectionContext } from "$lib/stores/selection";
   import CopyUrlButton from "$lib/components/molecules/CopyUrlButton.svelte";
   import DeselectAllButton from "$lib/components/molecules/DeselectAllButton.svelte";
   import DownloadButton from "$lib/components/molecules/DownloadButton.svelte";
+  import InternalImageButton from "$lib/components/molecules/InternalImageButton.svelte";
   import RenameButton from "$lib/components/organisms/widget/RenameButton.svelte";
   import TrashButton from "$lib/components/organisms/widget/TrashButton.svelte";
-  import InternalImageButton from "$lib/components/organisms/widget/InternalImageButton.svelte";
   import InternalVideoButton from "$lib/components/organisms/widget/InternalVideoButton.svelte";
   import SortButton from "./SortButton.svelte";
   import CreateFolderButton from "./CreateFolderButton.svelte";
 
+  const { openComic } = getComicContext();
   const { nodeMap, sync } = getFileSystemContext();
   const { selectedId, deselectAll } = getSelectionContext();
 
@@ -35,7 +37,12 @@
   <div class="flex-0 flex flex-col">
     <SortButton />
     <DeselectAllButton selectedId={$selectedId} {deselectAll} />
-    <InternalImageButton {getNameById} />
+    <InternalImageButton
+      {getNameById}
+      selectedId={$selectedId}
+      {deselectAll}
+      {openComic}
+    />
     <InternalVideoButton />
     <RenameButton {getNameById} on:afterrename={handleAfterAction} />
     <CreateFolderButton

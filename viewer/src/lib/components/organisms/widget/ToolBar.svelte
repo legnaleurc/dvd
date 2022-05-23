@@ -2,10 +2,10 @@
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import DeselectAllButton from "$lib/components/molecules/DeselectAllButton.svelte";
   import ExternalOpenButton from "$lib/components/molecules/ExternalOpenButton.svelte";
+  import InternalImageButton from "$lib/components/molecules/InternalImageButton.svelte";
   import RenameButton from "./RenameButton.svelte";
   import ShortcutButton from "./ShortcutButton.svelte";
   import TrashButton from "./TrashButton.svelte";
-  import InternalImageButton from "./InternalImageButton.svelte";
   import InternalVideoButton from "./InternalVideoButton.svelte";
 
   type Events = {
@@ -19,6 +19,7 @@
   export let getMimeTypeById: (id: string) => string;
   export let deselectAll: () => void;
   export let selectedId: Set<string>;
+  export let openComic: (id: string, name: string) => void;
 </script>
 
 <div class="flex bg-paper-800">
@@ -32,6 +33,6 @@
     <InternalVideoButton />
     <RenameButton {getNameById} on:afterrename />
     <ShortcutButton on:aftermove />
-    <InternalImageButton {getNameById} />
+    <InternalImageButton {getNameById} {selectedId} {deselectAll} {openComic} />
   </div>
 </div>
