@@ -2,9 +2,9 @@
   import { getFileSystemContext } from "$lib/stores/filesystem";
   import { getSelectionContext } from "$lib/stores/selection";
   import CopyUrlButton from "$lib/components/molecules/CopyUrlButton.svelte";
+  import DeselectAllButton from "$lib/components/molecules/DeselectAllButton.svelte";
   import RenameButton from "$lib/components/organisms/widget/RenameButton.svelte";
   import TrashButton from "$lib/components/organisms/widget/TrashButton.svelte";
-  import DeselectAllButton from "$lib/components/organisms/widget/DeselectAllButton.svelte";
   import InternalImageButton from "$lib/components/organisms/widget/InternalImageButton.svelte";
   import DownloadButton from "$lib/components/organisms/widget/DownloadButton.svelte";
   import InternalVideoButton from "$lib/components/organisms/widget/InternalVideoButton.svelte";
@@ -12,7 +12,7 @@
   import CreateFolderButton from "./CreateFolderButton.svelte";
 
   const { nodeMap, sync } = getFileSystemContext();
-  const { selectedId } = getSelectionContext();
+  const { selectedId, deselectAll } = getSelectionContext();
 
   function getNameById(id: string) {
     return $nodeMap[id]?.name ?? "";
@@ -34,7 +34,7 @@
 <div class="w-full h-full flex flex-col bg-paper-800">
   <div class="flex-0 flex flex-col">
     <SortButton />
-    <DeselectAllButton />
+    <DeselectAllButton selectedId={$selectedId} {deselectAll} />
     <InternalImageButton {getNameById} />
     <InternalVideoButton />
     <RenameButton {getNameById} on:afterrename={handleAfterAction} />
