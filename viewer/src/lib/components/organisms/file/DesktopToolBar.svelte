@@ -1,16 +1,18 @@
 <script lang="ts">
   import { getFileSystemContext } from "$lib/stores/filesystem";
+  import { getSelectionContext } from "$lib/stores/selection";
+  import CopyUrlButton from "$lib/components/molecules/CopyUrlButton.svelte";
   import RenameButton from "$lib/components/organisms/widget/RenameButton.svelte";
   import TrashButton from "$lib/components/organisms/widget/TrashButton.svelte";
   import DeselectAllButton from "$lib/components/organisms/widget/DeselectAllButton.svelte";
   import InternalImageButton from "$lib/components/organisms/widget/InternalImageButton.svelte";
-  import CopyUrlButton from "$lib/components/organisms/widget/CopyUrlButton.svelte";
   import DownloadButton from "$lib/components/organisms/widget/DownloadButton.svelte";
   import InternalVideoButton from "$lib/components/organisms/widget/InternalVideoButton.svelte";
   import SortButton from "./SortButton.svelte";
   import CreateFolderButton from "./CreateFolderButton.svelte";
 
   const { nodeMap, sync } = getFileSystemContext();
+  const { selectedId } = getSelectionContext();
 
   function getNameById(id: string) {
     return $nodeMap[id]?.name ?? "";
@@ -43,7 +45,7 @@
       on:aftercreate={handleAfterAction}
     />
     <DownloadButton {getNameById} {isFolderById} />
-    <CopyUrlButton {getNameById} {isFolderById} />
+    <CopyUrlButton {getNameById} {isFolderById} selectedId={$selectedId} />
   </div>
   <div class="flex-1" />
   <div class="flex-0 flex flex-col">
