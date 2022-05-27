@@ -1,49 +1,21 @@
 import { getContext, setContext } from "svelte";
-import { writable } from "svelte/store";
 
-const CONTEXT_KEY = Symbol();
+import { createStore } from "./idset";
 
-export function createStore() {
-  const selectedId = writable<Set<string>>(new Set());
-
-  function toggleId(id: string) {
-    selectedId.update((self) => {
-      if (self.has(id)) {
-        self.delete(id);
-      } else {
-        self.add(id);
-      }
-      return self;
-    });
-  }
-
-  function deselectList(idList: string[]) {
-    selectedId.update((self) => {
-      for (const id of idList) {
-        self.delete(id);
-      }
-      return self;
-    });
-  }
-
-  function deselectAll() {
-    selectedId.set(new Set());
-  }
-
-  return {
-    selectedId,
-    toggleId,
-    deselectAll,
-    deselectList,
-  };
-}
-
-export type SelectionStore = ReturnType<typeof createStore>;
+const KEY = Symbol();
 
 export function setSelectionContext() {
-  setContext(CONTEXT_KEY, createStore());
+  const store = createStore();
+  return setContext(KEY, {
+    selectedId: store.idSet,
+    toggleId: store.toggleId,
+    deselectAll: store.reset,
+    deselectList: store.deleteList,
+  });
 }
 
+export type SelectionStore = ReturnType<typeof setSelectionContext>;
+
 export function getSelectionContext() {
-  return getContext<SelectionStore>(CONTEXT_KEY);
+  return getContext<SelectionStore>(KEY);
 }
