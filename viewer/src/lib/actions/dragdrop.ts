@@ -9,7 +9,7 @@ export function drag(node: HTMLElement, params?: DragActionParams) {
     el.classList.add("dragging");
     event.dataTransfer.effectAllowed = "move";
     if (params?.onDragStart) {
-      params?.onDragStart(event);
+      params.onDragStart(event);
     }
   }
 
@@ -23,7 +23,7 @@ export function drag(node: HTMLElement, params?: DragActionParams) {
       return;
     }
     if (params?.onDragEnd) {
-      params?.onDragEnd(event);
+      params.onDragEnd(event);
     }
   }
 
@@ -74,7 +74,7 @@ export function drop(node: HTMLElement, params?: DropActionParams) {
     dragCounter = 0;
     el.classList.remove("drag-over");
     if (params?.onDrop) {
-      params?.onDrop(event);
+      params.onDrop(event);
     }
   }
 
