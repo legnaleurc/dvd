@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { setDragDropContext } from "$lib/stores/dragdrop";
   import { getFileSystemContext } from "$lib/stores/filesystem";
   import { getQueueContext } from "$lib/stores/queue";
   import LabeledSwitch from "$lib/components/atoms/LabeledSwitch.svelte";
@@ -9,6 +10,7 @@
   const { nodeMap } = getFileSystemContext();
   const { pendingList, pendingCount, resolvedCount, rejectedCount } =
     getQueueContext();
+  setDragDropContext();
 
   let twoColumn = false;
 

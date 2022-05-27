@@ -3,6 +3,7 @@
 
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import { callExternal } from "$lib/tools/external";
+  import { getDragDropContext } from "$lib/stores/dragdrop";
   import { getFileSystemContext } from "$lib/stores/filesystem";
   import { getQueueContext } from "$lib/stores/queue";
   import { getSelectionContext } from "$lib/stores/selection";
@@ -19,7 +20,8 @@
 
   const { nodeMap, childrenMap, loadChildren, sync } = getFileSystemContext();
   const { moveNodes } = getQueueContext();
-  const { selectedId, toggleId, deselectAll } = getSelectionContext();
+  const { selectedId, toggleId, deselectList } = getSelectionContext();
+  const { acceptedId } = getDragDropContext();
   const dispatch = createEventDispatcher<Events>();
 
   export let id: string;
@@ -62,31 +64,34 @@
     await callExternal(id, node.name, node.mimeType);
   }
 
-  function handleDragStart(event: DragEvent) {
+  async function handleDragEnd() {
+    const dst = $acceptedId;
+    $acceptedId = "";
+    if (!dst) {
+      return;
+    }
     const list = Array.from($selectedId);
-    event.dataTransfer.setData("text/plain", JSON.stringify(list));
+    await acceptNodes(list, dst);
+    deselectList(list);
   }
 
-  function handleDragEnd() {
-    deselectAll();
+  // NOTE
+  // Will always fires before dragend by spec.
+  function handleDrop() {
+    $acceptedId = id;
   }
 
-  function handleDrop(event: DragEvent) {
-    const raw = event.dataTransfer.getData("text/plain");
-    const list: string[] = JSON.parse(raw);
-    acceptNodes(list);
-  }
-
-  async function acceptNodes(list: string[]) {
-    if (node.isFolder) {
+  async function acceptNodes(list: string[], dst: string) {
+    const dstNode = $nodeMap[dst];
+    if (dstNode.isFolder) {
       // This node is a folder, accepts action.
-      await moveNodes(list, id);
+      await moveNodes(list, dst);
     } else {
       // Send to the parent of this node.
-      if (!node.parentId) {
+      if (!dstNode.parentId) {
         return;
       }
-      await moveNodes(list, node.parentId);
+      await moveNodes(list, dstNode.parentId);
     }
     await sync();
   }
@@ -114,7 +119,6 @@
         class="flex-1 break-all"
         draggable={selected}
         use:drag={{
-          onDragStart: handleDragStart,
           onDragEnd: handleDragEnd,
         }}
         on:click={handleSingleClick}
