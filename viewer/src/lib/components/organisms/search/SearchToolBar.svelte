@@ -43,18 +43,25 @@
     await renameNode(id, name);
     enableList(idList);
   }
+
+  async function handleTrash() {
+    const idList = Array.from($selectedId);
+    disableList(idList);
+    deselectList(idList);
+    await trashNodes(idList);
+    enableList(idList);
+  }
 </script>
 
 <HorizontalToolBar
   {getNameById}
   {getMimeTypeById}
   {deselectAll}
-  {deselectList}
   {openComic}
   {openVideo}
-  {trashNodes}
   shortcutList={$shortcutList}
   selectedId={$selectedId}
   on:move={handleMove}
   on:rename={handleRename}
+  on:trash={handleTrash}
 />

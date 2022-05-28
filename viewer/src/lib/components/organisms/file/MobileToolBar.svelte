@@ -25,10 +25,6 @@
     return $nodeMap[id]?.mimeType ?? "";
   }
 
-  async function handleAfterAction() {
-    await sync();
-  }
-
   async function handleMove(event: CustomEvent<string>) {
     const shortcut = event.detail;
     const idList = Array.from($selectedId);
@@ -49,19 +45,26 @@
     await sync();
     enableList(idList);
   }
+
+  async function handleTrash() {
+    const idList = Array.from($selectedId);
+    disableList(idList);
+    deselectList(idList);
+    await trashNodes(idList);
+    await sync();
+    enableList(idList);
+  }
 </script>
 
 <HorizontalToolBar
   {getNameById}
   {getMimeTypeById}
   {deselectAll}
-  {deselectList}
   {openComic}
   {openVideo}
-  {trashNodes}
   selectedId={$selectedId}
   shortcutList={$shortcutList}
   on:move={handleMove}
-  on:aftertrash={handleAfterAction}
+  on:trash={handleTrash}
   on:rename={handleRename}
 />

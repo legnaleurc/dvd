@@ -49,6 +49,15 @@
     await sync();
     enableList(idList);
   }
+
+  async function handleTrash() {
+    const idList = Array.from($selectedId);
+    disableList(idList);
+    deselectList(idList);
+    await trashNodes(idList);
+    await sync();
+    enableList(idList);
+  }
 </script>
 
 <div class="w-full h-full flex flex-col bg-paper-800">
@@ -80,9 +89,7 @@
   <div class="flex-0 flex flex-col">
     <TrashButton
       selectedId={$selectedId}
-      {deselectList}
-      {trashNodes}
-      on:aftertrash={handleAfterAction}
+      on:trash={handleTrash}
     />
   </div>
 </div>

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import { writable } from "svelte/store";
 
   import type { SvelteCustomEvents } from "$lib/types/traits";
@@ -8,26 +7,15 @@
   import TrashModal from "./TrashModal.svelte";
 
   type Events = {
-    aftertrash: null;
+    trash: null;
   };
   type $$Events = SvelteCustomEvents<Events>;
 
   export let selectedId: Set<string>;
-  export let deselectList: (idList: string[]) => void;
-  export let trashNodes: (idList: string[]) => Promise<void>;
-
-  const dispatch = createEventDispatcher<Events>();
 
   const showTrash = writable(false);
 
   $: isSelectionEmpty = selectedId.size <= 0;
-
-  async function handleTrash() {
-    const idList = Array.from(selectedId);
-    await trashNodes(idList);
-    deselectList(idList);
-    dispatch("aftertrash");
-  }
 </script>
 
 <IconButton
@@ -41,5 +29,5 @@
   show={$showTrash}
   {selectedId}
   on:hide={() => showTrash.set(false)}
-  on:trash={handleTrash}
+  on:trash
 />
