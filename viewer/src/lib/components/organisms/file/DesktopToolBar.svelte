@@ -87,9 +87,6 @@
   </div>
   <div class="flex-1" />
   <div class="flex-0 flex flex-col">
-    <TrashButton
-      selectedId={$selectedId}
-      on:trash={handleTrash}
-    />
+    <TrashButton selectedId={$selectedId} on:trash={handleTrash} />
   </div>
 </div>

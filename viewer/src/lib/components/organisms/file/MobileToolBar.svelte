@@ -25,6 +25,10 @@
     return $nodeMap[id]?.mimeType ?? "";
   }
 
+  function isFolderById(id: string) {
+    return $nodeMap[id]?.isFolder ?? false;
+  }
+
   async function handleMove(event: CustomEvent<string>) {
     const shortcut = event.detail;
     const idList = Array.from($selectedId);
@@ -59,6 +63,7 @@
 <HorizontalToolBar
   {getNameById}
   {getMimeTypeById}
+  {isFolderById}
   {deselectAll}
   {openComic}
   {openVideo}
