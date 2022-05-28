@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { renameNode } from "$lib/tools/api";
   import { getComicContext } from "$lib/stores/comic";
   import { getDisabledContext } from "$lib/stores/disabled";
   import { getFileSystemContext } from "$lib/stores/filesystem";
@@ -37,6 +38,17 @@
     await sync();
     enableList(idList);
   }
+
+  async function handleRename(event: CustomEvent<string>) {
+    const name = event.detail;
+    const idList = Array.from($selectedId);
+    const id = idList[0];
+    disableList(idList);
+    deselectList(idList);
+    await renameNode(id, name);
+    await sync();
+    enableList(idList);
+  }
 </script>
 
 <HorizontalToolBar
@@ -51,5 +63,5 @@
   shortcutList={$shortcutList}
   on:move={handleMove}
   on:aftertrash={handleAfterAction}
-  on:afterrename={handleAfterAction}
+  on:rename={handleRename}
 />

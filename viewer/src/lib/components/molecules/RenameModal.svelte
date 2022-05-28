@@ -8,10 +8,7 @@
 
   type Events = {
     hide: null;
-    rename: {
-      id: string;
-      name: string;
-    };
+    rename: string;
   };
   type $$Events = SvelteCustomEvents<Events>;
 
@@ -26,10 +23,7 @@
     if (!newName) {
       return;
     }
-    dispatch("rename", {
-      id,
-      name: newName,
-    });
+    dispatch("rename", newName);
     dispatch("hide");
   }
 

@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { renameNode } from "$lib/tools/api";
   import { getComicContext } from "$lib/stores/comic";
+  import { getDisabledContext } from "$lib/stores/disabled";
   import { getFileSystemContext } from "$lib/stores/filesystem";
   import { getQueueContext } from "$lib/stores/queue";
   import { getSelectionContext } from "$lib/stores/selection";
@@ -15,6 +17,7 @@
   import CreateFolderButton from "./CreateFolderButton.svelte";
 
   const { openComic } = getComicContext();
+  const { disableList, enableList } = getDisabledContext();
   const { nodeMap, sync } = getFileSystemContext();
   const { trashNodes } = getQueueContext();
   const { selectedId, deselectAll, deselectList } = getSelectionContext();
@@ -35,6 +38,17 @@
   async function handleAfterAction() {
     await sync();
   }
+
+  async function handleRename(event: CustomEvent<string>) {
+    const name = event.detail;
+    const idList = Array.from($selectedId);
+    const id = idList[0];
+    disableList(idList);
+    deselectList(idList);
+    await renameNode(id, name);
+    await sync();
+    enableList(idList);
+  }
 </script>
 
 <div class="w-full h-full flex flex-col bg-paper-800">
@@ -51,8 +65,7 @@
     <RenameButton
       {getNameById}
       selectedId={$selectedId}
-      {deselectList}
-      on:afterrename={handleAfterAction}
+      on:rename={handleRename}
     />
     <CreateFolderButton
       {getNameById}

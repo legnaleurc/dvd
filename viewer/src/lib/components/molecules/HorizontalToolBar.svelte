@@ -11,7 +11,7 @@
   type Events = {
     move: string;
     aftertrash: null;
-    afterrename: null;
+    rename: string;
   };
   type $$Events = SvelteCustomEvents<Events>;
 
@@ -35,7 +35,7 @@
     <TrashButton {selectedId} {deselectList} {trashNodes} on:aftertrash />
     <ExternalOpenButton {getNameById} {getMimeTypeById} {selectedId} />
     <InternalVideoButton {selectedId} {deselectAll} {openVideo} />
-    <RenameButton {getNameById} {selectedId} {deselectList} on:afterrename />
+    <RenameButton {getNameById} {selectedId} on:rename />
     <ShortcutButton {selectedId} {shortcutList} on:move />
     <InternalImageButton {getNameById} {selectedId} {deselectAll} {openComic} />
   </div>
