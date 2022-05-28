@@ -8,7 +8,6 @@ export function setDisabledContext() {
   const store = createStore();
   return setContext(KEY, {
     disabledId: store.idSet,
-    toggleId: store.toggleId,
     enableAll: store.reset,
     enableList: store.deleteList,
     disableList: store.addList,
