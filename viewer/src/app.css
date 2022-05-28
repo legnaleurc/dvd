@@ -55,7 +55,7 @@
     right: var(--inset-right);
   }
 
-  .drag-over {
+  .drag-over.drop-enabled {
     background-color: black;
     transition: background-color 250ms ease-in-out;
   }

@@ -3,6 +3,7 @@
 
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import { callExternal } from "$lib/tools/external";
+  import { getDisabledContext } from "$lib/stores/disabled";
   import { getDragDropContext } from "$lib/stores/dragdrop";
   import { getFileSystemContext } from "$lib/stores/filesystem";
   import { getQueueContext } from "$lib/stores/queue";
@@ -18,10 +19,11 @@
   };
   type $$Events = SvelteCustomEvents<Events>;
 
+  const { disabledId, disableList, enableList } = getDisabledContext();
+  const { acceptedId } = getDragDropContext();
   const { nodeMap, childrenMap, loadChildren, sync } = getFileSystemContext();
   const { moveNodes } = getQueueContext();
   const { selectedId, toggleId, deselectList } = getSelectionContext();
-  const { acceptedId } = getDragDropContext();
   const dispatch = createEventDispatcher<Events>();
 
   export let id: string;
@@ -31,6 +33,7 @@
 
   $: node = $nodeMap[id];
   $: selected = $selectedId.has(id);
+  $: disabled = $disabledId.has(id);
 
   async function handleIndicatorClick() {
     if (!node.isFolder) {
@@ -52,6 +55,9 @@
   }
 
   function handleSingleClick(event: MouseEvent) {
+    if (disabled) {
+      return;
+    }
     toggleId(id);
     if (event.shiftKey) {
       dispatch("end", id);
@@ -71,8 +77,16 @@
       return;
     }
     const list = Array.from($selectedId);
-    await acceptNodes(list, dst);
+    disableList(list);
     deselectList(list);
+    await acceptNodes(list, dst);
+    enableList(list);
+  }
+
+  function handleDragEnter(event: DragEvent) {
+    if (disabled) {
+      event.dataTransfer.dropEffect = "none";
+    }
   }
 
   // NOTE
@@ -101,10 +115,12 @@
   <div class="flex flex-col">
     <div
       class="flex"
+      class:bg-action-selected={selected}
+      class:drop-enabled={!disabled}
       use:drop={{
+        onDragEnter: handleDragEnter,
         onDrop: handleDrop,
       }}
-      class:bg-action-selected={selected}
     >
       <div class="flex-0">
         <NodeIndicator
@@ -117,6 +133,7 @@
       </div>
       <div
         class="flex-1 break-all"
+        class:text-action-disabled={disabled}
         draggable={selected}
         use:drag={{
           onDragEnd: handleDragEnd,

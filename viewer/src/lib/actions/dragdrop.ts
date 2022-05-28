@@ -38,6 +38,7 @@ export function drag(node: HTMLElement, params?: DragActionParams) {
 }
 
 type DropActionParams = {
+  onDragEnter?: (event: DragEvent) => void;
   onDrop?: (event: DragEvent) => void;
 };
 export function drop(node: HTMLElement, params?: DropActionParams) {
@@ -50,6 +51,9 @@ export function drop(node: HTMLElement, params?: DropActionParams) {
     if (dragCounter === 0) {
       el.classList.add("drag-over");
       event.dataTransfer.dropEffect = "move";
+      if (params?.onDragEnter) {
+        params.onDragEnter(event);
+      }
     }
     dragCounter += 1;
   }

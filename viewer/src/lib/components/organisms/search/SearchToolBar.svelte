@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getComicContext } from "$lib/stores/comic";
+  import { getDisabledContext } from "$lib/stores/disabled";
   import { getQueueContext } from "$lib/stores/queue";
   import { getSearchContext } from "$lib/stores/search";
   import { getSelectionContext } from "$lib/stores/selection";
@@ -8,6 +9,7 @@
   import HorizontalToolBar from "$lib/components/molecules/HorizontalToolBar.svelte";
 
   const { openComic } = getComicContext();
+  const { disableList, enableList } = getDisabledContext();
   const { resultMap } = getSearchContext();
   const { moveNodesToPath, trashNodes } = getQueueContext();
   const { selectedId, deselectAll, deselectList } = getSelectionContext();
@@ -21,6 +23,15 @@
   function getMimeTypeById(id: string) {
     return $resultMap[id].mime_type;
   }
+
+  async function handleMove(event: CustomEvent<string>) {
+    const shortcut = event.detail;
+    const idList = Array.from($selectedId);
+    disableList(idList);
+    deselectList(idList);
+    await moveNodesToPath(idList, shortcut);
+    enableList(idList);
+  }
 </script>
 
 <HorizontalToolBar
@@ -30,8 +41,8 @@
   {deselectList}
   {openComic}
   {openVideo}
-  {moveNodesToPath}
   {trashNodes}
   shortcutList={$shortcutList}
   selectedId={$selectedId}
+  on:move={handleMove}
 />

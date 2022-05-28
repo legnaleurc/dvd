@@ -4,6 +4,7 @@
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import { getFileSystemContext } from "$lib/stores/filesystem";
   import { getSelectionContext } from "$lib/stores/selection";
+  import { getDisabledContext } from "$lib/stores/disabled";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import NodeIcon from "$lib/components/atoms/NodeIcon.svelte";
@@ -17,22 +18,31 @@
 
   const { nodeMap } = getFileSystemContext();
   const { selectedId, toggleId } = getSelectionContext();
+  const { disabledId } = getDisabledContext();
   const dispatch = createEventDispatcher<Events>();
+
+  $: selected = $selectedId.has(id);
+  $: disabled = $disabledId.has(id);
+  $: node = $nodeMap[id];
 
   function handleOpen() {
     dispatch("open", id);
   }
 
   function handleSelect() {
+    if (disabled) {
+      return;
+    }
     toggleId(id);
   }
-
-  $: selected = $selectedId.has(id);
-  $: node = $nodeMap[id];
 </script>
 
 {#if node}
-  <div class="flex" class:bg-action-selected={selected}>
+  <div
+    class="flex"
+    class:bg-action-selected={selected}
+    class:text-action-disabled={disabled}
+  >
     <div class="flex-1 flex" on:click={handleSelect}>
       <div class="w-12 h-12 p-3">
         <NodeIcon category={node.category} />

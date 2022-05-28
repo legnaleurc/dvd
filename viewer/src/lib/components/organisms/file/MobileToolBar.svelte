@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getComicContext } from "$lib/stores/comic";
+  import { getDisabledContext } from "$lib/stores/disabled";
   import { getFileSystemContext } from "$lib/stores/filesystem";
   import { getQueueContext } from "$lib/stores/queue";
   import { getSelectionContext } from "$lib/stores/selection";
@@ -8,6 +9,7 @@
   import HorizontalToolBar from "$lib/components/molecules/HorizontalToolBar.svelte";
 
   const { openComic } = getComicContext();
+  const { disableList, enableList } = getDisabledContext();
   const { nodeMap, sync } = getFileSystemContext();
   const { moveNodesToPath, trashNodes } = getQueueContext();
   const { selectedId, deselectAll, deselectList } = getSelectionContext();
@@ -25,6 +27,16 @@
   async function handleAfterAction() {
     await sync();
   }
+
+  async function handleMove(event: CustomEvent<string>) {
+    const shortcut = event.detail;
+    const idList = Array.from($selectedId);
+    disableList(idList);
+    deselectList(idList);
+    await moveNodesToPath(idList, shortcut);
+    await sync();
+    enableList(idList);
+  }
 </script>
 
 <HorizontalToolBar
@@ -34,11 +46,10 @@
   {deselectList}
   {openComic}
   {openVideo}
-  {moveNodesToPath}
   {trashNodes}
   selectedId={$selectedId}
   shortcutList={$shortcutList}
-  on:aftermove={handleAfterAction}
+  on:move={handleMove}
   on:aftertrash={handleAfterAction}
   on:afterrename={handleAfterAction}
 />

@@ -9,7 +9,7 @@
   import TrashButton from "./TrashButton.svelte";
 
   type Events = {
-    aftermove: null;
+    move: string;
     aftertrash: null;
     afterrename: null;
   };
@@ -23,10 +23,6 @@
   export let openComic: (id: string, name: string) => void;
   export let openVideo: (id: string) => void;
   export let shortcutList: string[];
-  export let moveNodesToPath: (
-    idList: string[],
-    dstPath: string,
-  ) => Promise<void>;
   export let trashNodes: (idList: string[]) => Promise<void>;
 </script>
 
@@ -40,13 +36,7 @@
     <ExternalOpenButton {getNameById} {getMimeTypeById} {selectedId} />
     <InternalVideoButton {selectedId} {deselectAll} {openVideo} />
     <RenameButton {getNameById} {selectedId} {deselectList} on:afterrename />
-    <ShortcutButton
-      {selectedId}
-      {shortcutList}
-      {deselectList}
-      {moveNodesToPath}
-      on:aftermove
-    />
+    <ShortcutButton {selectedId} {shortcutList} on:move />
     <InternalImageButton {getNameById} {selectedId} {deselectAll} {openComic} />
   </div>
 </div>

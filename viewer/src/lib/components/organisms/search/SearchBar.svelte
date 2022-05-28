@@ -1,6 +1,7 @@
 <script lang="ts">
   import { writable } from "svelte/store";
 
+  import { getDisabledContext } from "$lib/stores/disabled";
   import { getQueueContext } from "$lib/stores/queue";
   import { getSelectionContext } from "$lib/stores/selection";
   import { getSearchContext } from "$lib/stores/search";
@@ -11,6 +12,7 @@
   import QueueButton from "$lib/components/molecules/QueueButton.svelte";
   import HistoryModal from "./HistoryModal.svelte";
 
+  const { enableAll } = getDisabledContext();
   const { pendingList, pendingCount, resolvedCount, rejectedCount } =
     getQueueContext();
   const { deselectAll } = getSelectionContext();
@@ -28,6 +30,7 @@
     if (!text) {
       return;
     }
+    enableAll();
     deselectAll();
     searchName(text);
   }

@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { getDisabledContext } from "$lib/stores/disabled";
   import { getSelectionContext } from "$lib/stores/selection";
   import NodeParent from "./NodeParent.svelte";
 
   export let idList: string[];
 
+  const { disabledId } = getDisabledContext();
   const { selectedId } = getSelectionContext();
 
   let beginId = "";
@@ -13,14 +15,22 @@
     if (!beginId || !endId) {
       return;
     }
-    const begin = idList.indexOf(beginId);
-    const end = idList.indexOf(endId);
+    let begin = idList.indexOf(beginId);
+    let end = idList.indexOf(endId);
     if (begin < 0 || end < 0) {
       return;
     }
+    if (begin > end) {
+      [begin, end] = [end, begin];
+    }
+    const disabled = $disabledId;
     selectedId.update((self) => {
       for (let i = begin; i <= end; ++i) {
-        self.add(idList[i]);
+        const id = idList[i];
+        if (disabled.has(id)) {
+          continue;
+        }
+        self.add(id);
       }
       return self;
     });

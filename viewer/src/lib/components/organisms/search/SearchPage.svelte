@@ -8,6 +8,7 @@
   import { getFullScreenContext } from "$lib/stores/fullscreen";
   import { setSearchContext } from "$lib/stores/search";
   import { setQueueContext } from "$lib/stores/queue";
+  import { setDisabledContext } from "$lib/stores/disabled";
   import SearchToolBar from "./SearchToolBar.svelte";
   import SearchBar from "./SearchBar.svelte";
   import ResultList from "./ResultList.svelte";
@@ -15,6 +16,7 @@
   setSearchContext();
   setSelectionContext();
   setQueueContext();
+  setDisabledContext();
 
   const { isFullScreen } = getFullScreenContext();
   const { selectedId, deselectAll } = getSelectionContext();
