@@ -64,6 +64,8 @@
   <div class="flex-0 flex flex-col">
     <SortButton />
     <DeselectAllButton selectedId={$selectedId} {deselectAll} />
+  </div>
+  <div class="flex-0 flex flex-col overflow-y-auto overflow-x-hidden">
     <InternalImageButton
       {getNameById}
       selectedId={$selectedId}
