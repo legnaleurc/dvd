@@ -1,16 +1,18 @@
 <script lang="ts">
   import { getStreamUrl } from "$lib/tools/api";
+  import { getSelectionContext } from "$lib/stores/selection";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
 
   export let isFolderById: (id: string) => boolean;
   export let getNameById: (id: string) => string;
-  export let selectedId: Set<string>;
 
-  $: isSelectionEmpty = selectedId.size <= 0;
+  const { selectedId } = getSelectionContext();
+
+  $: isSelectionEmpty = $selectedId.size <= 0;
 
   async function handleCopyUrl() {
-    const idList = Array.from(selectedId);
+    const idList = Array.from($selectedId);
     const fileList = idList.filter((id) => !isFolderById(id));
     const urlList = fileList.map((id) => {
       const name = getNameById(id);

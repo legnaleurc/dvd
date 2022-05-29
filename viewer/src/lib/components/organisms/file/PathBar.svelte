@@ -3,7 +3,6 @@
 
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import { getFileSystemContext } from "$lib/stores/filesystem";
-  import { getQueueContext } from "$lib/stores/queue";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import QueueButton from "$lib/components/molecules/QueueButton.svelte";
@@ -20,8 +19,6 @@
   export let stack: string[];
 
   const { nodeMap } = getFileSystemContext();
-  const { pendingList, pendingCount, resolvedCount, rejectedCount } =
-    getQueueContext();
   const dispatch = createEventDispatcher<Events>();
 
   function getNameById(id: string) {
@@ -40,13 +37,7 @@
   </div>
   <div class="flex-0">
     <SortButton />
-    <QueueButton
-      {getNameById}
-      pendingList={$pendingList}
-      pendingCount={$pendingCount}
-      resolvedCount={$resolvedCount}
-      rejectedCount={$rejectedCount}
-    />
+    <QueueButton {getNameById} />
     <SyncButton />
   </div>
 </div>

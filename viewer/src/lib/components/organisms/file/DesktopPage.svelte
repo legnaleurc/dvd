@@ -1,15 +1,12 @@
 <script lang="ts">
   import { setDragDropContext } from "$lib/stores/dragdrop";
   import { getFileSystemContext } from "$lib/stores/filesystem";
-  import { getQueueContext } from "$lib/stores/queue";
   import LabeledSwitch from "$lib/components/atoms/LabeledSwitch.svelte";
   import QueueButton from "$lib/components/molecules/QueueButton.svelte";
   import TreeFrame from "./TreeFrame.svelte";
   import SyncButton from "./SyncButton.svelte";
 
   const { nodeMap } = getFileSystemContext();
-  const { pendingList, pendingCount, resolvedCount, rejectedCount } =
-    getQueueContext();
   setDragDropContext();
 
   let twoColumn = false;
@@ -30,13 +27,7 @@
     </div>
     <div class="flex-1" />
     <div class="flex-0 flex">
-      <QueueButton
-        {getNameById}
-        pendingList={$pendingList}
-        pendingCount={$pendingCount}
-        resolvedCount={$resolvedCount}
-        rejectedCount={$rejectedCount}
-      />
+      <QueueButton {getNameById} />
       <SyncButton />
     </div>
   </div>

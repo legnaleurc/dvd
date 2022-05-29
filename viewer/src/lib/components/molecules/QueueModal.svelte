@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { SvelteCustomEvents } from "$lib/types/traits";
+  import { getQueueContext } from "$lib/stores/queue";
   import Modal from "./Modal.svelte";
 
   type Events = {
@@ -9,17 +10,16 @@
 
   export let show: boolean;
   export let getNameById: (id: string) => string;
-  export let pendingList: string[];
-  export let rejectedCount: number;
-  export let pendingCount: number;
-  export let resolvedCount: number;
+
+  const { rejectedCount, pendingCount, resolvedCount, pendingList } =
+    getQueueContext();
 </script>
 
 <Modal {show} on:hide>
   <span slot="title">Pending Tasks</span>
   <div slot="body">
     <div>
-      {#each pendingList as id, index (index)}
+      {#each $pendingList as id, index (index)}
         {#if id}
           <div class="p-3 truncate">
             {getNameById(id)}
@@ -30,9 +30,9 @@
       {/each}
     </div>
     <div class="flex mt-3 justify-around">
-      <div class="text-danger-500">{rejectedCount}</div>
-      <div class="text-warning-500">{pendingCount}</div>
-      <div class="text-success-500">{resolvedCount}</div>
+      <div class="text-danger-500">{$rejectedCount}</div>
+      <div class="text-warning-500">{$pendingCount}</div>
+      <div class="text-success-500">{$resolvedCount}</div>
     </div>
   </div>
 </Modal>

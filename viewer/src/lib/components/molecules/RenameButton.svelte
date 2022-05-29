@@ -1,27 +1,36 @@
 <script lang="ts">
   import { writable } from "svelte/store";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
+  import { getSelectionContext } from "$lib/stores/selection";
+  import { getDisabledContext } from "$lib/stores/disabled";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import RenameModal from "./RenameModal.svelte";
 
-  type Events = {
-    rename: string;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
-
   export let getNameById: (id: string) => string;
-  export let selectedId: Set<string>;
+  export let renameNode: (id: string, name: string) => Promise<void>;
+
+  const { disableList, enableList } = getDisabledContext();
+  const { selectedId, deselectList } = getSelectionContext();
 
   const renamingId = writable("");
 
-  $: isSelectingOne = selectedId.size === 1;
+  $: isSelectingOne = $selectedId.size === 1;
 
   function handleShowRename() {
-    const idList = Array.from(selectedId);
+    const idList = Array.from($selectedId);
     const id = idList[0];
     renamingId.set(id);
+  }
+
+  async function handleRename(event: CustomEvent<string>) {
+    const name = event.detail;
+    const idList = Array.from($selectedId);
+    const id = idList[0];
+    disableList(idList);
+    deselectList(idList);
+    await renameNode(id, name);
+    enableList(idList);
   }
 </script>
 
@@ -32,5 +41,5 @@
   id={$renamingId}
   {getNameById}
   on:hide={() => renamingId.set("")}
-  on:rename
+  on:rename={handleRename}
 />

@@ -2,6 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import type { SvelteCustomEvents } from "$lib/types/traits";
+  import { getShortcutContext } from "$lib/stores/shortcut";
   import EmptyBlock from "$lib/components/atoms/EmptyBlock.svelte";
   import MenuList from "./MenuList.svelte";
   import MenuItem from "./MenuItem.svelte";
@@ -16,8 +17,7 @@
     };
   };
 
-  export let shortcutList: string[];
-
+  const { shortcutList } = getShortcutContext();
   const dispatch = createEventDispatcher<Events>();
 </script>
 
@@ -26,7 +26,7 @@
     <slot showMenu={show} />
   </svelte:fragment>
   <svelte:fragment slot="items" let:hide>
-    {#each shortcutList as shortcut (shortcut)}
+    {#each $shortcutList as shortcut (shortcut)}
       <MenuItem
         on:click={() => {
           hide();

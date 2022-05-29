@@ -1,20 +1,23 @@
 <script lang="ts">
+  import { getComicContext } from "$lib/stores/comic";
+  import { getSelectionContext } from "$lib/stores/selection";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import Icon from "$lib/components/atoms/Icon.svelte";
 
   export let getNameById: (id: string) => string;
-  export let selectedId: Set<string>;
-  export let deselectAll: () => void;
-  export let openComic: (id: string, name: string) => void;
 
-  $: isSelectionEmpty = selectedId.size <= 0;
+  const { openComic } = getComicContext();
+  const { selectedId, deselectList } = getSelectionContext();
+
+  $: isSelectionEmpty = $selectedId.size <= 0;
 
   function handleInternal() {
-    for (const id of selectedId.values()) {
+    const idList = Array.from($selectedId);
+    for (const id of idList) {
       const name = getNameById(id);
       openComic(id, name);
     }
-    deselectAll();
+    deselectList(idList);
   }
 </script>
 

@@ -1,16 +1,18 @@
 <script lang="ts">
   import { getDownloadUrl } from "$lib/tools/api";
+  import { getSelectionContext } from "$lib/stores/selection";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
 
   export let isFolderById: (id: string) => boolean;
   export let getNameById: (id: string) => string;
-  export let selectedId: Set<string>;
 
-  $: isSelectionEmpty = selectedId.size <= 0;
+  const { selectedId } = getSelectionContext();
 
-  async function handleCopyUrl() {
-    const idList = Array.from(selectedId);
+  $: isSelectionEmpty = $selectedId.size <= 0;
+
+  async function handleDownload() {
+    const idList = Array.from($selectedId);
     for (const id of idList) {
       if (isFolderById(id)) {
         continue;
@@ -22,6 +24,6 @@
   }
 </script>
 
-<IconButton disabled={isSelectionEmpty} on:click={handleCopyUrl}>
+<IconButton disabled={isSelectionEmpty} on:click={handleDownload}>
   <Icon name="file_download" />
 </IconButton>

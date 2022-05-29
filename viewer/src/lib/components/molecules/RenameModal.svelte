@@ -19,6 +19,9 @@
 
   let newName = "";
 
+  $: name = id ? getNameById(id) : "";
+  $: newName = name;
+
   function handleAccept() {
     if (!newName) {
       return;
@@ -26,9 +29,6 @@
     dispatch("rename", newName);
     dispatch("hide");
   }
-
-  $: name = id ? getNameById(id) : "";
-  $: newName = name;
 </script>
 
 <Modal show={id.length > 0} on:hide>

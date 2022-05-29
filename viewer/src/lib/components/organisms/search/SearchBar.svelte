@@ -2,7 +2,6 @@
   import { writable } from "svelte/store";
 
   import { getDisabledContext } from "$lib/stores/disabled";
-  import { getQueueContext } from "$lib/stores/queue";
   import { getSelectionContext } from "$lib/stores/selection";
   import { getSearchContext } from "$lib/stores/search";
   import Icon from "$lib/components/atoms/Icon.svelte";
@@ -13,8 +12,6 @@
   import HistoryModal from "./HistoryModal.svelte";
 
   const { enableAll } = getDisabledContext();
-  const { pendingList, pendingCount, resolvedCount, rejectedCount } =
-    getQueueContext();
   const { deselectAll } = getSelectionContext();
   const { searchName, showDetail, resultMap } = getSearchContext();
 
@@ -64,13 +61,7 @@
     </div>
     <div class="flex-1" />
     <div class="flex-0">
-      <QueueButton
-        {getNameById}
-        pendingList={$pendingList}
-        pendingCount={$pendingCount}
-        rejectedCount={$rejectedCount}
-        resolvedCount={$resolvedCount}
-      />
+      <QueueButton {getNameById} />
       <IconButton on:click={() => showHistory.set(true)}>
         <Icon name="history" />
       </IconButton>

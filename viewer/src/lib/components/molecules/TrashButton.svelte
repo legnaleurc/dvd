@@ -1,21 +1,28 @@
 <script lang="ts">
   import { writable } from "svelte/store";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
+  import { getSelectionContext } from "$lib/stores/selection";
+  import { getDisabledContext } from "$lib/stores/disabled";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import TrashModal from "./TrashModal.svelte";
 
-  type Events = {
-    trash: null;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  export let trashNodes: (idList: string[]) => Promise<void>;
 
-  export let selectedId: Set<string>;
+  const { disableList, enableList } = getDisabledContext();
+  const { selectedId, deselectList } = getSelectionContext();
 
   const showTrash = writable(false);
 
-  $: isSelectionEmpty = selectedId.size <= 0;
+  $: isSelectionEmpty = $selectedId.size <= 0;
+
+  async function handleTrash() {
+    const idList = Array.from($selectedId);
+    disableList(idList);
+    deselectList(idList);
+    await trashNodes(idList);
+    enableList(idList);
+  }
 </script>
 
 <IconButton
@@ -27,7 +34,6 @@
 </IconButton>
 <TrashModal
   show={$showTrash}
-  {selectedId}
   on:hide={() => showTrash.set(false)}
-  on:trash
+  on:trash={handleTrash}
 />

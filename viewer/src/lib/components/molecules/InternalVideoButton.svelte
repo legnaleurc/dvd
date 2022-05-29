@@ -1,18 +1,20 @@
 <script lang="ts">
+  import { getVideoContext } from "$lib/stores/video";
+  import { getSelectionContext } from "$lib/stores/selection";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import Icon from "$lib/components/atoms/Icon.svelte";
 
-  export let selectedId: Set<string>;
-  export let deselectAll: () => void;
-  export let openVideo: (id: string) => void;
+  const { openVideo } = getVideoContext();
+  const { selectedId, deselectList } = getSelectionContext();
 
-  $: isSelectionEmpty = selectedId.size <= 0;
+  $: isSelectionEmpty = $selectedId.size <= 0;
 
   function handleInternal() {
-    for (const id of selectedId.values()) {
+    const idList = Array.from($selectedId);
+    for (const id of idList) {
       openVideo(id);
     }
-    deselectAll();
+    deselectList(idList);
   }
 </script>
 

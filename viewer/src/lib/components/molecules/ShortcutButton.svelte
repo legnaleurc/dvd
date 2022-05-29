@@ -1,28 +1,34 @@
 <script lang="ts">
   import { writable } from "svelte/store";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
+  import { getSelectionContext } from "$lib/stores/selection";
+  import { getDisabledContext } from "$lib/stores/disabled";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import ShortcutMenu from "./ShortcutMenu.svelte";
   import ShortcutModal from "./ShortcutModal.svelte";
 
-  type Events = {
-    move: string;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  export let moveNodesToPath: (idList: string[], path: string) => Promise<void>;
 
-  export let selectedId: Set<string>;
-  export let shortcutList: string[];
+  const { disableList, enableList } = getDisabledContext();
+  const { selectedId, deselectList } = getSelectionContext();
 
   const moveTarget = writable("");
 
-  $: isSelectionEmpty = selectedId.size <= 0;
+  $: isSelectionEmpty = $selectedId.size <= 0;
+
+  async function handleMove(event: CustomEvent<string>) {
+    const shortcut = event.detail;
+    const idList = Array.from($selectedId);
+    disableList(idList);
+    deselectList(idList);
+    await moveNodesToPath(idList, shortcut);
+    enableList(idList);
+  }
 </script>
 
 <ShortcutMenu
   let:showMenu
-  {shortcutList}
   on:shortcut={(event) => moveTarget.set(event.detail)}
 >
   <IconButton
@@ -34,7 +40,6 @@
 </ShortcutMenu>
 <ShortcutModal
   shortcut={$moveTarget}
-  {selectedId}
   on:hide={() => moveTarget.set("")}
-  on:move
+  on:move={handleMove}
 />
