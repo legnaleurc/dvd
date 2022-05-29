@@ -8,9 +8,7 @@ export function drag(node: HTMLElement, params?: DragActionParams) {
     const el = event.currentTarget as HTMLElement;
     el.classList.add("dragging");
     event.dataTransfer.effectAllowed = "move";
-    if (params?.onDragStart) {
-      params.onDragStart(event);
-    }
+    params?.onDragStart?.(event);
   }
 
   function handleDragEnd(event: DragEvent) {
@@ -22,9 +20,7 @@ export function drag(node: HTMLElement, params?: DragActionParams) {
       // User canceled.
       return;
     }
-    if (params?.onDragEnd) {
-      params.onDragEnd(event);
-    }
+    params?.onDragEnd?.(event);
   }
 
   node.addEventListener("dragstart", handleDragStart);
@@ -51,9 +47,7 @@ export function drop(node: HTMLElement, params?: DropActionParams) {
     if (dragCounter === 0) {
       el.classList.add("drag-over");
       event.dataTransfer.dropEffect = "move";
-      if (params?.onDragEnter) {
-        params.onDragEnter(event);
-      }
+      params?.onDragEnter?.(event);
     }
     dragCounter += 1;
   }
@@ -77,9 +71,7 @@ export function drop(node: HTMLElement, params?: DropActionParams) {
     const el = event.currentTarget as HTMLElement;
     dragCounter = 0;
     el.classList.remove("drag-over");
-    if (params?.onDrop) {
-      params.onDrop(event);
-    }
+    params?.onDrop?.(event);
   }
 
   node.addEventListener("dragenter", handleDragEnter);
