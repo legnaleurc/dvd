@@ -52,6 +52,7 @@
   >
     {#each data.imageList as image, index (index)}
       <img
+        draggable="false"
         class="bg-paper-600"
         loading="lazy"
         alt=""
