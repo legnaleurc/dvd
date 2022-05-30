@@ -18,29 +18,27 @@ export function createStore() {
   const videoMap = writable<Record<string, VideoData>>({});
 
   async function openVideo(id: string) {
-    try {
-      const videoList = await listVideo(id);
-      videoMap.update((self) => {
-        for (const video of videoList) {
-          self[video.id] = {
-            id: video.id,
-            name: video.name,
-            mimeType: video.mime_type,
-            width: video.width,
-            height: video.height,
-          };
+    const videoList = await listVideo(id);
+    videoMap.update((self) => {
+      for (const video of videoList) {
+        self[video.id] = {
+          id: video.id,
+          name: video.name,
+          mimeType: video.mime_type,
+          width: video.width,
+          height: video.height,
+        };
+      }
+      return self;
+    });
+    idList.update((self) => {
+      for (const video of videoList) {
+        if (self.indexOf(video.id) < 0) {
+          self.push(video.id);
         }
-        return self;
-      });
-      idList.update((self) => {
-        for (const video of videoList) {
-          if (self.indexOf(video.id) < 0) {
-            self.push(video.id);
-          }
-        }
-        return self;
-      });
-    } catch (e: unknown) {}
+      }
+      return self;
+    });
   }
 
   function clearAllVideo() {
