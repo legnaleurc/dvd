@@ -21,7 +21,7 @@ const CHANGE_LIST: ChangeResponse[] = [
 ];
 
 export const handlers = [
-  rest.get("/api/v1/nodes/root", (req, res, ctx) => {
+  rest.get("/api/v1/nodes/root", (_req, res, ctx) => {
     return res(ctx.status(200), ctx.json(TABLE["__ROOT__"]));
   }),
   rest.get("/api/v1/nodes/:id", (req, res, ctx) => {
@@ -42,13 +42,13 @@ export const handlers = [
     const rv = children.map((id) => TABLE[id]);
     return res(ctx.status(200), ctx.json(rv));
   }),
-  rest.post("/api/v1/changes", (req, res, ctx) => {
+  rest.post("/api/v1/changes", (_req, res, ctx) => {
     return res(ctx.status(200), ctx.json(CHANGE_LIST));
   }),
-  rest.patch("/api/v1/nodes/:id", (req, res, ctx) => {
+  rest.patch("/api/v1/nodes/:id", (_req, res, ctx) => {
     return res(ctx.status(200), ctx.json(null));
   }),
-  rest.delete("/api/v1/nodes/:id", (req, res, ctx) => {
+  rest.delete("/api/v1/nodes/:id", (_req, res, ctx) => {
     return res(ctx.status(200), ctx.json(null));
   }),
 ];

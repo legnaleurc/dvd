@@ -23,7 +23,7 @@ export const handlers = [
     assertIsString(id);
     return res(ctx.status(200), ctx.json(folderResponse(id, "__ROOT__")));
   }),
-  rest.get("/api/v1/cache", (req, res, ctx) => {
+  rest.get("/api/v1/cache", (_req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json([
@@ -35,7 +35,7 @@ export const handlers = [
       ]),
     );
   }),
-  rest.delete("/api/v1/cache", (req, res, ctx) => {
+  rest.delete("/api/v1/cache", (_req, res, ctx) => {
     return res(ctx.status(204));
   }),
 ];
