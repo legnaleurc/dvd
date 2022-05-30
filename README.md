@@ -50,11 +50,11 @@ python3 -m wcpan.drive.google sync
 
 ### viewer
 
-This module uses Node.js 14 or later. It also uses yarn instead of npm.
+This module uses Node.js 16 or later.
 
 ```sh
 cd viewer
-yarn install
+npm install
 ```
 
 ## Run the Daemon
