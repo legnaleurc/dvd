@@ -29,6 +29,7 @@ describe("queue", () => {
       }
 
       async function consumer(q: Queue<number>, rv: number[]) {
+        // eslint-disable-next-line no-constant-condition
         while (true) {
           const item = await q.get();
           try {

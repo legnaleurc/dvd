@@ -126,6 +126,7 @@ export function getQueueContext() {
 }
 
 async function consume(q: Queue<Task>, id: number) {
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const task = await q.get();
     try {
