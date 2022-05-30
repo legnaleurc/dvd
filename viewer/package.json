@@ -33,7 +33,7 @@
     "eslint-plugin-svelte3": "^4.0.0",
     "jest": "^28.1.0",
     "jest-environment-jsdom": "^28.1.0",
-    "msw": "^0.39.2",
+    "msw": "^0.42.0",
     "node-fetch": "^3.2.4",
     "postcss": "^8.4.12",
     "prettier": "^2.5.1",
