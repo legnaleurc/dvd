@@ -22,4 +22,6 @@ jobs:
         run: |
           cd viewer
           npm install
+          npm run lint
+          npm run check
           npm run test
