@@ -46,7 +46,7 @@
   {#each PAGES as page_ (page_.routePrefix)}
     <section
       class="w-full h-full"
-      hidden={!$page.routeId.startsWith(page_.routePrefix)}
+      hidden={!$page.routeId?.startsWith(page_.routePrefix)}
     >
       <svelte:component this={page_.content}>
         <slot />
