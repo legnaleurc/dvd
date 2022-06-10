@@ -28,7 +28,7 @@ describe("queue", () => {
 
   test("has good initial values", () => {
     expect(get(store.pendingCount)).toEqual(0);
-    expect(get(store.resolvedCount)).toEqual(0);
+    expect(get(store.fullfilledCount)).toEqual(0);
     expect(get(store.rejectedCount)).toEqual(0);
     expect(get(store.pendingList)).toEqual(["", "", "", "", "", ""]);
   });
@@ -36,11 +36,11 @@ describe("queue", () => {
   test("move nodes", async () => {
     const promise = store.moveNodes(["a", "b", "c", "d", "e", "f", "g"], "0");
     expect(get(store.pendingCount)).toEqual(7);
-    expect(get(store.resolvedCount)).toEqual(0);
+    expect(get(store.fullfilledCount)).toEqual(0);
     expect(get(store.rejectedCount)).toEqual(0);
     await promise;
     expect(get(store.pendingCount)).toEqual(0);
-    expect(get(store.resolvedCount)).toEqual(3);
+    expect(get(store.fullfilledCount)).toEqual(3);
     expect(get(store.rejectedCount)).toEqual(4);
   });
 
@@ -50,22 +50,22 @@ describe("queue", () => {
       "/",
     );
     expect(get(store.pendingCount)).toEqual(7);
-    expect(get(store.resolvedCount)).toEqual(0);
+    expect(get(store.fullfilledCount)).toEqual(0);
     expect(get(store.rejectedCount)).toEqual(0);
     await promise;
     expect(get(store.pendingCount)).toEqual(0);
-    expect(get(store.resolvedCount)).toEqual(3);
+    expect(get(store.fullfilledCount)).toEqual(3);
     expect(get(store.rejectedCount)).toEqual(4);
   });
 
   test("trash nodes", async () => {
     const promise = store.trashNodes(["a", "b", "c", "d", "e", "f", "g"]);
     expect(get(store.pendingCount)).toEqual(7);
-    expect(get(store.resolvedCount)).toEqual(0);
+    expect(get(store.fullfilledCount)).toEqual(0);
     expect(get(store.rejectedCount)).toEqual(0);
     await promise;
     expect(get(store.pendingCount)).toEqual(0);
-    expect(get(store.resolvedCount)).toEqual(3);
+    expect(get(store.fullfilledCount)).toEqual(3);
     expect(get(store.rejectedCount)).toEqual(4);
   });
 });

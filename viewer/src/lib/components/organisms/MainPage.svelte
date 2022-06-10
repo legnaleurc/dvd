@@ -47,7 +47,7 @@
     >
       <LazyLoad lazy={page_.lazy}>
         <LoadingBlock slot="pending" />
-        <slot slot="resolved" />
+        <slot slot="fullfilled" />
       </LazyLoad>
     </section>
   {/each}

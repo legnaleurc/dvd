@@ -13,7 +13,7 @@ export function createStore() {
   const queue = new Queue<Task>();
   const pendingList = writable<string[]>([]);
   const pendingCount = writable(0);
-  const resolvedCount = writable(0);
+  const fullfilledCount = writable(0);
   const rejectedCount = writable(0);
 
   async function moveNodesToPath(idList: string[], dstPath: string) {
@@ -45,7 +45,7 @@ export function createStore() {
         });
         try {
           await moveNode(id, dst);
-          resolvedCount.update((self) => self + 1);
+          fullfilledCount.update((self) => self + 1);
         } catch (e: unknown) {
           rejectedCount.update((self) => self + 1);
         } finally {
@@ -70,7 +70,7 @@ export function createStore() {
         });
         try {
           await trashNode(id);
-          resolvedCount.update((self) => self + 1);
+          fullfilledCount.update((self) => self + 1);
         } catch (e: unknown) {
           rejectedCount.update((self) => self + 1);
         } finally {
@@ -104,7 +104,7 @@ export function createStore() {
   return {
     pendingList,
     pendingCount,
-    resolvedCount,
+    fullfilledCount,
     rejectedCount,
     setup,
     moveNodesToPath,

@@ -2,7 +2,7 @@ import { Future, Event_ } from "./lock";
 
 describe("lock", () => {
   describe("Future", () => {
-    it("can be resolved", async () => {
+    it("can be fullfilled", async () => {
       const future = new Future<null>();
       future.resolve(null);
       await expect(future.promise).resolves.toBeNull();
