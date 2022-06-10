@@ -1,43 +1,40 @@
 <script lang="ts">
   import { page } from "$app/stores";
 
-  import type { SvelteComponentConstructor } from "$lib/types/traits";
+  import type { SvelteComponentModule } from "$lib/types/traits";
   import { setComicContext } from "$lib/stores/comic";
   import { setVideoContext } from "$lib/stores/video";
-  import FilePage from "./file/FilePage.svelte";
-  import SearchPage from "./search/SearchPage.svelte";
-  import ComicPage from "./comic/ComicPage.svelte";
-  import VideoPage from "./video/VideoPage.svelte";
-  import SettingsPage from "./settings/SettingsPage.svelte";
+  import LazyLoad from "$lib/components/atoms/LazyLoad.svelte";
+  import LoadingBlock from "$lib/components/atoms/LoadingBlock.svelte";
 
   setComicContext();
   setVideoContext();
 
   type Page = {
     routePrefix: string;
-    content: SvelteComponentConstructor;
+    lazy: () => Promise<SvelteComponentModule>;
   };
 
   const PAGES: Page[] = [
     {
       routePrefix: "files",
-      content: FilePage,
+      lazy: () => import("./file/FilePage.svelte"),
     },
     {
       routePrefix: "search",
-      content: SearchPage,
+      lazy: () => import("./search/SearchPage.svelte"),
     },
     {
       routePrefix: "video",
-      content: VideoPage,
+      lazy: () => import("./video/VideoPage.svelte"),
     },
     {
       routePrefix: "comic",
-      content: ComicPage,
+      lazy: () => import("./comic/ComicPage.svelte"),
     },
     {
       routePrefix: "settings",
-      content: SettingsPage,
+      lazy: () => import("./settings/SettingsPage.svelte"),
     },
   ];
 </script>
@@ -48,9 +45,10 @@
       class="w-full h-full"
       hidden={!$page.routeId?.startsWith(page_.routePrefix)}
     >
-      <svelte:component this={page_.content}>
-        <slot />
-      </svelte:component>
+      <LazyLoad lazy={page_.lazy}>
+        <LoadingBlock slot="pending" />
+        <slot slot="resolved" />
+      </LazyLoad>
     </section>
   {/each}
 </main>
