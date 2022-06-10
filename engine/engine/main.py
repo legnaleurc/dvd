@@ -136,7 +136,7 @@ def setup_api_path(app: Application) -> None:
 
 
 def setup_static_path(app: Application, path: str) -> None:
-    app.router.add_view(r'/', view.IndexView)
+    app.router.add_view(r'/', view.IndexRedirect)
     app.router.add_view(r'/files', view.IndexView)
     app.router.add_view(r'/search', view.IndexView)
     app.router.add_view(r'/settings', view.IndexView)
