@@ -7,9 +7,11 @@
   };
 
   export let lazy: () => Promise<SvelteComponentModule>;
+
+  $: load = lazy();
 </script>
 
-{#await lazy()}
+{#await load}
   <slot name="pending" />
 {:then module_}
   <svelte:component this={module_.default}>
