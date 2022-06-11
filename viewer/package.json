@@ -1,6 +1,6 @@
 {
   "name": "viewer",
-  "version": "0.0.1",
+  "version": "3.0.0",
   "scripts": {
     "dev": "svelte-kit dev",
     "build": "svelte-kit build",
@@ -23,7 +23,7 @@
     "@swc/jest": "^0.2.21",
     "@testing-library/jest-dom": "^5.14.0",
     "@testing-library/svelte": "^3.0.0",
-    "@types/jest": "^27.0.0",
+    "@types/jest": "^28.1.0",
     "@types/testing-library__jest-dom": "^5.14.0",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
     "@typescript-eslint/parser": "^5.10.1",
