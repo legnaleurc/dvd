@@ -7,7 +7,7 @@ import { splitVendorChunkPlugin } from "vite";
  */
 const redirect = (map) => ({
   name: "redirect",
-  configureServer: (server) => () => {
+  configureServer: (server) => {
     server.middlewares.use((req, res, next) => {
       if (map[req.url]) {
         res.statusCode = 302;
