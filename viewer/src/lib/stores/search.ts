@@ -11,6 +11,7 @@ export function createStore() {
   const idList = writable<string[]>([]);
   const resultMap = writable<Record<string, SearchResponse>>({});
   const historyList = writable<string[]>([]);
+  const detailList = writable<string[]>([]);
 
   async function searchText(text: string) {
     searching.set(true);
@@ -50,6 +51,7 @@ export function createStore() {
     idList,
     resultMap,
     historyList,
+    detailList,
     searchName,
     searchHistory,
   };

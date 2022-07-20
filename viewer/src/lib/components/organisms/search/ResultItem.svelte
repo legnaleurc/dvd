@@ -4,6 +4,7 @@
   import { getSearchContext } from "$lib/stores/search";
 
   export let id: string;
+  export let detailed: boolean;
 
   const { disabledId } = getDisabledContext();
   const { resultMap } = getSearchContext();
@@ -29,4 +30,10 @@
 >
   <div>{result.name}</div>
   <div class="text-symbol-hint">{result.path}</div>
+  {#if detailed}
+    <div class="text-symbol-hint font-mono">{result.id}</div>
+    <div class="text-symbol-hint font-mono">{result.hash}</div>
+    <div class="text-symbol-hint font-mono">{result.size}</div>
+    <div class="text-symbol-hint font-mono">{result.modified}</div>
+  {/if}
 </div>

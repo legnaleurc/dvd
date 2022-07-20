@@ -12,7 +12,7 @@
     <LoadingBlock />
   {:else}
     {#each $idList as id (id)}
-      <ResultItem {id} />
+      <ResultItem {id} detailed={false} />
     {:else}
       <EmptyBlock />
     {/each}

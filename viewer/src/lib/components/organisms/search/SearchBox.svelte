@@ -6,6 +6,7 @@
 
   let klass = "";
   export { klass as class };
+  export let disabled: boolean;
 
   const { enableAll } = getDisabledContext();
   const { deselectAll } = getSelectionContext();
@@ -25,6 +26,7 @@
 
 <SearchInput
   class={klass}
+  {disabled}
   placeholder="Search"
   bind:value={text}
   on:enterpressed={handleSearch}
