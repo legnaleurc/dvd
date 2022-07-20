@@ -9,8 +9,8 @@
   import { setSearchContext } from "$lib/stores/search";
   import { setQueueContext } from "$lib/stores/queue";
   import { setDisabledContext } from "$lib/stores/disabled";
-  import SearchToolBar from "./SearchToolBar.svelte";
-  import SearchBar from "./SearchBar.svelte";
+  import BottomBar from "./BottomBar.svelte";
+  import TopBar from "./TopBar.svelte";
   import ResultList from "./ResultList.svelte";
 
   setSearchContext();
@@ -35,13 +35,13 @@
 
 <div class="w-full h-full flex flex-col">
   <div class="flex-0">
-    <SearchBar />
+    <TopBar />
   </div>
   <div class="flex-1 overflow-y-auto overflow-x-hidden">
     <ResultList />
   </div>
   {#if !isSelectionEmpty}
-    <SearchToolBar />
+    <BottomBar />
   {/if}
   <div class="hidden">
     <slot />
