@@ -1,35 +1,21 @@
 <script lang="ts">
   import { writable } from "svelte/store";
 
-  import { getDisabledContext } from "$lib/stores/disabled";
-  import { getSelectionContext } from "$lib/stores/selection";
   import { getSearchContext } from "$lib/stores/search";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
-  import SearchInput from "$lib/components/atoms/SearchInput.svelte";
   import LabeledSwitch from "$lib/components/atoms/LabeledSwitch.svelte";
   import QueueButton from "$lib/components/molecules/QueueButton.svelte";
   import HistoryModal from "./HistoryModal.svelte";
+  import SearchBox from "./SearchBox.svelte";
 
-  const { enableAll } = getDisabledContext();
-  const { deselectAll } = getSelectionContext();
-  const { searchName, showDetail, resultMap } = getSearchContext();
+  const { showDetail, resultMap } = getSearchContext();
 
-  let text = "";
   let showMenu = false;
   const showHistory = writable(false);
 
   function toggleMenu() {
     showMenu = !showMenu;
-  }
-
-  function handleSearch() {
-    if (!text) {
-      return;
-    }
-    enableAll();
-    deselectAll();
-    searchName(text);
   }
 
   function getNameById(id: string) {
@@ -39,12 +25,7 @@
 
 <div class="flex flex-col bg-paper-800">
   <div class="flex">
-    <SearchInput
-      class="flex-1"
-      placeholder="Search"
-      bind:value={text}
-      on:enterpressed={handleSearch}
-    />
+    <SearchBox class="flex-1" />
     <div class="flex-0">
       <IconButton on:click={toggleMenu}>
         <Icon name={showMenu ? "expand_less" : "expand_more"} />
