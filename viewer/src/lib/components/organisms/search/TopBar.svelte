@@ -33,7 +33,7 @@
 <div class="flex flex-col bg-paper-800">
   <div class="flex">
     <SearchBox class="flex-1" disabled={hasDetails} />
-    <div class="flex-0">
+    <div class="flex-0 flex">
       {#if !hasDetails}
         <IconButton disabled={$selectedId.size <= 0} on:click={commitDetails}>
           <Icon name="zoom_in" />
