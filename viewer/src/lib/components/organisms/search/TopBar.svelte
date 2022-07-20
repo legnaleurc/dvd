@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { writable } from "svelte/store";
-
   import { getSearchContext } from "$lib/stores/search";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
@@ -10,7 +8,7 @@
 
   const { resultMap } = getSearchContext();
 
-  const showHistory = writable(false);
+  let showHistory = false;
 
   function getNameById(id: string) {
     return $resultMap[id]?.name ?? "";
@@ -22,13 +20,10 @@
     <SearchBox class="flex-1" />
     <div class="flex-0">
       <QueueButton {getNameById} />
-      <IconButton on:click={() => showHistory.set(true)}>
+      <IconButton on:click={() => (showHistory = true)}>
         <Icon name="history" />
       </IconButton>
-      <HistoryModal
-        show={$showHistory}
-        on:hide={() => showHistory.set(false)}
-      />
+      <HistoryModal show={showHistory} on:hide={() => (showHistory = false)} />
     </div>
   </div>
 </div>
