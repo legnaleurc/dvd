@@ -2,10 +2,10 @@
   "name": "viewer",
   "version": "3.0.0",
   "scripts": {
-    "dev": "svelte-kit dev",
-    "build": "svelte-kit build",
+    "dev": "vite dev",
+    "build": "vite build",
     "package": "svelte-kit package",
-    "preview": "svelte-kit preview",
+    "preview": "vite preview",
     "prepare": "svelte-kit sync",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest src --config jest.config.json",
     "check": "svelte-check --tsconfig ./tsconfig.json",
