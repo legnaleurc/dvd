@@ -42,7 +42,7 @@
         </IconButton>
       {/if}
       <QueueButton {getNameById} />
-      <HistoryButton />
+      <HistoryButton disabled={hasDetails} />
     </div>
   </div>
 </div>
