@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import VirtualScroll from "@legnaleurc/svelte-virtual-scroll-list";
+  import VirtualScroll from "svelte-virtual-scroll-list";
 
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import LoadingBlock from "$lib/components/atoms/LoadingBlock.svelte";
