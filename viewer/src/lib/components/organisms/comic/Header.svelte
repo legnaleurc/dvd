@@ -21,7 +21,7 @@
   <div class="flex-1 p-3 overflow-x-auto whitespace-nowrap select-text">
     {name}
   </div>
-  <div class="flex-0">
+  <div class="flex-0 flex">
     <IconButton on:click={() => dispatch("first")}>
       <Icon name="vertical_align_top" />
     </IconButton>

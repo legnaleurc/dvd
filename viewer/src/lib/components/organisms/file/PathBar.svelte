@@ -27,7 +27,7 @@
 </script>
 
 <div class="flex bg-paper-800">
-  <div class="flex-0">
+  <div class="flex-0 flex">
     <IconButton disabled={stack.length <= 1} on:click={() => dispatch("back")}>
       <Icon name="chevron_left" />
     </IconButton>
@@ -35,7 +35,7 @@
   <div class="flex-1 flex min-w-0">
     <Breadcrumb {stack} on:open={(event) => dispatch("backTo", event.detail)} />
   </div>
-  <div class="flex-0">
+  <div class="flex-0 flex">
     <SortButton />
     <QueueButton {getNameById} />
     <SyncButton />

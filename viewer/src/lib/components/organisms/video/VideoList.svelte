@@ -10,7 +10,7 @@
 <div class="w-full h-full flex flex-col">
   <div class="flex-0 flex bg-paper-800">
     <div class="flex-1" />
-    <div class="flex-0">
+    <div class="flex-0 flex">
       <IconButton on:click={clearAllVideo}>
         <Icon name="playlist_remove" />
       </IconButton>
