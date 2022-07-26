@@ -4,13 +4,11 @@
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconButton from "$lib/components/atoms/IconButton.svelte";
   import QueueButton from "$lib/components/molecules/QueueButton.svelte";
-  import HistoryModal from "./HistoryModal.svelte";
   import SearchBox from "./SearchBox.svelte";
+  import HistoryButton from "./HistoryButton.svelte";
 
   const { resultMap, detailList } = getSearchContext();
   const { selectedId, deselectList, deselectAll } = getSelectionContext();
-
-  let showHistory = false;
 
   function getNameById(id: string) {
     return $resultMap[id]?.name ?? "";
@@ -44,10 +42,7 @@
         </IconButton>
       {/if}
       <QueueButton {getNameById} />
-      <IconButton on:click={() => (showHistory = true)}>
-        <Icon name="history" />
-      </IconButton>
-      <HistoryModal show={showHistory} on:hide={() => (showHistory = false)} />
+      <HistoryButton />
     </div>
   </div>
 </div>
