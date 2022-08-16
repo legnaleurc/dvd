@@ -1,5 +1,4 @@
 import { sveltekit } from "@sveltejs/kit/vite";
-import { splitVendorChunkPlugin } from "vite";
 
 /**
  * @param {Record<string, string>} map
@@ -28,5 +27,5 @@ export default {
       "/api": process.env.BACKEND_BASE_URL,
     },
   },
-  plugins: [sveltekit(), redirect({ "/": "/files" }), splitVendorChunkPlugin()],
+  plugins: [sveltekit(), redirect({ "/": "/files" })],
 };
