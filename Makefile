@@ -7,7 +7,7 @@ PYTHON := python3
 PIP := pip3
 
 VIEWER_ALL_FILES = $(shell find viewer -type d \( -name node_modules -o -name build \) -prune -o -type f -print)
-VIEWER_CONF_FILES = viewer/package.json
+VIEWER_CONF_FILES = viewer/package.json viewer/package-lock.json
 ENGINE_LOCK_FILE = engine/.lock
 
 .PHONY: debug unpack-release viewer-release engine-release
