@@ -6,7 +6,6 @@
     "build": "vite build",
     "package": "svelte-kit package",
     "preview": "vite preview",
-    "prepare": "svelte-kit sync",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest src --config jest.config.json",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
