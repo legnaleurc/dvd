@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { writable } from "svelte/store";
-
   import { getQueueContext } from "$lib/stores/queue";
   import Icon from "$lib/components/atoms/Icon.svelte";
   import IconBadge from "$lib/components/atoms/IconBadge.svelte";
@@ -9,18 +7,26 @@
 
   export let getNameById: (id: string) => string;
 
-  const { pendingCount } = getQueueContext();
+  const { pendingCount, fullfilledCount, rejectedCount } = getQueueContext();
 
-  const showQueue = writable(false);
+  let showQueue = false;
+
+  $: hasResult = $fullfilledCount + $rejectedCount > 0;
+  $: hasPending = $pendingCount > 0;
+  $: icon = hasPending
+    ? "hourglass_top"
+    : hasResult
+    ? "hourglass_bottom"
+    : "hourglass_empty";
 </script>
 
-<IconButton on:click={() => showQueue.set(true)}>
+<IconButton on:click={() => (showQueue = true)}>
   <IconBadge count={$pendingCount} variant="warning">
-    <Icon name="pending" />
+    <Icon name={icon} />
   </IconBadge>
 </IconButton>
 <QueueModal
-  show={$showQueue}
+  show={showQueue}
   {getNameById}
-  on:hide={() => showQueue.set(false)}
+  on:hide={() => (showQueue = false)}
 />
