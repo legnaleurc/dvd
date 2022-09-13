@@ -4,7 +4,14 @@
   export let disabled: boolean = undefined;
 </script>
 
-<input type="checkbox" role="switch" {id} {disabled} bind:checked />
+<input
+  type="checkbox"
+  role="switch"
+  aria-checked={checked}
+  {id}
+  {disabled}
+  bind:checked
+/>
 
 <style lang="scss">
   input[type="checkbox"][role="switch"] {
