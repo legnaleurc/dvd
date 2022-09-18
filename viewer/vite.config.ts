@@ -1,10 +1,7 @@
+import type { PluginOption, UserConfig } from "vite";
 import { sveltekit } from "@sveltejs/kit/vite";
 
-/**
- * @param {Record<string, string>} map
- * @returns {import('vite').PluginOption}
- */
-const redirect = (map) => ({
+const redirect = (map: Record<string, string>): PluginOption => ({
   name: "redirect",
   configureServer: (server) => {
     server.middlewares.use((req, res, next) => {
@@ -20,7 +17,6 @@ const redirect = (map) => ({
   },
 });
 
-/** @type {import('vite').UserConfig} */
 export default {
   server: {
     proxy: {
@@ -28,4 +24,4 @@ export default {
     },
   },
   plugins: [sveltekit(), redirect({ "/": "/files" })],
-};
+} as UserConfig;
