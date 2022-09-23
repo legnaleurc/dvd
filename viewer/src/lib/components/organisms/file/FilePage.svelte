@@ -2,8 +2,8 @@
   import { setQueueContext } from "$lib/stores/queue";
   import { setFileSystemContext } from "$lib/stores/filesystem";
   import { setDisabledContext } from "$lib/stores/disabled";
-  import MobilePage from "./MobilePage.svelte";
-  import DesktopPage from "./DesktopPage.svelte";
+  import LazyLoad from "$lib/components/atoms/LazyLoad.svelte";
+  import LoadingBlock from "$lib/components/atoms/LoadingBlock.svelte";
 
   type $$Slots = {
     default: Record<string, never>;
@@ -16,10 +16,14 @@
 
 <div class="w-full h-full">
   <div class="hidden lg:contents">
-    <DesktopPage />
+    <LazyLoad lazy={() => import("./DesktopPage.svelte")}>
+      <LoadingBlock slot="pending" />
+    </LazyLoad>
   </div>
   <div class="contents lg:hidden">
-    <MobilePage />
+    <LazyLoad lazy={() => import("./MobilePage.svelte")}>
+      <LoadingBlock slot="pending" />
+    </LazyLoad>
   </div>
   <div class="hidden">
     <slot />

@@ -14,7 +14,11 @@
 {#await load}
   <slot name="pending" />
 {:then module_}
-  <svelte:component this={module_.default}>
-    <slot name="fullfilled" />
-  </svelte:component>
+  {#if $$slots.fullfilled}
+    <svelte:component this={module_.default}>
+      <slot name="fullfilled" />
+    </svelte:component>
+  {:else}
+    <svelte:component this={module_.default} />
+  {/if}
 {/await}
