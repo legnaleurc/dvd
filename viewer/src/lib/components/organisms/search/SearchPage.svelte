@@ -14,6 +14,10 @@
   import ResultList from "./ResultList.svelte";
   import DetailList from "./DetailList.svelte";
 
+  type $$Slots = {
+    default: Record<string, never>;
+  };
+
   setSearchContext();
   setSelectionContext();
   setQueueContext();

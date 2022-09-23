@@ -7,6 +7,10 @@
   import LazyLoad from "$lib/components/atoms/LazyLoad.svelte";
   import LoadingBlock from "$lib/components/atoms/LoadingBlock.svelte";
 
+  type $$Slots = {
+    default: Record<string, never>;
+  };
+
   setComicContext();
   setVideoContext();
 

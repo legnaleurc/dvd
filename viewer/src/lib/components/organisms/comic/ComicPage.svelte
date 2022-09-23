@@ -6,6 +6,10 @@
   import BookList from "./BookList.svelte";
   import ImageList from "./ImageList.svelte";
 
+  type $$Slots = {
+    default: Record<string, never>;
+  };
+
   const { idList, comicMap, openComic } = getComicContext();
 
   $: isMainRoute = $page.routeId === "comic";

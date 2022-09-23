@@ -9,6 +9,10 @@
   import NavBar from "$lib/components/organisms/NavBar.svelte";
   import MainPage from "$lib/components/organisms/MainPage.svelte";
 
+  type $$Slots = {
+    default: Record<string, never>;
+  };
+
   setFullScreenContext();
   setShortcutContext();
 

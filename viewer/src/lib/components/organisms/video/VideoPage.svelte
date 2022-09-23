@@ -2,6 +2,10 @@
   import { page } from "$app/stores";
   import VideoList from "./VideoList.svelte";
 
+  type $$Slots = {
+    default: Record<string, never>;
+  };
+
   $: isVideoRoute = $page.routeId === "video/[videoId]";
 </script>
 

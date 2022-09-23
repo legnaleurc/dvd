@@ -5,6 +5,10 @@
   import MobilePage from "./MobilePage.svelte";
   import DesktopPage from "./DesktopPage.svelte";
 
+  type $$Slots = {
+    default: Record<string, never>;
+  };
+
   setFileSystemContext();
   setQueueContext();
   setDisabledContext();
