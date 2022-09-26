@@ -55,4 +55,4 @@ engine-test:
 	$(CD) engine && $(PYTHON) -m unittest
 
 viewer-test:
-	$(CD) viewer && $(YARN) test
+	$(CD) viewer && $(NPM) test
