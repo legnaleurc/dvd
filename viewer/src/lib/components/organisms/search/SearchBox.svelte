@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getDisabledContext } from "$lib/stores/disabled";
   import { getSelectionContext } from "$lib/stores/selection";
   import { getSearchContext } from "$lib/stores/search";
   import SearchInput from "$lib/components/atoms/SearchInput.svelte";
@@ -8,7 +7,6 @@
   export { klass as class };
   export let disabled: boolean;
 
-  const { enableAll } = getDisabledContext();
   const { deselectAll } = getSelectionContext();
   const { searchName } = getSearchContext();
 
@@ -18,7 +16,6 @@
     if (!text) {
       return;
     }
-    enableAll();
     deselectAll();
     searchName(text);
   }

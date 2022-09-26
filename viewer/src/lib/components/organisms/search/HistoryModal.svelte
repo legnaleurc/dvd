@@ -3,6 +3,7 @@
 
   import type { SvelteCustomEvents } from "$lib/types/traits";
   import { getSearchContext } from "$lib/stores/search";
+  import { getSelectionContext } from "$lib/stores/selection";
   import EmptyBlock from "$lib/components/atoms/EmptyBlock.svelte";
   import Modal from "$lib/components/molecules/Modal.svelte";
 
@@ -14,6 +15,7 @@
   export let show: boolean;
 
   const { historyList, searchHistory } = getSearchContext();
+  const { deselectAll } = getSelectionContext();
   const dispatch = createEventDispatcher<Events>();
 </script>
 
@@ -24,6 +26,7 @@
       <div
         class="p-3 cursor-pointer"
         on:click={() => {
+          deselectAll();
           searchHistory(index);
           dispatch("hide");
         }}
