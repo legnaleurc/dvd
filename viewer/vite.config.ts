@@ -24,4 +24,10 @@ export default {
     },
   },
   plugins: [sveltekit(), redirect({ "/": "/files" })],
+  test: {
+    deps: {
+      inline: ["msw"],
+    },
+    setupFiles: ["./vitest.setup.ts"],
+  },
 } as UserConfig;
