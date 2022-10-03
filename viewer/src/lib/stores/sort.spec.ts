@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { get } from "svelte/store";
 
 import { fileNode } from "$lib/mocks/utils";

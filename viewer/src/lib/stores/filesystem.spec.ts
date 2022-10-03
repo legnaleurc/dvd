@@ -1,3 +1,14 @@
+/// @vitest-environment jsdom
+
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  test,
+} from "vitest";
 import { get } from "svelte/store";
 import { setupServer } from "msw/node";
 

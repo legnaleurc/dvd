@@ -1,3 +1,6 @@
+/// @vitest-environment jsdom
+
+import { afterEach, describe, expect, test } from "vitest";
 import { get } from "svelte/store";
 
 import { createStore } from "./shortcut";

@@ -1,3 +1,4 @@
+import { describe, expect, it, test } from "vitest";
 import { get } from "svelte/store";
 
 import { createStore } from "./fullscreen";
