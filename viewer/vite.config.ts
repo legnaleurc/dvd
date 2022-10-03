@@ -17,7 +17,7 @@ const redirect = (map: Record<string, string>): PluginOption => ({
   },
 });
 
-export default {
+const config: UserConfig = {
   server: {
     proxy: {
       "/api": process.env.BACKEND_BASE_URL,
@@ -30,4 +30,6 @@ export default {
     },
     setupFiles: ["./vitest.setup.ts"],
   },
-} as UserConfig;
+};
+
+export default config;
