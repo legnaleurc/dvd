@@ -1,8 +1,8 @@
 import { getContext, onMount, setContext } from "svelte";
 import { writable } from "svelte/store";
 
-import { moveNode, listNodeByPath, trashNode } from "$lib/tools/api";
-import { Queue } from "$lib/tools/queue";
+import { moveNode, listNodeByPath, trashNode } from "$tools/api";
+import { Queue } from "$tools/queue";
 
 type Task = ((consumerId: number) => Promise<void>) | null;
 

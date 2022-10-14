@@ -1,6 +1,6 @@
 import { rest } from "msw";
 
-import type { VideoResponse } from "$lib/types/api";
+import type { VideoResponse } from "$types/api";
 import { assertIsString } from "./utils";
 
 const TABLE: Record<string, VideoResponse[]> = {

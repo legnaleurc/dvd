@@ -1,9 +1,6 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
-  import {
-    useBodyScrolling,
-    useMountedStore,
-  } from "$lib/components/atoms/LifeCycle.svelte";
+  import { useBodyScrolling, useMountedStore } from "$atoms/LifeCycle.svelte";
 
   type $$Slots = {
     trigger: {

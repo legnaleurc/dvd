@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { setQueueContext } from "$lib/stores/queue";
-  import { setFileSystemContext } from "$lib/stores/filesystem";
-  import { setDisabledContext } from "$lib/stores/disabled";
-  import LazyLoad from "$lib/components/atoms/LazyLoad.svelte";
-  import LoadingBlock from "$lib/components/atoms/LoadingBlock.svelte";
+  import { setQueueContext } from "$stores/queue";
+  import { setFileSystemContext } from "$stores/filesystem";
+  import { setDisabledContext } from "$stores/disabled";
+  import LazyLoad from "$atoms/LazyLoad.svelte";
+  import LoadingBlock from "$atoms/LoadingBlock.svelte";
 
   type $$Slots = {
     default: Record<string, never>;

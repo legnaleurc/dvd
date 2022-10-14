@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import { getFileSystemContext } from "$lib/stores/filesystem";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import { getFileSystemContext } from "$stores/filesystem";
 
   type Events = {
     open: number;

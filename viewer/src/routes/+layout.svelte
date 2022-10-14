@@ -4,10 +4,10 @@
   import {
     getFullScreenContext,
     setFullScreenContext,
-  } from "$lib/stores/fullscreen";
-  import { setShortcutContext } from "$lib/stores/shortcut";
-  import NavBar from "$lib/components/organisms/NavBar.svelte";
-  import MainPage from "$lib/components/organisms/MainPage.svelte";
+  } from "$stores/fullscreen";
+  import { setShortcutContext } from "$stores/shortcut";
+  import NavBar from "$organisms/NavBar.svelte";
+  import MainPage from "$organisms/MainPage.svelte";
 
   type $$Slots = {
     default: Record<string, never>;

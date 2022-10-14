@@ -1,11 +1,11 @@
 <script lang="ts">
   import { page } from "$app/stores";
 
-  import type { SvelteComponentModule } from "$lib/types/traits";
-  import { setComicContext } from "$lib/stores/comic";
-  import { setVideoContext } from "$lib/stores/video";
-  import LazyLoad from "$lib/components/atoms/LazyLoad.svelte";
-  import LoadingBlock from "$lib/components/atoms/LoadingBlock.svelte";
+  import type { SvelteComponentModule } from "$types/traits";
+  import { setComicContext } from "$stores/comic";
+  import { setVideoContext } from "$stores/video";
+  import LazyLoad from "$atoms/LazyLoad.svelte";
+  import LoadingBlock from "$atoms/LoadingBlock.svelte";
 
   type $$Slots = {
     default: Record<string, never>;

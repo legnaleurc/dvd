@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { getSelectionContext } from "$lib/stores/selection";
-  import { getSearchContext } from "$lib/stores/search";
-  import SearchInput from "$lib/components/atoms/SearchInput.svelte";
+  import { getSelectionContext } from "$stores/selection";
+  import { getSearchContext } from "$stores/search";
+  import SearchInput from "$atoms/SearchInput.svelte";
 
   let klass = "";
   export { klass as class };

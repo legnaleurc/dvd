@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getLabel, getSortContext, METHOD_LIST } from "$lib/stores/sort";
-  import MenuList from "$lib/components/molecules/MenuList.svelte";
-  import MenuItem from "$lib/components/molecules/MenuItem.svelte";
-  import Icon from "$lib/components/atoms/Icon.svelte";
+  import { getLabel, getSortContext, METHOD_LIST } from "$stores/sort";
+  import MenuList from "$molecules/MenuList.svelte";
+  import MenuItem from "$molecules/MenuItem.svelte";
+  import Icon from "$atoms/Icon.svelte";
 
   type $$Slots = {
     default: {

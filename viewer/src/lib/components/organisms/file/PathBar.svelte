@@ -1,11 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import { getFileSystemContext } from "$lib/stores/filesystem";
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
-  import QueueButton from "$lib/components/molecules/QueueButton.svelte";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import { getFileSystemContext } from "$stores/filesystem";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
+  import QueueButton from "$molecules/QueueButton.svelte";
   import Breadcrumb from "./Breadcrumb.svelte";
   import SyncButton from "./SyncButton.svelte";
   import SortButton from "./SortButton.svelte";

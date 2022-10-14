@@ -1,13 +1,9 @@
 import { getContext, onMount, setContext } from "svelte";
 import { writable, get } from "svelte/store";
 
-import type { NodeMap, ChildrenMap } from "$lib/types/filesystem";
-import {
-  createChangeList,
-  listNodeChildren,
-  readRootNode,
-} from "$lib/tools/api";
-import { applyChange, createNode } from "$lib/tools/filesystem";
+import type { NodeMap, ChildrenMap } from "$types/filesystem";
+import { createChangeList, listNodeChildren, readRootNode } from "$tools/api";
+import { applyChange, createNode } from "$tools/filesystem";
 
 const CONTEXT_KEY = Symbol();
 

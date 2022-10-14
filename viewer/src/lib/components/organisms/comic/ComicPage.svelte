@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
 
   import { page } from "$app/stores";
-  import { getComicContext } from "$lib/stores/comic";
+  import { getComicContext } from "$stores/comic";
   import BookList from "./BookList.svelte";
   import ImageList from "./ImageList.svelte";
 

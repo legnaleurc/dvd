@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { getFileSystemContext } from "$lib/stores/filesystem";
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
+  import { getFileSystemContext } from "$stores/filesystem";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
 
   const { isSyncing, sync } = getFileSystemContext();
 </script>

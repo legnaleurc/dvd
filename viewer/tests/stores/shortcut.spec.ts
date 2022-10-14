@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, test } from "vitest";
 import { get } from "svelte/store";
 
-import { createStore } from "./shortcut";
+import { createStore } from "$stores/shortcut";
 
 describe("shortcut", () => {
   afterEach(() => {

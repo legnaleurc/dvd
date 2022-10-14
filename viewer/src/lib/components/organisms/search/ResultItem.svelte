@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { getDisabledContext } from "$lib/stores/disabled";
-  import { getSelectionContext } from "$lib/stores/selection";
-  import { getSearchContext } from "$lib/stores/search";
+  import { getDisabledContext } from "$stores/disabled";
+  import { getSelectionContext } from "$stores/selection";
+  import { getSearchContext } from "$stores/search";
 
   export let id: string;
   export let detailed: boolean;

@@ -1,10 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
-  import TextInput from "$lib/components/atoms/TextInput.svelte";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
+  import TextInput from "$atoms/TextInput.svelte";
   import InputGroup from "./InputGroup.svelte";
 
   type Events = {

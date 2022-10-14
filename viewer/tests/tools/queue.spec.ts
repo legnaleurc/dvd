@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { Queue } from "./queue";
+import { Queue } from "$tools/queue";
 
 describe("queue", () => {
   describe("Queue", () => {

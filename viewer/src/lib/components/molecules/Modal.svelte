@@ -1,13 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from "svelte";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
-  import {
-    useBodyScrolling,
-    useMountedStore,
-  } from "$lib/components/atoms/LifeCycle.svelte";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
+  import { useBodyScrolling, useMountedStore } from "$atoms/LifeCycle.svelte";
 
   type Events = {
     hide: null;

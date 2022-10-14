@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import { getShortcutContext } from "$lib/stores/shortcut";
-  import EmptyBlock from "$lib/components/atoms/EmptyBlock.svelte";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import { getShortcutContext } from "$stores/shortcut";
+  import EmptyBlock from "$atoms/EmptyBlock.svelte";
   import MenuList from "./MenuList.svelte";
   import MenuItem from "./MenuItem.svelte";
 

@@ -1,7 +1,7 @@
 import { getContext, setContext } from "svelte";
 import { writable } from "svelte/store";
 
-import { listVideo } from "$lib/tools/api";
+import { listVideo } from "$tools/api";
 
 type VideoData = {
   id: string;

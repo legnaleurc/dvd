@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { getSearchContext } from "$lib/stores/search";
-  import LoadingBlock from "$lib/components/atoms/LoadingBlock.svelte";
-  import EmptyBlock from "$lib/components/atoms/EmptyBlock.svelte";
+  import { getSearchContext } from "$stores/search";
+  import LoadingBlock from "$atoms/LoadingBlock.svelte";
+  import EmptyBlock from "$atoms/EmptyBlock.svelte";
   import ResultItem from "./ResultItem.svelte";
 
   const { searching, idList } = getSearchContext();

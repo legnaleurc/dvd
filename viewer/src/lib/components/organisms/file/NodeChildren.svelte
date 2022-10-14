@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { getDisabledContext } from "$lib/stores/disabled";
-  import { getSelectionContext } from "$lib/stores/selection";
+  import { getDisabledContext } from "$stores/disabled";
+  import { getSelectionContext } from "$stores/selection";
   import NodeParent from "./NodeParent.svelte";
 
   export let idList: string[];

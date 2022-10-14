@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import { getSelectionContext } from "$lib/stores/selection";
-  import Button from "$lib/components/atoms/Button.svelte";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import { getSelectionContext } from "$stores/selection";
+  import Button from "$atoms/Button.svelte";
   import Modal from "./Modal.svelte";
 
   type Events = {

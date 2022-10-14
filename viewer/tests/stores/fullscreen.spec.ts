@@ -1,7 +1,7 @@
 import { describe, expect, it, test } from "vitest";
 import { get } from "svelte/store";
 
-import { createStore } from "./fullscreen";
+import { createStore } from "$stores/fullscreen";
 
 describe("fullscreen", () => {
   it("is not fullscreen by default", () => {

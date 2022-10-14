@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { setDragDropContext } from "$lib/stores/dragdrop";
-  import { getFileSystemContext } from "$lib/stores/filesystem";
-  import LabeledSwitch from "$lib/components/atoms/LabeledSwitch.svelte";
-  import QueueButton from "$lib/components/molecules/QueueButton.svelte";
+  import { setDragDropContext } from "$stores/dragdrop";
+  import { getFileSystemContext } from "$stores/filesystem";
+  import LabeledSwitch from "$atoms/LabeledSwitch.svelte";
+  import QueueButton from "$molecules/QueueButton.svelte";
   import TreeFrame from "./TreeFrame.svelte";
   import SyncButton from "./SyncButton.svelte";
 

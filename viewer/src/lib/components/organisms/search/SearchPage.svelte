@@ -1,14 +1,11 @@
 <script lang="ts">
   import { beforeNavigate } from "$app/navigation";
 
-  import {
-    getSelectionContext,
-    setSelectionContext,
-  } from "$lib/stores/selection";
-  import { getFullScreenContext } from "$lib/stores/fullscreen";
-  import { getSearchContext, setSearchContext } from "$lib/stores/search";
-  import { setQueueContext } from "$lib/stores/queue";
-  import { setDisabledContext } from "$lib/stores/disabled";
+  import { getSelectionContext, setSelectionContext } from "$stores/selection";
+  import { getFullScreenContext } from "$stores/fullscreen";
+  import { getSearchContext, setSearchContext } from "$stores/search";
+  import { setQueueContext } from "$stores/queue";
+  import { setDisabledContext } from "$stores/disabled";
   import BottomBar from "./BottomBar.svelte";
   import TopBar from "./TopBar.svelte";
   import ResultList from "./ResultList.svelte";

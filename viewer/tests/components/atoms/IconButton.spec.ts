@@ -2,7 +2,7 @@
 
 import { describe, expect, it, afterEach, vi } from "vitest";
 import { render, fireEvent, cleanup } from "@testing-library/svelte";
-import IconButton from "./IconButton.svelte";
+import IconButton from "$atoms/IconButton.svelte";
 
 describe("IconButton", () => {
   afterEach(() => {

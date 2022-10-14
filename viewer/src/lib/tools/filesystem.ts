@@ -1,5 +1,5 @@
-import type { ChangeResponse, NodeResponse } from "$lib/types/api";
-import type { Node_, NodeMap, ChildrenMap } from "$lib/types/filesystem";
+import type { ChangeResponse, NodeResponse } from "$types/api";
+import type { Node_, NodeMap, ChildrenMap } from "$types/filesystem";
 
 function getParentId(rawNode: NodeResponse) {
   if (!rawNode) {

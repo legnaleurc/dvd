@@ -12,8 +12,8 @@ import {
 import { get } from "svelte/store";
 import { setupServer } from "msw/node";
 
-import { handlers } from "$lib/mocks/queue";
-import { createStore, type ActionQueueStore } from "./queue";
+import { handlers } from "$mocks/queue";
+import { createStore, type ActionQueueStore } from "$stores/queue";
 
 describe("queue", () => {
   const server = setupServer(...handlers);

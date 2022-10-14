@@ -1,5 +1,5 @@
-import type { NodeResponse } from "$lib/types/api";
-import type { Node_ } from "$lib/types/filesystem";
+import type { NodeResponse } from "$types/api";
+import type { Node_ } from "$types/filesystem";
 
 export function assertIsString(value: unknown): asserts value is string {
   if (typeof value !== "string") {

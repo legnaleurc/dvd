@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { loadToken, saveToken } from "$lib/tools/storage";
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
+  import { loadToken, saveToken } from "$tools/storage";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
   import InputGroup from "./InputGroup.svelte";
   import SettingsGroup from "./SettingsGroup.svelte";
 

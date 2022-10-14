@@ -1,4 +1,4 @@
-import type { SvelteEventDispatcher } from "$lib/types/traits";
+import type { SvelteEventDispatcher } from "$types/traits";
 
 type Events = {
   enterpressed: null;

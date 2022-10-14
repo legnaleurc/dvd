@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import { getFullScreenContext } from "$lib/stores/fullscreen";
-  import Icon from "$lib/components/atoms/Icon.svelte";
+  import { getFullScreenContext } from "$stores/fullscreen";
+  import Icon from "$atoms/Icon.svelte";
 
   type Tab = {
     path: string;

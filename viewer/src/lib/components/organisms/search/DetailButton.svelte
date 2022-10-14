@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getSearchContext } from "$lib/stores/search";
-  import { getSelectionContext } from "$lib/stores/selection";
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
+  import { getSearchContext } from "$stores/search";
+  import { getSelectionContext } from "$stores/selection";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
 
   const { detailList } = getSearchContext();
   const { selectedId, deselectList, deselectAll } = getSelectionContext();

@@ -2,8 +2,8 @@
   import { onMount } from "svelte";
 
   import { page } from "$app/stores";
-  import { getVideoContext } from "$lib/stores/video";
-  import { getStreamUrl } from "$lib/tools/api";
+  import { getVideoContext } from "$stores/video";
+  import { getStreamUrl } from "$tools/api";
 
   const { videoMap, openVideo } = getVideoContext();
 

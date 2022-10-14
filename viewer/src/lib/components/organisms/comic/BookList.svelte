@@ -1,9 +1,9 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { getComicContext } from "$lib/stores/comic";
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
-  import EmptyBlock from "$lib/components/atoms/EmptyBlock.svelte";
+  import { getComicContext } from "$stores/comic";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
+  import EmptyBlock from "$atoms/EmptyBlock.svelte";
 
   const { idList, comicMap, clearComic, openCachedComic } = getComicContext();
 

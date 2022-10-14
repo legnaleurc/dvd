@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { getComicContext } from "$lib/stores/comic";
-  import { getImageUrl } from "$lib/tools/api";
-  import { getFullScreenContext } from "$lib/stores/fullscreen";
+  import { getComicContext } from "$stores/comic";
+  import { getImageUrl } from "$tools/api";
+  import { getFullScreenContext } from "$stores/fullscreen";
   import Header from "./Header.svelte";
 
   export let id: string;

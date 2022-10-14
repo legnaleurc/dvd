@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Variants } from "$lib/types/button";
+  import type { Variants } from "$types/button";
   import Icon from "./Icon.svelte";
 
   export let label: string;

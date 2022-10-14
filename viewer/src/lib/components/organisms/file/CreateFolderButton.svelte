@@ -2,12 +2,12 @@
   import { createEventDispatcher } from "svelte";
   import { writable } from "svelte/store";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import { getSelectionContext } from "$lib/stores/selection";
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import { createFolder } from "$tools/api";
+  import { getSelectionContext } from "$stores/selection";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
   import CreateFolderModal from "./CreateFolderModal.svelte";
-  import { createFolder } from "$lib/tools/api";
 
   type Events = {
     aftercreate: null;

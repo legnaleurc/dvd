@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SvelteComponentModule } from "$lib/types/traits";
+  import type { SvelteComponentModule } from "$types/traits";
 
   type $$Slots = {
     pending: Record<string, never>;

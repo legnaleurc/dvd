@@ -4,8 +4,8 @@ import { describe, expect, beforeAll, afterAll, afterEach, test } from "vitest";
 import { get } from "svelte/store";
 import { setupServer } from "msw/node";
 
-import { handlers } from "$lib/mocks/video";
-import { createStore } from "./video";
+import { handlers } from "$mocks/video";
+import { createStore } from "$stores/video";
 
 describe("video", () => {
   const server = setupServer(...handlers);

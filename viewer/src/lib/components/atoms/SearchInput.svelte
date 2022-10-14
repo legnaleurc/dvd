@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import { inputEvents } from "$lib/actions/input";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import { inputEvents } from "$actions/input";
 
   type Events = {
     enterpressed: null;

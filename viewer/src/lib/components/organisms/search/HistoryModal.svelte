@@ -1,11 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import { getSearchContext } from "$lib/stores/search";
-  import { getSelectionContext } from "$lib/stores/selection";
-  import EmptyBlock from "$lib/components/atoms/EmptyBlock.svelte";
-  import Modal from "$lib/components/molecules/Modal.svelte";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import { getSearchContext } from "$stores/search";
+  import { getSelectionContext } from "$stores/selection";
+  import EmptyBlock from "$atoms/EmptyBlock.svelte";
+  import Modal from "$molecules/Modal.svelte";
 
   type Events = {
     hide: null;

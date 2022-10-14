@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { renameNode } from "$lib/tools/api";
-  import { getFileSystemContext } from "$lib/stores/filesystem";
-  import { getQueueContext } from "$lib/stores/queue";
-  import CopyUrlButton from "$lib/components/molecules/CopyUrlButton.svelte";
-  import DeselectAllButton from "$lib/components/molecules/DeselectAllButton.svelte";
-  import DownloadButton from "$lib/components/molecules/DownloadButton.svelte";
-  import InternalImageButton from "$lib/components/molecules/InternalImageButton.svelte";
-  import InternalVideoButton from "$lib/components/molecules/InternalVideoButton.svelte";
-  import RenameButton from "$lib/components/molecules/RenameButton.svelte";
-  import TrashButton from "$lib/components/molecules/TrashButton.svelte";
+  import { renameNode } from "$tools/api";
+  import { getFileSystemContext } from "$stores/filesystem";
+  import { getQueueContext } from "$stores/queue";
+  import CopyUrlButton from "$molecules/CopyUrlButton.svelte";
+  import DeselectAllButton from "$molecules/DeselectAllButton.svelte";
+  import DownloadButton from "$molecules/DownloadButton.svelte";
+  import InternalImageButton from "$molecules/InternalImageButton.svelte";
+  import InternalVideoButton from "$molecules/InternalVideoButton.svelte";
+  import RenameButton from "$molecules/RenameButton.svelte";
+  import TrashButton from "$molecules/TrashButton.svelte";
   import SortButton from "./SortButton.svelte";
   import CreateFolderButton from "./CreateFolderButton.svelte";
 

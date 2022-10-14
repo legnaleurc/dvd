@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { get } from "svelte/store";
 
-import { createStore } from "./dragdrop";
+import { createStore } from "$stores/dragdrop";
 
 describe("dragdrop", () => {
   test("has good initial value", () => {

@@ -1,10 +1,10 @@
 <script lang="ts" context="module">
-  import type { Node_ } from "$lib/types/filesystem";
+  import type { Node_ } from "$types/filesystem";
   import {
     getCompareFunction,
     getSortContext,
     type SortMethod,
-  } from "$lib/stores/sort";
+  } from "$stores/sort";
 
   function getSortedIdList(
     map: Record<string, Node_>,
@@ -20,7 +20,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { getFileSystemContext } from "$lib/stores/filesystem";
+  import { getFileSystemContext } from "$stores/filesystem";
 
   type $$Slots = {
     default: {

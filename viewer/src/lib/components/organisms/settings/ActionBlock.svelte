@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { loadActionMap, saveActionMap } from "$lib/tools/storage";
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
-  import TextInput from "$lib/components/atoms/TextInput.svelte";
+  import { loadActionMap, saveActionMap } from "$tools/storage";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
+  import TextInput from "$atoms/TextInput.svelte";
   import InputGroup from "./InputGroup.svelte";
   import SettingsGroup from "./SettingsGroup.svelte";
   import ActionItem from "./ActionItem.svelte";

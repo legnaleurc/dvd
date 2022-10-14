@@ -1,10 +1,10 @@
 <script lang="ts">
   import { writable } from "svelte/store";
 
-  import { getSelectionContext } from "$lib/stores/selection";
-  import { getDisabledContext } from "$lib/stores/disabled";
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
+  import { getSelectionContext } from "$stores/selection";
+  import { getDisabledContext } from "$stores/disabled";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
   import RenameModal from "./RenameModal.svelte";
 
   export let getNameById: (id: string) => string;

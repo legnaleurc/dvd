@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { renameNode } from "$lib/tools/api";
-  import { getQueueContext } from "$lib/stores/queue";
-  import { getSearchContext } from "$lib/stores/search";
-  import HorizontalToolBar from "$lib/components/molecules/HorizontalToolBar.svelte";
+  import { renameNode } from "$tools/api";
+  import { getQueueContext } from "$stores/queue";
+  import { getSearchContext } from "$stores/search";
+  import HorizontalToolBar from "$molecules/HorizontalToolBar.svelte";
 
   const { resultMap } = getSearchContext();
   const { moveNodesToPath, trashNodes } = getQueueContext();

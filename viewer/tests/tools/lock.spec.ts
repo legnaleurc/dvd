@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { Future, Event_ } from "./lock";
+import { Future, Event_ } from "$tools/lock";
 
 describe("lock", () => {
   describe("Future", () => {

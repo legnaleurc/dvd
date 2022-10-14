@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import { getQueueContext } from "$lib/stores/queue";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import { getQueueContext } from "$stores/queue";
   import Modal from "./Modal.svelte";
 
   type Events = {

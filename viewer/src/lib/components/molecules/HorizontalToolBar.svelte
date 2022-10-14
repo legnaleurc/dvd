@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Icon from "$lib/components/atoms/Icon.svelte";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
+  import Icon from "$atoms/Icon.svelte";
+  import IconButton from "$atoms/IconButton.svelte";
   import DeselectAllButton from "./DeselectAllButton.svelte";
   import DownloadButton from "./DownloadButton.svelte";
   import ExternalOpenButton from "./ExternalOpenButton.svelte";

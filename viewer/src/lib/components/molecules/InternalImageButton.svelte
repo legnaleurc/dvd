@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getComicContext } from "$lib/stores/comic";
-  import { getSelectionContext } from "$lib/stores/selection";
-  import IconButton from "$lib/components/atoms/IconButton.svelte";
-  import Icon from "$lib/components/atoms/Icon.svelte";
+  import { getComicContext } from "$stores/comic";
+  import { getSelectionContext } from "$stores/selection";
+  import IconButton from "$atoms/IconButton.svelte";
+  import Icon from "$atoms/Icon.svelte";
 
   export let getNameById: (id: string) => string;
 

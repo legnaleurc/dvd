@@ -1,8 +1,8 @@
 import { getContext, setContext } from "svelte";
 import { get, writable } from "svelte/store";
 
-import type { SearchResponse } from "$lib/types/api";
-import { listNodeByName } from "$lib/tools/api";
+import type { SearchResponse } from "$types/api";
+import { listNodeByName } from "$tools/api";
 
 const KEY = Symbol();
 

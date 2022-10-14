@@ -9,7 +9,7 @@ import {
   saveShortcutList,
   loadToken,
   saveToken,
-} from "./storage";
+} from "$tools/storage";
 
 describe("storage", () => {
   afterEach(() => {

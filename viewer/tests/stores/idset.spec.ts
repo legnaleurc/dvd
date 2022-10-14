@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { get } from "svelte/store";
 
-import { createStore } from "./idset";
+import { createStore } from "$stores/idset";
 
 describe("idset", () => {
   test("has good initial values", () => {

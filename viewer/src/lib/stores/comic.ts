@@ -1,13 +1,13 @@
 import { getContext, setContext } from "svelte";
 import { get, writable } from "svelte/store";
 
-import type { ImageResponse } from "$lib/types/api";
+import type { ImageResponse } from "$types/api";
 import {
   clearCachedImage,
   listCachedImage,
   listImage,
   readNode,
-} from "$lib/tools/api";
+} from "$tools/api";
 
 type ImageData = ImageResponse;
 type ComicData = {

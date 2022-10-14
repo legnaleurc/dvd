@@ -1,14 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$lib/types/traits";
-  import { callExternal } from "$lib/tools/external";
-  import { getDisabledContext } from "$lib/stores/disabled";
-  import { getDragDropContext } from "$lib/stores/dragdrop";
-  import { getFileSystemContext } from "$lib/stores/filesystem";
-  import { getQueueContext } from "$lib/stores/queue";
-  import { getSelectionContext } from "$lib/stores/selection";
-  import { drag, drop } from "$lib/actions/dragdrop";
+  import type { SvelteCustomEvents } from "$types/traits";
+  import { callExternal } from "$tools/external";
+  import { getDisabledContext } from "$stores/disabled";
+  import { getDragDropContext } from "$stores/dragdrop";
+  import { getFileSystemContext } from "$stores/filesystem";
+  import { getQueueContext } from "$stores/queue";
+  import { getSelectionContext } from "$stores/selection";
+  import { drag, drop } from "$actions/dragdrop";
   import NodeChildren from "./NodeChildren.svelte";
   import NodeIndicator from "./NodeIndicator.svelte";
   import SortedList from "./SortedList.svelte";

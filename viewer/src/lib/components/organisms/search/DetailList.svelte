@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getSearchContext } from "$lib/stores/search";
+  import { getSearchContext } from "$stores/search";
   import ResultItem from "./ResultItem.svelte";
 
   const { detailList } = getSearchContext();
