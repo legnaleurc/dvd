@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-  type IconStyle = "outlined" | "filled";
+  type IconStyle = "filled";
 
   function getIconStyle(style: string) {
     if (!style || style === "filled") {
