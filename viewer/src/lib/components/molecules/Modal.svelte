@@ -55,6 +55,7 @@
 </script>
 
 {#if show}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
     class="safe-area-inset-0 fixed flex flex-col justify-center items-center bg-black/70"
     bind:this={backdrop}

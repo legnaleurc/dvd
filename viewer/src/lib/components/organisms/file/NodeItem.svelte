@@ -43,6 +43,7 @@
     class:bg-action-selected={selected}
     class:text-action-disabled={disabled}
   >
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div class="flex-1 flex" on:click={handleSelect}>
       <div class="w-12 h-12 p-3">
         <NodeIcon category={node.category} />

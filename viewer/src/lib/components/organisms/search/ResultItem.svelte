@@ -22,6 +22,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
   class="p-3"
   class:bg-action-selected={selected}

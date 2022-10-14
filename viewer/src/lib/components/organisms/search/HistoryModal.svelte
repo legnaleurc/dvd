@@ -23,6 +23,7 @@
   <span slot="title">Search History</span>
   <div slot="body" class="flex flex-col">
     {#each $historyList as history, index (index)}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         class="p-3 cursor-pointer"
         on:click={() => {

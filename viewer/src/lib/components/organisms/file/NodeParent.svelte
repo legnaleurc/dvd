@@ -131,6 +131,7 @@
           on:click={handleIndicatorClick}
         />
       </div>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         class="flex-1 break-all"
         class:text-action-disabled={disabled}

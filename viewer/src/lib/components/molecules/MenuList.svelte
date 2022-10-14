@@ -95,6 +95,7 @@
 
 <slot name="trigger" {show} />
 {#if present}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
     class="safe-area-inset-0 fixed overflow-hidden"
     bind:this={rootEl}
