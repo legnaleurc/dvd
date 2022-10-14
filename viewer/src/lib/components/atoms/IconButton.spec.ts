@@ -1,10 +1,14 @@
 /// @vitest-environment jsdom
 
-import { describe, expect, it, vi } from "vitest";
-import { render, fireEvent } from "@testing-library/svelte";
+import { describe, expect, it, afterEach, vi } from "vitest";
+import { render, fireEvent, cleanup } from "@testing-library/svelte";
 import IconButton from "./IconButton.svelte";
 
 describe("IconButton", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("can trigger click event", async () => {
     const handler = vi.fn();
     const { getByRole, component } = render(IconButton);
