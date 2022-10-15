@@ -5,10 +5,9 @@
   import MenuItem from "$molecules/MenuItem.svelte";
   import MenuList from "$molecules/MenuList.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     command: string;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
   type $$Slots = {
     default: {
       showMenu: (x: number, y: number) => void;
@@ -25,7 +24,7 @@
     [VLC_FOR_IOS, "VLC for iOS"],
   ];
 
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 </script>
 
 <MenuList>

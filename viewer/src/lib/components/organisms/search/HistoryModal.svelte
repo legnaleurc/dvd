@@ -7,16 +7,15 @@
   import EmptyBlock from "$atoms/EmptyBlock.svelte";
   import Modal from "$molecules/Modal.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     hide: null;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   export let show: boolean;
 
   const { historyList, searchHistory } = getSearchContext();
   const { deselectAll } = getSelectionContext();
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 </script>
 
 <Modal {show} on:hide>

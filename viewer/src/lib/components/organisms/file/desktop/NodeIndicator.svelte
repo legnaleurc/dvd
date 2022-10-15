@@ -5,17 +5,16 @@
   import Icon from "$atoms/Icon.svelte";
   import NodeIcon from "$atoms/NodeIcon.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     click: null;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   export let category: string;
   export let isFolder: boolean;
   export let loading: boolean;
   export let expanded: boolean;
 
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 
   function handleClick() {
     if (loading) {

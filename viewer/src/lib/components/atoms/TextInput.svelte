@@ -4,17 +4,16 @@
   import type { SvelteCustomEvents } from "$types/traits";
   import { inputEvents } from "$actions/input";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     enterpressed: null;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   let klass = "";
   export { klass as class };
   export let value: string = undefined;
   export let placeholder = "";
 
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 </script>
 
 <input

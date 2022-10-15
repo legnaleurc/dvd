@@ -7,10 +7,9 @@
   import MenuList from "./MenuList.svelte";
   import MenuItem from "./MenuItem.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     shortcut: string;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
   type $$Slots = {
     default: {
       showMenu: (x: number, y: number) => void;
@@ -18,7 +17,7 @@
   };
 
   const { shortcutList } = getShortcutContext();
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 </script>
 
 <MenuList>

@@ -6,15 +6,14 @@
   import LoadingBlock from "$atoms/LoadingBlock.svelte";
   import NodeItem from "./NodeItem.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     open: string;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   export let loaded: boolean;
   export let idList: string[];
 
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 
   function handleOpen(event: CustomEvent<string>) {
     dispatch("open", event.detail);

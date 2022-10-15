@@ -6,10 +6,9 @@
   import IconButton from "$atoms/IconButton.svelte";
   import { useBodyScrolling, useMountedStore } from "$atoms/LifeCycle.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     hide: null;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
   type $$Slots = {
     title: Record<string, never>;
     body: Record<string, never>;
@@ -18,7 +17,7 @@
 
   export let show: boolean;
 
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
   const bodyScrolling = useBodyScrolling();
   const isMounted = useMountedStore();
 

@@ -7,19 +7,18 @@
   import TextInput from "$atoms/TextInput.svelte";
   import InputGroup from "./InputGroup.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     save: {
       type: string;
       command: string;
     };
     remove: string;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   export let type: string;
   export let command: string;
 
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 
   let newCommand = "";
 

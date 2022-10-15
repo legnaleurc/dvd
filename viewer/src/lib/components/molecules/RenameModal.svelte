@@ -6,16 +6,15 @@
   import TextInput from "$atoms/TextInput.svelte";
   import Modal from "./Modal.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     hide: null;
     rename: string;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   export let id: string;
   export let getNameById: (id: string) => string;
 
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 
   let newName = "";
 

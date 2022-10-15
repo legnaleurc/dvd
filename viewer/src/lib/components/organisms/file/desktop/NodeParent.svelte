@@ -13,18 +13,17 @@
   import NodeChildren from "./NodeChildren.svelte";
   import NodeIndicator from "./NodeIndicator.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     begin: string;
     end: string;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   const { disabledId, disableList, enableList } = getDisabledContext();
   const { acceptedId } = getDragDropContext();
   const { nodeMap, childrenMap, loadChildren, sync } = getFileSystemContext();
   const { moveNodes } = getQueueContext();
   const { selectedId, toggleId, deselectList } = getSelectionContext();
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 
   export let id: string;
 

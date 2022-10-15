@@ -3,10 +3,9 @@
   import { getQueueContext } from "$stores/queue";
   import Modal from "./Modal.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     hide: null;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   export let show: boolean;
   export let getNameById: (id: string) => string;

@@ -11,15 +11,14 @@
 
   export let id: string;
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     open: string;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   const { nodeMap } = getFileSystemContext();
   const { selectedId, toggleId } = getSelectionContext();
   const { disabledId } = getDisabledContext();
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 
   $: selected = $selectedId.has(id);
   $: disabled = $disabledId.has(id);

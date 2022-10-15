@@ -10,16 +10,15 @@
   import SortButton from "$organisms/file/common/SortButton.svelte";
   import Breadcrumb from "./Breadcrumb.svelte";
 
-  type Events = {
-    back: void;
+  type $$Events = SvelteCustomEvents<{
+    back: null;
     backTo: number;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   export let stack: string[];
 
   const { nodeMap } = getFileSystemContext();
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 
   function getNameById(id: string) {
     return $nodeMap[id].name;

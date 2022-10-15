@@ -6,16 +6,15 @@
   import Button from "$atoms/Button.svelte";
   import Modal from "./Modal.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     hide: null;
     trash: null;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   export let show: boolean;
 
   const { selectedId } = getSelectionContext();
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 </script>
 
 <Modal {show} on:hide>

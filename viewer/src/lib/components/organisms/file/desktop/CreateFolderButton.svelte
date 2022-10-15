@@ -9,17 +9,16 @@
   import IconButton from "$atoms/IconButton.svelte";
   import CreateFolderModal from "./CreateFolderModal.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     aftercreate: null;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   export let getNameById: (id: string) => string;
   export let isFolderById: (id: string) => boolean;
   export let getParentById: (id: string) => string;
 
   const { selectedId, deselectList } = getSelectionContext();
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 
   const parentId = writable("");
 

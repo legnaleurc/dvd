@@ -5,16 +5,15 @@
   import Icon from "$atoms/Icon.svelte";
   import IconButton from "$atoms/IconButton.svelte";
 
-  type Events = {
+  type $$Events = SvelteCustomEvents<{
     first: null;
     last: null;
-  };
-  type $$Events = SvelteCustomEvents<Events>;
+  }>;
 
   export let hidden: boolean;
   export let name: string;
 
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher();
 </script>
 
 <div class="flex min-w-0 bg-paper-800" class:hidden>
