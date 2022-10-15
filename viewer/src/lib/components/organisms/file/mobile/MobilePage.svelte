@@ -4,10 +4,10 @@
   import { getFileSystemContext } from "$stores/filesystem";
   import { getFullScreenContext } from "$stores/fullscreen";
   import { setSortContext } from "$stores/sort";
+  import SortedList from "$organisms/file/common/SortedList.svelte";
   import MobileToolBar from "./MobileToolBar.svelte";
   import NodeList from "./NodeList.svelte";
   import PathBar from "./PathBar.svelte";
-  import SortedList from "./SortedList.svelte";
 
   setSelectionContext();
   setSortContext();

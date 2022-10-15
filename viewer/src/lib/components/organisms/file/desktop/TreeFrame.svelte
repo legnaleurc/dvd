@@ -2,9 +2,9 @@
   import { getFileSystemContext } from "$stores/filesystem";
   import { setSelectionContext } from "$stores/selection";
   import { setSortContext } from "$stores/sort";
+  import SortedList from "$organisms/file/common/SortedList.svelte";
   import DesktopToolBar from "./DesktopToolBar.svelte";
   import NodeChildren from "./NodeChildren.svelte";
-  import SortedList from "./SortedList.svelte";
 
   setSortContext();
   setSelectionContext();

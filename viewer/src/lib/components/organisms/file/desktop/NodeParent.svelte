@@ -9,9 +9,9 @@
   import { getQueueContext } from "$stores/queue";
   import { getSelectionContext } from "$stores/selection";
   import { drag, drop } from "$actions/dragdrop";
+  import SortedList from "$organisms/file/common/SortedList.svelte";
   import NodeChildren from "./NodeChildren.svelte";
   import NodeIndicator from "./NodeIndicator.svelte";
-  import SortedList from "./SortedList.svelte";
 
   type Events = {
     begin: string;

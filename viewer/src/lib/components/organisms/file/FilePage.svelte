@@ -16,12 +16,12 @@
 
 <div class="w-full h-full">
   <div class="hidden lg:contents">
-    <LazyLoad lazy={() => import("./DesktopPage.svelte")}>
+    <LazyLoad lazy={() => import("./desktop/DesktopPage.svelte")}>
       <LoadingBlock slot="pending" />
     </LazyLoad>
   </div>
   <div class="contents lg:hidden">
-    <LazyLoad lazy={() => import("./MobilePage.svelte")}>
+    <LazyLoad lazy={() => import("./mobile/MobilePage.svelte")}>
       <LoadingBlock slot="pending" />
     </LazyLoad>
   </div>

@@ -9,7 +9,7 @@
   import InternalVideoButton from "$molecules/InternalVideoButton.svelte";
   import RenameButton from "$molecules/RenameButton.svelte";
   import TrashButton from "$molecules/TrashButton.svelte";
-  import SortButton from "./SortButton.svelte";
+  import SortButton from "$organisms/file/common/SortButton.svelte";
   import CreateFolderButton from "./CreateFolderButton.svelte";
 
   const { nodeMap, sync } = getFileSystemContext();

@@ -6,9 +6,9 @@
   import Icon from "$atoms/Icon.svelte";
   import IconButton from "$atoms/IconButton.svelte";
   import QueueButton from "$molecules/QueueButton.svelte";
+  import SyncButton from "$organisms/file/common/SyncButton.svelte";
+  import SortButton from "$organisms/file/common/SortButton.svelte";
   import Breadcrumb from "./Breadcrumb.svelte";
-  import SyncButton from "./SyncButton.svelte";
-  import SortButton from "./SortButton.svelte";
 
   type Events = {
     back: void;

@@ -3,8 +3,8 @@
   import { getFileSystemContext } from "$stores/filesystem";
   import LabeledSwitch from "$atoms/LabeledSwitch.svelte";
   import QueueButton from "$molecules/QueueButton.svelte";
+  import SyncButton from "$organisms/file/common/SyncButton.svelte";
   import TreeFrame from "./TreeFrame.svelte";
-  import SyncButton from "./SyncButton.svelte";
 
   const { nodeMap } = getFileSystemContext();
   setDragDropContext();
