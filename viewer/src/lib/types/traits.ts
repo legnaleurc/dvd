@@ -17,10 +17,3 @@ export type SvelteComponentModule<
 export type SvelteCustomEvents<Events extends Record<string, unknown>> = {
   [key in keyof Events]: CustomEvent<Events[key]>;
 };
-
-export type SvelteEventDispatcher<Events extends Record<string, unknown>> = <
-  K extends keyof Events,
->(
-  type: K,
-  detail?: Events[K],
-) => void;

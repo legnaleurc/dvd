@@ -38,7 +38,7 @@
   <div slot="body" class="flex flex-col">
     <div class="p-3">Creating Folder to {getNameById(id)}</div>
     <div class="flex flex-col">
-      <TextInput bind:value={newName} on:enterpressed={handleAccept} />
+      <TextInput bind:value={newName} on:enterpress={handleAccept} />
     </div>
   </div>
   <div slot="footer">

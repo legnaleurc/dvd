@@ -26,5 +26,5 @@
   {disabled}
   placeholder="Search"
   bind:value={text}
-  on:enterpressed={handleSearch}
+  on:enterpress={handleSearch}
 />

@@ -32,7 +32,7 @@
         class="flex-1"
         placeholder="New Shortcut"
         bind:value={newShortcut}
-        on:enterpressed={handleNew}
+        on:enterpress={handleNew}
       />
       <svelte:fragment slot="action">
         <IconButton disabled={newShortcut.length <= 0} on:click={handleNew}>
