@@ -45,8 +45,8 @@
       on:last={handleLast}
     />
   </div>
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
+    role="presentation"
     class="flex-1 flex flex-col items-center overflow-y-auto overflow-x-hidden"
     bind:this={container}
     on:click={toggleFullScreen}

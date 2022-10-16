@@ -95,13 +95,15 @@
 
 <slot name="trigger" {show} />
 {#if present}
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
+    role="presentation"
     class="safe-area-inset-0 fixed overflow-hidden"
     bind:this={rootEl}
     on:click|self={hide}
   >
     <div
+      role="menu"
+      tabindex="-1"
       class="absolute invisible p-3 flex flex-col bg-paper-700"
       bind:this={menuEl}
     >

@@ -4,6 +4,7 @@
   import type { SvelteCustomEvents } from "$types/traits";
   import { getSearchContext } from "$stores/search";
   import { getSelectionContext } from "$stores/selection";
+  import { onButtonClick } from "$actions/event";
   import EmptyBlock from "$atoms/EmptyBlock.svelte";
   import Modal from "$molecules/Modal.svelte";
 
@@ -16,20 +17,23 @@
   const { historyList, searchHistory } = getSearchContext();
   const { deselectAll } = getSelectionContext();
   const dispatch = createEventDispatcher();
+
+  function handleSearchHistory(index: number) {
+    deselectAll();
+    searchHistory(index);
+    dispatch("hide");
+  }
 </script>
 
 <Modal {show} on:hide>
   <span slot="title">Search History</span>
   <div slot="body" class="flex flex-col">
     {#each $historyList as history, index (index)}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
+        role="button"
+        tabindex="0"
         class="p-3 cursor-pointer"
-        on:click={() => {
-          deselectAll();
-          searchHistory(index);
-          dispatch("hide");
-        }}
+        use:onButtonClick={() => handleSearchHistory(index)}
       >
         {history}
       </div>

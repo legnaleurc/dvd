@@ -2,6 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import type { SvelteCustomEvents } from "$types/traits";
+  import { onButtonClick } from "$actions/event";
   import Icon from "$atoms/Icon.svelte";
   import NodeIcon from "$atoms/NodeIcon.svelte";
 
@@ -24,8 +25,7 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="flex" on:click={handleClick}>
+<div role="button" tabindex="0" class="flex" use:onButtonClick={handleClick}>
   {#if isFolder}
     {#if loading}
       <div class="flex animate-spin">

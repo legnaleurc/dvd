@@ -9,6 +9,7 @@
   import { getQueueContext } from "$stores/queue";
   import { getSelectionContext } from "$stores/selection";
   import { drag, drop } from "$actions/dragdrop";
+  import { onButtonClick, onButtonDoubleClick } from "$actions/event";
   import SortedList from "$organisms/file/common/SortedList.svelte";
   import NodeChildren from "./NodeChildren.svelte";
   import NodeIndicator from "./NodeIndicator.svelte";
@@ -130,16 +131,18 @@
           on:click={handleIndicatorClick}
         />
       </div>
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
+        role="button"
+        aria-disabled={disabled}
+        tabindex="0"
         class="flex-1 break-all"
         class:text-action-disabled={disabled}
         draggable={selected}
         use:drag={{
           onDragEnd: handleDragEnd,
         }}
-        on:click={handleSingleClick}
-        on:dblclick={handleDoubleClick}
+        use:onButtonClick={handleSingleClick}
+        use:onButtonDoubleClick={handleDoubleClick}
       >
         {node.name}
       </div>

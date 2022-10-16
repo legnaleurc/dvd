@@ -5,6 +5,7 @@
   import { getFileSystemContext } from "$stores/filesystem";
   import { getSelectionContext } from "$stores/selection";
   import { getDisabledContext } from "$stores/disabled";
+  import { onButtonClick } from "$actions/event";
   import Icon from "$atoms/Icon.svelte";
   import IconButton from "$atoms/IconButton.svelte";
   import NodeIcon from "$atoms/NodeIcon.svelte";
@@ -42,8 +43,12 @@
     class:bg-action-selected={selected}
     class:text-action-disabled={disabled}
   >
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div class="flex-1 flex" on:click={handleSelect}>
+    <div
+      role="button"
+      tabindex="0"
+      class="flex-1 flex"
+      use:onButtonClick={handleSelect}
+    >
       <div class="w-12 h-12 p-3">
         <NodeIcon category={node.category} />
       </div>

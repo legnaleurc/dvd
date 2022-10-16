@@ -2,6 +2,7 @@
   import { getDisabledContext } from "$stores/disabled";
   import { getSelectionContext } from "$stores/selection";
   import { getSearchContext } from "$stores/search";
+  import { onButtonClick } from "$actions/event";
 
   export let id: string;
   export let detailed: boolean;
@@ -22,12 +23,14 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
+  role="button"
+  aria-pressed={selected}
+  tabindex="0"
   class="p-3"
   class:bg-action-selected={selected}
   class:text-action-disabled={disabled}
-  on:click={handleClick}
+  use:onButtonClick={handleClick}
 >
   <div>{result.name}</div>
   <div class="text-symbol-hint">{result.path}</div>
