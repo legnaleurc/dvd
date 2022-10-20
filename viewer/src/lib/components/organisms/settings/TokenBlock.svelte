@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-
-  import { loadToken, saveToken } from "$tools/storage";
+  import { saveToken } from "$tools/storage";
   import Icon from "$atoms/Icon.svelte";
   import IconButton from "$atoms/IconButton.svelte";
   import InputGroup from "./InputGroup.svelte";
@@ -11,15 +9,12 @@
 
   function handleSave() {
     saveToken(token);
+    token = "";
   }
 
   function handleReload() {
     window.location.reload();
   }
-
-  onMount(() => {
-    token = loadToken();
-  });
 </script>
 
 <SettingsGroup>
@@ -30,7 +25,7 @@
         class="m-3 px-3 flex-1 bg-black"
         type="password"
         placeholder="Token"
-        autocomplete="off"
+        autocomplete="new-password"
         bind:value={token}
       />
     </svelte:fragment>
