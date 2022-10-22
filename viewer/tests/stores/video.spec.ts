@@ -22,22 +22,25 @@ describe("video", () => {
 
   test("has good initial value", () => {
     const store = createStore();
-    expect(get(store.idList)).toHaveLength(0);
+    expect(get(store.idList)).toEqual([]);
     expect(get(store.videoMap)).toEqual({});
+    expect(get(store.errorList)).toEqual([]);
   });
 
   test("open video", async () => {
     const store = createStore();
     await store.openVideo("__NORMAL__");
-    expect(get(store.idList)).toHaveLength(1);
+    expect(get(store.idList)).toEqual(["__NORMAL__"]);
     expect(get(store.videoMap)).toHaveProperty("__NORMAL__");
+    expect(get(store.errorList)).toEqual([]);
   });
 
-  test.skip("open invalid video", async () => {
+  test("open invalid video", async () => {
     const store = createStore();
     await store.openVideo("__INVALID__");
-    expect(get(store.idList)).toHaveLength(0);
+    expect(get(store.idList)).toEqual([]);
     expect(get(store.videoMap)).not.toHaveProperty("__INVALID__");
+    expect(get(store.errorList)).toEqual(["Not Found"]);
   });
 
   test("clear video", () => {
@@ -52,8 +55,37 @@ describe("video", () => {
         height: 600,
       },
     });
+    store.errorList.set(["Not Found"]);
     store.clearAllVideo();
-    expect(get(store.idList)).toHaveLength(0);
+    expect(get(store.idList)).toEqual([]);
     expect(get(store.videoMap)).toEqual({});
+    expect(get(store.errorList)).toEqual(["Not Found"]);
+  });
+
+  test("clear error", () => {
+    const store = createStore();
+    store.idList.set(["test"]);
+    store.videoMap.set({
+      __NORMAL__: {
+        id: "__NORMAL__",
+        name: "NORMAL",
+        mimeType: "video/mp4",
+        width: 800,
+        height: 600,
+      },
+    });
+    store.errorList.set(["Not Found"]);
+    store.clearError();
+    expect(get(store.idList)).toEqual(["test"]);
+    expect(get(store.videoMap)).toEqual({
+      __NORMAL__: {
+        id: "__NORMAL__",
+        name: "NORMAL",
+        mimeType: "video/mp4",
+        width: 800,
+        height: 600,
+      },
+    });
+    expect(get(store.errorList)).toEqual([]);
   });
 });
