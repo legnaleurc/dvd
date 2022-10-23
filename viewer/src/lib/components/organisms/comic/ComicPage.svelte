@@ -12,8 +12,8 @@
 
   const { idList, comicMap, openComic } = getComicContext();
 
-  $: isMainRoute = $page.routeId === "comic";
-  $: isBookRoute = $page.routeId === "comic/[comicId]";
+  $: isMainRoute = $page.routeId === "/comic";
+  $: isBookRoute = $page.routeId === "/comic/[comicId]";
   $: comicId = $page.params.comicId ?? "";
 
   onMount(() => {

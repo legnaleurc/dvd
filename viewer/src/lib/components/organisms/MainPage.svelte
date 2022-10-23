@@ -41,11 +41,12 @@
       lazy: () => import("./settings/SettingsPage.svelte"),
     },
   ];
+
+  $: routeId = $page.routeId ?? "";
 </script>
 
 <main class="w-full h-full">
   {#each PAGES as page_ (page_.routePrefix)}
-    {@const routeId = $page.routeId ?? ""}
     <section
       class="w-full h-full"
       hidden={!routeId.startsWith(page_.routePrefix)}
