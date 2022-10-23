@@ -21,23 +21,23 @@
 
   const PAGES: Page[] = [
     {
-      routePrefix: "files",
+      routePrefix: "/files",
       lazy: () => import("./file/FilePage.svelte"),
     },
     {
-      routePrefix: "search",
+      routePrefix: "/search",
       lazy: () => import("./search/SearchPage.svelte"),
     },
     {
-      routePrefix: "video",
+      routePrefix: "/video",
       lazy: () => import("./video/VideoPage.svelte"),
     },
     {
-      routePrefix: "comic",
+      routePrefix: "/comic",
       lazy: () => import("./comic/ComicPage.svelte"),
     },
     {
-      routePrefix: "settings",
+      routePrefix: "/settings",
       lazy: () => import("./settings/SettingsPage.svelte"),
     },
   ];
@@ -45,9 +45,10 @@
 
 <main class="w-full h-full">
   {#each PAGES as page_ (page_.routePrefix)}
+    {@const routeId = $page.routeId ?? ""}
     <section
       class="w-full h-full"
-      hidden={!$page.routeId?.startsWith(page_.routePrefix)}
+      hidden={!routeId.startsWith(page_.routePrefix)}
     >
       <LazyLoad lazy={page_.lazy}>
         <LoadingBlock slot="pending" />
