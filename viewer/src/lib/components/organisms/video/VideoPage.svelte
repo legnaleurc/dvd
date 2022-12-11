@@ -6,7 +6,7 @@
     default: Record<string, never>;
   };
 
-  $: isVideoRoute = $page.routeId === "video/[videoId]";
+  $: isVideoRoute = $page.route.id === "/video/[videoId]";
 </script>
 
 <div class="w-full h-full">

@@ -42,7 +42,7 @@
     },
   ];
 
-  $: routeId = $page.routeId ?? "";
+  $: routeId = $page.route.id ?? "";
 </script>
 
 <main class="w-full h-full">
