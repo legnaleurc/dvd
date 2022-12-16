@@ -11,6 +11,7 @@ const TABLE: Record<string, VideoResponse[]> = {
       width: 100,
       height: 100,
       mime_type: "video/mp4",
+      path: "__NORMAL__",
     },
   ],
 };

@@ -5,7 +5,7 @@
   import Icon from "$atoms/Icon.svelte";
   import VideoItem from "./VideoItem.svelte";
 
-  const { idList, videoMap, clearAllVideo } = getVideoContext();
+  const { idList, clearAllVideo } = getVideoContext();
 </script>
 
 <div class="w-full h-full flex flex-col">

@@ -53,6 +53,7 @@ describe("video", () => {
         mimeType: "video/mp4",
         width: 800,
         height: 600,
+        path: "__NORMAL__",
       },
     });
     store.errorList.set(["Not Found"]);
@@ -72,6 +73,7 @@ describe("video", () => {
         mimeType: "video/mp4",
         width: 800,
         height: 600,
+        path: "__NORMAL__",
       },
     });
     store.errorList.set(["Not Found"]);
@@ -84,6 +86,7 @@ describe("video", () => {
         mimeType: "video/mp4",
         width: 800,
         height: 600,
+        path: "__NORMAL__",
       },
     });
     expect(get(store.errorList)).toEqual([]);
