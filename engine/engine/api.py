@@ -240,22 +240,25 @@ class NodeVideoListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
 
     async def list_(self):
         node = await self.get_object()
+        drive: Drive = self.request.app['drive']
 
         if node.is_video:
+            path = await drive.get_path_by_id(node.parent_id)
             return [{
                 'id': node.id_,
                 'name': node.name,
                 'mime_type': node.mime_type,
                 'width': node.video_width,
                 'height': node.video_height,
+                'path': str(path),
             }]
 
         if node.is_file:
             return []
 
-        drive: Drive = self.request.app['drive']
         manifest = []
         async for _root, _folders, files in drive.walk(node):
+            path = await drive.get_path(_root)
             for f in files:
                 if not f.is_video:
                     continue
@@ -265,6 +268,7 @@ class NodeVideoListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
                     'mime_type': f.mime_type,
                     'width': f.video_width,
                     'height': f.video_height,
+                    'path': str(path),
                 })
 
         return manifest
