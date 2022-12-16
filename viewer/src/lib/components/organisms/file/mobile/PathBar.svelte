@@ -5,7 +5,7 @@
   import { getFileSystemContext } from "$stores/filesystem";
   import Icon from "$atoms/Icon.svelte";
   import IconButton from "$atoms/IconButton.svelte";
-  import QueueButton from "$molecules/QueueButton.svelte";
+  import QueueButton from "$molecules/queue";
   import SyncButton from "$organisms/file/common/SyncButton.svelte";
   import SortButton from "$organisms/file/common/SortButton.svelte";
   import Breadcrumb from "./Breadcrumb.svelte";

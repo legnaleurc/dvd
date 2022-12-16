@@ -7,8 +7,8 @@
   import DownloadButton from "$molecules/DownloadButton.svelte";
   import InternalImageButton from "$molecules/InternalImageButton.svelte";
   import InternalVideoButton from "$molecules/InternalVideoButton.svelte";
-  import RenameButton from "$molecules/RenameButton.svelte";
-  import TrashButton from "$molecules/TrashButton.svelte";
+  import RenameButton from "$molecules/rename";
+  import TrashButton from "$molecules/trash";
   import SortButton from "$organisms/file/common/SortButton.svelte";
   import CreateFolderButton from "./CreateFolderButton.svelte";
 

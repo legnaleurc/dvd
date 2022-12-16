@@ -7,9 +7,9 @@
   import InternalImageButton from "./InternalImageButton.svelte";
   import InternalVideoButton from "./InternalVideoButton.svelte";
   import CopyUrlButton from "./CopyUrlButton.svelte";
-  import RenameButton from "./RenameButton.svelte";
-  import ShortcutButton from "./ShortcutButton.svelte";
-  import TrashButton from "./TrashButton.svelte";
+  import RenameButton from "./rename";
+  import ShortcutButton from "./shortcut";
+  import TrashButton from "./trash";
 
   export let getNameById: (id: string) => string;
   export let getMimeTypeById: (id: string) => string;

@@ -4,7 +4,7 @@
   import type { SvelteCustomEvents } from "$types/traits";
   import { getSelectionContext } from "$stores/selection";
   import Button from "$atoms/Button.svelte";
-  import Modal from "./Modal.svelte";
+  import Modal from "$molecules/Modal.svelte";
 
   type $$Events = SvelteCustomEvents<{
     hide: null;

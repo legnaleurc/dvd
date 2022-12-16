@@ -4,8 +4,8 @@
   import type { SvelteCustomEvents } from "$types/traits";
   import { getShortcutContext } from "$stores/shortcut";
   import EmptyBlock from "$atoms/EmptyBlock.svelte";
-  import MenuList from "./MenuList.svelte";
-  import MenuItem from "./MenuItem.svelte";
+  import MenuList from "$molecules/MenuList.svelte";
+  import MenuItem from "$molecules/MenuItem.svelte";
 
   type $$Events = SvelteCustomEvents<{
     shortcut: string;
