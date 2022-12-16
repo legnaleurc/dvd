@@ -3,6 +3,7 @@
   import EmptyBlock from "$atoms/EmptyBlock.svelte";
   import IconButton from "$atoms/IconButton.svelte";
   import Icon from "$atoms/Icon.svelte";
+  import VideoItem from "./VideoItem.svelte";
 
   const { idList, videoMap, clearAllVideo } = getVideoContext();
 </script>
@@ -17,18 +18,12 @@
     </div>
   </div>
   <div class="flex-1 overflow-y-auto">
-    <ul class="flex flex-col-reverse justify-end">
+    <div class="flex flex-col-reverse justify-end">
       {#each $idList as id (id)}
-        <li class="break-all">
-          <a class="block w-full p-3 text-left" href="/video/{id}"
-            >{$videoMap[id].name}</a
-          >
-        </li>
+        <VideoItem {id} />
       {:else}
-        <li>
-          <EmptyBlock />
-        </li>
+        <EmptyBlock />
       {/each}
-    </ul>
+    </div>
   </div>
 </div>

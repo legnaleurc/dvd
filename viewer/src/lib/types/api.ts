@@ -43,4 +43,5 @@ export interface VideoResponse {
   mime_type: string;
   width: number;
   height: number;
+  path: string;
 }

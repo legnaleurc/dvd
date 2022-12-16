@@ -32,7 +32,6 @@
       <CopyUrlButton {getNameById} {isFolderById} />
       <DownloadButton {getNameById} {isFolderById} />
       <ExternalOpenButton {getNameById} {getMimeTypeById} />
-      <InternalVideoButton />
     </div>
   </div>
   <div class="flex">
@@ -45,6 +44,7 @@
     </div>
     <div class="flex-1" />
     <div class="flex-0 flex">
+      <InternalVideoButton />
       <RenameButton {getNameById} {renameNode} />
       <ShortcutButton {moveNodesToPath} />
       <InternalImageButton {getNameById} />

@@ -9,6 +9,7 @@ type VideoData = {
   mimeType: string;
   width: number;
   height: number;
+  path: string;
 };
 
 const KEY = Symbol();
@@ -29,6 +30,7 @@ export function createStore() {
             mimeType: video.mime_type,
             width: video.width,
             height: video.height,
+            path: video.path,
           };
         }
         return self;
