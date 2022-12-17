@@ -3,6 +3,7 @@
   import { getImageUrl } from "$tools/api";
   import { getFullScreenContext } from "$stores/fullscreen";
   import Header from "./Header.svelte";
+  import ImageBlock from "./ImageBlock.svelte";
 
   export let id: string;
 
@@ -52,11 +53,7 @@
     on:click={toggleFullScreen}
   >
     {#each data.imageList as image, index (index)}
-      <img
-        draggable="false"
-        class="bg-paper-600"
-        loading="lazy"
-        alt=""
+      <ImageBlock
         width={image.width}
         height={image.height}
         src={getImageUrl(id, index)}
