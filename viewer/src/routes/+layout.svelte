@@ -1,10 +1,7 @@
 <script lang="ts">
   import "../app.css";
   import { beforeNavigate } from "$app/navigation";
-  import {
-    getFullScreenContext,
-    setFullScreenContext,
-  } from "$stores/fullscreen";
+  import { setFullScreenContext } from "$stores/fullscreen";
   import { setShortcutContext } from "$stores/shortcut";
   import NavBar from "$organisms/NavBar.svelte";
   import MainPage from "$organisms/MainPage.svelte";
@@ -13,10 +10,8 @@
     default: Record<string, never>;
   };
 
-  setFullScreenContext();
+  const { isFullScreen } = setFullScreenContext();
   setShortcutContext();
-
-  const { isFullScreen } = getFullScreenContext();
 
   beforeNavigate(() => {
     isFullScreen.set(false);

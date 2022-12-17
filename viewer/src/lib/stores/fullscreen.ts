@@ -19,7 +19,7 @@ export function createStore() {
 export type FullScreenStore = ReturnType<typeof createStore>;
 
 export function setFullScreenContext() {
-  setContext(KEY, createStore());
+  return setContext(KEY, createStore());
 }
 
 export function getFullScreenContext() {
