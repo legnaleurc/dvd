@@ -1,4 +1,4 @@
-import { getContext, onMount, setContext } from "svelte";
+import { getContext, setContext } from "svelte";
 import { writable, get } from "svelte/store";
 
 import type { NodeMap, ChildrenMap } from "$types/filesystem";
@@ -90,11 +90,7 @@ export function createStore() {
 export type FileSystemStore = ReturnType<typeof createStore>;
 
 export function setFileSystemContext() {
-  const store = createStore();
-  onMount(async () => {
-    await store.loadRootAndChildren();
-  });
-  setContext(CONTEXT_KEY, store);
+  return setContext(CONTEXT_KEY, createStore());
 }
 
 export function getFileSystemContext() {

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+
   import { setQueueContext } from "$stores/queue";
   import { setFileSystemContext } from "$stores/filesystem";
   import { setDisabledContext } from "$stores/disabled";
@@ -9,9 +11,13 @@
     default: Record<string, never>;
   };
 
-  setFileSystemContext();
+  const { loadRootAndChildren } = setFileSystemContext();
   setQueueContext();
   setDisabledContext();
+
+  onMount(async () => {
+    await loadRootAndChildren();
+  });
 </script>
 
 <div class="w-full h-full">
