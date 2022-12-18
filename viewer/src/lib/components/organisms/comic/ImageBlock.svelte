@@ -11,7 +11,8 @@
       return;
     }
     const url = new URL(src);
-    url.searchParams.set("retry", `${++retry}`);
+    const hash = `${++retry}_${Date.now()}`;
+    url.searchParams.set("_retry", hash);
     srcUrl = url.toString();
   }
 </script>
