@@ -28,8 +28,9 @@
     <BookList />
   </div>
   {#each $idList as id (id)}
-    <div class="w-full h-full" class:hidden={!isBookRoute || comicId !== id}>
-      <ImageList {id} />
+    {@const isActive = isBookRoute && comicId === id}
+    <div class="w-full h-full" class:hidden={!isActive}>
+      <ImageList {id} {isActive} />
     </div>
   {/each}
   <div class="hidden">

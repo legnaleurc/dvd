@@ -1,29 +1,34 @@
 <script lang="ts">
+  import { retry } from "$actions/image";
+  import { observeIntersection } from "$actions/observer";
+  import { debounce } from "$tools/fp";
+
+  export let viewport: HTMLElement;
+  export let isActive: boolean;
   export let width: number;
   export let height: number;
   export let src: string;
 
-  let retry = 0;
-  let srcUrl = src;
+  let srcUrl: string;
 
-  function handleError() {
-    if (retry > 3) {
-      return;
+  const handleIntersect = debounce((isIntersecting: boolean) => {
+    if (isIntersecting) {
+      srcUrl = src;
     }
-    const url = new URL(src);
-    const hash = `${++retry}_${Date.now()}`;
-    url.searchParams.set("_retry", hash);
-    srcUrl = url.toString();
-  }
+  }, 200);
 </script>
 
 <img
   draggable="false"
-  class="bg-paper-600"
-  loading="lazy"
   alt=""
+  class="bg-paper-600"
   {width}
   {height}
   src={srcUrl}
-  on:error={handleError}
+  use:retry
+  use:observeIntersection={{
+    viewport,
+    onIntersect: handleIntersect,
+    isActive: isActive && !srcUrl,
+  }}
 />

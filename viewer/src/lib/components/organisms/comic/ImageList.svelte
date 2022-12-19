@@ -6,6 +6,7 @@
   import ImageBlock from "./ImageBlock.svelte";
 
   export let id: string;
+  export let isActive: boolean;
 
   const { comicMap } = getComicContext();
   const { isFullScreen, toggleFullScreen } = getFullScreenContext();
@@ -54,6 +55,8 @@
   >
     {#each data.imageList as image, index (index)}
       <ImageBlock
+        viewport={container}
+        {isActive}
         width={image.width}
         height={image.height}
         src={getImageUrl(id, index)}
