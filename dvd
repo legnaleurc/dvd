@@ -26,7 +26,7 @@ async def main(args=None):
     if args is None:
         args = sys.argv
 
-    stop_event = setup()
+    setup()
 
     args = parse_args(args)
 
@@ -40,7 +40,6 @@ async def main(args=None):
             await run_debug(
                 public_listen=args.public_listen,
                 private_listen=args.private_listen,
-                stop_event=stop_event,
                 token=args.token,
             )
     except Exception as e:
@@ -50,17 +49,14 @@ async def main(args=None):
     return 0
 
 
-def close(stop_event):
-    stop_event.set()
-
-
 def setup():
     loop = asyncio.get_running_loop()
-    stop_event = asyncio.Event()
-    fn = functools.partial(close, stop_event)
-    loop.add_signal_handler(signal.SIGINT, fn)
-    loop.add_signal_handler(signal.SIGTERM, fn)
-    return stop_event
+    loop.add_signal_handler(signal.SIGINT, close)
+    loop.add_signal_handler(signal.SIGTERM, close)
+
+
+def close():
+    pass
 
 
 def parse_args(args):
@@ -89,7 +85,6 @@ async def run_release(public_listen: int, token: str):
 async def run_debug(
     public_listen: int,
     private_listen: int,
-    stop_event: asyncio.Event,
     token: str,
 ):
     await run_or_die(['make', '-j', 'debug'])
@@ -103,12 +98,13 @@ async def run_debug(
     ]
     if token:
         cmd.extend(['-t', token])
-    backend = run_or_die(
+    backend_process = await spawn(
         cmd,
         cwd=pathlib.Path('./engine'),
     )
+    backend_task = asyncio.create_task(ok_or_die(backend_process))
 
-    frontend = run_or_die(
+    frontend_task = asyncio.create_task(run_or_die(
         [
             'npm', 'run', 'dev', '--',
                 '--host=0.0.0.0',
@@ -118,42 +114,41 @@ async def run_debug(
         env=clone_env({
             'BACKEND_BASE_URL': f'http://localhost:{private_listen}',
         }),
-    )
-    frontend_task = asyncio.create_task(frontend)
-    fn = functools.partial(stop_backend, stop_event=stop_event)
-    frontend_task.add_done_callback(fn)
+    ))
+    frontend_done = functools.partial(close_backend, backend_process)
+    frontend_task.add_done_callback(frontend_done)
 
     await asyncio.wait([
-        asyncio.create_task(backend),
+        backend_task,
         frontend_task,
     ])
 
 
-async def run_or_die(cmd, cwd=None, env=None):
+async def run_or_die(cmd, cwd=None, env=None) -> None:
     p = await spawn(cmd, cwd=cwd, env=env)
     await ok_or_die(p)
 
 
-async def spawn(cmd, cwd=None, env=None):
+async def spawn(cmd, cwd=None, env=None) -> asyncio.subprocess.Process:
     return await asyncio.create_subprocess_exec(*cmd, cwd=cwd, env=env)
 
 
-async def ok_or_die(p):
+async def ok_or_die(p: asyncio.subprocess.Process):
     rv = await p.wait()
     if rv > 0:
         raise ProcessError(rv)
 
 
-def stop_backend(frontend_task, *, stop_event):
-    if frontend_task.exception():
-        stop_event.set()
-
-
-def clone_env(override=None):
+def clone_env(override=None) -> dict[str, str]:
     env = os.environ.copy()
     if override:
         env.update(override)
     return env
+
+
+def close_backend(backend_process: asyncio.subprocess.Process, _frontend_task):
+    print('send SIGINT to backend ...')
+    backend_process.send_signal(signal.SIGINT)
 
 
 if __name__ == '__main__':
