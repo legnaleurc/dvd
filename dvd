@@ -2,7 +2,6 @@
 
 import asyncio
 import argparse
-import functools
 import os
 import pathlib
 import signal
@@ -103,12 +102,13 @@ async def run_debug(
     )
     backend_task = asyncio.create_task(ok_or_die(backend_process))
 
+    cmd = [
+        'npm', 'run', 'dev', '--',
+            '--host=0.0.0.0',
+            f'--port={public_listen}',
+    ]
     frontend_process = await spawn(
-        [
-            'npm', 'run', 'dev', '--',
-                '--host=0.0.0.0',
-                f'--port={public_listen}',
-        ],
+        cmd,
         cwd=pathlib.Path('./viewer'),
         env=clone_env({
             'BACKEND_BASE_URL': f'http://localhost:{private_listen}',
