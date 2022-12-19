@@ -52,7 +52,6 @@ async def main(args=None):
 def setup():
     loop = asyncio.get_running_loop()
     loop.add_signal_handler(signal.SIGINT, close)
-    loop.add_signal_handler(signal.SIGTERM, close)
 
 
 def close():
@@ -104,7 +103,7 @@ async def run_debug(
     )
     backend_task = asyncio.create_task(ok_or_die(backend_process))
 
-    frontend_task = asyncio.create_task(run_or_die(
+    frontend_process = await spawn(
         [
             'npm', 'run', 'dev', '--',
                 '--host=0.0.0.0',
@@ -114,9 +113,11 @@ async def run_debug(
         env=clone_env({
             'BACKEND_BASE_URL': f'http://localhost:{private_listen}',
         }),
-    ))
-    frontend_done = functools.partial(close_backend, backend_process)
-    frontend_task.add_done_callback(frontend_done)
+    )
+    frontend_task = asyncio.create_task(ok_or_die(frontend_process))
+
+    backend_task.add_done_callback(lambda _: kill_process(frontend_process))
+    frontend_task.add_done_callback(lambda _: kill_process(backend_process))
 
     await asyncio.wait([
         backend_task,
@@ -146,9 +147,10 @@ def clone_env(override=None) -> dict[str, str]:
     return env
 
 
-def close_backend(backend_process: asyncio.subprocess.Process, _frontend_task):
-    print('send SIGINT to backend ...')
-    backend_process.send_signal(signal.SIGINT)
+def kill_process(p: asyncio.subprocess.Process):
+    if p.returncode is not None:
+        return
+    p.send_signal(signal.SIGINT)
 
 
 if __name__ == '__main__':
