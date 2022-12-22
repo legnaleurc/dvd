@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { retry } from "$actions/image";
-  import { observeIntersection } from "$actions/observer";
   import { debounce } from "$tools/fp";
+  import { retry } from "$actions/image";
+  import { observeIntersectionChild } from "$actions/observer";
 
-  export let viewport: HTMLElement;
   export let isActive: boolean;
   export let width: number;
   export let height: number;
@@ -26,8 +25,7 @@
   {height}
   src={srcUrl}
   use:retry
-  use:observeIntersection={{
-    viewport,
+  use:observeIntersectionChild={{
     onIntersect: handleIntersect,
     isActive: isActive && !srcUrl,
   }}

@@ -1,52 +1,97 @@
 import type { Action } from "svelte/action";
 
-type ObserveIntersectionParams = {
-  viewport: HTMLElement;
-  isActive: boolean;
-  onIntersect: (isIntersecting: boolean) => void;
-};
-
-export const observeIntersection: Action<
-  HTMLElement,
-  ObserveIntersectionParams
-> = (node, params) => {
-  let observer = setIntersectionObserver(node, params);
-  return {
-    update(newParams) {
-      clearIntersectionObserver(observer);
-      observer = setIntersectionObserver(node, newParams);
-    },
-    destroy() {
-      clearIntersectionObserver(observer);
-    },
-  };
-};
-
-function setIntersectionObserver(
-  node: HTMLElement,
-  params: ObserveIntersectionParams,
-): IntersectionObserver | null {
-  const { isActive, viewport, onIntersect } = params;
-  if (!isActive) {
-    return null;
-  }
+export const observeIntersectionParent: Action<HTMLElement> = (node) => {
   const observer = new IntersectionObserver(
-    (entries) => entries.forEach((entry) => onIntersect(entry.isIntersecting)),
+    (entries) =>
+      entries.forEach((entry) => {
+        const event = new CustomEvent("intersect", {
+          detail: entry.isIntersecting,
+        });
+        entry.target.dispatchEvent(event);
+      }),
     {
-      root: viewport,
+      root: node,
       rootMargin: "100% 0px 100% 0px",
       threshold: 0,
     },
   );
-  observer.observe(node);
-  return observer;
+
+  function handleObserveIntersection(event: Event) {
+    event.stopPropagation();
+    observer.observe(event.target as HTMLElement);
+  }
+
+  function handleUnobserveIntersection(event: Event) {
+    event.stopPropagation();
+    observer.unobserve(event.target as HTMLElement);
+  }
+
+  node.addEventListener("observeintersection", handleObserveIntersection);
+  node.addEventListener("unobserveintersection", handleUnobserveIntersection);
+
+  return {
+    destroy() {
+      node.removeEventListener(
+        "observeintersection",
+        handleObserveIntersection,
+      );
+      node.removeEventListener(
+        "unobserveintersection",
+        handleUnobserveIntersection,
+      );
+      observer.disconnect();
+    },
+  };
+};
+
+type ObserveIntersectionChildParams = {
+  isActive: boolean;
+  onIntersect: (isIntersecting: boolean) => void;
+};
+
+export const observeIntersectionChild: Action<
+  HTMLElement,
+  ObserveIntersectionChildParams
+> = (node, params) => {
+  let clear = setIntersectionChild(node, params);
+  return {
+    update(newParams) {
+      clear();
+      clear = setIntersectionChild(node, newParams);
+    },
+    destroy() {
+      clear();
+      fireEvent(node, "unobserveintersection");
+    },
+  };
+};
+
+function setIntersectionChild(
+  node: HTMLElement,
+  params: ObserveIntersectionChildParams,
+) {
+  const { onIntersect, isActive } = params;
+
+  function handleIntersect(event: CustomEvent<boolean>) {
+    onIntersect(event.detail);
+  }
+
+  if (isActive) {
+    node.addEventListener("intersect", handleIntersect);
+  }
+
+  fireEvent(node, isActive ? "observeintersection" : "unobserveintersection");
+
+  return () => {
+    if (isActive) {
+      node.removeEventListener("intersect", handleIntersect);
+    }
+  };
 }
 
-function clearIntersectionObserver(
-  observer: IntersectionObserver | null,
-): void {
-  if (!observer) {
-    return;
-  }
-  observer.disconnect();
+function fireEvent(target: EventTarget, type: string) {
+  const event = new Event(type, {
+    bubbles: true,
+  });
+  target.dispatchEvent(event);
 }
