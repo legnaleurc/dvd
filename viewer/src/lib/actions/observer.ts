@@ -10,34 +10,43 @@ export const observeIntersection: Action<
   HTMLElement,
   ObserveIntersectionParams
 > = (node, params) => {
-  const { viewport, isActive, onIntersect } = params;
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        onIntersect(entry.isIntersecting);
-      });
+  let observer = setIntersectionObserver(node, params);
+  return {
+    update(newParams) {
+      clearIntersectionObserver(observer);
+      observer = setIntersectionObserver(node, newParams);
     },
+    destroy() {
+      clearIntersectionObserver(observer);
+    },
+  };
+};
+
+function setIntersectionObserver(
+  node: HTMLElement,
+  params: ObserveIntersectionParams,
+): IntersectionObserver | null {
+  const { isActive, viewport, onIntersect } = params;
+  if (!isActive) {
+    return null;
+  }
+  const observer = new IntersectionObserver(
+    (entries) => entries.forEach((entry) => onIntersect(entry.isIntersecting)),
     {
       root: viewport,
       rootMargin: "100% 0px 100% 0px",
       threshold: 0,
     },
   );
+  observer.observe(node);
+  return observer;
+}
 
-  if (isActive) {
-    observer.observe(node);
+function clearIntersectionObserver(
+  observer: IntersectionObserver | null,
+): void {
+  if (!observer) {
+    return;
   }
-
-  return {
-    update(params) {
-      if (params.isActive) {
-        observer.observe(node);
-      } else {
-        observer.disconnect();
-      }
-    },
-    destroy() {
-      observer.disconnect();
-    },
-  };
-};
+  observer.disconnect();
+}
