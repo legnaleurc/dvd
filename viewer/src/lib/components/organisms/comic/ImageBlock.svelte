@@ -1,3 +1,13 @@
+<script lang="ts" context="module">
+  function createDummyImage(width: number, height: number) {
+    const svg = [
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`,
+      "</svg>",
+    ].join("");
+    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  }
+</script>
+
 <script lang="ts">
   import { debounce } from "$tools/fp";
   import { retry } from "$actions/image";
@@ -8,11 +18,13 @@
   export let height: number;
   export let src: string;
 
-  let srcUrl: string;
+  let isLazy = true;
+
+  $: srcUrl = isLazy ? createDummyImage(width, height) : src;
 
   const handleIntersect = debounce((isIntersecting: boolean) => {
     if (isIntersecting) {
-      srcUrl = src;
+      isLazy = false;
     }
   }, 200);
 </script>
@@ -27,6 +39,6 @@
   use:retry
   use:observeIntersectionChild={{
     onIntersect: handleIntersect,
-    isActive: isActive && !srcUrl,
+    isActive: isActive && isLazy,
   }}
 />
