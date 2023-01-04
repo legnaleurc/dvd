@@ -2,7 +2,7 @@
   import { getImageUrl } from "$tools/api";
   import { getComicContext } from "$stores/comic";
   import { getFullScreenContext } from "$stores/fullscreen";
-  import { observeIntersectionParent } from "$actions/observer";
+  import { publishIntersection } from "$actions/observer";
   import Header from "./Header.svelte";
   import ImageBlock from "./ImageBlock.svelte";
 
@@ -53,7 +53,7 @@
     class="flex-1 flex flex-col items-center overflow-y-auto overflow-x-hidden"
     bind:this={container}
     on:click={toggleFullScreen}
-    use:observeIntersectionParent
+    use:publishIntersection
   >
     {#each data.imageList as image, index (index)}
       <ImageBlock

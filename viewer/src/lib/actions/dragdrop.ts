@@ -1,11 +1,14 @@
+import { makeAction } from "$tools/fp";
+
 type DragActionParams = {
   onDragStart?: (event: DragEvent) => void;
   onDragEnd?: (event: DragEvent) => void;
 };
-export function drag(node: HTMLElement, params?: DragActionParams) {
+
+export const drag = makeAction((node: Element, params?: DragActionParams) => {
   function handleDragStart(event: DragEvent) {
     event.stopPropagation();
-    const el = event.currentTarget as HTMLElement;
+    const el = event.currentTarget as Element;
     el.classList.add("dragging");
     event.dataTransfer.effectAllowed = "move";
     params?.onDragStart?.(event);
@@ -13,7 +16,7 @@ export function drag(node: HTMLElement, params?: DragActionParams) {
 
   function handleDragEnd(event: DragEvent) {
     event.stopPropagation();
-    const el = event.currentTarget as HTMLElement;
+    const el = event.currentTarget as Element;
     el.classList.remove("dragging");
     const data = event.dataTransfer;
     if (data.dropEffect === "none" || data.mozUserCancelled) {
@@ -25,25 +28,25 @@ export function drag(node: HTMLElement, params?: DragActionParams) {
 
   node.addEventListener("dragstart", handleDragStart);
   node.addEventListener("dragend", handleDragEnd);
-  return {
-    destroy() {
-      node.removeEventListener("dragstart", handleDragStart);
-      node.removeEventListener("dragend", handleDragEnd);
-    },
+
+  return () => {
+    node.removeEventListener("dragstart", handleDragStart);
+    node.removeEventListener("dragend", handleDragEnd);
   };
-}
+});
 
 type DropActionParams = {
   onDragEnter?: (event: DragEvent) => void;
   onDrop?: (event: DragEvent) => void;
 };
-export function drop(node: HTMLElement, params?: DropActionParams) {
+
+export const drop = makeAction((node: Element, params?: DropActionParams) => {
   let dragCounter = 0;
 
   function handleDragEnter(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-    const el = event.currentTarget as HTMLElement;
+    const el = event.currentTarget as Element;
     if (dragCounter === 0) {
       el.classList.add("drag-over");
       event.dataTransfer.dropEffect = "move";
@@ -58,7 +61,7 @@ export function drop(node: HTMLElement, params?: DropActionParams) {
   function handleDragLeave(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-    const el = event.currentTarget as HTMLElement;
+    const el = event.currentTarget as Element;
     dragCounter -= 1;
     if (dragCounter === 0) {
       el.classList.remove("drag-over");
@@ -68,7 +71,7 @@ export function drop(node: HTMLElement, params?: DropActionParams) {
   function handleDrop(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-    const el = event.currentTarget as HTMLElement;
+    const el = event.currentTarget as Element;
     dragCounter = 0;
     el.classList.remove("drag-over");
     params?.onDrop?.(event);
@@ -78,12 +81,11 @@ export function drop(node: HTMLElement, params?: DropActionParams) {
   node.addEventListener("dragover", handleDragOver);
   node.addEventListener("dragleave", handleDragLeave);
   node.addEventListener("drop", handleDrop);
-  return {
-    destroy() {
-      node.removeEventListener("dragenter", handleDragEnter);
-      node.removeEventListener("dragover", handleDragOver);
-      node.removeEventListener("dragleave", handleDragLeave);
-      node.removeEventListener("drop", handleDrop);
-    },
+
+  return () => {
+    node.removeEventListener("dragenter", handleDragEnter);
+    node.removeEventListener("dragover", handleDragOver);
+    node.removeEventListener("dragleave", handleDragLeave);
+    node.removeEventListener("drop", handleDrop);
   };
-}
+});

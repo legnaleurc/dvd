@@ -11,7 +11,7 @@
 <script lang="ts">
   import { debounce } from "$tools/fp";
   import { retry } from "$actions/image";
-  import { observeIntersectionChild } from "$actions/observer";
+  import { subscribeIntersection } from "$actions/observer";
 
   export let isActive: boolean;
   export let width: number;
@@ -37,7 +37,7 @@
   {height}
   src={srcUrl}
   use:retry
-  use:observeIntersectionChild={{
+  use:subscribeIntersection={{
     onIntersect: handleIntersect,
     isActive: isActive && isLazy,
   }}

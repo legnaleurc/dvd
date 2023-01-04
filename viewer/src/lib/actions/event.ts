@@ -1,32 +1,26 @@
-import type { Action } from "svelte/action";
+import { makeAction } from "$tools/fp";
 
 type KeyboardEventHandler = (event: KeyboardEvent) => void;
 
-export const onEnterPress: Action<HTMLElement, KeyboardEventHandler> = (
-  node,
-  handler,
-) => {
-  function handleKeyDown(event: KeyboardEvent) {
-    if (event.key !== "Enter") {
-      return;
+export const enterpress = makeAction(
+  (node: EventTarget, handler: KeyboardEventHandler) => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Enter") {
+        return;
+      }
+      event.preventDefault();
+      handler(event);
     }
-    event.preventDefault();
-    handler(event);
-  }
-  node.addEventListener("keydown", handleKeyDown);
-  return {
-    destroy() {
+    node.addEventListener("keydown", handleKeyDown);
+    return () => {
       node.removeEventListener("keydown", handleKeyDown);
-    },
-  };
-};
+    };
+  },
+);
 
-type ButtonClickHandler = (event: KeyboardEvent | MouseEvent) => void;
+type ClickHandler = (event: KeyboardEvent | MouseEvent) => void;
 
-export const onButtonClick: Action<HTMLElement, ButtonClickHandler> = (
-  node,
-  handler,
-) => {
+export const click = makeAction((node: EventTarget, handler: ClickHandler) => {
   function keyDownHandler(event: KeyboardEvent) {
     if (event.key !== " ") {
       return;
@@ -34,35 +28,28 @@ export const onButtonClick: Action<HTMLElement, ButtonClickHandler> = (
     event.preventDefault();
     handler(event);
   }
-
   node.addEventListener("click", handler);
   node.addEventListener("keydown", keyDownHandler);
-  return {
-    destroy() {
-      node.removeEventListener("keydown", keyDownHandler);
-      node.removeEventListener("click", handler);
-    },
+  return () => {
+    node.removeEventListener("keydown", keyDownHandler);
+    node.removeEventListener("click", handler);
   };
-};
+});
 
-export const onButtonDoubleClick: Action<HTMLElement, ButtonClickHandler> = (
-  node,
-  handler,
-) => {
-  function keyDownHandler(event: KeyboardEvent) {
-    if (event.key !== "Enter") {
-      return;
+export const dblclick = makeAction(
+  (node: EventTarget, handler: ClickHandler) => {
+    function keyDownHandler(event: KeyboardEvent) {
+      if (event.key !== "Enter") {
+        return;
+      }
+      event.preventDefault();
+      handler(event);
     }
-    event.preventDefault();
-    handler(event);
-  }
-
-  node.addEventListener("dblclick", handler);
-  node.addEventListener("keydown", keyDownHandler);
-  return {
-    destroy() {
+    node.addEventListener("dblclick", handler);
+    node.addEventListener("keydown", keyDownHandler);
+    return () => {
       node.removeEventListener("keydown", keyDownHandler);
       node.removeEventListener("dblclick", handler);
-    },
-  };
-};
+    };
+  },
+);

@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import type { SvelteCustomEvents } from "$types/traits";
-  import { onEnterPress } from "$actions/event";
+  import { enterpress } from "$actions/event";
 
   type $$Events = SvelteCustomEvents<{
     enterpress: null;
@@ -22,6 +22,6 @@
   type="search"
   {placeholder}
   {disabled}
-  use:onEnterPress={() => dispatch("enterpress")}
+  use:enterpress={() => dispatch("enterpress")}
   bind:value
 />

@@ -1,10 +1,16 @@
 import type { Action } from "svelte/action";
 
-export const observeIntersectionParent: Action<HTMLElement> = (node) => {
+import { makeAction } from "$tools/fp";
+
+const INTERSECT_EVENT = "dv.intersect";
+const OBSERVE_INTERSECTION_EVENT = "dv.observeintersection";
+const UNOBSERVE_INTERSECTION_EVENT = "dv.unobserveintersection";
+
+export const publishIntersection: Action<Element> = (node) => {
   const observer = new IntersectionObserver(
     (entries) =>
       entries.forEach((entry) => {
-        const event = new CustomEvent("intersect", {
+        const event = new CustomEvent(INTERSECT_EVENT, {
           detail: entry.isIntersecting,
         });
         entry.target.dispatchEvent(event);
@@ -18,25 +24,28 @@ export const observeIntersectionParent: Action<HTMLElement> = (node) => {
 
   function handleObserveIntersection(event: Event) {
     event.stopPropagation();
-    observer.observe(event.target as HTMLElement);
+    observer.observe(event.target as Element);
   }
 
   function handleUnobserveIntersection(event: Event) {
     event.stopPropagation();
-    observer.unobserve(event.target as HTMLElement);
+    observer.unobserve(event.target as Element);
   }
 
-  node.addEventListener("observeintersection", handleObserveIntersection);
-  node.addEventListener("unobserveintersection", handleUnobserveIntersection);
+  node.addEventListener(OBSERVE_INTERSECTION_EVENT, handleObserveIntersection);
+  node.addEventListener(
+    UNOBSERVE_INTERSECTION_EVENT,
+    handleUnobserveIntersection,
+  );
 
   return {
     destroy() {
       node.removeEventListener(
-        "observeintersection",
+        OBSERVE_INTERSECTION_EVENT,
         handleObserveIntersection,
       );
       node.removeEventListener(
-        "unobserveintersection",
+        UNOBSERVE_INTERSECTION_EVENT,
         handleUnobserveIntersection,
       );
       observer.disconnect();
@@ -44,50 +53,35 @@ export const observeIntersectionParent: Action<HTMLElement> = (node) => {
   };
 };
 
-type ObserveIntersectionChildParams = {
+type SubscribeIntersectionParams = {
   isActive: boolean;
   onIntersect: (isIntersecting: boolean) => void;
 };
 
-export const observeIntersectionChild: Action<
-  HTMLElement,
-  ObserveIntersectionChildParams
-> = (node, params) => {
-  let clear = setIntersectionChild(node, params);
-  return {
-    update(newParams) {
-      clear();
-      clear = setIntersectionChild(node, newParams);
-    },
-    destroy() {
-      clear();
-      fireEvent(node, "unobserveintersection");
-    },
-  };
-};
+export const subscribeIntersection = makeAction(
+  (node: Element, params: SubscribeIntersectionParams) => {
+    const { onIntersect, isActive } = params;
 
-function setIntersectionChild(
-  node: HTMLElement,
-  params: ObserveIntersectionChildParams,
-) {
-  const { onIntersect, isActive } = params;
-
-  function handleIntersect(event: CustomEvent<boolean>) {
-    onIntersect(event.detail);
-  }
-
-  if (isActive) {
-    node.addEventListener("intersect", handleIntersect);
-  }
-
-  fireEvent(node, isActive ? "observeintersection" : "unobserveintersection");
-
-  return () => {
-    if (isActive) {
-      node.removeEventListener("intersect", handleIntersect);
+    function handleIntersect(event: CustomEvent<boolean>) {
+      onIntersect(event.detail);
     }
-  };
-}
+
+    if (isActive) {
+      node.addEventListener(INTERSECT_EVENT, handleIntersect);
+    }
+
+    fireEvent(
+      node,
+      isActive ? OBSERVE_INTERSECTION_EVENT : UNOBSERVE_INTERSECTION_EVENT,
+    );
+
+    return () => {
+      if (isActive) {
+        node.removeEventListener(INTERSECT_EVENT, handleIntersect);
+      }
+    };
+  },
+);
 
 function fireEvent(target: EventTarget, type: string) {
   const event = new Event(type, {

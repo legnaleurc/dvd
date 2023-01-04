@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import type { SvelteCustomEvents } from "$types/traits";
-  import { onButtonClick } from "$actions/event";
+  import { click } from "$actions/event";
 
   type $$Events = SvelteCustomEvents<{
     click: null;
@@ -18,7 +18,7 @@
   role="menuitem"
   tabindex="0"
   class="p-3 cursor-pointer hover:bg-action-hover {klass}"
-  use:onButtonClick={() => dispatch("click")}
+  use:click={() => dispatch("click")}
 >
   <slot />
 </div>

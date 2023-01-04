@@ -4,7 +4,7 @@
   import type { SvelteCustomEvents } from "$types/traits";
   import { getSearchContext } from "$stores/search";
   import { getSelectionContext } from "$stores/selection";
-  import { onButtonClick } from "$actions/event";
+  import { click } from "$actions/event";
   import EmptyBlock from "$atoms/EmptyBlock.svelte";
   import Modal from "$molecules/Modal.svelte";
 
@@ -33,7 +33,7 @@
         role="button"
         tabindex="0"
         class="p-3 cursor-pointer"
-        use:onButtonClick={() => handleSearchHistory(index)}
+        use:click={() => handleSearchHistory(index)}
       >
         {history}
       </div>

@@ -5,7 +5,7 @@
   import { getFileSystemContext } from "$stores/filesystem";
   import { getSelectionContext } from "$stores/selection";
   import { getDisabledContext } from "$stores/disabled";
-  import { onButtonClick } from "$actions/event";
+  import { click } from "$actions/event";
   import Icon from "$atoms/Icon.svelte";
   import IconButton from "$atoms/IconButton.svelte";
   import NodeIcon from "$atoms/NodeIcon.svelte";
@@ -47,7 +47,7 @@
       role="button"
       tabindex="0"
       class="flex-1 flex"
-      use:onButtonClick={handleSelect}
+      use:click={handleSelect}
     >
       <div class="w-12 h-12 p-3">
         <NodeIcon category={node.category} />

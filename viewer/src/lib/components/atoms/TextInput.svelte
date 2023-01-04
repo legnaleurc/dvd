@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import type { SvelteCustomEvents } from "$types/traits";
-  import { onEnterPress } from "$actions/event";
+  import { enterpress } from "$actions/event";
 
   type $$Events = SvelteCustomEvents<{
     enterpress: null;
@@ -20,6 +20,6 @@
   class="m-3 px-3 bg-black {klass}"
   type="text"
   {placeholder}
-  use:onEnterPress={() => dispatch("enterpress")}
+  use:enterpress={() => dispatch("enterpress")}
   bind:value
 />

@@ -9,7 +9,7 @@
   import { getQueueContext } from "$stores/queue";
   import { getSelectionContext } from "$stores/selection";
   import { drag, drop } from "$actions/dragdrop";
-  import { onButtonClick, onButtonDoubleClick } from "$actions/event";
+  import { click, dblclick } from "$actions/event";
   import SortedList from "$organisms/file/common/SortedList.svelte";
   import NodeChildren from "./NodeChildren.svelte";
   import NodeIndicator from "./NodeIndicator.svelte";
@@ -141,8 +141,8 @@
         use:drag={{
           onDragEnd: handleDragEnd,
         }}
-        use:onButtonClick={handleSingleClick}
-        use:onButtonDoubleClick={handleDoubleClick}
+        use:click={handleSingleClick}
+        use:dblclick={handleDoubleClick}
       >
         {node.name}
       </div>

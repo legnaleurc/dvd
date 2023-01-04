@@ -2,7 +2,7 @@
   import { getDisabledContext } from "$stores/disabled";
   import { getSelectionContext } from "$stores/selection";
   import { getSearchContext } from "$stores/search";
-  import { onButtonClick } from "$actions/event";
+  import { click } from "$actions/event";
 
   export let id: string;
   export let detailed: boolean;
@@ -30,7 +30,7 @@
   class="p-3"
   class:bg-action-selected={selected}
   class:text-action-disabled={disabled}
-  use:onButtonClick={handleClick}
+  use:click={handleClick}
 >
   <div>{result.name}</div>
   <div class="text-symbol-hint">{result.path}</div>
