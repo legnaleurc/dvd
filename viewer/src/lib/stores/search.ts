@@ -32,7 +32,7 @@ export function createStore() {
 
   async function searchName(name: string) {
     historyList.update((self) => {
-      return [name, ...self];
+      return [name, ...self.filter((n) => n !== name)];
     });
     await searchText(name);
   }

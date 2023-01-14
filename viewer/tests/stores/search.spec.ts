@@ -50,4 +50,14 @@ describe("search", () => {
     expect(get(store.historyList)).toEqual(["a", "b"]);
     expect(get(store.searching)).toBeFalsy();
   });
+
+  test("no duplicate history", async () => {
+    const store = createStore();
+
+    await store.searchName("name");
+    await store.searchName("test");
+    expect(get(store.historyList)).toEqual(["test", "name"]);
+    await store.searchName("name");
+    expect(get(store.historyList)).toEqual(["name", "test"]);
+  });
 });
