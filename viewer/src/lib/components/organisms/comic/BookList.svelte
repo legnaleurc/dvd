@@ -4,6 +4,7 @@
   import Icon from "$atoms/Icon.svelte";
   import IconButton from "$atoms/IconButton.svelte";
   import EmptyBlock from "$atoms/EmptyBlock.svelte";
+  import ListItem from "$molecules/ListItem.svelte";
 
   const { idList, comicMap, clearComic, openCachedComic } = getComicContext();
 
@@ -25,25 +26,21 @@
     </div>
   </div>
   <div class="flex-1 overflow-y-auto">
-    <ul class="flex flex-col-reverse justify-end">
+    <div class="flex flex-col-reverse justify-end">
       {#each $idList as id (id)}
-        <li class="break-all">
-          <button
-            class="w-full p-3 text-left disabled:text-action-disabled"
-            class:line-through={!$comicMap[id].unpacking &&
-              $comicMap[id].imageList.length <= 0}
-            disabled={$comicMap[id].unpacking ||
-              $comicMap[id].imageList.length <= 0}
-            on:click={() => handleOpen(id)}
+        {@const comic = $comicMap[id]}
+        {@const noContent = comic.imageList.length <= 0}
+        <ListItem
+          disabled={comic.unpacking || noContent}
+          on:click={() => handleOpen(id)}
+        >
+          <span slot="title" class:line-through={!comic.unpacking && noContent}
+            >{comic.name}</span
           >
-            {$comicMap[id].name}
-          </button>
-        </li>
+        </ListItem>
       {:else}
-        <li>
-          <EmptyBlock />
-        </li>
+        <EmptyBlock />
       {/each}
-    </ul>
+    </div>
   </div>
 </div>

@@ -5,10 +5,10 @@
   import { getFileSystemContext } from "$stores/filesystem";
   import { getSelectionContext } from "$stores/selection";
   import { getDisabledContext } from "$stores/disabled";
-  import { click } from "$actions/event";
   import Icon from "$atoms/Icon.svelte";
   import IconButton from "$atoms/IconButton.svelte";
   import NodeIcon from "$atoms/NodeIcon.svelte";
+  import ListItem from "$molecules/ListItem.svelte";
 
   export let id: string;
 
@@ -38,28 +38,17 @@
 </script>
 
 {#if node}
-  <div
-    class="flex"
-    class:bg-action-selected={selected}
-    class:text-action-disabled={disabled}
-  >
-    <div
-      role="button"
-      tabindex="0"
-      class="flex-1 flex"
-      use:click={handleSelect}
-    >
-      <div class="w-12 h-12 p-3">
-        <NodeIcon category={node.category} />
-      </div>
-      <div class="p-3 break-all">{node.name}</div>
+  <ListItem {selected} {disabled} on:click={handleSelect}>
+    <div slot="title" class="flex gap-3">
+      <NodeIcon category={node.category} />
+      <div>{node.name}</div>
     </div>
-    <div class="flex-0">
+    <svelte:fragment slot="action">
       {#if node.isFolder}
-        <IconButton on:click={handleOpen}>
+        <IconButton {disabled} on:click={handleOpen}>
           <Icon name="chevron_right" />
         </IconButton>
       {/if}
-    </div>
-  </div>
+    </svelte:fragment>
+  </ListItem>
 {/if}

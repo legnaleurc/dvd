@@ -5,6 +5,7 @@
   import { callExternal } from "$tools/external";
   import IconButton from "$atoms/IconButton.svelte";
   import Icon from "$atoms/Icon.svelte";
+  import ListItem from "$molecules/ListItem.svelte";
 
   export let id: string;
 
@@ -21,12 +22,10 @@
   }
 </script>
 
-<div class="w-full flex">
-  <div class="flex-1 p-3 flex flex-col break-all">
-    <div>{video.name}</div>
-    <div class="text-symbol-hint">{video.path}</div>
-  </div>
-  <div class="flex-0 flex flex-col">
+<ListItem>
+  <span slot="title">{video.name}</span>
+  <span slot="caption">{video.path}</span>
+  <div slot="action" class="flex flex-col">
     <IconButton on:click={handlePush}>
       <Icon name="chevron_right" />
     </IconButton>
@@ -34,4 +33,4 @@
       <Icon name="open_in_new" />
     </IconButton>
   </div>
-</div>
+</ListItem>

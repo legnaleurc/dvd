@@ -2,7 +2,7 @@
   import { getDisabledContext } from "$stores/disabled";
   import { getSelectionContext } from "$stores/selection";
   import { getSearchContext } from "$stores/search";
-  import { click } from "$actions/event";
+  import ListItem from "$molecules/ListItem.svelte";
 
   export let id: string;
   export let detailed: boolean;
@@ -23,21 +23,15 @@
   }
 </script>
 
-<div
-  role="button"
-  aria-pressed={selected}
-  tabindex="0"
-  class="p-3"
-  class:bg-action-selected={selected}
-  class:text-action-disabled={disabled}
-  use:click={handleClick}
->
-  <div>{result.name}</div>
-  <div class="text-symbol-hint">{result.path}</div>
-  {#if detailed}
-    <div class="text-symbol-hint font-mono">{result.id}</div>
-    <div class="text-symbol-hint font-mono">{result.hash}</div>
-    <div class="text-symbol-hint font-mono">{result.size}</div>
-    <div class="text-symbol-hint font-mono">{result.modified}</div>
-  {/if}
-</div>
+<ListItem {disabled} {selected} on:click={handleClick}>
+  <span slot="title">{result.name}</span>
+  <div slot="caption" class="flex flex-col">
+    <div>{result.path}</div>
+    {#if detailed}
+      <div class="font-mono">{result.id}</div>
+      <div class="font-mono">{result.hash}</div>
+      <div class="font-mono">{result.size}</div>
+      <div class="font-mono">{result.modified}</div>
+    {/if}
+  </div>
+</ListItem>
