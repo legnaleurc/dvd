@@ -35,6 +35,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         await super().asyncTearDown()
 
     async def testChangeList(self):
+        assert self._client.app
+
         expected = []
 
         drive = self._client.app['drive']
@@ -50,6 +52,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(body, expected)
 
     async def testGetRoot(self):
+        assert self._client.app
+
         expected = make_node_dict({})
 
         drive = self._client.app['drive']
@@ -65,6 +69,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(body, expected)
 
     async def testGetNode(self):
+        assert self._client.app
+
         expected = make_node_dict({})
 
         drive = self._client.app['drive']
@@ -81,6 +87,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         drive.get_node_by_id.assert_called_once_with('1')
 
     async def testGetNodeWith404(self):
+        assert self._client.app
+
         drive = self._client.app['drive']
         drive.get_node_by_id.return_value = None
 
@@ -92,6 +100,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(rv.status, 404)
 
     async def testMoveNode(self):
+        assert self._client.app
+
         async def fake_get_node_by_id(id: str):
             return Node.from_dict(make_node_dict({
                 'id': id,
@@ -120,6 +130,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         )
 
     async def testRenameNode(self):
+        assert self._client.app
+
         async def fake_get_node_by_id(id: str):
             return Node.from_dict(make_node_dict({
                 'id': id,
@@ -148,6 +160,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         )
 
     async def testTrashNode(self):
+        assert self._client.app
+
         async def fake_get_node_by_id(id: str):
             return Node.from_dict(make_node_dict({
                 'id': id,
@@ -166,6 +180,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         )
 
     async def testImageListForFolders(self):
+        assert self._client.app
+
         async def fake_get_node_by_id(id: str):
             return Node.from_dict(make_node_dict({
                 'id': id,
@@ -208,6 +224,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
 
     @patch('asyncio.create_subprocess_exec')
     async def testImageListForFiles(self, fake_create_process: MagicMock):
+        assert self._client.app
+
         async def fake_get_node_by_id(id: str):
             return Node.from_dict(make_node_dict({
                 'id': id,

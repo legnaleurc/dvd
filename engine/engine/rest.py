@@ -6,7 +6,6 @@ from aiohttp.web_exceptions import HTTPNoContent
 
 
 class PermissionMixin(abc.ABC):
-
     async def has_permission(self) -> bool:
         return True
 
@@ -16,7 +15,6 @@ class PermissionMixin(abc.ABC):
 
 
 class RetriveAPIMixin(PermissionMixin, abc.ABC):
-
     async def get(self):
         if not await self.has_permission():
             await self.raise_permission_error()
@@ -29,7 +27,6 @@ class RetriveAPIMixin(PermissionMixin, abc.ABC):
 
 
 class ListAPIMixin(PermissionMixin, abc.ABC):
-
     async def get(self):
         if not await self.has_permission():
             await self.raise_permission_error()
@@ -42,7 +39,6 @@ class ListAPIMixin(PermissionMixin, abc.ABC):
 
 
 class PartialUpdateAPIMixin(PermissionMixin, abc.ABC):
-
     async def patch(self):
         if not await self.has_permission():
             await self.raise_permission_error()
@@ -55,7 +51,6 @@ class PartialUpdateAPIMixin(PermissionMixin, abc.ABC):
 
 
 class CreateAPIMixin(PermissionMixin, abc.ABC):
-
     async def post(self):
         if not await self.has_permission():
             await self.raise_permission_error()
@@ -68,7 +63,6 @@ class CreateAPIMixin(PermissionMixin, abc.ABC):
 
 
 class DestroyAPIMixin(PermissionMixin, abc.ABC):
-
     async def delete(self):
         if not await self.has_permission():
             await self.raise_permission_error()
@@ -84,6 +78,6 @@ def json_response(data, status=200):
     data = json.dumps(data)
     return Response(
         status=status,
-        content_type='application/json',
-        text=data + '\n',
+        content_type="application/json",
+        text=data + "\n",
     )

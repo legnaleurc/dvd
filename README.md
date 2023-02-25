@@ -36,17 +36,7 @@ export CMAKE_PREFIX_PATH="/usr/local/opt/libarchive:/usr/local/opt/openssl"
 
 ### engine
 
-This module uses Python 3.7.
-
-```sh
-pip install -r engine/requirements.txt
-```
-
-Then you need to initialize the drive cache.
-
-```sh
-python3 -m wcpan.drive.google sync
-```
+Please see `engine` directory.
 
 ### viewer
 

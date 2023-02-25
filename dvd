@@ -88,11 +88,11 @@ async def run_debug(
     await run_or_die(['make', '-j', 'debug'])
 
     cmd = [
-        'python3', '-m', 'wcpan.watchdog',
-            '--',
-            'python3', '-m', 'engine',
-                '-u', '../unpack/build/unpack',
-                '-p', str(private_listen),
+        'poetry', 'run', '--',
+            'python3', '-m', 'wcpan.watchdog', '--',
+                'python3', '-m', 'engine',
+                    '-u', '../unpack/build/unpack',
+                    '-p', str(private_listen),
     ]
     if token:
         cmd.extend(['-t', token])

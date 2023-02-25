@@ -3,18 +3,16 @@ MKDIR := mkdir
 TOUCH := touch
 CMAKE := cmake
 NPM := npm
-PYTHON := python3
-PIP := pip3
 
 VIEWER_ALL_FILES = $(shell find viewer -type d \( -name node_modules -o -name build \) -prune -o -type f -print)
-VIEWER_CONF_FILES = viewer/package.json viewer/package-lock.json
-ENGINE_LOCK_FILE = engine/.lock
-
-.PHONY: debug unpack-release viewer-release engine-release
+VIEWER_PKG_FILES = viewer/package.json viewer/package-lock.json
 
 all: release
 
 release: unpack-release viewer-release engine-release
+
+# TODO there is no need to debug unpack for now
+debug: unpack-release viewer/node_modules engine-debug
 
 unpack-release: unpack/build/unpack
 
@@ -30,29 +28,21 @@ viewer/build: viewer/node_modules $(VIEWER_ALL_FILES)
 	$(CD) viewer && $(NPM) run build
 	$(TOUCH) "$@"
 
-viewer/node_modules: $(VIEWER_CONF_FILES)
+viewer/node_modules: $(VIEWER_PKG_FILES)
 	$(CD) viewer && $(NPM) install
 	$(RM) -rf 'viewer/build'
 	$(TOUCH) "$@"
 
-engine-release: engine-install
+engine-release:
+	$(MAKE) -C engine release
 
-engine-install: $(ENGINE_LOCK_FILE)
-
-$(ENGINE_LOCK_FILE): engine/requirements.txt
-	$(PIP) install -r engine/requirements.txt
-	touch $(ENGINE_LOCK_FILE)
-
-# TODO there is no need to debug unpack for now
-debug: unpack-release viewer/node_modules engine-debug
-
-engine-debug: engine-install
+engine-debug:
+	$(MAKE) -C engine debug
 
 test: engine-test viewer-test
 
 engine-test:
-	$(CD) engine && $(PYTHON) -m compileall engine
-	$(CD) engine && $(PYTHON) -m unittest
+	$(MAKE) -C engine test
 
 viewer-test:
 	$(CD) viewer && $(NPM) test

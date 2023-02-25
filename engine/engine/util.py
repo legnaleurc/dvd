@@ -11,12 +11,12 @@ from contextlib import AsyncExitStack, asynccontextmanager
 from itertools import zip_longest
 from mimetypes import guess_type
 from os.path import getsize, join as join_path
-from typing import Dict, List, TypedDict, Union, cast
+from typing import Dict, List, TypedDict, Union
 
 from PIL import Image
 from wcpan.logger import EXCEPTION, DEBUG, INFO
 from wcpan.drive.core.drive import Drive
-from wcpan.drive.core.types import Node, NodeDict
+from wcpan.drive.core.types import Node
 
 
 class ImageDict(TypedDict):
@@ -27,123 +27,15 @@ class ImageDict(TypedDict):
     path: str
 
 
-class SearchNodeDict(NodeDict):
-    path: str
-
-
-class InvalidPatternError(Exception):
-
-    def __init__(self, message: str) -> None:
-        self._message = message
-
-    def __str__(self) -> str:
-        return self._message
-
-
-class SearchFailedError(Exception):
-
-    def __init__(self, message: str) -> None:
-        self._message = message
-
-    def __str__(self) -> str:
-        return self._message
-
-
 class UnpackFailedError(Exception):
-
     def __init__(self, message: str) -> None:
         self._message = message
 
     def __str__(self) -> str:
         return self._message
-
-
-class SearchEngine(object):
-
-    def __init__(self, drive: Drive) -> None:
-        super(SearchEngine, self).__init__()
-        # NOTE only takes a reference, not owning
-        self._drive = drive
-        self._cache: Dict[str, List[SearchNodeDict]] = {}
-        self._searching: Dict[str, asyncio.Condition] = {}
-
-    async def get_nodes_by_regex(self, pattern: str) -> List[SearchNodeDict]:
-        nodes = self._cache.get(pattern, None)
-        if nodes is not None:
-            return nodes
-
-        if pattern in self._searching:
-            lock = self._searching[pattern]
-            return await self._wait_for_result(lock, pattern)
-
-        lock = asyncio.Condition()
-        self._searching[pattern] = lock
-        return await self._search(pattern)
-
-    async def get_nodes_by_path(self, path: str) -> List[SearchNodeDict]:
-        if not path:
-            return []
-
-        node = await self._drive.get_node_by_path(path)
-        if not node:
-            return []
-
-        rv = cast(SearchNodeDict, node.to_dict())
-        rv['path'] = path
-        return [rv]
-
-    async def clear_cache(self) -> None:
-        while len(self._searching) > 0:
-            pattern, lock = next(iter(self._searching.items()))
-            async with lock:
-                await lock.wait()
-        self._cache = {}
-
-    def drop_value(self, value: str) -> None:
-        keys = list(self._cache.keys())
-        for k in keys:
-            if re.search(k, value, re.I):
-                del self._cache[k]
-
-    async def _search(self, pattern: str) -> List[SearchNodeDict]:
-        lock = self._searching[pattern]
-        try:
-            nodes = await self._drive.find_nodes_by_regex(pattern)
-            nodes = (_ for _ in nodes if not _.trashed)
-            nodes = (self._make_item(_) for _ in nodes)
-            nodes = await asyncio.gather(*nodes)
-            nodes = sorted(nodes, key=lambda _: (_['path'], _['name']))
-            self._cache[pattern] = nodes
-            return nodes
-        except Exception as e:
-            EXCEPTION('engine', e) << 'search failed, abort'
-            raise SearchFailedError(str(e))
-        finally:
-            del self._searching[pattern]
-            async with lock:
-                lock.notify_all()
-
-    async def _wait_for_result(self,
-        lock: asyncio.Condition,
-        pattern: str,
-    ) -> List[SearchNodeDict]:
-        async with lock:
-            await lock.wait()
-        try:
-            return self._cache[pattern]
-        except KeyError:
-            raise SearchFailedError(f'{pattern} canceled search')
-
-    async def _make_item(self, node: Node) -> SearchNodeDict:
-        parent_node = await self._drive.get_node_by_id(node.parent_id)
-        parent_path = await self._drive.get_path(parent_node)
-        rv = cast(SearchNodeDict, node.to_dict())
-        rv['path'] = str(parent_path)
-        return rv
 
 
 class UnpackEngine(object):
-
     def __init__(self, drive: Drive, port: int, unpack_path: str) -> None:
         super(UnpackEngine, self).__init__()
         # NOTE only takes a reference, not owning
@@ -156,9 +48,7 @@ class UnpackEngine(object):
 
     async def __aenter__(self) -> UnpackEngine:
         async with AsyncExitStack() as stack:
-            self._storage = await stack.enter_async_context(
-                StorageManager()
-            )
+            self._storage = await stack.enter_async_context(StorageManager())
             self._raii = stack.pop_all()
         return self
 
@@ -204,14 +94,15 @@ class UnpackEngine(object):
         except UnpackFailedError:
             raise
         except Exception as e:
-            EXCEPTION('engine', e) << 'unpack failed, abort'
+            EXCEPTION("engine", e) << "unpack failed, abort"
             raise UnpackFailedError(str(e))
         finally:
             del self._unpacking[node.id_]
             async with lock:
                 lock.notify_all()
 
-    async def _wait_for_result(self,
+    async def _wait_for_result(
+        self,
         lock: asyncio.Condition,
         node_id: str,
     ) -> List[ImageDict]:
@@ -221,7 +112,7 @@ class UnpackEngine(object):
         try:
             return self._storage.get_cache(node_id)
         except KeyError:
-            raise UnpackFailedError(f'{node_id} canceled unpack')
+            raise UnpackFailedError(f"{node_id} canceled unpack")
 
     async def _unpack_local(self, node_id: str) -> List[ImageDict]:
         assert self._storage is not None
@@ -231,7 +122,7 @@ class UnpackEngine(object):
             node_id,
             self._storage.root_path,
         ]
-        DEBUG('engine') << ' '.join(cmd)
+        DEBUG("engine") << " ".join(cmd)
         p = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
@@ -256,28 +147,30 @@ class UnpackEngine(object):
                 type_, encoding = guess_type(path)
                 if type_ is None:
                     continue
-                if not type_.startswith('image/'):
+                if not type_.startswith("image/"):
                     continue
                 try:
                     image = Image.open(path)
                 except OSError as e:
-                    EXCEPTION('engine', e) << 'unknown image'
+                    EXCEPTION("engine", e) << "unknown image"
                     continue
                 width, height = image.size
-                rv.append({
-                    'path': path,
-                    'type': type_,
-                    'size': getsize(path),
-                    'width': width,
-                    'height': height,
-                })
+                rv.append(
+                    {
+                        "path": path,
+                        "type": type_,
+                        "size": getsize(path),
+                        "width": width,
+                        "height": height,
+                    }
+                )
         return rv
 
     async def _unpack_remote(self, node: Node) -> List[ImageDict]:
         return await self._scan_remote(node)
 
     async def _scan_remote(self, node: Node) -> List[ImageDict]:
-        DEFAULT_MIME_TYPE = 'application/octet-stream'
+        DEFAULT_MIME_TYPE = "application/octet-stream"
         rv: List[ImageDict] = []
         async for root, folders, files in self._drive.walk(node):
             folders.sort(key=lambda _: FuzzyName(_.name))
@@ -289,20 +182,21 @@ class UnpackEngine(object):
                 assert f.image_width is not None
                 assert f.image_height is not None
                 type_ = DEFAULT_MIME_TYPE if f.mime_type is None else f.mime_type
-                rv.append({
-                    'path': f.id_,
-                    'type': type_,
-                    'size': f.size,
-                    'width': f.image_width,
-                    'height': f.image_height,
-                })
+                rv.append(
+                    {
+                        "path": f.id_,
+                        "type": type_,
+                        "size": f.size,
+                        "width": f.image_width,
+                        "height": f.image_height,
+                    }
+                )
         return rv
 
 
 class FuzzyName(object):
-
     def __init__(self, name: str) -> None:
-        seg_list = re.findall(r'\d+|\D+', name)
+        seg_list = re.findall(r"\d+|\D+", name)
         seg_list = [int(_) if _.isdigit() else _ for _ in seg_list]
         self._seg_list = seg_list
 
@@ -325,7 +219,6 @@ class FuzzyName(object):
 
 
 class StorageManager(object):
-
     def __init__(self):
         self._cache: Dict[str, List[ImageDict]] = {}
         self._tmp: Union[str, None] = None
@@ -374,7 +267,7 @@ class StorageManager(object):
     @property
     def root_path(self) -> str:
         if not self._tmp:
-            return ''
+            return ""
         return self._tmp
 
     @asynccontextmanager
@@ -396,11 +289,11 @@ class StorageManager(object):
         for child in self._path.iterdir():
             s = child.stat()
             d = now - s.st_mtime
-            DEBUG('engine') << 'check' << child << f'({d})'
+            DEBUG("engine") << "check" << child << f"({d})"
             if d > DAY:
                 shutil.rmtree(str(child))
                 del self._cache[child.name]
-                INFO('engine') << 'prune' << child << f'({d})'
+                INFO("engine") << "prune" << child << f"({d})"
 
     async def _loop(self):
         while True:
@@ -408,28 +301,8 @@ class StorageManager(object):
             self._check()
 
 
-def normalize_search_pattern(raw: str) -> str:
-    rv = re.match(r'(.+?)\s*\((.+)\)', raw)
-    if rv:
-        rv = rv.groups()
-    else:
-        rv = (raw,)
-    rv = map(inner_normalize_search_pattern, rv)
-    rv = '|'.join(rv)
-    rv = f'.*({rv}).*'
-    return rv
-
-
-def inner_normalize_search_pattern(raw: str) -> str:
-    rv = re.split(r'(?:\s|-)+', raw)
-    rv = map(re.escape, rv)
-    rv = map(str, rv)
-    rv = '.*'.join(rv)
-    return rv
-
-
 async def get_node(drive: Drive, id_or_root: str) -> Node:
-    if id_or_root == 'root':
+    if id_or_root == "root":
         return await drive.get_root_node()
     else:
         return await drive.get_node_by_id(id_or_root)
