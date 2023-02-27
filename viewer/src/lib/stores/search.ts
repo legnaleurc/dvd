@@ -2,7 +2,7 @@ import { getContext, setContext } from "svelte";
 import { get, writable } from "svelte/store";
 
 import type { SearchResponse } from "$types/api";
-import { listNodeByName } from "$tools/api";
+import { listNode } from "$tools/api";
 
 const KEY = Symbol();
 
@@ -16,7 +16,7 @@ export function createStore() {
   async function searchText(text: string) {
     searching.set(true);
     try {
-      const rawList = await listNodeByName(text);
+      const rawList = await listNode({ name: text, fuzzy: true });
       const list: string[] = [];
       const map: Record<string, SearchResponse> = {};
       for (const row of rawList) {

@@ -11,7 +11,7 @@ export interface NodeResponse {
 export interface SearchResponse extends NodeResponse {
   hash: string;
   size: number;
-  path: string;
+  parent_path: string;
 }
 
 export interface RemovedChangeResponse {

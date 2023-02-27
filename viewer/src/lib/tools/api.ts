@@ -69,9 +69,15 @@ export async function trashNode(id: string): Promise<void> {
   await delete_(`/api/v1/nodes/${id}`);
 }
 
-export async function moveNode(src: string, dst: string) {
+export async function moveNodeToId(src: string, dst: string) {
   await patch(`/api/v1/nodes/${src}`, {
     parent_id: dst,
+  });
+}
+
+export async function moveNodeToPath(src: string, dst: string) {
+  await patch(`/api/v1/nodes/${src}`, {
+    path: dst,
   });
 }
 
@@ -81,18 +87,14 @@ export async function renameNode(id: string, name: string) {
   });
 }
 
-export async function listNodeByPath(path: string): Promise<SearchResponse[]> {
-  const r = await get("/api/v1/nodes", {
-    path,
-  });
-  const rv: SearchResponse[] = await r.json();
-  return rv;
-}
-
-export async function listNodeByName(name: string) {
-  const r = await get("/api/v1/nodes", {
-    name,
-  });
+type ListNode = Partial<{
+  name: string;
+  fuzzy: boolean;
+  parent_path: string;
+  size: number;
+}>;
+export async function listNode(param: ListNode) {
+  const r = await get("/api/v1/nodes", param);
   const rv: SearchResponse[] = await r.json();
   return rv;
 }

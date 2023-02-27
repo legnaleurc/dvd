@@ -1,10 +1,11 @@
 import { getContext, onMount, setContext } from "svelte";
 import { writable } from "svelte/store";
 
-import { moveNode, listNodeByPath, trashNode } from "$tools/api";
+import { moveNodeToId, moveNodeToPath, trashNode } from "$tools/api";
 import { Queue } from "$tools/queue";
 
 type Task = ((consumerId: number) => Promise<void>) | null;
+type ApiTask = (id: string) => Promise<void>;
 
 const MAX_TASK_COUNT = 6;
 const KEY = Symbol();
@@ -18,50 +19,23 @@ export function createStore() {
 
   async function moveNodesToPath(idList: string[], dstPath: string) {
     pendingCount.update((self) => self + idList.length);
-
-    const dst = await fetchIdFromPath(dstPath);
-    if (!dst) {
-      rejectedCount.update((self) => self + idList.length);
-      pendingCount.update((self) => self - idList.length);
-      return;
-    }
-
-    await innerMoveNodes(idList, dst);
+    await produceTasks(idList, (id: string) => moveNodeToPath(id, dstPath));
     await queue.join();
   }
 
   async function moveNodes(idList: string[], dst: string) {
     pendingCount.update((self) => self + idList.length);
-    await innerMoveNodes(idList, dst);
+    await produceTasks(idList, (id: string) => moveNodeToId(id, dst));
     await queue.join();
-  }
-
-  async function innerMoveNodes(idList: string[], dst: string) {
-    for (const id of idList) {
-      await queue.put(async (consumerId) => {
-        pendingList.update((self) => {
-          self[consumerId] = id;
-          return self;
-        });
-        try {
-          await moveNode(id, dst);
-          fullfilledCount.update((self) => self + 1);
-        } catch (e: unknown) {
-          rejectedCount.update((self) => self + 1);
-        } finally {
-          pendingCount.update((self) => self - 1);
-          pendingList.update((self) => {
-            self[consumerId] = "";
-            return self;
-          });
-        }
-      });
-    }
   }
 
   async function trashNodes(idList: string[]) {
     pendingCount.update((self) => self + idList.length);
+    await produceTasks(idList, trashNode);
+    await queue.join();
+  }
 
+  async function produceTasks(idList: string[], api: ApiTask) {
     for (const id of idList) {
       await queue.put(async (consumerId) => {
         pendingList.update((self) => {
@@ -69,7 +43,7 @@ export function createStore() {
           return self;
         });
         try {
-          await trashNode(id);
+          await api(id);
           fullfilledCount.update((self) => self + 1);
         } catch (e: unknown) {
           rejectedCount.update((self) => self + 1);
@@ -82,8 +56,6 @@ export function createStore() {
         }
       });
     }
-
-    await queue.join();
   }
 
   function setup() {
@@ -140,13 +112,4 @@ async function consume(q: Queue<Task>, id: number) {
       q.taskDone();
     }
   }
-}
-
-async function fetchIdFromPath(path: string) {
-  const rawNodeList = await listNodeByPath(path);
-  if (rawNodeList.length <= 0) {
-    return "";
-  }
-  const rawNode = rawNodeList[0];
-  return rawNode.id;
 }

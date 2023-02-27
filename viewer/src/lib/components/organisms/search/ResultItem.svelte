@@ -26,7 +26,7 @@
 <ListItem {disabled} {selected} on:click={handleClick}>
   <span slot="title">{result.name}</span>
   <div slot="caption" class="flex flex-col">
-    <div>{result.path}</div>
+    <div>{result.parent_path}</div>
     {#if detailed}
       <div class="font-mono">{result.id}</div>
       <div class="font-mono">{result.hash}</div>
