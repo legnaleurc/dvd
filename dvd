@@ -68,12 +68,13 @@ def parse_args(args):
 
 
 async def run_release(public_listen: int, token: str):
-    await run_or_die(['make', '-j'])
+    await run_or_die(['make', '-j', 'release'])
     cmd = [
-        'python3', '-m', 'engine',
-            '-u', '../unpack/build/unpack',
-            '-s', '../viewer/build',
-            '-p', str(public_listen),
+        'poetry', 'run', '--',
+            'python3', '-m', 'engine',
+                '-u', '../unpack/release/unpack',
+                '-s', '../viewer/build',
+                '-p', str(public_listen),
     ]
     if token:
         cmd.extend(['-t', token])
@@ -91,7 +92,7 @@ async def run_debug(
         'poetry', 'run', '--',
             'python3', '-m', 'wcpan.watchdog', '--',
                 'python3', '-m', 'engine',
-                    '-u', '../unpack/build/unpack',
+                    '-u', '../unpack/debug/unpack',
                     '-p', str(private_listen),
     ]
     if token:

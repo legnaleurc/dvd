@@ -1,29 +1,30 @@
-TOUCH = touch
+TOUCH := touch
+RM := rm -rf
 PYTHON := python3
 POETRY := poetry
 BLACK := black
 
-PKG_FILES = pyproject.toml poetry.lock
-PKG_DIR = .venv
+PKG_FILES := pyproject.toml poetry.lock
+PKG_DIR := .venv
+BLD_LOCK := $(PKG_DIR)/pyvenv.cfg
 
-debug: setup
+.PHONY: release debug clean purge test setup
+
 release: setup
-
-setup: $(PKG_DIR)
-
-$(PKG_DIR): $(PKG_FILES)
-	$(POETRY) install
-	$(TOUCH) $@
-
+debug: setup
 clean:
-	$(RM) -rf .coverage
-
-distclean: clean
-	$(RM) -rf $(PKG_DIR)
-
+	$(RM) .coverage
+purge: clean
+	$(RM) $(PKG_DIR)
 test: setup
 	$(POETRY) run $(PYTHON) -m compileall engine
 	$(POETRY) run $(PYTHON) -m unittest
+
+setup: $(BLD_LOCK)
+
+$(BLD_LOCK): $(PKG_FILES)
+	$(POETRY) install
+	$(TOUCH) $@
 
 auth: setup
 	$(POETRY) run $(PYTHON) -m wcpan.drive.cli auth
