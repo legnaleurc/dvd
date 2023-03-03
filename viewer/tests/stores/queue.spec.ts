@@ -28,13 +28,12 @@ describe("queue", () => {
     server.resetHandlers();
   });
   let store: ActionQueueStore;
-  let tearDown: () => Promise<void>;
   beforeEach(() => {
     store = createStore();
-    tearDown = store.setup();
+    store.startQueue();
   });
   afterEach(async () => {
-    await tearDown();
+    await store.stopQueue();
   });
 
   test("has good initial values", () => {

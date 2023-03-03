@@ -60,7 +60,7 @@ export function createStore() {
 export type SearchStore = ReturnType<typeof createStore>;
 
 export function setSearchContext() {
-  setContext(KEY, createStore());
+  return setContext(KEY, createStore());
 }
 
 export function getSearchContext() {

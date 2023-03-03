@@ -107,7 +107,7 @@ export function createStore() {
 export type ComicStore = ReturnType<typeof createStore>;
 
 export function setComicContext() {
-  setContext(KEY, createStore());
+  return setContext(KEY, createStore());
 }
 
 export function getComicContext() {

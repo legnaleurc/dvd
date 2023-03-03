@@ -45,7 +45,7 @@ export function createStore() {
 export type SortStore = ReturnType<typeof createStore>;
 
 export function setSortContext() {
-  setContext(KEY, createStore());
+  return setContext(KEY, createStore());
 }
 
 export function getSortContext() {

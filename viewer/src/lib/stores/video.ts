@@ -73,7 +73,7 @@ export function createStore() {
 export type VideoStore = ReturnType<typeof createStore>;
 
 export function setVideoContext() {
-  setContext(KEY, createStore());
+  return setContext(KEY, createStore());
 }
 
 export function getVideoContext() {

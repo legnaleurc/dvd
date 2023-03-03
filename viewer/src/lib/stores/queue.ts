@@ -1,4 +1,4 @@
-import { getContext, onMount, setContext } from "svelte";
+import { getContext, setContext } from "svelte";
 import { writable } from "svelte/store";
 
 import { moveNodeToId, moveNodeToPath, trashNode } from "$tools/api";
@@ -12,24 +12,34 @@ const KEY = Symbol();
 
 export function createStore() {
   const queue = new Queue<Task>();
+  let active = false;
   const pendingList = writable<string[]>([]);
   const pendingCount = writable(0);
   const fullfilledCount = writable(0);
   const rejectedCount = writable(0);
 
   async function moveNodesToPath(idList: string[], dstPath: string) {
+    if (!active) {
+      return;
+    }
     pendingCount.update((self) => self + idList.length);
     await produceTasks(idList, (id: string) => moveNodeToPath(id, dstPath));
     await queue.join();
   }
 
   async function moveNodes(idList: string[], dst: string) {
+    if (!active) {
+      return;
+    }
     pendingCount.update((self) => self + idList.length);
     await produceTasks(idList, (id: string) => moveNodeToId(id, dst));
     await queue.join();
   }
 
   async function trashNodes(idList: string[]) {
+    if (!active) {
+      return;
+    }
     pendingCount.update((self) => self + idList.length);
     await produceTasks(idList, trashNode);
     await queue.join();
@@ -58,19 +68,22 @@ export function createStore() {
     }
   }
 
-  function setup() {
+  function startQueue() {
     const tmp: string[] = [];
     for (let i = 0; i < MAX_TASK_COUNT; ++i) {
       tmp.push("");
       consume(queue, i);
     }
     pendingList.set(tmp);
-    return async () => {
-      for (let i = 0; i < MAX_TASK_COUNT; ++i) {
-        queue.put(null);
-      }
-      await queue.join();
-    };
+    active = true;
+  }
+
+  async function stopQueue() {
+    for (let i = 0; i < MAX_TASK_COUNT; ++i) {
+      queue.put(null);
+    }
+    await queue.join();
+    active = false;
   }
 
   return {
@@ -78,7 +91,8 @@ export function createStore() {
     pendingCount,
     fullfilledCount,
     rejectedCount,
-    setup,
+    startQueue,
+    stopQueue,
     moveNodesToPath,
     moveNodes,
     trashNodes,
@@ -88,9 +102,7 @@ export function createStore() {
 export type ActionQueueStore = ReturnType<typeof createStore>;
 
 export function setQueueContext() {
-  const store = createStore();
-  onMount(store.setup);
-  setContext(KEY, store);
+  return setContext(KEY, createStore());
 }
 
 export function getQueueContext() {

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+
   import "../app.css";
   import { beforeNavigate } from "$app/navigation";
   import { setFullScreenContext } from "$stores/fullscreen";
@@ -11,11 +13,13 @@
   };
 
   const { isFullScreen } = setFullScreenContext();
-  setShortcutContext();
+  const { loadShortcut } = setShortcutContext();
 
   beforeNavigate(() => {
     isFullScreen.set(false);
   });
+
+  onMount(loadShortcut);
 </script>
 
 <div class="w-full h-full flex flex-col bg-paper-900">

@@ -12,8 +12,13 @@
   };
 
   const { loadRootAndChildren } = setFileSystemContext();
-  setQueueContext();
+  const { startQueue, stopQueue } = setQueueContext();
   setDisabledContext();
+
+  onMount(() => {
+    startQueue();
+    return stopQueue;
+  });
 
   onMount(async () => {
     await loadRootAndChildren();

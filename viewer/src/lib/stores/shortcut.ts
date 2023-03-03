@@ -1,4 +1,4 @@
-import { getContext, onMount, setContext } from "svelte";
+import { getContext, setContext } from "svelte";
 import { writable } from "svelte/store";
 
 import { loadShortcutList, saveShortcutList } from "$tools/storage";
@@ -7,6 +7,10 @@ const KEY = Symbol();
 
 export function createStore() {
   const shortcutList = writable<string[]>([]);
+
+  function loadShortcut() {
+    shortcutList.set(loadShortcutList());
+  }
 
   function addShortcut(shortcut: string) {
     shortcutList.update((self) => {
@@ -37,6 +41,7 @@ export function createStore() {
 
   return {
     shortcutList,
+    loadShortcut,
     addShortcut,
     updateShortcut,
     removeShortcut,
@@ -46,11 +51,7 @@ export function createStore() {
 export type ShortcutStore = ReturnType<typeof createStore>;
 
 export function setShortcutContext() {
-  const store = createStore();
-  onMount(() => {
-    store.shortcutList.set(loadShortcutList());
-  });
-  setContext(KEY, store);
+  return setContext(KEY, createStore());
 }
 
 export function getShortcutContext() {

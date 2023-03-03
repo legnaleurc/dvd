@@ -1,33 +1,37 @@
 <script lang="ts">
   import { beforeNavigate } from "$app/navigation";
 
-  import { getSelectionContext, setSelectionContext } from "$stores/selection";
+  import { setSelectionContext } from "$stores/selection";
   import { getFullScreenContext } from "$stores/fullscreen";
-  import { getSearchContext, setSearchContext } from "$stores/search";
+  import { setSearchContext } from "$stores/search";
   import { setQueueContext } from "$stores/queue";
   import { setDisabledContext } from "$stores/disabled";
   import BottomBar from "./BottomBar.svelte";
   import TopBar from "./TopBar.svelte";
   import ResultList from "./ResultList.svelte";
   import DetailList from "./DetailList.svelte";
+  import { onMount } from "svelte";
 
   type $$Slots = {
     default: Record<string, never>;
   };
 
-  setSearchContext();
-  setSelectionContext();
-  setQueueContext();
+  const { detailList } = setSearchContext();
+  const { selectedId, deselectAll } = setSelectionContext();
+  const { startQueue, stopQueue } = setQueueContext();
   setDisabledContext();
 
   const { isFullScreen } = getFullScreenContext();
-  const { selectedId, deselectAll } = getSelectionContext();
-  const { detailList } = getSearchContext();
 
   let isSelectionEmpty = true;
 
   beforeNavigate(() => {
     deselectAll();
+  });
+
+  onMount(() => {
+    startQueue();
+    return stopQueue;
   });
 
   $: {

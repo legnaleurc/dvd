@@ -1,6 +1,6 @@
 <script lang="ts">
   import { beforeNavigate } from "$app/navigation";
-  import { getSelectionContext, setSelectionContext } from "$stores/selection";
+  import { setSelectionContext } from "$stores/selection";
   import { getFileSystemContext } from "$stores/filesystem";
   import { getFullScreenContext } from "$stores/fullscreen";
   import { setSortContext } from "$stores/sort";
@@ -9,11 +9,10 @@
   import NodeList from "./NodeList.svelte";
   import PathBar from "./PathBar.svelte";
 
-  setSelectionContext();
+  const { deselectAll, selectedId } = setSelectionContext();
   setSortContext();
 
   const { rootId } = getFileSystemContext();
-  const { deselectAll, selectedId } = getSelectionContext();
   const { isFullScreen } = getFullScreenContext();
 
   let stack: string[] = [];
