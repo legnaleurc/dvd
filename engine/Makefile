@@ -1,8 +1,7 @@
-TOUCH := touch
 RM := rm -rf
-PYTHON := python3
 POETRY := poetry
-BLACK := black
+PYTHON := $(POETRY) run -- python3
+BLACK := $(POETRY) run -- black
 
 PKG_FILES := pyproject.toml poetry.lock
 PKG_DIR := .venv
@@ -17,23 +16,23 @@ clean:
 purge: clean
 	$(RM) $(PKG_DIR)
 test: setup
-	$(POETRY) run $(PYTHON) -m compileall engine
-	$(POETRY) run $(PYTHON) -m unittest
+	$(PYTHON) -m compileall engine
+	$(PYTHON) -m unittest
 
 setup: $(BLD_LOCK)
 
 $(BLD_LOCK): $(PKG_FILES)
 	$(POETRY) install
-	$(TOUCH) $@
+	touch $@
 
 auth: setup
-	$(POETRY) run $(PYTHON) -m wcpan.drive.cli auth
+	$(PYTHON) -m wcpan.drive.cli auth
 
 sync: setup
-	$(POETRY) run $(PYTHON) -m wcpan.drive.cli sync
+	$(PYTHON) -m wcpan.drive.cli sync
 
 lint: setup
-	$(POETRY) run $(BLACK) --check engine
+	$(BLACK) --check engine tests
 
 format: setup
-	$(POETRY) run $(BLACK) engine
+	$(BLACK) engine tests
