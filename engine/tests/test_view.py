@@ -10,18 +10,19 @@ from engine.main import application_context
 
 
 class ViewTestCase(IsolatedAsyncioTestCase):
-
     async def asyncSetUp(self) -> None:
         await super().asyncSetUp()
         async with AsyncExitStack() as stack:
             static_path = stack.enter_context(TemporaryDirectory())
-            stack.enter_context(patch('engine.main.DriveFactory'))
-            app = await stack.enter_async_context(application_context(
-                port=9999,
-                unpack_path='',
-                static_path=static_path,
-                token='1234',
-            ))
+            stack.enter_context(patch("engine.main.DriveFactory"))
+            app = await stack.enter_async_context(
+                application_context(
+                    port=9999,
+                    unpack_path="",
+                    static_path=static_path,
+                    token="1234",
+                )
+            )
             client = await stack.enter_async_context(TestClient(TestServer(app)))
             self._client = client
             self._static_path = Path(static_path)
@@ -32,38 +33,38 @@ class ViewTestCase(IsolatedAsyncioTestCase):
         await super().asyncTearDown()
 
     async def testCorrectRoutes(self):
-        expected = 'test'
+        expected = "test"
 
-        index_path = self._static_path / 'index.html'
-        with index_path.open('w') as fout:
+        index_path = self._static_path / "index.html"
+        with index_path.open("w") as fout:
             fout.write(expected)
 
         valid_routes = [
-            '',
-            'files',
-            'settings',
-            'search',
-            'comic',
-            'comic/abc',
+            "",
+            "files",
+            "settings",
+            "search",
+            "comic",
+            "comic/abc",
         ]
         for route in valid_routes:
-            rv = await self._client.get(f'/{route}')
+            rv = await self._client.get(f"/{route}")
             self.assertEqual(rv.status, 200)
             body = await rv.text()
             self.assertEqual(body, expected)
 
     async def testInvalidRoutes(self):
-        rv = await self._client.get('/abc')
+        rv = await self._client.get("/abc")
         self.assertEqual(rv.status, 404)
 
     async def testStaticUrl(self):
-        expected = 'test'
+        expected = "test"
 
-        index_path = self._static_path / 'random.txt'
-        with index_path.open('w') as fout:
+        index_path = self._static_path / "random.txt"
+        with index_path.open("w") as fout:
             fout.write(expected)
 
-        rv = await self._client.get('/random.txt')
+        rv = await self._client.get("/random.txt")
         self.assertEqual(rv.status, 200)
         body = await rv.text()
         self.assertEqual(body, expected)
