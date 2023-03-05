@@ -58,14 +58,19 @@ class NodeView(
             kwargs,
             (
                 "parent_id",
+                "parent_path",
                 "name",
             ),
         )
         if kwargs:
             parent_node = None
             name = None
+            if "parent_id" in kwargs and "parent_path" in kwargs:
+                raise HTTPBadRequest()
             if "parent_id" in kwargs:
                 parent_node = await drive.get_node_by_id(kwargs["parent_id"])
+            if "parent_path" in kwargs:
+                parent_node = await drive.get_node_by_path(kwargs["parent_path"])
             if "name" in kwargs:
                 name = kwargs["name"]
             await drive.rename_node(node, parent_node, name)

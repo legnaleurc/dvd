@@ -77,7 +77,7 @@ export async function moveNodeToId(src: string, dst: string) {
 
 export async function moveNodeToPath(src: string, dst: string) {
   await patch(`/api/v1/nodes/${src}`, {
-    path: dst,
+    parent_path: dst,
   });
 }
 
