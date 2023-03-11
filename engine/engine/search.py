@@ -110,7 +110,9 @@ class SearchEngine(object):
                 lock.notify_all()
 
     async def _make_item(self, node: Node) -> SearchNodeDict:
+        assert node.parent_id
         parent_node = await self._drive.get_node_by_id(node.parent_id)
+        assert parent_node
         parent_path = await self._drive.get_path(parent_node)
         rv = cast(SearchNodeDict, node.to_dict())
         rv["parent_path"] = str(parent_path)
