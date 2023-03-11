@@ -10,6 +10,7 @@ from aiohttp.web import Response, StreamResponse, View
 from aiohttp.web_exceptions import (
     HTTPBadRequest,
     HTTPConflict,
+    HTTPInternalServerError,
     HTTPNoContent,
     HTTPServiceUnavailable,
     HTTPUnauthorized,
@@ -132,6 +133,9 @@ class NodeListView(HasTokenMixin, ListAPIMixin, CreateAPIMixin, View):
         parent_id = kwargs["parent_id"]
         name = kwargs["name"]
         parent = await drive.get_node_by_id(parent_id)
+        if not parent:
+            raise HTTPBadRequest()
+
         try:
             node = await drive.create_folder(
                 parent_node=parent,
@@ -245,6 +249,9 @@ class NodeImageView(NodeObjectMixin, View):
         await response.prepare(self.request)
         if node.is_folder:
             child = await get_node(drive, data["path"])
+            if not child:
+                getLogger(__name__).error(f"tried to find child {data['path']} but not found")
+                raise HTTPInternalServerError()
             async with await drive.download(child) as stream:
                 async for chunk in stream:
                     await response.write(chunk)
@@ -264,6 +271,8 @@ class NodeVideoListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
         drive: Drive = self.request.app["drive"]
 
         if node.is_video:
+            if not node.parent_id:
+                return []
             path = await drive.get_path_by_id(node.parent_id)
             return [
                 {

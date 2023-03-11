@@ -303,7 +303,7 @@ class StorageManager(object):
             self._check()
 
 
-async def get_node(drive: Drive, id_or_root: str) -> Node:
+async def get_node(drive: Drive, id_or_root: str) -> Node | None:
     if id_or_root == "root":
         return await drive.get_root_node()
     else:
