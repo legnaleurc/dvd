@@ -3,9 +3,10 @@ POETRY := poetry
 PYTHON := $(POETRY) run -- python3
 BLACK := $(POETRY) run -- black
 
-PKG_FILES := pyproject.toml poetry.lock
-PKG_DIR := .venv
-BLD_LOCK := $(PKG_DIR)/pyvenv.cfg
+PKG_FILES := pyproject.toml
+PKG_LOCK := poetry.lock
+ENV_DIR := .venv
+ENV_LOCK := $(ENV_DIR)/pyvenv.cfg
 
 .PHONY: release debug clean purge test setup
 
@@ -14,15 +15,19 @@ debug: setup
 clean:
 	$(RM) .coverage
 purge: clean
-	$(RM) $(PKG_DIR)
+	$(RM) $(ENV_DIR)
 test: setup
 	$(PYTHON) -m compileall engine
 	$(PYTHON) -m unittest
 
-setup: $(BLD_LOCK)
+setup: $(ENV_LOCK)
 
-$(BLD_LOCK): $(PKG_FILES)
+$(ENV_LOCK): $(PKG_LOCK)
 	$(POETRY) install
+	touch $@
+
+$(PKG_LOCK): $(PKG_FILES)
+	$(POETRY) lock
 	touch $@
 
 auth: setup
