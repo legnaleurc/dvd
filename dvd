@@ -2,6 +2,7 @@
 
 import asyncio
 import argparse
+from asyncio.subprocess import Process
 import os
 import pathlib
 import signal
@@ -131,11 +132,11 @@ async def run_or_die(cmd, cwd=None, env=None) -> None:
     await ok_or_die(p)
 
 
-async def spawn(cmd, cwd=None, env=None) -> asyncio.subprocess.Process:
+async def spawn(cmd, cwd=None, env=None) -> Process:
     return await asyncio.create_subprocess_exec(*cmd, cwd=cwd, env=env)
 
 
-async def ok_or_die(p: asyncio.subprocess.Process):
+async def ok_or_die(p: Process):
     rv = await p.wait()
     if rv > 0:
         raise ProcessError(rv)
@@ -148,7 +149,7 @@ def clone_env(override=None) -> dict[str, str]:
     return env
 
 
-def kill_process(p: asyncio.subprocess.Process):
+def kill_process(p: Process):
     if p.returncode is not None:
         return
     p.send_signal(signal.SIGINT)
