@@ -1,11 +1,13 @@
 import argparse
 import asyncio
+from logging import getLogger
+from logging.config import dictConfig
 import signal
 from contextlib import asynccontextmanager
 
 from aiohttp.web import Application, AppRunner, TCPSite
 from wcpan.drive.core.drive import DriveFactory
-from wcpan.logger import setup as setup_logger, EXCEPTION
+from wcpan.logging import ConfigBuilder
 
 from . import api, util, view, search
 
@@ -14,13 +16,12 @@ class Daemon(object):
     def __init__(self):
         self._kwargs = None
         self._finished = None
-        self._loggers = setup_logger(
-            (
-                "aiohttp",
-                "wcpan.drive",
-                "engine",
-            ),
-            "/tmp/engine.log",
+
+        dictConfig(
+            ConfigBuilder(path="/tmp/engine.log", level="N")
+            .add("aiohttp", level="I")
+            .add("wcpan", "engine", level="D")
+            .to_dict()
         )
 
     async def __call__(self, args):
@@ -31,8 +32,8 @@ class Daemon(object):
         loop.add_signal_handler(signal.SIGTERM, self._close)
         try:
             return await self._main()
-        except Exception as e:
-            EXCEPTION("engine", e)
+        except Exception:
+            getLogger(__name__).exception("main function error")
         return 1
 
     async def _main(self):

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from logging import getLogger
 import shlex
 from typing import Any, Dict, Iterable, Type, TypeVar
 
@@ -14,7 +15,6 @@ from aiohttp.web_exceptions import (
     HTTPUnauthorized,
 )
 from multidict import MultiDictProxy
-from wcpan.logger import EXCEPTION
 from wcpan.drive.core.drive import Drive
 
 from .mixins import NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin
@@ -140,7 +140,9 @@ class NodeListView(HasTokenMixin, ListAPIMixin, CreateAPIMixin, View):
             )
             return node.to_dict()
         except Exception as e:
-            EXCEPTION("engine", e) << name << parent_id
+            getLogger(__name__).exception(
+                f"failed to create folder, name: {name}, parent_id: {parent_id}"
+            )
             raise HTTPConflict() from e
 
 

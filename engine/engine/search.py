@@ -1,5 +1,6 @@
 import asyncio
 import itertools
+from logging import getLogger
 import re
 from asyncio import Condition
 from dataclasses import dataclass
@@ -7,7 +8,6 @@ from typing import AsyncGenerator, Callable, cast
 
 from wcpan.drive.core.drive import Drive
 from wcpan.drive.core.types import Node, NodeDict
-from wcpan.logger import EXCEPTION
 
 
 class SearchNodeDict(NodeDict):
@@ -102,7 +102,7 @@ class SearchEngine(object):
             self._cache[param] = nodes
             return nodes
         except Exception as e:
-            EXCEPTION("engine", e) << "search failed, abort"
+            getLogger(__name__).exception("search failed, abort")
             raise SearchFailedError(str(e))
         finally:
             del self._searching[param]

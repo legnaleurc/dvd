@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from logging import getLogger
 import os
 import pathlib
 import re
@@ -14,7 +15,6 @@ from os.path import getsize, join as join_path
 from typing import Dict, List, TypedDict, Union
 
 from PIL import Image
-from wcpan.logger import EXCEPTION, DEBUG, INFO
 from wcpan.drive.core.drive import Drive
 from wcpan.drive.core.types import Node
 
@@ -94,8 +94,8 @@ class UnpackEngine(object):
         except UnpackFailedError:
             raise
         except Exception as e:
-            EXCEPTION("engine", e) << "unpack failed, abort"
-            raise UnpackFailedError(str(e))
+            getLogger(__name__).exception("unpack failed, abort")
+            raise UnpackFailedError(str(e)) from e
         finally:
             del self._unpacking[node.id_]
             async with lock:
@@ -122,7 +122,9 @@ class UnpackEngine(object):
             node_id,
             self._storage.root_path,
         ]
-        DEBUG("engine") << " ".join(cmd)
+
+        getLogger(__name__).debug(" ".join(cmd))
+
         p = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
@@ -151,8 +153,8 @@ class UnpackEngine(object):
                     continue
                 try:
                     image = Image.open(path)
-                except OSError as e:
-                    EXCEPTION("engine", e) << "unknown image"
+                except OSError:
+                    getLogger(__name__).exception("unknown image")
                     continue
                 width, height = image.size
                 rv.append(
@@ -289,11 +291,11 @@ class StorageManager(object):
         for child in self._path.iterdir():
             s = child.stat()
             d = now - s.st_mtime
-            DEBUG("engine") << "check" << child << f"({d})"
+            getLogger(__name__).debug(f"check {child} ({d})")
             if d > DAY:
                 shutil.rmtree(str(child))
                 del self._cache[child.name]
-                INFO("engine") << "prune" << child << f"({d})"
+                getLogger(__name__).info(f"prune {child} ({d})")
 
     async def _loop(self):
         while True:
