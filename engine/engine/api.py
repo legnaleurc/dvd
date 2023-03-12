@@ -4,7 +4,7 @@ import asyncio
 import json
 from logging import getLogger
 import shlex
-from typing import Any, Dict, Iterable, Type, TypeVar
+from typing import Any, Iterable, Type, TypeVar
 
 from aiohttp.web import Response, StreamResponse, View
 from aiohttp.web_exceptions import (
@@ -250,7 +250,9 @@ class NodeImageView(NodeObjectMixin, View):
         if node.is_folder:
             child = await get_node(drive, data["path"])
             if not child:
-                getLogger(__name__).error(f"tried to find child {data['path']} but not found")
+                getLogger(__name__).error(
+                    f"tried to find child {data['path']} but not found"
+                )
                 raise HTTPInternalServerError()
             async with await drive.download(child) as stream:
                 async for chunk in stream:
@@ -366,7 +368,7 @@ class CacheView(HasTokenMixin, ListAPIMixin, DestroyAPIMixin, View):
         ue.clear_cache()
 
 
-def unpack_dict(d: Dict[str, Any], keys: Iterable[str]) -> Dict[str, Any]:
+def unpack_dict(d: dict[str, Any], keys: Iterable[str]) -> dict[str, Any]:
     common_keys = set(keys) & set(d.keys())
     return {key: d[key] for key in common_keys}
 

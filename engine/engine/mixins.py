@@ -1,5 +1,4 @@
 import re
-from typing import Tuple, Union
 
 from aiohttp.abc import AbstractView
 from aiohttp.web import StreamResponse
@@ -40,7 +39,7 @@ class NodeRandomAccessMixin(AbstractView):
         self,
         response: StreamResponse,
         node: Node,
-    ) -> Union[Tuple[int, int], None]:
+    ) -> tuple[int, int] | None:
         assert node.size is not None
 
         DEFAULT_MIME_TYPE = "application/octet-stream"
@@ -72,7 +71,7 @@ class NodeRandomAccessMixin(AbstractView):
         self,
         response: StreamResponse,
         node: Node,
-        good_range: Union[Tuple[int, int], None],
+        good_range: tuple[int, int] | None,
     ) -> None:
         await response.prepare(self.request)
         if not good_range:

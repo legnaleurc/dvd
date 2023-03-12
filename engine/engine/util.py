@@ -12,7 +12,7 @@ from contextlib import AsyncExitStack, asynccontextmanager
 from itertools import zip_longest
 from mimetypes import guess_type
 from os.path import getsize, join as join_path
-from typing import Dict, List, TypedDict, Union
+from typing import TypedDict
 
 from PIL import Image
 from wcpan.drive.core.drive import Drive
@@ -42,9 +42,9 @@ class UnpackEngine(object):
         self._drive = drive
         self._port = port
         self._unpack_path = unpack_path
-        self._unpacking: Dict[str, asyncio.Condition] = {}
-        self._storage: Union[StorageManager, None] = None
-        self._raii: Union[AsyncExitStack, None] = None
+        self._unpacking: dict[str, asyncio.Condition] = {}
+        self._storage: StorageManager | None = None
+        self._raii: AsyncExitStack | None = None
 
     async def __aenter__(self) -> UnpackEngine:
         async with AsyncExitStack() as stack:
@@ -58,7 +58,7 @@ class UnpackEngine(object):
         self._storage = None
         self._raii = None
 
-    async def get_manifest(self, node: Node) -> List[ImageDict]:
+    async def get_manifest(self, node: Node) -> list[ImageDict]:
         assert self._storage is not None
         manifest = self._storage.get_cache_or_none(node.id_)
         if manifest is not None:
@@ -81,7 +81,7 @@ class UnpackEngine(object):
         assert self._storage is not None
         self._storage.clear_cache()
 
-    async def _unpack(self, node: Node) -> List[ImageDict]:
+    async def _unpack(self, node: Node) -> list[ImageDict]:
         assert self._storage is not None
         lock = self._unpacking[node.id_]
         try:
@@ -105,7 +105,7 @@ class UnpackEngine(object):
         self,
         lock: asyncio.Condition,
         node_id: str,
-    ) -> List[ImageDict]:
+    ) -> list[ImageDict]:
         assert self._storage is not None
         async with lock:
             await lock.wait()
@@ -114,7 +114,7 @@ class UnpackEngine(object):
         except KeyError:
             raise UnpackFailedError(f"{node_id} canceled unpack")
 
-    async def _unpack_local(self, node_id: str) -> List[ImageDict]:
+    async def _unpack_local(self, node_id: str) -> list[ImageDict]:
         assert self._storage is not None
         cmd = [
             self._unpack_path,
@@ -137,9 +137,9 @@ class UnpackEngine(object):
             )
         return self._scan_local(node_id)
 
-    def _scan_local(self, node_id: str) -> List[ImageDict]:
+    def _scan_local(self, node_id: str) -> list[ImageDict]:
         assert self._storage is not None
-        rv: List[ImageDict] = []
+        rv: list[ImageDict] = []
         top = self._storage.get_path(node_id)
         for dirpath, dirnames, filenames in os.walk(top):
             dirnames.sort(key=FuzzyName)
@@ -168,12 +168,12 @@ class UnpackEngine(object):
                 )
         return rv
 
-    async def _unpack_remote(self, node: Node) -> List[ImageDict]:
+    async def _unpack_remote(self, node: Node) -> list[ImageDict]:
         return await self._scan_remote(node)
 
-    async def _scan_remote(self, node: Node) -> List[ImageDict]:
+    async def _scan_remote(self, node: Node) -> list[ImageDict]:
         DEFAULT_MIME_TYPE = "application/octet-stream"
-        rv: List[ImageDict] = []
+        rv: list[ImageDict] = []
         async for root, folders, files in self._drive.walk(node):
             folders.sort(key=lambda _: FuzzyName(_.name))
             files.sort(key=lambda _: FuzzyName(_.name))
@@ -222,10 +222,10 @@ class FuzzyName(object):
 
 class StorageManager(object):
     def __init__(self):
-        self._cache: Dict[str, List[ImageDict]] = {}
-        self._tmp: Union[str, None] = None
-        self._path: Union[pathlib.Path, None] = None
-        self._raii: Union[AsyncExitStack, None] = None
+        self._cache: dict[str, list[ImageDict]] = {}
+        self._tmp: str | None = None
+        self._path: pathlib.Path | None = None
+        self._raii: AsyncExitStack | None = None
 
     async def __aenter__(self) -> StorageManager:
         async with AsyncExitStack() as stack:
@@ -249,13 +249,13 @@ class StorageManager(object):
         for child in self._path.iterdir():
             shutil.rmtree(str(child))
 
-    def get_cache(self, id_: str) -> List[ImageDict]:
+    def get_cache(self, id_: str) -> list[ImageDict]:
         return self._cache[id_]
 
-    def get_cache_or_none(self, id_: str) -> Union[List[ImageDict], None]:
+    def get_cache_or_none(self, id_: str) -> list[ImageDict] | None:
         return self._cache.get(id_, None)
 
-    def set_cache(self, id_: str, manifest: List[ImageDict]) -> None:
+    def set_cache(self, id_: str, manifest: list[ImageDict]) -> None:
         self._cache[id_] = manifest
 
     def get_path(self, id_: str) -> str:
