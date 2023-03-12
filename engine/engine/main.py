@@ -18,8 +18,7 @@ class Daemon(object):
         self._finished = None
 
         dictConfig(
-            ConfigBuilder(path="/tmp/engine.log", level="N")
-            .add("aiohttp", level="I")
+            ConfigBuilder(path="/tmp/engine.log")
             .add("wcpan", "engine", level="D")
             .to_dict()
         )
