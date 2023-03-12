@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 from logging import getLogger
 import os
@@ -12,7 +10,7 @@ from contextlib import AsyncExitStack, asynccontextmanager
 from itertools import zip_longest
 from mimetypes import guess_type
 from os.path import getsize, join as join_path
-from typing import TypedDict
+from typing import Self, TypedDict
 
 from PIL import Image
 from wcpan.drive.core.drive import Drive
@@ -46,7 +44,7 @@ class UnpackEngine(object):
         self._storage: StorageManager | None = None
         self._raii: AsyncExitStack | None = None
 
-    async def __aenter__(self) -> UnpackEngine:
+    async def __aenter__(self) -> Self:
         async with AsyncExitStack() as stack:
             self._storage = await stack.enter_async_context(StorageManager())
             self._raii = stack.pop_all()
@@ -202,7 +200,7 @@ class FuzzyName(object):
         seg_list = [int(_) if _.isdigit() else _ for _ in seg_list]
         self._seg_list = seg_list
 
-    def __lt__(self, that: FuzzyName) -> bool:
+    def __lt__(self, that: Self) -> bool:
         for l, r in zip_longest(self._seg_list, that._seg_list):
             # compare length: shorter first
             if l is None:
@@ -227,7 +225,7 @@ class StorageManager(object):
         self._path: pathlib.Path | None = None
         self._raii: AsyncExitStack | None = None
 
-    async def __aenter__(self) -> StorageManager:
+    async def __aenter__(self) -> Self:
         async with AsyncExitStack() as stack:
             self._tmp = stack.enter_context(tempfile.TemporaryDirectory())
             assert self._tmp is not None
