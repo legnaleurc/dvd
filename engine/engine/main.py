@@ -18,7 +18,7 @@ class Daemon(object):
         self._finished = None
 
         dictConfig(
-            ConfigBuilder(path="/tmp/engine.log")
+            ConfigBuilder(path="/tmp/engine.log", rotate=True)
             .add("wcpan", "engine", level="D")
             .to_dict()
         )
