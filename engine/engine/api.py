@@ -4,12 +4,13 @@ from logging import getLogger
 import shlex
 from typing import Any, Iterable, Type, TypeVar
 
-from aiohttp.web import Response, StreamResponse, View
+from aiohttp.web import StreamResponse, View
 from aiohttp.web_exceptions import (
     HTTPBadRequest,
     HTTPConflict,
     HTTPInternalServerError,
     HTTPNoContent,
+    HTTPNotFound,
     HTTPServiceUnavailable,
     HTTPUnauthorized,
 )
@@ -232,12 +233,12 @@ class NodeImageView(NodeObjectMixin, View):
         try:
             manifest = await ue.get_manifest(node)
         except UnpackFailedError:
-            return Response(status=503)
+            raise HTTPInternalServerError()
 
         try:
             data = manifest[image_id]
         except IndexError:
-            return Response(status=404)
+            raise HTTPNotFound()
 
         drive: Drive = self.request.app["drive"]
         response = StreamResponse(status=200)
