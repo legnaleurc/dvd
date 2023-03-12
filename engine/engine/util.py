@@ -22,7 +22,7 @@ class ImageDict(TypedDict):
     width: int
     height: int
     size: int
-    path: str
+    id: str
 
 
 class UnpackFailedError(Exception):
@@ -157,7 +157,7 @@ class UnpackEngine(object):
                 width, height = image.size
                 rv.append(
                     {
-                        "path": path,
+                        "id": path,
                         "type": type_,
                         "size": getsize(path),
                         "width": width,
@@ -184,7 +184,7 @@ class UnpackEngine(object):
                 type_ = DEFAULT_MIME_TYPE if f.mime_type is None else f.mime_type
                 rv.append(
                     {
-                        "path": f.id_,
+                        "id": f.id_,
                         "type": type_,
                         "size": f.size,
                         "width": f.image_width,

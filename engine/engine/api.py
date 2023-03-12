@@ -248,17 +248,17 @@ class NodeImageView(NodeObjectMixin, View):
 
         await response.prepare(self.request)
         if node.is_folder:
-            child = await get_node(drive, data["path"])
+            child = await get_node(drive, data["id"])
             if not child:
                 getLogger(__name__).error(
-                    f"tried to find child {data['path']} but not found"
+                    f"tried to find child {data['id']} but not found"
                 )
                 raise HTTPInternalServerError()
             async with await drive.download(child) as stream:
                 async for chunk in stream:
                     await response.write(chunk)
         else:
-            with open(data["path"], "rb") as fin:
+            with open(data["id"], "rb") as fin:
                 while True:
                     chunk = fin.read(65536)
                     if not chunk:
