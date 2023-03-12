@@ -1,6 +1,6 @@
 import argparse
 import asyncio
-from logging import getLogger
+from logging import captureWarnings, getLogger
 from logging.config import dictConfig
 import signal
 from contextlib import asynccontextmanager
@@ -22,6 +22,7 @@ class Daemon(object):
             .add("wcpan", "engine", level="D")
             .to_dict()
         )
+        captureWarnings(True)
 
     async def __call__(self, args):
         self._kwargs = parse_args(args[1:])
