@@ -55,6 +55,7 @@ class SearchEngine(object):
         size: int | None = None,
     ) -> list[SearchNodeDict]:
         param = SearchParam(name=name, fuzzy=fuzzy, parent_path=parent_path, size=size)
+        getLogger(__name__).info(f"search {param}")
 
         nodes = self._cache.get(param, None)
         if nodes is not None:
