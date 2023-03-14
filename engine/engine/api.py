@@ -78,7 +78,7 @@ class NodeView(
 
     async def destory(self):
         node = await self.get_object()
-        getLogger(__name__).info(f"trasg {node.name}")
+        getLogger(__name__).info(f"trash `{node.name}` `{node.id_}`")
         drive: Drive = self.request.app["drive"]
         se: SearchEngine = self.request.app["se"]
         path = await drive.get_path(node)
