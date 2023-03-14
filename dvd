@@ -142,7 +142,7 @@ async def ok_or_die(p: Process):
         raise ProcessError(rv)
 
 
-def clone_env(override=None) -> dict[str, str]:
+def clone_env(override: dict[str, str] | None = None) -> dict[str, str]:
     env = os.environ.copy()
     if override:
         env.update(override)
