@@ -27,7 +27,7 @@ $(ENV_LOCK): $(PKG_LOCK)
 	touch $@
 
 $(PKG_LOCK): $(PKG_FILES)
-	$(POETRY) lock
+	$(POETRY) lock --no-update
 	touch $@
 
 auth: setup
