@@ -4,7 +4,6 @@
   import type { SvelteCustomEvents } from "$types/traits";
   import { getSearchContext } from "$stores/search";
   import { getSelectionContext } from "$stores/selection";
-  import { click } from "$actions/event";
   import EmptyBlock from "$atoms/EmptyBlock.svelte";
   import Modal from "$molecules/Modal.svelte";
 
@@ -29,14 +28,9 @@
   <span slot="title">Search History</span>
   <div slot="body" class="flex flex-col">
     {#each $historyList as history, index (index)}
-      <div
-        role="button"
-        tabindex="0"
-        class="p-3 cursor-pointer"
-        use:click={() => handleSearchHistory(index)}
-      >
+      <button class="p-3" on:click={() => handleSearchHistory(index)}>
         {history}
-      </div>
+      </button>
     {:else}
       <EmptyBlock />
     {/each}

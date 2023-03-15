@@ -1,14 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$types/traits";
-  import { click } from "$actions/event";
   import Icon from "$atoms/Icon.svelte";
   import NodeIcon from "$atoms/NodeIcon.svelte";
 
-  type $$Events = SvelteCustomEvents<{
-    click: null;
-  }>;
+  type $$Events = {
+    click: CustomEvent<never>;
+  };
 
   export let category: string;
   export let isFolder: boolean;
@@ -25,7 +23,7 @@
   }
 </script>
 
-<div role="button" tabindex="0" class="flex" use:click={handleClick}>
+<button class="flex cursor-default" on:click={handleClick}>
   {#if isFolder}
     {#if loading}
       <div class="flex animate-spin">
@@ -39,4 +37,4 @@
   {:else}
     <NodeIcon {category} />
   {/if}
-</div>
+</button>
