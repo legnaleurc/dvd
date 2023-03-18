@@ -41,7 +41,7 @@
   <ListItem {selected} {disabled} on:click={handleSelect}>
     <div slot="title" class="flex gap-3">
       <NodeIcon category={node.category} />
-      <div>{node.name}</div>
+      <div class="break-all">{node.name}</div>
     </div>
     <svelte:fragment slot="action">
       {#if node.isFolder}
