@@ -50,12 +50,7 @@ async def main(args=None):
 
 
 def setup():
-    loop = asyncio.get_running_loop()
-    loop.add_signal_handler(signal.SIGINT, close)
-
-
-def close():
-    pass
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
 def parse_args(args):
