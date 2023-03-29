@@ -116,10 +116,16 @@ async def run_debug(
     backend_task.add_done_callback(lambda _: kill_process(frontend_process))
     frontend_task.add_done_callback(lambda _: kill_process(backend_process))
 
-    await asyncio.wait([
+    done, _ = await asyncio.wait([
         backend_task,
         frontend_task,
     ])
+
+    for task in done:
+        try:
+            task.result()
+        except Exception:
+            raise
 
 
 async def run_or_die(cmd, cwd=None, env=None) -> None:
