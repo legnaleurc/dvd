@@ -19,7 +19,8 @@ class Daemon(object):
 
         dictConfig(
             ConfigBuilder(path="/tmp/engine.log", rotate=True)
-            .add("wcpan", "engine", level="D")
+            .add("engine", level="D")
+            .add("wcpan", level="I")
             .to_dict()
         )
         captureWarnings(True)
