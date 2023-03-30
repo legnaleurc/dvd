@@ -10,7 +10,7 @@
 
   let klass = "";
   export { klass as class };
-  export let name = '';
+  export let name = "";
   export let value: string = undefined;
   export let placeholder = "";
   export let disabled = false;
