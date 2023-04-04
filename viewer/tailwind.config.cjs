@@ -19,12 +19,6 @@ module.exports = {
           900: "#303030",
           950: "#1a1a1a",
         },
-        paper: {
-          600: "#606060",
-          700: "#515151",
-          800: "#424242",
-          900: "#303030",
-        },
         symbol: {
           placeholder: colors.gray[400],
           hint: colors.gray[400],

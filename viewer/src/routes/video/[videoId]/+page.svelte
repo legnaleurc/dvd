@@ -26,7 +26,7 @@
 
 <div class="w-full h-full flex flex-col">
   <div
-    class="flex-0 p-3 whitespace-nowrap overflow-x-auto select-text bg-paper-800"
+    class="flex-0 p-3 whitespace-nowrap overflow-x-auto select-text bg-pale-900"
   >
     {name}
   </div>

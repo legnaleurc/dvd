@@ -22,7 +22,7 @@
   onMount(loadShortcut);
 </script>
 
-<div class="w-full h-full flex flex-col bg-paper-900">
+<div class="w-full h-full flex flex-col text-pale-50 bg-pale-950">
   <div class="flex-1 min-h-0">
     <MainPage>
       <slot />

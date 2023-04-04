@@ -16,7 +16,7 @@
   const dispatch = createEventDispatcher();
 </script>
 
-<div class="flex min-w-0 bg-paper-800" class:hidden>
+<div class="flex min-w-0 bg-pale-900" class:hidden>
   <div class="flex-1 p-3 overflow-x-auto whitespace-nowrap select-text">
     {name}
   </div>

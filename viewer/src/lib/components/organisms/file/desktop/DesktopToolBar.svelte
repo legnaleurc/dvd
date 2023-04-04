@@ -42,7 +42,7 @@
   }
 </script>
 
-<div class="w-full h-full flex flex-col bg-paper-800">
+<div class="w-full h-full flex flex-col bg-pale-900">
   <div class="flex-0 flex flex-col">
     <SortButton />
     <DeselectAllButton />

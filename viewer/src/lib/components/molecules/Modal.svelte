@@ -61,9 +61,9 @@
     bind:this={backdrop}
     on:click|self={hide}
   >
-    <div class="modal flex flex-col bg-paper-900">
+    <div class="modal flex flex-col bg-pale-950">
       {#if $$slots.title}
-        <div class="modal-header flex font-bold bg-paper-800">
+        <div class="modal-header flex font-bold bg-pale-900">
           <div class="flex-1 p-3 flex">
             <slot name="title" />
           </div>
@@ -78,7 +78,7 @@
         <slot name="body" />
       </div>
       {#if $$slots.footer}
-        <div class="modal-footer bg-paper-800">
+        <div class="modal-footer bg-pale-900">
           <slot name="footer" />
         </div>
       {/if}

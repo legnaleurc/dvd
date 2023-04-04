@@ -17,7 +17,7 @@
 </script>
 
 <div class="w-full h-full flex flex-col">
-  <div class="flex-0 flex bg-paper-800">
+  <div class="flex-0 flex bg-pale-900">
     <div class="flex-0">
       <LabeledSwitch
         id="switch-two-column-mode"

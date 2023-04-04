@@ -32,7 +32,7 @@
 <img
   draggable="false"
   alt=""
-  class="bg-paper-600"
+  class="bg-pale-700"
   {width}
   {height}
   src={srcUrl}

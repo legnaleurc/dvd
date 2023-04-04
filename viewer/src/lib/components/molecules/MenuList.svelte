@@ -104,7 +104,7 @@
     <div
       role="menu"
       tabindex="-1"
-      class="absolute invisible p-3 flex flex-col bg-paper-700"
+      class="absolute invisible p-3 flex flex-col bg-pale-800"
       bind:this={menuEl}
     >
       <slot name="items" {hide} />

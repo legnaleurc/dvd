@@ -25,7 +25,7 @@
   }
 </script>
 
-<div class="flex flex-col bg-paper-800">
+<div class="flex flex-col bg-pale-900">
   <div class="flex" class:hidden={!expand}>
     <div class="flex-1" />
     <div class="flex-0 flex">

@@ -25,7 +25,7 @@
   }
 </script>
 
-<div class="flex bg-paper-800">
+<div class="flex bg-pale-900">
   <div class="flex-0 flex">
     <IconButton disabled={stack.length <= 1} on:click={() => dispatch("back")}>
       <Icon name="chevron_left" />

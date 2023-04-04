@@ -14,7 +14,7 @@
   $: hasDetails = $detailList.length > 0;
 </script>
 
-<div class="flex flex-col bg-paper-800">
+<div class="flex flex-col bg-pale-900">
   <div class="flex">
     <SearchBox class="flex-1" disabled={hasDetails} />
     <div class="flex-0 flex">
