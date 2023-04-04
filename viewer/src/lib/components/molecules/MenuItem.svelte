@@ -9,7 +9,7 @@
 
 <button
   role="menuitem"
-  class="p-3 cursor-pointer hover:bg-action-hover {klass}"
+  class="p-3 cursor-pointer hover:bg-pale-600 {klass}"
   on:click
 >
   <slot />

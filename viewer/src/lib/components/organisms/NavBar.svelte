@@ -40,7 +40,7 @@
       <li class="flex-grow">
         <a
           draggable="false"
-          class="w-full h-full flex justify-center items-center active:bg-action-focus"
+          class="w-full h-full flex justify-center items-center active:bg-pale-700"
           class:text-pale-500={!$page.url.pathname.startsWith(tab.path)}
           href={tab.path}
         >

@@ -114,7 +114,7 @@
   <div class="flex flex-col">
     <div
       class="flex"
-      class:bg-action-selected={selected}
+      class:bg-pale-600={selected}
       class:drop-enabled={!disabled}
       use:drop={{
         onDragEnter: handleDragEnter,
@@ -133,7 +133,7 @@
       <button
         aria-disabled={disabled}
         class="flex-1 break-all text-left cursor-default"
-        class:text-action-disabled={disabled}
+        class:opacity-30={disabled}
         draggable={selected}
         use:drag={{
           onDragEnd: handleDragEnd,

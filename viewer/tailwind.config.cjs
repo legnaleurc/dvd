@@ -19,12 +19,6 @@ module.exports = {
           900: "#303030",
           950: "#1a1a1a",
         },
-        action: {
-          hover: "rgb(255 255 255 / 0.08)",
-          selected: "rgb(255 255 255 / 0.16)",
-          disabled: "rgb(255 255 255 / 0.30)",
-          focus: "rgb(255 255 255 / 0.12)",
-        },
         primary: colors.blue,
         danger: colors.red,
         warning: colors.yellow,

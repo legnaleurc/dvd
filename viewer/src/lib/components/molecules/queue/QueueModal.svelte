@@ -24,7 +24,7 @@
             {getNameById(id)}
           </div>
         {:else}
-          <div class="p-3 truncate text-action-disabled">(idle)</div>
+          <div class="p-3 truncate opacity-30">(idle)</div>
         {/if}
       {/each}
     </div>
