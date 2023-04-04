@@ -22,7 +22,7 @@
     <div>
       <slot name="title" />
     </div>
-    <div class="text-symbol-hint">
+    <div class="text-pale-400">
       <slot name="caption" />
     </div>
   </button>

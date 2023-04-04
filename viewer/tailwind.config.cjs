@@ -19,11 +19,6 @@ module.exports = {
           900: "#303030",
           950: "#1a1a1a",
         },
-        symbol: {
-          placeholder: colors.gray[400],
-          hint: colors.gray[400],
-          disabled: colors.gray[400],
-        },
         action: {
           hover: "rgb(255 255 255 / 0.08)",
           selected: "rgb(255 255 255 / 0.16)",

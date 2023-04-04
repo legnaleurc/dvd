@@ -18,7 +18,7 @@
 </script>
 
 <input
-  class="m-3 px-3 bg-black disabled:text-symbol-disabled {klass}"
+  class="m-3 px-3 bg-black disabled:text-pale-400 {klass}"
   type="search"
   {placeholder}
   {disabled}
