@@ -2,7 +2,7 @@
   "name": "viewer",
   "version": "3.0.0",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "svelte-kit sync && vite dev",
     "build": "svelte-kit sync && vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check",
