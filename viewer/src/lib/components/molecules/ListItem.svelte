@@ -12,7 +12,7 @@
   export let selected = false;
 </script>
 
-<div class="w-full flex" class:bg-pale-600={selected}>
+<div class="w-full flex" class:bg-pale-800={selected}>
   <button
     type="button"
     class="flex-1 p-3 flex flex-col text-left disabled:opacity-30"

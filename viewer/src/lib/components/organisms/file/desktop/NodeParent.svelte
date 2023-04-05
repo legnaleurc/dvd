@@ -114,7 +114,7 @@
   <div class="flex flex-col">
     <div
       class="flex"
-      class:bg-pale-600={selected}
+      class:bg-pale-800={selected}
       class:drop-enabled={!disabled}
       use:drop={{
         onDragEnter: handleDragEnter,
