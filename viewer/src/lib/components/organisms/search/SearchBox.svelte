@@ -23,7 +23,6 @@
 
 <SearchInput
   class={klass}
-  name="search--search"
   {disabled}
   placeholder="Search"
   bind:value={text}
