@@ -2,6 +2,7 @@
   import { saveToken } from "$tools/storage";
   import Icon from "$atoms/Icon.svelte";
   import IconButton from "$atoms/IconButton.svelte";
+  import VoidForm from "$atoms/VoidForm.svelte";
   import InputGroup from "./InputGroup.svelte";
   import SettingsGroup from "./SettingsGroup.svelte";
 
@@ -21,13 +22,15 @@
   <span slot="header">Access Token</span>
   <InputGroup slot="body">
     <svelte:fragment slot="input">
-      <input
-        class="m-3 px-3 flex-1 bg-black"
-        type="password"
-        placeholder="Token"
-        autocomplete="new-password"
-        bind:value={token}
-      />
+      <VoidForm>
+        <input
+          class="m-3 px-3 flex-1 bg-black"
+          type="password"
+          placeholder="Token"
+          autocomplete="new-password"
+          bind:value={token}
+        />
+      </VoidForm>
     </svelte:fragment>
     <svelte:fragment slot="action">
       <IconButton on:click={handleSave}>
