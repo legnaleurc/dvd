@@ -8,12 +8,14 @@
   export let disabled = false;
 
   $: isPrimary = variant === "primary";
+  $: isSecondary = variant === "secondary";
   $: isDanger = variant === "danger";
 </script>
 
 <button
   class="p-3 w-36 flex disabled:opacity-30"
   class:bg-blue-500={isPrimary}
+  class:bg-gray-600={isSecondary}
   class:bg-red-500={isDanger}
   {disabled}
   on:click

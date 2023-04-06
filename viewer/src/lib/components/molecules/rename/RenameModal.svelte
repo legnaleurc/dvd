@@ -40,7 +40,12 @@
   </div>
   <div slot="footer">
     <div class="flex">
-      <Button label="Cancel" icon="close" on:click={() => dispatch("hide")} />
+      <Button
+        variant="secondary"
+        label="Cancel"
+        icon="close"
+        on:click={() => dispatch("hide")}
+      />
       <div class="flex-1" />
       <Button
         label="OK"
