@@ -10,15 +10,12 @@
 }
 
 @layer base {
-  html,
-  body {
+  html {
     width: 100%;
     height: 100%;
 
     overflow: hidden;
-  }
 
-  html {
     /* Prevent viewport scrolling in iOS. */
     position: fixed;
     /* Prevent touch actions. */
@@ -26,15 +23,11 @@
   }
 
   body {
-    /* Disable selection globally, enable for only inputs. */
-    @apply select-none;
     /* Disable tap highlight on links and buttons for Webkit. */
     -webkit-tap-highlight-color: transparent;
     /* Disable long press actions on iOS. */
     -webkit-touch-callout: none;
 
-    background-color: black;
-    color: white;
     font-size: 16px;
     font-family: "Roboto", "Hiragino Kaku Gothic Pro", "Meiryo",
       "Noto Sans CJK JP", "sans-serif";
