@@ -1,5 +1,3 @@
-const colors = require("tailwindcss/colors");
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{html,js,svelte,ts}"],
@@ -19,10 +17,6 @@ module.exports = {
           900: "#303030",
           950: "#1a1a1a",
         },
-        primary: colors.blue,
-        danger: colors.red,
-        warning: colors.yellow,
-        success: colors.green,
       },
     },
   },

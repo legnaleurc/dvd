@@ -29,9 +29,9 @@
       {/each}
     </div>
     <div class="flex mt-3 justify-around">
-      <div class="text-danger-500">{$rejectedCount}</div>
-      <div class="text-warning-500">{$pendingCount}</div>
-      <div class="text-success-500">{$fullfilledCount}</div>
+      <div class="text-red-500">{$rejectedCount}</div>
+      <div class="text-yellow-500">{$pendingCount}</div>
+      <div class="text-green-500">{$fullfilledCount}</div>
     </div>
   </div>
 </Modal>

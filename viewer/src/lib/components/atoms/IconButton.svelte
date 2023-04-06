@@ -2,23 +2,14 @@
   import type { Variants } from "$types/button";
 
   export let disabled = false;
-  export let variant: Variants = "primary";
+  export let variant: Variants = "vanilla";
 
-  let color = "";
-
-  $: {
-    switch (variant) {
-      case "danger":
-        color = "text-danger-500";
-        break;
-      default:
-        color = "";
-    }
-  }
+  $: isDanger = variant === "danger";
 </script>
 
 <button
-  class="w-12 h-12 p-3 rounded-full flex-0 inline-flex justify-center items-center {color} disabled:opacity-30 active:enabled:bg-pale-700"
+  class="w-12 h-12 p-3 rounded-full flex-0 inline-flex justify-center items-center disabled:opacity-30 active:enabled:bg-pale-700"
+  class:text-red-500={isDanger}
   {disabled}
   on:click
 >
