@@ -51,7 +51,7 @@
   }
 
   .drag-over.drop-enabled {
-    background-color: black;
+    background-color: gray;
     transition: background-color 250ms ease-in-out;
   }
 }
