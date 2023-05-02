@@ -65,8 +65,6 @@ class SearchEngine(object):
             lock = self._searching[param]
             return await self._wait_for_result(lock, param)
 
-        lock = Condition()
-        self._searching[param] = lock
         return await self._guarded_search(param)
 
     async def clear_cache(self) -> None:
@@ -93,7 +91,8 @@ class SearchEngine(object):
             raise SearchFailedError(f"{param} canceled search")
 
     async def _guarded_search(self, param: SearchParam) -> list[SearchNodeDict]:
-        lock = self._searching[param]
+        lock = Condition()
+        self._searching[param] = lock
         try:
             nodes = await self._pure_search(param)
             g = (_ for _ in nodes if not _.trashed)
