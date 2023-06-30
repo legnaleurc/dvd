@@ -5,7 +5,6 @@
   import IconButton from "$atoms/IconButton.svelte";
 
   export let isFolderById: (id: string) => boolean;
-  export let getNameById: (id: string) => string;
 
   const { selectedId } = getSelectionContext();
 
@@ -17,8 +16,7 @@
       if (isFolderById(id)) {
         continue;
       }
-      const name = getNameById(id);
-      const url = getDownloadUrl(id, name);
+      const url = getDownloadUrl(id);
       window.open(url, "_blank");
     }
   }

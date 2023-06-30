@@ -57,7 +57,7 @@
       {getParentById}
       on:aftercreate={handleAfterAction}
     />
-    <DownloadButton {getNameById} {isFolderById} />
+    <DownloadButton {isFolderById} />
     <CopyUrlButton {getNameById} {isFolderById} />
   </div>
   <div class="flex-1" />

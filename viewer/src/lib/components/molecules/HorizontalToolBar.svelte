@@ -30,7 +30,7 @@
     <div class="flex-1" />
     <div class="flex-0 flex">
       <CopyUrlButton {getNameById} {isFolderById} />
-      <DownloadButton {getNameById} {isFolderById} />
+      <DownloadButton {isFolderById} />
       <ExternalOpenButton {getNameById} {getMimeTypeById} />
     </div>
   </div>

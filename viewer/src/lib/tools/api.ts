@@ -110,6 +110,6 @@ export function getStreamUrl(id: string, name: string): string {
   return `${getBaseUrl()}/api/v1/nodes/${id}/stream/${encodeURI(name)}`;
 }
 
-export function getDownloadUrl(id: string, name: string): string {
-  return `${getBaseUrl()}/api/v1/nodes/${id}/download/${encodeURI(name)}`;
+export function getDownloadUrl(id: string): string {
+  return `${getBaseUrl()}/api/v1/nodes/${id}/download`;
 }
