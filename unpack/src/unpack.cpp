@@ -1,337 +1,355 @@
 #include "unpack.hpp"
 
-#include <memory>
 #include <iomanip>
+#include <memory>
 
 #include <archive.h>
 #include <archive_entry.h>
+#include <boost/filesystem.hpp>
 #include <cpprest/http_client.h>
 #include <cpprest/rawptrstream.h>
-#include <boost/filesystem.hpp>
 
-#include "types.hpp"
 #include "exception.hpp"
 #include "text.hpp"
-
+#include "types.hpp"
 
 const uint64_t CHUNK_SIZE = 65536;
 
-
-class Context {
+class Context
+{
 public:
-    Context (uint16_t port, const std::string & id);
+  Context(uint16_t port, const std::string& id);
 
-    web::http::http_response & getResponse ();
-    int64_t readChunk (const void ** buffer);
-    int64_t seek (int64_t offset, int whence);
-    void reset ();
+  web::http::http_response& getResponse();
+  int64_t readChunk(const void** buffer);
+  int64_t seek(int64_t offset, int whence);
+  void reset();
 
 private:
-    web::uri base;
-    web::uri path;
-    web::http::http_response response;
-    int64_t offset;
-    int64_t length;
-    std::array<uint8_t, CHUNK_SIZE> chunk;
+  web::uri base;
+  web::uri path;
+  web::http::http_response response;
+  int64_t offset;
+  int64_t length;
+  std::array<uint8_t, CHUNK_SIZE> chunk;
 };
 using ContextHandle = std::shared_ptr<Context>;
 
+ArchiveHandle
+createArchiveReader(ContextHandle context);
+ArchiveHandle
+createDiskWriter();
+std::string
+resolvePath(Text& text,
+            const std::string& localPath,
+            const std::string& id,
+            const std::string& entryName);
+void
+extractArchive(ArchiveHandle reader, ArchiveHandle writer);
+web::uri
+makeBase(uint16_t port);
+web::uri
+makePath(const std::string& id);
 
-ArchiveHandle createArchiveReader (ContextHandle context);
-ArchiveHandle createDiskWriter ();
-std::string resolvePath (Text & text, const std::string & localPath,
-                         const std::string & id, const std::string & entryName);
-void extractArchive (ArchiveHandle reader, ArchiveHandle writer);
-web::uri makeBase (uint16_t port);
-web::uri makePath (const std::string & id);
-
-int openCallback (struct archive * handle, void * context);
-int	closeCallback (struct archive * handle, void * context);
-la_ssize_t readCallback (struct archive * handle, void * context,
-                         const void ** buffer);
-la_int64_t seekCallback (struct archive * handle, void * context,
-                         la_int64_t offset, int whence);
-
+int
+openCallback(struct archive* handle, void* context);
+int
+closeCallback(struct archive* handle, void* context);
+la_ssize_t
+readCallback(struct archive* handle, void* context, const void** buffer);
+la_int64_t
+seekCallback(struct archive* handle,
+             void* context,
+             la_int64_t offset,
+             int whence);
 
 void
-unpackTo (uint16_t port, const std::string & id,
-          const std::string & localPath)
+unpackTo(uint16_t port, const std::string& id, const std::string& localPath)
 {
-    ContextHandle context = std::make_shared<Context>(port, id);
-    Text text;
-    auto reader = createArchiveReader(context);
-    auto writer = createDiskWriter();
+  ContextHandle context = std::make_shared<Context>(port, id);
+  Text text;
+  auto reader = createArchiveReader(context);
+  auto writer = createDiskWriter();
 
-    for (;;) {
-        struct archive_entry * entry = nullptr;
-        int rv = archive_read_next_header(reader.get(), &entry);
-        if (rv == ARCHIVE_EOF) {
-            break;
-        }
-        if (rv != ARCHIVE_OK) {
-            throw ArchiveError(reader, "archive_read_next_header");
-        }
-
-        // skip folders
-        auto fileType = archive_entry_filetype(entry);
-        if (fileType & AE_IFDIR) {
-            continue;
-        }
-
-        const char * entryName = archive_entry_pathname(entry);
-        if (!entryName) {
-            throw EntryError("archive_entry_pathname", "nullptr");
-        }
-
-        auto entryPath = resolvePath(text, localPath, id, entryName);
-        rv = archive_entry_update_pathname_utf8(entry, entryPath.c_str());
-        if (!rv) {
-            throw EntryError("archive_entry_update_pathname_utf8", entryPath);
-        }
-
-        rv = archive_write_header(writer.get(), entry);
-        if (rv != ARCHIVE_OK) {
-            throw ArchiveError(writer, "archive_write_header");
-        }
-
-        extractArchive(reader, writer);
-
-        rv = archive_write_finish_entry(writer.get());
-        if (rv != ARCHIVE_OK) {
-            throw ArchiveError(writer, "archive_write_finish_entry");
-        }
+  for (;;) {
+    struct archive_entry* entry = nullptr;
+    int rv = archive_read_next_header(reader.get(), &entry);
+    if (rv == ARCHIVE_EOF) {
+      break;
     }
+    if (rv != ARCHIVE_OK) {
+      throw ArchiveError(reader, "archive_read_next_header");
+    }
+
+    // skip folders
+    auto fileType = archive_entry_filetype(entry);
+    if (fileType & AE_IFDIR) {
+      continue;
+    }
+
+    const char* entryName = archive_entry_pathname(entry);
+    if (!entryName) {
+      throw EntryError("archive_entry_pathname", "nullptr");
+    }
+
+    auto entryPath = resolvePath(text, localPath, id, entryName);
+    rv = archive_entry_update_pathname_utf8(entry, entryPath.c_str());
+    if (!rv) {
+      throw EntryError("archive_entry_update_pathname_utf8", entryPath);
+    }
+
+    rv = archive_write_header(writer.get(), entry);
+    if (rv != ARCHIVE_OK) {
+      throw ArchiveError(writer, "archive_write_header");
+    }
+
+    extractArchive(reader, writer);
+
+    rv = archive_write_finish_entry(writer.get());
+    if (rv != ARCHIVE_OK) {
+      throw ArchiveError(writer, "archive_write_finish_entry");
+    }
+  }
 }
 
+ArchiveHandle
+createArchiveReader(ContextHandle context)
+{
+  int rv = 0;
 
-ArchiveHandle createArchiveReader (ContextHandle context) {
+  ArchiveHandle handle(
+    archive_read_new(),
+    [](ArchiveHandle::element_type* p) -> void { archive_read_free(p); });
+
+  rv = archive_read_support_filter_all(handle.get());
+  if (rv != ARCHIVE_OK) {
+    throw ArchiveError(handle, "archive_read_support_filter_all");
+  }
+  rv = archive_read_support_format_all(handle.get());
+  if (rv != ARCHIVE_OK) {
+    throw ArchiveError(handle, "archive_read_support_format_all");
+  }
+
+  rv = archive_read_set_open_callback(handle.get(), openCallback);
+  if (rv != ARCHIVE_OK) {
+    throw ArchiveError(handle, "archive_read_set_open_callback");
+  }
+  rv = archive_read_set_close_callback(handle.get(), closeCallback);
+  if (rv != ARCHIVE_OK) {
+    throw ArchiveError(handle, "archive_read_set_close_callback");
+  }
+  rv = archive_read_set_read_callback(handle.get(), readCallback);
+  if (rv != ARCHIVE_OK) {
+    throw ArchiveError(handle, "archive_read_set_read_callback");
+  }
+  rv = archive_read_set_seek_callback(handle.get(), seekCallback);
+  if (rv != ARCHIVE_OK) {
+    throw ArchiveError(handle, "archive_read_set_seek_callback");
+  }
+
+  rv = archive_read_set_callback_data(handle.get(), context.get());
+  if (rv != ARCHIVE_OK) {
+    throw ArchiveError(handle, "archive_read_set_callback_data");
+  }
+
+  rv = archive_read_open1(handle.get());
+  if (rv != ARCHIVE_OK) {
+    throw ArchiveError(handle, "archive_read_open1");
+  }
+
+  return handle;
+}
+
+ArchiveHandle
+createDiskWriter()
+{
+  ArchiveHandle handle(
+    archive_write_disk_new(),
+    [](ArchiveHandle::element_type* p) -> void { archive_write_free(p); });
+  return handle;
+}
+
+void
+extractArchive(ArchiveHandle reader, ArchiveHandle writer)
+{
+  for (;;) {
     int rv = 0;
+    const void* chunk = nullptr;
+    size_t length = 0;
+    la_int64_t offset = 0;
 
-    ArchiveHandle handle(
-        archive_read_new(),
-        [](ArchiveHandle::element_type * p) -> void {
-            archive_read_free(p);
-        });
-
-    rv = archive_read_support_filter_all(handle.get());
-    if (rv != ARCHIVE_OK) {
-        throw ArchiveError(handle, "archive_read_support_filter_all");
+    rv = archive_read_data_block(reader.get(), &chunk, &length, &offset);
+    if (rv == ARCHIVE_EOF) {
+      break;
     }
-    rv = archive_read_support_format_all(handle.get());
     if (rv != ARCHIVE_OK) {
-        throw ArchiveError(handle, "archive_read_support_format_all");
+      throw ArchiveError(reader, "archive_read_data_block");
     }
 
-    rv = archive_read_set_open_callback(handle.get(), openCallback);
+    rv = archive_write_data_block(writer.get(), chunk, length, offset);
     if (rv != ARCHIVE_OK) {
-        throw ArchiveError(handle, "archive_read_set_open_callback");
+      throw ArchiveError(writer, "archive_write_data_block");
     }
-    rv = archive_read_set_close_callback(handle.get(), closeCallback);
-    if (rv != ARCHIVE_OK) {
-        throw ArchiveError(handle, "archive_read_set_close_callback");
-    }
-    rv = archive_read_set_read_callback(handle.get(), readCallback);
-    if (rv != ARCHIVE_OK) {
-        throw ArchiveError(handle, "archive_read_set_read_callback");
-    }
-    rv = archive_read_set_seek_callback(handle.get(), seekCallback);
-    if (rv != ARCHIVE_OK) {
-        throw ArchiveError(handle, "archive_read_set_seek_callback");
-    }
-
-    rv = archive_read_set_callback_data(handle.get(), context.get());
-    if (rv != ARCHIVE_OK) {
-        throw ArchiveError(handle, "archive_read_set_callback_data");
-    }
-
-    rv = archive_read_open1(handle.get());
-    if (rv != ARCHIVE_OK) {
-        throw ArchiveError(handle, "archive_read_open1");
-    }
-
-    return handle;
+  }
 }
 
-
-ArchiveHandle createDiskWriter () {
-    ArchiveHandle handle(
-        archive_write_disk_new(),
-        [](ArchiveHandle::element_type * p) -> void {
-            archive_write_free(p);
-        });
-    return handle;
-}
-
-
-void extractArchive (ArchiveHandle reader, ArchiveHandle writer) {
-    for (;;) {
-        int rv = 0;
-        const void * chunk = nullptr;
-        size_t length = 0;
-        la_int64_t offset = 0;
-
-        rv = archive_read_data_block(reader.get(), &chunk, &length, &offset);
-        if (rv == ARCHIVE_EOF) {
-            break;
-        }
-        if (rv != ARCHIVE_OK) {
-            throw ArchiveError(reader, "archive_read_data_block");
-        }
-
-        rv = archive_write_data_block(writer.get(), chunk, length, offset);
-        if (rv != ARCHIVE_OK) {
-            throw ArchiveError(writer, "archive_write_data_block");
-        }
-    }
-}
-
-
-int openCallback (struct archive * handle, void * context) {
-    auto ctx = static_cast<Context *>(context);
-    ctx->reset();
-    return ARCHIVE_OK;
-}
-
-
-int	closeCallback (struct archive * handle, void * context) {
-    auto ctx = static_cast<Context *>(context);
-    ctx->reset();
-    return ARCHIVE_OK;
-}
-
-
-la_ssize_t readCallback (struct archive * handle, void * context,
-                         const void ** buffer)
+int
+openCallback(struct archive* handle, void* context)
 {
-    auto ctx = static_cast<Context *>(context);
-    try {
-        return ctx->readChunk(buffer);
-    } catch (std::exception & e) {
-        fprintf(stderr, "readCallback %s\n", e.what());
-        return ARCHIVE_FATAL;
-    }
+  auto ctx = static_cast<Context*>(context);
+  ctx->reset();
+  return ARCHIVE_OK;
 }
 
-
-la_int64_t seekCallback (struct archive * handle, void * context,
-                         la_int64_t offset, int whence)
+int
+closeCallback(struct archive* handle, void* context)
 {
-    auto ctx = static_cast<Context *>(context);
-    auto rv = ctx->seek(offset, whence);
-    if (rv < 0) {
-        return ARCHIVE_FATAL;
-    }
-    return rv;
+  auto ctx = static_cast<Context*>(context);
+  ctx->reset();
+  return ARCHIVE_OK;
 }
 
-
-web::uri makeBase (uint16_t port) {
-    web::uri_builder builder;
-    builder.set_scheme("http");
-    builder.set_host("localhost");
-    builder.set_port(port);
-    return builder.to_uri();
-}
-
-
-web::uri makePath (const std::string & id) {
-    std::ostringstream sout;
-    sout << "/api/v1/nodes/" << id << "/stream";
-    web::uri_builder builder;
-    builder.set_path(sout.str());
-    return builder.to_uri();
-}
-
-
-std::string resolvePath (Text & text, const std::string & localPath,
-                         const std::string & id, const std::string & entryName)
+la_ssize_t
+readCallback(struct archive* handle, void* context, const void** buffer)
 {
-    auto newEntryName = text.toUtf8(entryName);
-    boost::filesystem::path path = localPath;
-    path /= id;
-    path /= newEntryName;
-    return path.string();
+  auto ctx = static_cast<Context*>(context);
+  try {
+    return ctx->readChunk(buffer);
+  } catch (std::exception& e) {
+    fprintf(stderr, "readCallback %s\n", e.what());
+    return ARCHIVE_FATAL;
+  }
 }
 
+la_int64_t
+seekCallback(struct archive* handle,
+             void* context,
+             la_int64_t offset,
+             int whence)
+{
+  auto ctx = static_cast<Context*>(context);
+  auto rv = ctx->seek(offset, whence);
+  if (rv < 0) {
+    return ARCHIVE_FATAL;
+  }
+  return rv;
+}
 
-Context::Context (uint16_t port, const std::string & id)
-    : base(makeBase(port))
-    , path(makePath(id))
-    , response()
-    , offset(0)
-    , length(-1)
-    , chunk()
-{}
+web::uri
+makeBase(uint16_t port)
+{
+  web::uri_builder builder;
+  builder.set_scheme("http");
+  builder.set_host("localhost");
+  builder.set_port(port);
+  return builder.to_uri();
+}
 
+web::uri
+makePath(const std::string& id)
+{
+  std::ostringstream sout;
+  sout << "/api/v1/nodes/" << id << "/stream";
+  web::uri_builder builder;
+  builder.set_path(sout.str());
+  return builder.to_uri();
+}
 
-web::http::http_response &
-Context::getResponse () {
-    auto status = this->response.status_code();
-    if (status == web::http::status_codes::OK ||
-        status == web::http::status_codes::PartialContent) {
-        return this->response;
-    }
+std::string
+resolvePath(Text& text,
+            const std::string& localPath,
+            const std::string& id,
+            const std::string& entryName)
+{
+  auto newEntryName = text.toUtf8(entryName);
+  boost::filesystem::path path = localPath;
+  path /= id;
+  path /= newEntryName;
+  return path.string();
+}
 
-    web::http::http_request request;
-    request.set_method(web::http::methods::GET);
-    request.set_request_uri(this->path);
-    if (this->length >= 0) {
-        std::ostringstream sout;
-        sout << "bytes=" << this->offset << "-" << (this->length - 1);
-        request.headers().add("Range", sout.str());
-    }
+Context::Context(uint16_t port, const std::string& id)
+  : base(makeBase(port))
+  , path(makePath(id))
+  , response()
+  , offset(0)
+  , length(-1)
+  , chunk()
+{
+}
 
-    web::http::client::http_client_config cfg;
-    cfg.set_timeout(std::chrono::minutes(1));
-    web::http::client::http_client client(this->base, cfg);
-    this->response = client.request(request).get();
-    status = this->response.status_code();
-    if (status == web::http::status_codes::OK) {
-        this->length = this->response.headers().content_length();
-    } else if (status != web::http::status_codes::PartialContent) {
-        throw HttpError(status, this->response.reason_phrase());
-    }
+web::http::http_response&
+Context::getResponse()
+{
+  auto status = this->response.status_code();
+  if (status == web::http::status_codes::OK ||
+      status == web::http::status_codes::PartialContent) {
     return this->response;
+  }
+
+  web::http::http_request request;
+  request.set_method(web::http::methods::GET);
+  request.set_request_uri(this->path);
+  if (this->length >= 0) {
+    std::ostringstream sout;
+    sout << "bytes=" << this->offset << "-" << (this->length - 1);
+    request.headers().add("Range", sout.str());
+  }
+
+  web::http::client::http_client_config cfg;
+  cfg.set_timeout(std::chrono::minutes(1));
+  web::http::client::http_client client(this->base, cfg);
+  this->response = client.request(request).get();
+  status = this->response.status_code();
+  if (status == web::http::status_codes::OK) {
+    this->length = this->response.headers().content_length();
+  } else if (status != web::http::status_codes::PartialContent) {
+    throw HttpError(status, this->response.reason_phrase());
+  }
+  return this->response;
 }
 
+int64_t
+Context::readChunk(const void** buffer)
+{
+  using Buffer = Concurrency::streams::rawptr_buffer<uint8_t>;
 
-int64_t Context::readChunk (const void ** buffer) {
-    using Buffer = Concurrency::streams::rawptr_buffer<uint8_t>;
-
-    auto & response = this->getResponse();
-    Buffer glue(&this->chunk[0], CHUNK_SIZE);
-    auto length = response.body().read(glue, CHUNK_SIZE).get();
-    *buffer = &this->chunk[0];
-    this->offset += length;
-    return length;
+  auto& response = this->getResponse();
+  Buffer glue(&this->chunk[0], CHUNK_SIZE);
+  auto length = response.body().read(glue, CHUNK_SIZE).get();
+  *buffer = &this->chunk[0];
+  this->offset += length;
+  return length;
 }
 
+int64_t
+Context::seek(int64_t offset, int whence)
+{
+  this->response = web::http::http_response();
 
-int64_t Context::seek (int64_t offset, int whence) {
-    this->response = web::http::http_response();
-
-    switch (whence) {
+  switch (whence) {
     case SEEK_SET:
-        this->offset = offset;
-        break;
+      this->offset = offset;
+      break;
     case SEEK_CUR:
-        this->offset += offset;
-        break;
+      this->offset += offset;
+      break;
     case SEEK_END:
-        if (this->length < 0) {
-            return -1;
-        }
-        this->offset = this->length + offset;
-        break;
-    default:
+      if (this->length < 0) {
         return -1;
-    }
-    return this->offset;
+      }
+      this->offset = this->length + offset;
+      break;
+    default:
+      return -1;
+  }
+  return this->offset;
 }
 
-
-void Context::reset () {
-    this->response = web::http::http_response();
-    this->offset = 0;
-    this->length = -1;
+void
+Context::reset()
+{
+  this->response = web::http::http_response();
+  this->offset = 0;
+  this->length = -1;
 }

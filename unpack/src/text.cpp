@@ -4,41 +4,40 @@
 
 #include <iterator>
 
-
-const char * TEXT_CODEC_LIST[] = {
-    "UTF-8",
-    "Shift-JIS",
-    "CP932",
-    "EUC-JP",
-    "GB2312",
-    "GBK",
-    "GB18030",
+const char* TEXT_CODEC_LIST[] = {
+  "UTF-8", "Shift-JIS", "CP932", "EUC-JP", "GB2312", "GBK", "GB18030",
 };
 
-
-Text::Text(): index(std::begin(TEXT_CODEC_LIST)) {}
-
-
-Text::Text(Text && that): index(that.index) {}
-
-
-Text & Text::operator = (Text && that) {
-    this->index = that.index;
-    return *this;
+Text::Text()
+  : index(std::begin(TEXT_CODEC_LIST))
+{
 }
 
+Text::Text(Text&& that)
+  : index(that.index)
+{
+}
 
-std::string Text::toUtf8(const std::string & encoded) {
-    namespace Conv = boost::locale::conv;
+Text&
+Text::operator=(Text&& that)
+{
+  this->index = that.index;
+  return *this;
+}
 
-    while (index != std::end(TEXT_CODEC_LIST)) {
-        const auto codec = *index;
-        try {
-            auto decoded = Conv::to_utf<char>(encoded, codec, Conv::stop);
-            return decoded;
-        } catch (std::exception & e) {
-            std::advance(index, 1);
-        }
+std::string
+Text::toUtf8(const std::string& encoded)
+{
+  namespace Conv = boost::locale::conv;
+
+  while (index != std::end(TEXT_CODEC_LIST)) {
+    const auto codec = *index;
+    try {
+      auto decoded = Conv::to_utf<char>(encoded, codec, Conv::stop);
+      return decoded;
+    } catch (std::exception& e) {
+      std::advance(index, 1);
     }
-    return encoded;
+  }
+  return encoded;
 }
