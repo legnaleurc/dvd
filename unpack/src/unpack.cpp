@@ -194,7 +194,7 @@ extractArchive(ArchiveHandle reader, ArchiveHandle writer)
 }
 
 int
-openCallback(struct archive* handle, void* context)
+openCallback(struct archive* /*handle*/, void* context)
 {
   auto ctx = static_cast<Context*>(context);
   ctx->reset();
@@ -202,7 +202,7 @@ openCallback(struct archive* handle, void* context)
 }
 
 int
-closeCallback(struct archive* handle, void* context)
+closeCallback(struct archive* /*handle*/, void* context)
 {
   auto ctx = static_cast<Context*>(context);
   ctx->reset();
@@ -210,7 +210,7 @@ closeCallback(struct archive* handle, void* context)
 }
 
 la_ssize_t
-readCallback(struct archive* handle, void* context, const void** buffer)
+readCallback(struct archive* /*handle*/, void* context, const void** buffer)
 {
   auto ctx = static_cast<Context*>(context);
   try {
@@ -222,7 +222,7 @@ readCallback(struct archive* handle, void* context, const void** buffer)
 }
 
 la_int64_t
-seekCallback(struct archive* handle,
+seekCallback(struct archive* /*handle*/,
              void* context,
              la_int64_t offset,
              int whence)
