@@ -3,12 +3,13 @@ RM := rm -rf
 MKDIR := mkdir
 TOUCH := touch
 CMAKE := cmake
+CLANG_FORMAT := clang-format
 
 BLD_FILES := CMakeLists.txt
 HDR_FILES := src/*.hpp
 SRC_FILES := src/*.cpp
 
-.PHONY: release debug clean purge
+.PHONY: release debug clean purge format
 
 release: release/unpack
 debug: debug/unpack
@@ -17,6 +18,8 @@ clean:
 	if [ -d debug ]; then $(MAKE) -C debug clean; fi
 purge:
 	$(RM) release debug
+format:
+	$(CLANG_FORMAT) -i $(HDR_FILES) $(SRC_FILES)
 
 release/unpack: release/Makefile
 	$(MAKE) -C release

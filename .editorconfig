@@ -6,11 +6,11 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 charset = utf-8
 
-[*.{hpp,cpp,py}]
+[*.{py}]
 indent_style = space
 indent_size = 4
 
-[*.{js,mjs,cjs,ts,html,css,svelte}]
+[*.{hpp,cppjs,mjs,cjs,ts,html,css,svelte}]
 indent_style = space
 indent_size = 2
 
