@@ -13,6 +13,7 @@ set(SOURCES
 
 add_executable(unpack)
 target_compile_features(unpack PUBLIC cxx_std_11)
+target_compile_options(unpack PRIVATE -Wall -Wextra -pedantic)
 target_include_directories(unpack PRIVATE ${LibArchive_INCLUDE_DIRS})
 target_link_libraries(unpack PRIVATE
     ${LibArchive_LIBRARIES}
