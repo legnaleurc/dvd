@@ -25,8 +25,10 @@ const config: UserConfig = {
   },
   plugins: [sveltekit(), redirect({ "/": "/files" })],
   test: {
-    deps: {
-      inline: ["msw"],
+    server: {
+      deps: {
+        inline: ["msw"],
+      },
     },
     setupFiles: ["./vitest.setup.ts"],
   },
