@@ -1,12 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import type { SvelteCustomEvents } from "$types/traits";
   import Icon from "$atoms/Icon.svelte";
   import NodeIcon from "$atoms/NodeIcon.svelte";
 
-  type $$Events = {
-    click: CustomEvent<never>;
-  };
+  type $$Events = SvelteCustomEvents<{
+    click: null;
+  }>;
 
   export let category: string;
   export let isFolder: boolean;
