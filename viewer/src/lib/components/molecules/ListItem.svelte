@@ -1,11 +1,13 @@
 <script lang="ts">
+  import type { NeverRecord } from "$types/traits";
+
   type $$Events = {
     click: MouseEvent;
   };
   type $$Slots = {
-    title: Record<string, never>;
-    caption: Record<string, never>;
-    action: Record<string, never>;
+    title: NeverRecord;
+    caption: NeverRecord;
+    action: NeverRecord;
   };
 
   export let disabled = false;

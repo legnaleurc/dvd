@@ -1,10 +1,11 @@
 <script lang="ts">
+  import type { NeverRecord } from "$types/traits";
   import ActionBlock from "./ActionBlock.svelte";
   import ShortcutBlock from "./ShortcutBlock.svelte";
   import TokenBlock from "./TokenBlock.svelte";
 
   type $$Slots = {
-    default: Record<string, never>;
+    default: NeverRecord;
   };
 </script>
 

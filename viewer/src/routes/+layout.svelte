@@ -1,15 +1,18 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import "../app.css";
   import { beforeNavigate } from "$app/navigation";
+
   import { setFullScreenContext } from "$stores/fullscreen";
   import { setShortcutContext } from "$stores/shortcut";
   import NavBar from "$organisms/NavBar.svelte";
   import MainPage from "$organisms/MainPage.svelte";
+  import type { NeverRecord } from "$types/traits";
+
+  import "../app.css";
 
   type $$Slots = {
-    default: Record<string, never>;
+    default: NeverRecord;
   };
 
   const { isFullScreen } = setFullScreenContext();

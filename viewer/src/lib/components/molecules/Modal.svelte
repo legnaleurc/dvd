@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from "svelte";
 
-  import type { SvelteCustomEvents } from "$types/traits";
+  import type { NeverRecord, SvelteCustomEvents } from "$types/traits";
   import Icon from "$atoms/Icon.svelte";
   import IconButton from "$atoms/IconButton.svelte";
   import { useBodyScrolling, useMountedStore } from "$atoms/LifeCycle.svelte";
@@ -10,9 +10,9 @@
     hide: null;
   }>;
   type $$Slots = {
-    title: Record<string, never>;
-    body: Record<string, never>;
-    footer: Record<string, never>;
+    title: NeverRecord;
+    body: NeverRecord;
+    footer: NeverRecord;
   };
 
   export let show: boolean;

@@ -1,6 +1,9 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+
   import { beforeNavigate } from "$app/navigation";
 
+  import type { NeverRecord } from "$types/traits";
   import { setSelectionContext } from "$stores/selection";
   import { getFullScreenContext } from "$stores/fullscreen";
   import { setSearchContext } from "$stores/search";
@@ -10,10 +13,9 @@
   import TopBar from "./TopBar.svelte";
   import ResultList from "./ResultList.svelte";
   import DetailList from "./DetailList.svelte";
-  import { onMount } from "svelte";
 
   type $$Slots = {
-    default: Record<string, never>;
+    default: NeverRecord;
   };
 
   const { detailList } = setSearchContext();

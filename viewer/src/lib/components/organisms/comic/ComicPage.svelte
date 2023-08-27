@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
+  import type { NeverRecord } from "$types/traits";
   import { page } from "$app/stores";
   import { getComicContext } from "$stores/comic";
   import BookList from "./BookList.svelte";
   import ImageList from "./ImageList.svelte";
 
   type $$Slots = {
-    default: Record<string, never>;
+    default: NeverRecord;
   };
 
   const { idList, comicMap, openComic } = getComicContext();

@@ -1,14 +1,14 @@
 <script lang="ts">
   import { page } from "$app/stores";
 
-  import type { SvelteComponentModule } from "$types/traits";
+  import type { NeverRecord, SvelteComponentModule } from "$types/traits";
   import { setComicContext } from "$stores/comic";
   import { setVideoContext } from "$stores/video";
   import LazyLoad from "$atoms/LazyLoad.svelte";
   import LoadingBlock from "$atoms/LoadingBlock.svelte";
 
   type $$Slots = {
-    default: Record<string, never>;
+    default: NeverRecord;
   };
 
   setComicContext();

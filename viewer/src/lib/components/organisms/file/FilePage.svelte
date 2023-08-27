@@ -6,9 +6,10 @@
   import { setDisabledContext } from "$stores/disabled";
   import LazyLoad from "$atoms/LazyLoad.svelte";
   import LoadingBlock from "$atoms/LoadingBlock.svelte";
+  import type { NeverRecord } from "$types/traits";
 
   type $$Slots = {
-    default: Record<string, never>;
+    default: NeverRecord;
   };
 
   const { loadRootAndChildren } = setFileSystemContext();

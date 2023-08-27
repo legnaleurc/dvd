@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { SvelteComponentModule } from "$types/traits";
+  import type { NeverRecord, SvelteComponentModule } from "$types/traits";
 
   type $$Slots = {
-    pending: Record<string, never>;
-    fullfilled: Record<string, never>;
+    pending: NeverRecord;
+    fullfilled: NeverRecord;
   };
 
   export let lazy: () => Promise<SvelteComponentModule>;

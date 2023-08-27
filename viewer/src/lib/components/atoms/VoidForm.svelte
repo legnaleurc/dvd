@@ -1,6 +1,8 @@
 <script lang="ts">
+  import type { NeverRecord } from "$types/traits";
+
   type $$Slots = {
-    default: Record<string, never>;
+    default: NeverRecord;
   };
 </script>
 

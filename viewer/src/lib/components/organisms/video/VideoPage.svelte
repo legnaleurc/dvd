@@ -1,9 +1,11 @@
 <script lang="ts">
   import { page } from "$app/stores";
+
+  import type { NeverRecord } from "$types/traits";
   import VideoList from "./VideoList.svelte";
 
   type $$Slots = {
-    default: Record<string, never>;
+    default: NeverRecord;
   };
 
   $: isVideoRoute = $page.route.id === "/video/[videoId]";
