@@ -45,7 +45,9 @@
       border-radius: 50%;
 
       background-color: gray;
-      transition: background-color 250ms ease, left 250ms ease;
+      transition:
+        background-color 250ms ease,
+        left 250ms ease;
     }
 
     &:checked {
