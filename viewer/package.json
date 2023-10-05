@@ -24,7 +24,7 @@
     "eslint-plugin-svelte": "^2.32.4",
     "jsdom": "^22.1.0",
     "msw": "^1.0.0",
-    "postcss": "^8.4.12",
+    "postcss": "^8.4.31",
     "prettier": "^3.0.2",
     "prettier-plugin-svelte": "^3.0.3",
     "sass": "^1.50.0",
