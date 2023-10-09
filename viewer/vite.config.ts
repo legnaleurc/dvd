@@ -24,13 +24,6 @@ const config: UserConfig = {
     },
   },
   plugins: [sveltekit(), redirect({ "/": "/files" })],
-  test: {
-    server: {
-      deps: {
-        inline: ["msw"],
-      },
-    },
-  },
 };
 
 export default config;
