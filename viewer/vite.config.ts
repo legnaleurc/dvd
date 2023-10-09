@@ -30,7 +30,6 @@ const config: UserConfig = {
         inline: ["msw"],
       },
     },
-    setupFiles: ["./vitest.setup.ts"],
   },
 };
 
