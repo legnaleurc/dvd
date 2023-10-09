@@ -2,7 +2,7 @@ RM := rm -rf
 NPM := npm
 
 SRC_FILES := $(shell find src static -type f -print)
-CFG_FILES := vite.config.ts tsconfig.json svelte.config.js tailwind.config.cjs postcss.config.cjs
+CFG_FILES := vite.config.ts tsconfig.json svelte.config.js tailwind.config.ts postcss.config.cjs
 PKG_FILES := package.json package-lock.json
 OBJ_FILES := .svelte-kit
 ENV_DIR := node_modules
