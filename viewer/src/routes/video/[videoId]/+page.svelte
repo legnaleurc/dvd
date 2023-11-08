@@ -4,6 +4,9 @@
   import { page } from "$app/stores";
   import { getVideoContext } from "$stores/video";
   import { getStreamUrl } from "$tools/api";
+  import { callExternal } from "$tools/external";
+  import IconButton from "$atoms/IconButton.svelte";
+  import Icon from "$atoms/Icon.svelte";
 
   const { videoMap, openVideo } = getVideoContext();
 
@@ -16,6 +19,10 @@
   $: width = video?.width ?? 0;
   $: height = video?.height ?? 0;
 
+async function handleOpen() {
+  await callExternal(video.id, video.name, video.mimeType);
+}
+
   onMount(async () => {
     if (!video) {
       await openVideo(id);
@@ -25,10 +32,17 @@
 </script>
 
 <div class="w-full h-full flex flex-col">
-  <div
-    class="flex-0 p-3 whitespace-nowrap overflow-x-auto select-text bg-pale-900"
-  >
-    {name}
+  <div class="flex bg-pale-900">
+    <div
+      class="flex-1 p-3 whitespace-nowrap overflow-x-auto select-text"
+    >
+      {name}
+    </div>
+    <div class="flex-0 flex">
+      <IconButton on:click={handleOpen}>
+        <Icon name="open_in_new" />
+      </IconButton>
+    </div>
   </div>
   <div class="flex-1 flex flex-col justify-center items-center overflow-y-auto">
     {#if width && height && mimeType && url}
