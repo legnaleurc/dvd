@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 Pillow = "^10.0.1"
-aiohttp = "^3.8.5"
+aiohttp = "^3.8.6"
 wcpan-drive-core = "^3.0.0"
 wcpan-drive-crypt = "^3.0.0"
 wcpan-drive-google = "^8.0.0"
