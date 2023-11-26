@@ -15,6 +15,7 @@ wcpan-drive-google = "^8.0.0"
 wcpan-watchdog = "^1.0.0"
 wcpan-drive-cli = "^2.1.0"
 wcpan-logging = "^2.0.2"
+pillow-avif-plugin = "^1.4.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
