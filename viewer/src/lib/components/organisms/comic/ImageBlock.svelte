@@ -36,6 +36,7 @@
   {width}
   {height}
   src={srcUrl}
+  decoding="async"
   use:retry
   use:subscribeIntersection={{
     onIntersect: handleIntersect,
