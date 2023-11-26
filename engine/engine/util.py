@@ -15,6 +15,7 @@ from typing import Self, TypedDict
 from PIL import Image
 from wcpan.drive.core.drive import Drive
 from wcpan.drive.core.types import Node
+import pillow_avif
 
 
 class ImageDict(TypedDict):
