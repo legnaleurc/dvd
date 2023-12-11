@@ -1,5 +1,6 @@
 import abc
 import json
+from typing import Any
 
 from aiohttp.web import Response
 from aiohttp.web_exceptions import HTTPNoContent
@@ -74,7 +75,7 @@ class DestroyAPIMixin(PermissionMixin, abc.ABC):
         ...
 
 
-def json_response(data, status=200):
+def json_response(data: Any, status: int = 200):
     data = json.dumps(data)
     return Response(
         status=status,

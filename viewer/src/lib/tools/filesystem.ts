@@ -1,28 +1,25 @@
 import type { ChangeResponse, NodeResponse } from "$types/api";
 import type { Node_, NodeMap, ChildrenMap } from "$types/filesystem";
 
-function getParentId(rawNode: NodeResponse) {
+function getParentId(rawNode: NodeResponse): string {
   if (!rawNode) {
     return null;
   }
-  if (!rawNode.parent_list) {
+  if (!rawNode.parent_id) {
     return null;
   }
-  if (rawNode.parent_list.length < 1) {
-    return null;
-  }
-  return rawNode.parent_list[0];
+  return rawNode.parent_id;
 }
 
 export function createNode(rawNode: NodeResponse): Node_ {
   const node: Node_ = {
     id: rawNode.id,
     name: rawNode.name,
-    isFolder: rawNode.is_folder,
+    isFolder: rawNode.is_directory,
     parentId: getParentId(rawNode),
     mimeType: rawNode.mime_type,
-    category: rawNode.is_folder ? "folder" : rawNode.mime_type.split("/")[0],
-    modified: Date.parse(rawNode.modified),
+    category: rawNode.is_directory ? "folder" : rawNode.mime_type.split("/")[0],
+    modified: Date.parse(rawNode.mtime),
   };
   return node;
 }
@@ -36,7 +33,7 @@ export function applyChange(
     removeNode(nodeMap, childrenMap, change.id);
     return;
   }
-  if (change.node.trashed) {
+  if (change.node.is_trashed) {
     removeNode(nodeMap, childrenMap, change.node.id);
     return;
   }

@@ -16,7 +16,7 @@
   }
 
   function isFolderById(id: string) {
-    return $resultMap[id].is_folder;
+    return $resultMap[id].is_directory;
   }
 </script>
 

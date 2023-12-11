@@ -1,38 +1,39 @@
 import asyncio
-from contextlib import AsyncExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, MagicMock, patch
-from typing import cast
+from typing import cast, Any
+from datetime import datetime
 
 from aiohttp.test_utils import TestServer, TestClient
-from wcpan.drive.core.types import Node, NodeDict
+from wcpan.drive.core.types import Node
+from wcpan.drive.core.exceptions import NodeNotFoundError
 
 from engine.main import application_context
+from engine.util import dict_from_node
 
 
 class ApiTestCase(IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         await super().asyncSetUp()
-        async with AsyncExitStack() as stack:
-            static_path = stack.enter_context(TemporaryDirectory())
-            stack.enter_context(patch("engine.main.DriveFactory"))
-            app = await stack.enter_async_context(
-                application_context(
-                    port=9999,
-                    unpack_path="fake_unpack",
-                    static_path=static_path,
-                    token="1234",
-                )
+
+        static_path = self.enterContext(TemporaryDirectory())
+        self.enterContext(patch("engine.main.create_drive_from_config"))
+        app = await self.enterAsyncContext(
+            application_context(
+                port=9999,
+                unpack_path="fake_unpack",
+                drive_path="fake_drive",
+                static_path=static_path,
+                token="1234",
             )
-            client = await stack.enter_async_context(TestClient(TestServer(app)))
-            self._client = client
-            self._static_path = Path(static_path)
-            self._raii = stack.pop_all()
+        )
+        client = await self.enterAsyncContext(TestClient(TestServer(app)))
+        self._client = client
+        self._static_path = Path(static_path)
 
     async def asyncTearDown(self) -> None:
-        await self._raii.aclose()
         await super().asyncTearDown()
 
     async def testChangeList(self):
@@ -58,10 +59,10 @@ class ApiTestCase(IsolatedAsyncioTestCase):
     async def testGetRoot(self):
         assert self._client.app
 
-        expected = make_node_dict({})
+        expected = make_node({})
 
         drive = self._client.app["drive"]
-        drive.get_root_node.return_value = Node.from_dict(expected)
+        drive.get_root.return_value = expected
 
         rv = await self._client.get("/api/v1/nodes/root")
         self.assertEqual(rv.status, 401)
@@ -73,15 +74,15 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         )
         self.assertEqual(rv.status, 200)
         body = await rv.json()
-        self.assertEqual(body, expected)
+        self.assertEqual(body, dict_from_node(expected))
 
     async def testGetNode(self):
         assert self._client.app
 
-        expected = make_node_dict({})
+        expected = make_node({})
 
         drive = self._client.app["drive"]
-        drive.get_node_by_id.return_value = Node.from_dict(expected)
+        drive.get_node_by_id.return_value = expected
 
         rv = await self._client.get("/api/v1/nodes/1")
         self.assertEqual(rv.status, 401)
@@ -93,14 +94,14 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         )
         self.assertEqual(rv.status, 200)
         body = await rv.json()
-        self.assertEqual(body, expected)
+        self.assertEqual(body, dict_from_node(expected))
         drive.get_node_by_id.assert_called_once_with("1")
 
     async def testGetNodeWith404(self):
         assert self._client.app
 
         drive = self._client.app["drive"]
-        drive.get_node_by_id.return_value = None
+        drive.get_node_by_id.side_effect = NodeNotFoundError("1")
 
         rv = await self._client.get("/api/v1/nodes/1")
         self.assertEqual(rv.status, 401)
@@ -116,12 +117,10 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         assert self._client.app
 
         async def fake_get_node_by_id(id: str):
-            return Node.from_dict(
-                make_node_dict(
-                    {
-                        "id": id,
-                    }
-                )
+            return make_node(
+                {
+                    "id": id,
+                }
             )
 
         drive = self._client.app["drive"]
@@ -144,22 +143,20 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             },
         )
         self.assertEqual(rv.status, 204)
-        drive.rename_node.assert_called_once_with(
-            Node.from_dict(make_node_dict({"id": "1"})),
-            Node.from_dict(make_node_dict({"id": "2"})),
-            None,
+        drive.move.assert_called_once_with(
+            make_node({"id": "1"}),
+            new_parent=make_node({"id": "2"}),
+            new_name=None,
         )
 
     async def testRenameNode(self):
         assert self._client.app
 
         async def fake_get_node_by_id(id: str):
-            return Node.from_dict(
-                make_node_dict(
-                    {
-                        "id": id,
-                    }
-                )
+            return make_node(
+                {
+                    "id": id,
+                }
             )
 
         drive = self._client.app["drive"]
@@ -182,22 +179,20 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             },
         )
         self.assertEqual(rv.status, 204)
-        drive.rename_node.assert_called_once_with(
-            Node.from_dict(make_node_dict({"id": "1"})),
-            None,
-            "test",
+        drive.move.assert_called_once_with(
+            make_node({"id": "1"}),
+            new_parent=None,
+            new_name="test",
         )
 
     async def testTrashNode(self):
         assert self._client.app
 
         async def fake_get_node_by_id(id: str):
-            return Node.from_dict(
-                make_node_dict(
-                    {
-                        "id": id,
-                    }
-                )
+            return make_node(
+                {
+                    "id": id,
+                }
             )
 
         drive = self._client.app["drive"]
@@ -212,46 +207,37 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             },
         )
         self.assertEqual(rv.status, 204)
-        drive.trash_node.assert_called_once_with(
-            Node.from_dict(make_node_dict({"id": "1"})),
-        )
+        drive.move.assert_called_once_with(make_node({"id": "1"}), trashed=True)
 
     async def testImageListForFolders(self):
         assert self._client.app
 
         async def fake_get_node_by_id(id: str):
-            return Node.from_dict(
-                make_node_dict(
-                    {
-                        "id": id,
-                        "is_folder": True,
-                    }
-                )
+            return make_node(
+                {
+                    "id": id,
+                    "is_directory": True,
+                }
             )
 
         async def fake_walk(node: Node):
             yield node, [], [
-                Node.from_dict(
-                    make_node_dict(
-                        {
-                            "id": "2",
-                            "name": "image2",
-                            "mime_type": "image/png",
-                            "image": {
-                                "width": 640,
-                                "height": 480,
-                            },
-                        }
-                    )
+                make_node(
+                    {
+                        "id": "2",
+                        "name": "image2",
+                        "mime_type": "image/png",
+                        "is_image": True,
+                        "width": 640,
+                        "height": 480,
+                    }
                 ),
-                Node.from_dict(
-                    make_node_dict(
-                        {
-                            "id": "3",
-                            "name": "file3",
-                            "mime_type": "text/plain",
-                        }
-                    )
+                make_node(
+                    {
+                        "id": "3",
+                        "name": "file3",
+                        "mime_type": "text/plain",
+                    }
                 ),
             ]
 
@@ -283,17 +269,15 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         assert self._client.app
 
         async def fake_get_node_by_id(id: str):
-            return Node.from_dict(
-                make_node_dict(
-                    {
-                        "id": id,
-                        "is_folder": False,
-                    }
-                )
+            return make_node(
+                {
+                    "id": id,
+                    "is_directory": False,
+                }
             )
 
         ue = self._client.app["ue"]
-        tmp_path = ue._storage._tmp
+        tmp_path = ue._storage._path
         fake_process = AsyncMock()
         fake_process.communicate.return_value = None, None
         fake_process.returncode = 0
@@ -316,27 +300,32 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             "fake_unpack",
             "9999",
             "1",
-            tmp_path,
+            str(tmp_path),
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
 
 
-def make_node_dict(d):
-    rv = {
-        "id": "",
-        "name": "",
-        "trashed": False,
-        "created": "1900-01-01T00:00:00+00:00",
-        "modified": "1900-01-01T00:00:00+00:00",
-        "is_folder": False,
-        "mime_type": "",
-        "hash": "",
-        "size": 0,
-        "image": None,
-        "video": None,
-        "parent_list": [],
-        "private": None,
-    }
-    rv.update(d)
-    return cast(NodeDict, rv)
+def make_node(d: Any):
+    from dataclasses import replace
+
+    node = Node(
+        id="",
+        name="",
+        parent_id=None,
+        is_trashed=False,
+        is_directory=False,
+        ctime=datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+        mtime=datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+        mime_type="",
+        hash="",
+        size=0,
+        is_image=False,
+        is_video=False,
+        width=0,
+        height=0,
+        ms_duration=0,
+        private=None,
+    )
+    node = replace(node, **d)
+    return node

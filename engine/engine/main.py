@@ -4,12 +4,14 @@ from logging import captureWarnings, getLogger
 from logging.config import dictConfig
 import signal
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from aiohttp.web import Application, AppRunner, TCPSite
-from wcpan.drive.core.drive import DriveFactory
+from wcpan.drive.cli.lib import create_drive_from_config
 from wcpan.logging import ConfigBuilder
 
-from . import api, util, view, search
+from . import api, view, search
+from .util import create_unpack_engine
 
 
 class Daemon(object):
@@ -21,11 +23,12 @@ class Daemon(object):
             ConfigBuilder(path="/tmp/engine.log", rotate=True)
             .add("engine", level="D")
             .add("wcpan", level="I")
+            .add("aiohttp")
             .to_dict()
         )
         captureWarnings(True)
 
-    async def __call__(self, args):
+    async def __call__(self, args: list[str]):
         self._kwargs = parse_args(args[1:])
         self._finished = asyncio.Event()
         loop = asyncio.get_running_loop()
@@ -41,11 +44,16 @@ class Daemon(object):
         assert self._kwargs is not None
         port: int = self._kwargs.port
         unpack_path: str = self._kwargs.unpack
+        drive_path: str = self._kwargs.drive
         static_path: str = self._kwargs.static
         token: str = self._kwargs.token
 
         async with application_context(
-            port=port, unpack_path=unpack_path, static_path=static_path, token=token
+            port=port,
+            unpack_path=unpack_path,
+            drive_path=drive_path,
+            static_path=static_path,
+            token=token,
         ) as app, server_context(app, port):
             await self._until_finished()
 
@@ -60,23 +68,24 @@ class Daemon(object):
         self._finished.set()
 
 
-def parse_args(args):
+def parse_args(args: list[str]):
     parser = argparse.ArgumentParser("engine")
 
     parser.add_argument("-p", "--port", required=True, type=int)
     parser.add_argument("-u", "--unpack", required=True, type=str)
+    parser.add_argument("-d", "--drive", required=True, type=str)
     parser.add_argument("-s", "--static", type=str)
     parser.add_argument("-t", "--token", type=str, default="")
 
-    args = parser.parse_args(args)
-
-    return args
+    kwargs = parser.parse_args(args)
+    return kwargs
 
 
 @asynccontextmanager
 async def application_context(
     port: int,
     unpack_path: str,
+    drive_path: str,
     static_path: str,
     token: str,
 ):
@@ -91,11 +100,12 @@ async def application_context(
         setup_static_path(app, static_path)
 
     # drive
-    factory = DriveFactory()
-    factory.load_config()
+    config_path = Path(drive_path)
 
     # context
-    async with factory() as drive, util.UnpackEngine(drive, port, unpack_path) as ue:
+    async with create_drive_from_config(config_path) as drive, create_unpack_engine(
+        drive, port, unpack_path
+    ) as ue:
         app["drive"] = drive
         app["ue"] = ue
         app["se"] = search.SearchEngine(drive)

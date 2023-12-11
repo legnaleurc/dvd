@@ -12,24 +12,23 @@ from engine.main import application_context
 class ViewTestCase(IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         await super().asyncSetUp()
-        async with AsyncExitStack() as stack:
-            static_path = stack.enter_context(TemporaryDirectory())
-            stack.enter_context(patch("engine.main.DriveFactory"))
-            app = await stack.enter_async_context(
-                application_context(
-                    port=9999,
-                    unpack_path="",
-                    static_path=static_path,
-                    token="1234",
-                )
+
+        static_path = self.enterContext(TemporaryDirectory())
+        self.enterContext(patch("engine.main.create_drive_from_config"))
+        app = await self.enterAsyncContext(
+            application_context(
+                port=9999,
+                unpack_path="",
+                drive_path="drive_path",
+                static_path=static_path,
+                token="1234",
             )
-            client = await stack.enter_async_context(TestClient(TestServer(app)))
-            self._client = client
-            self._static_path = Path(static_path)
-            self._raii = stack.pop_all()
+        )
+        client = await self.enterAsyncContext(TestClient(TestServer(app)))
+        self._client = client
+        self._static_path = Path(static_path)
 
     async def asyncTearDown(self) -> None:
-        await self._raii.aclose()
         await super().asyncTearDown()
 
     async def testCorrectRoutes(self):

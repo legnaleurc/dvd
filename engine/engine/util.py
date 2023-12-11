@@ -1,21 +1,32 @@
 import asyncio
 from logging import getLogger
-import os
-import pathlib
 import re
 import shutil
-import tempfile
 import time
 from contextlib import AsyncExitStack, asynccontextmanager
 from itertools import zip_longest
 from mimetypes import guess_type
-from os.path import getsize, join as join_path
-from typing import Self, TypedDict
+from typing import Self, TypedDict, TypeGuard
+from tempfile import TemporaryDirectory
+from pathlib import Path
+from asyncio import Condition
 
 from PIL import Image
-from wcpan.drive.core.drive import Drive
-from wcpan.drive.core.types import Node
-import pillow_avif
+from wcpan.drive.core.types import Node, Drive, ChangeAction, UpdateAction
+from wcpan.drive.core.exceptions import NodeNotFoundError
+import pillow_avif as pillow_avif
+
+
+class NodeDict(TypedDict):
+    id: str
+    name: str
+    parent_id: str | None
+    is_trashed: bool
+    is_directory: bool
+    mtime: str
+    mime_type: str
+    hash: str
+    size: int
 
 
 class ImageDict(TypedDict):
@@ -34,41 +45,103 @@ class UnpackFailedError(Exception):
         return self._message
 
 
-class UnpackEngine(object):
-    def __init__(self, drive: Drive, port: int, unpack_path: str) -> None:
-        super(UnpackEngine, self).__init__()
-        # NOTE only takes a reference, not owning
+@asynccontextmanager
+async def create_storage_manager():
+    async with AsyncExitStack() as stack:
+        tmp = stack.enter_context(TemporaryDirectory())
+        path = Path(tmp)
+        storage = StorageManager(path)
+        await stack.enter_async_context(storage.watch())
+        yield storage
+
+
+class StorageManager(object):
+    def __init__(self, path: Path):
+        self._cache: dict[str, list[ImageDict]] = {}
+        self._path = path
+
+    def clear_cache(self):
+        self._cache = {}
+        for child in self._path.iterdir():
+            shutil.rmtree(str(child))
+
+    def get_cache(self, id_: str) -> list[ImageDict]:
+        return self._cache[id_]
+
+    def get_cache_or_none(self, id_: str) -> list[ImageDict] | None:
+        return self._cache.get(id_, None)
+
+    def set_cache(self, id_: str, manifest: list[ImageDict]) -> None:
+        self._cache[id_] = manifest
+
+    def get_path(self, id_: str) -> Path:
+        return self._path / id_
+
+    @property
+    def cache(self):
+        return self._cache
+
+    @property
+    def root_path(self) -> Path:
+        return self._path
+
+    @asynccontextmanager
+    async def watch(self):
+        task = asyncio.create_task(self._loop())
+        try:
+            yield
+        finally:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                task = None
+
+    def _check(self):
+        DAY = 60 * 60 * 24
+        now = time.time()
+        for child in self._path.iterdir():
+            s = child.stat()
+            d = now - s.st_mtime
+            getLogger(__name__).debug(f"check {child} ({d})")
+            if d > DAY:
+                shutil.rmtree(str(child))
+                del self._cache[child.name]
+                getLogger(__name__).info(f"prune {child} ({d})")
+
+    async def _loop(self):
+        while True:
+            await asyncio.sleep(60 * 60)
+            self._check()
+
+
+@asynccontextmanager
+async def create_unpack_engine(drive: Drive, port: int, unpack_path: str):
+    async with create_storage_manager() as storage:
+        yield UnpackEngine(drive, port, unpack_path, storage)
+
+
+class UnpackEngine:
+    def __init__(
+        self, drive: Drive, port: int, unpack_path: str, storage: StorageManager
+    ) -> None:
         self._drive = drive
         self._port = port
         self._unpack_path = unpack_path
-        self._unpacking: dict[str, asyncio.Condition] = {}
-        self._storage: StorageManager | None = None
-        self._raii: AsyncExitStack | None = None
-
-    async def __aenter__(self) -> Self:
-        async with AsyncExitStack() as stack:
-            self._storage = await stack.enter_async_context(StorageManager())
-            self._raii = stack.pop_all()
-        return self
-
-    async def __aexit__(self, exc, type_, tb):
-        assert self._raii is not None
-        await self._raii.aclose()
-        self._storage = None
-        self._raii = None
+        self._unpacking: dict[str, Condition] = {}
+        self._storage = storage
 
     async def get_manifest(self, node: Node) -> list[ImageDict]:
-        assert self._storage is not None
-        manifest = self._storage.get_cache_or_none(node.id_)
+        manifest = self._storage.get_cache_or_none(node.id)
         if manifest is not None:
             return manifest
 
-        if node.id_ in self._unpacking:
-            lock = self._unpacking[node.id_]
-            return await self._wait_for_result(lock, node.id_)
+        if node.id in self._unpacking:
+            lock = self._unpacking[node.id]
+            return await self._wait_for_result(lock, node.id)
 
-        lock = asyncio.Condition()
-        self._unpacking[node.id_] = lock
+        lock = Condition()
+        self._unpacking[node.id] = lock
         return await self._unpack(node)
 
     @property
@@ -82,13 +155,13 @@ class UnpackEngine(object):
 
     async def _unpack(self, node: Node) -> list[ImageDict]:
         assert self._storage is not None
-        lock = self._unpacking[node.id_]
+        lock = self._unpacking[node.id]
         try:
-            if node.is_folder:
+            if node.is_directory:
                 manifest = await self._unpack_remote(node)
             else:
-                manifest = await self._unpack_local(node.id_)
-            self._storage.set_cache(node.id_, manifest)
+                manifest = await self._unpack_local(node.id)
+            self._storage.set_cache(node.id, manifest)
             return manifest
         except UnpackFailedError:
             raise
@@ -96,7 +169,7 @@ class UnpackEngine(object):
             getLogger(__name__).exception("unpack failed, abort")
             raise UnpackFailedError(str(e)) from e
         finally:
-            del self._unpacking[node.id_]
+            del self._unpacking[node.id]
             async with lock:
                 lock.notify_all()
 
@@ -119,7 +192,7 @@ class UnpackEngine(object):
             self._unpack_path,
             str(self._port),
             node_id,
-            self._storage.root_path,
+            str(self._storage.root_path),
         ]
 
         getLogger(__name__).debug(" ".join(cmd))
@@ -129,7 +202,7 @@ class UnpackEngine(object):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-        out, err = await p.communicate()
+        _out, err = await p.communicate()
         if p.returncode != 0:
             raise UnpackFailedError(
                 f'unpack failed code: {p.returncode}\n\n{err.decode("utf-8")}'
@@ -140,12 +213,12 @@ class UnpackEngine(object):
         assert self._storage is not None
         rv: list[ImageDict] = []
         top = self._storage.get_path(node_id)
-        for dirpath, dirnames, filenames in os.walk(top):
+        for dirpath, dirnames, filenames in top.walk():
             dirnames.sort(key=FuzzyName)
             filenames.sort(key=FuzzyName)
             for filename in filenames:
-                path = join_path(dirpath, filename)
-                type_, encoding = guess_type(path)
+                path = dirpath / filename
+                type_, _encoding = guess_type(path)
                 if type_ is None:
                     continue
                 if not type_.startswith("image/"):
@@ -158,9 +231,9 @@ class UnpackEngine(object):
                 width, height = image.size
                 rv.append(
                     {
-                        "id": path,
+                        "id": str(path),
                         "type": type_,
-                        "size": getsize(path),
+                        "size": path.stat().st_size,
                         "width": width,
                         "height": height,
                     }
@@ -173,23 +246,23 @@ class UnpackEngine(object):
     async def _scan_remote(self, node: Node) -> list[ImageDict]:
         DEFAULT_MIME_TYPE = "application/octet-stream"
         rv: list[ImageDict] = []
-        async for root, folders, files in self._drive.walk(node):
+        async for _root, folders, files in self._drive.walk(node):
             folders.sort(key=lambda _: FuzzyName(_.name))
             files.sort(key=lambda _: FuzzyName(_.name))
             for f in files:
                 if not f.is_image:
                     continue
                 assert f.size is not None
-                assert f.image_width is not None
-                assert f.image_height is not None
-                type_ = DEFAULT_MIME_TYPE if f.mime_type is None else f.mime_type
+                assert f.width is not None
+                assert f.height is not None
+                type_ = DEFAULT_MIME_TYPE if not f.mime_type else f.mime_type
                 rv.append(
                     {
-                        "id": f.id_,
+                        "id": f.id,
                         "type": type_,
                         "size": f.size,
-                        "width": f.image_width,
-                        "height": f.image_height,
+                        "width": f.width,
+                        "height": f.height,
                     }
                 )
         return rv
@@ -219,91 +292,41 @@ class FuzzyName(object):
         return False
 
 
-class StorageManager(object):
-    def __init__(self):
-        self._cache: dict[str, list[ImageDict]] = {}
-        self._tmp: str | None = None
-        self._path: pathlib.Path | None = None
-        self._raii: AsyncExitStack | None = None
-
-    async def __aenter__(self) -> Self:
-        async with AsyncExitStack() as stack:
-            self._tmp = stack.enter_context(tempfile.TemporaryDirectory())
-            assert self._tmp is not None
-            self._path = pathlib.Path(self._tmp)
-            await stack.enter_async_context(self._watch())
-            self._raii = stack.pop_all()
-        return self
-
-    async def __aexit__(self, exc_type, exc_value, traceback):
-        assert self._raii is not None
-        await self._raii.aclose()
-        self._path = None
-        self._tmp = None
-        self._raii = None
-
-    def clear_cache(self):
-        assert self._path is not None
-        self._cache = {}
-        for child in self._path.iterdir():
-            shutil.rmtree(str(child))
-
-    def get_cache(self, id_: str) -> list[ImageDict]:
-        return self._cache[id_]
-
-    def get_cache_or_none(self, id_: str) -> list[ImageDict] | None:
-        return self._cache.get(id_, None)
-
-    def set_cache(self, id_: str, manifest: list[ImageDict]) -> None:
-        self._cache[id_] = manifest
-
-    def get_path(self, id_: str) -> str:
-        assert self._tmp is not None
-        return join_path(self._tmp, id_)
-
-    @property
-    def cache(self):
-        return self._cache
-
-    @property
-    def root_path(self) -> str:
-        if not self._tmp:
-            return ""
-        return self._tmp
-
-    @asynccontextmanager
-    async def _watch(self):
-        task = asyncio.create_task(self._loop())
-        try:
-            yield
-        finally:
-            task.cancel()
-            try:
-                await task
-            except asyncio.CancelledError:
-                task = None
-
-    def _check(self):
-        assert self._path is not None
-        DAY = 60 * 60 * 24
-        now = time.time()
-        for child in self._path.iterdir():
-            s = child.stat()
-            d = now - s.st_mtime
-            getLogger(__name__).debug(f"check {child} ({d})")
-            if d > DAY:
-                shutil.rmtree(str(child))
-                del self._cache[child.name]
-                getLogger(__name__).info(f"prune {child} ({d})")
-
-    async def _loop(self):
-        while True:
-            await asyncio.sleep(60 * 60)
-            self._check()
-
-
 async def get_node(drive: Drive, id_or_root: str) -> Node | None:
-    if id_or_root == "root":
-        return await drive.get_root_node()
-    else:
-        return await drive.get_node_by_id(id_or_root)
+    try:
+        if id_or_root == "root":
+            return await drive.get_root()
+        else:
+            return await drive.get_node_by_id(id_or_root)
+    except NodeNotFoundError:
+        return None
+
+
+def dict_from_node(node: Node) -> NodeDict:
+    return {
+        "id": node.id,
+        "name": node.name,
+        "parent_id": node.parent_id,
+        "is_trashed": node.is_trashed,
+        "is_directory": node.is_directory,
+        "mtime": node.mtime.isoformat(),
+        "mime_type": node.mime_type,
+        "hash": node.hash,
+        "size": node.size,
+    }
+
+
+def is_update_change(change: ChangeAction) -> TypeGuard[UpdateAction]:
+    return not change[0]
+
+
+def dict_from_change(change: ChangeAction):
+    if is_update_change(change):
+        return {
+            "removed": change[0],
+            "node": dict_from_node(change[1]),
+        }
+    return {
+        "removed": change[0],
+        "id": change[1],
+    }

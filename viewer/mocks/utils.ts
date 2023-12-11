@@ -70,12 +70,12 @@ function toResponse(
 ): NodeResponse {
   return {
     id,
-    parent_list: [parentId],
-    is_folder: isFolder,
+    parent_id: parentId,
+    is_directory: isFolder,
     name: optional?.name ?? id,
     mime_type: isFolder ? null : "text/plain",
-    modified: "",
-    trashed: optional?.trashed ?? false,
+    mtime: "",
+    is_trashed: optional?.trashed ?? false,
   };
 }
 
@@ -98,11 +98,11 @@ export function fileResponse(
 export function rootResponse(): NodeResponse {
   return {
     id: "__ROOT__",
-    parent_list: [],
+    parent_id: null,
     name: null,
-    is_folder: true,
+    is_directory: true,
     mime_type: null,
-    modified: "",
-    trashed: false,
+    mtime: "",
+    is_trashed: false,
   };
 }

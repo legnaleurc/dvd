@@ -5,9 +5,11 @@ import re
 from asyncio import Condition
 from dataclasses import dataclass
 from typing import AsyncGenerator, Callable, cast
+from pathlib import PurePath
 
-from wcpan.drive.core.drive import Drive
-from wcpan.drive.core.types import Node, NodeDict
+from wcpan.drive.core.types import Node, Drive
+
+from .util import NodeDict, dict_from_node
 
 
 class SearchNodeDict(NodeDict):
@@ -69,7 +71,7 @@ class SearchEngine(object):
 
     async def clear_cache(self) -> None:
         while len(self._searching) > 0:
-            pattern, lock = next(iter(self._searching.items()))
+            _pattern, lock = next(iter(self._searching.items()))
             async with lock:
                 await lock.wait()
         self._cache = {}
@@ -95,7 +97,7 @@ class SearchEngine(object):
         self._searching[param] = lock
         try:
             nodes = await self._pure_search(param)
-            g = (_ for _ in nodes if not _.trashed)
+            g = (_ for _ in nodes if not _.is_trashed)
             h = (self._make_item(_) for _ in g)
             results: list[SearchNodeDict] = await asyncio.gather(*h)
             nodes = sorted(results, key=lambda _: (_["parent_path"], _["name"]))
@@ -113,8 +115,8 @@ class SearchEngine(object):
         assert node.parent_id
         parent_node = await self._drive.get_node_by_id(node.parent_id)
         assert parent_node
-        parent_path = await self._drive.get_path(parent_node)
-        rv = cast(SearchNodeDict, node.to_dict())
+        parent_path = await self._drive.resolve_path(parent_node)
+        rv = cast(SearchNodeDict, dict_from_node(node))
         rv["parent_path"] = str(parent_path)
         return rv
 
@@ -125,7 +127,7 @@ class SearchEngine(object):
         size = param.size
 
         if parent_path:
-            parent_node = await self._drive.get_node_by_path(parent_path)
+            parent_node = await self._drive.get_node_by_path(PurePath(parent_path))
         else:
             parent_node = None
 
@@ -155,9 +157,9 @@ class SearchEngine(object):
 
         if size is not None:
             if size >= 0:
-                g = filter(lambda n: n.size is not None and n.size >= size, node_list)
+                g = filter(lambda n: n.size >= size, node_list)
             else:
-                g = filter(lambda n: n.size is not None and n.size <= size, node_list)
+                g = filter(lambda n: n.size <= size, node_list)
             node_list = list(g)
 
         return node_list

@@ -1,11 +1,11 @@
 export interface NodeResponse {
   id: string;
   name: string;
-  parent_list: string[];
-  modified: string;
+  parent_id: string | null;
+  mtime: string;
   mime_type: string;
-  is_folder: boolean;
-  trashed: boolean;
+  is_directory: boolean;
+  is_trashed: boolean;
 }
 
 export interface SearchResponse extends NodeResponse {

@@ -31,7 +31,7 @@
       <div class="font-mono">{result.id}</div>
       <div class="font-mono">{result.hash}</div>
       <div class="font-mono">{result.size}</div>
-      <div class="font-mono">{result.modified}</div>
+      <div class="font-mono">{result.mtime}</div>
     {/if}
   </div>
 </ListItem>

@@ -15,7 +15,7 @@ from aiohttp.web_exceptions import (
     HTTPUnauthorized,
 )
 from multidict import MultiDictProxy
-from wcpan.drive.core.drive import Drive
+from wcpan.drive.core.types import Drive
 
 from .mixins import NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin
 from .rest import (
@@ -35,6 +35,8 @@ from .util import (
     UnpackEngine,
     UnpackFailedError,
     get_node,
+    dict_from_node,
+    dict_from_change,
 )
 
 
@@ -48,7 +50,7 @@ class NodeView(
 ):
     async def retrive(self):
         node = await self.get_object()
-        return node.to_dict()
+        return dict_from_node(node)
 
     async def partial_update(self):
         node = await self.get_object()
@@ -73,17 +75,17 @@ class NodeView(
                 parent_node = await drive.get_node_by_path(kwargs["parent_path"])
             if "name" in kwargs:
                 name = kwargs["name"]
-            await drive.rename_node(node, parent_node, name)
+            await drive.move(node, new_parent=parent_node, new_name=name)
         raise HTTPNoContent()
 
     async def destory(self):
         node = await self.get_object()
-        getLogger(__name__).info(f"trash {node.id_} {node.name}")
+        getLogger(__name__).info(f"trash {node.id} {node.name}")
         drive: Drive = self.request.app["drive"]
         se: SearchEngine = self.request.app["se"]
-        path = await drive.get_path(node)
+        path = await drive.resolve_path(node)
         se.drop_value(str(path))
-        await drive.trash_node(node)
+        await drive.move(node, trashed=True)
 
 
 class NodeListView(HasTokenMixin, ListAPIMixin, CreateAPIMixin, View):
@@ -137,12 +139,12 @@ class NodeListView(HasTokenMixin, ListAPIMixin, CreateAPIMixin, View):
             raise HTTPBadRequest()
 
         try:
-            node = await drive.create_folder(
-                parent_node=parent,
-                folder_name=name,
+            node = await drive.create_directory(
+                name,
+                parent,
                 exist_ok=False,
             )
-            return node.to_dict()
+            return dict_from_node(node)
         except Exception as e:
             getLogger(__name__).exception(
                 f"failed to create folder, name: {name}, parent_id: {parent_id}"
@@ -155,15 +157,15 @@ class NodeChildrenView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
         node = await self.get_object()
         drive: Drive = self.request.app["drive"]
         children = await drive.get_children(node)
-        children = filter(lambda _: not _.trashed, children)
-        children = [_.to_dict() for _ in children]
+        children = filter(lambda _: not _.is_trashed, children)
+        children = [dict_from_node(_) for _ in children]
         return children
 
 
 class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
     async def head(self):
         node = await self.get_object()
-        if node.is_folder:
+        if node.is_directory:
             raise HTTPBadRequest()
 
         response = await self.create_response()
@@ -173,7 +175,7 @@ class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
 
     async def get(self):
         node = await self.get_object()
-        if node.is_folder:
+        if node.is_directory:
             raise HTTPBadRequest()
 
         response = await self.create_response()
@@ -185,7 +187,7 @@ class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
 class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, View):
     async def get(self):
         node = await self.get_object()
-        if node.is_folder:
+        if node.is_directory:
             raise HTTPBadRequest()
 
         response = await self.create_response()
@@ -247,14 +249,14 @@ class NodeImageView(NodeObjectMixin, View):
         response.content_length = data["size"]
 
         await response.prepare(self.request)
-        if node.is_folder:
+        if node.is_directory:
             child = await get_node(drive, data["id"])
             if not child:
                 getLogger(__name__).error(
                     f"tried to find child {data['id']} but not found"
                 )
                 raise HTTPInternalServerError()
-            async with await drive.download(child) as stream:
+            async with drive.download_file(child) as stream:
                 async for chunk in stream:
                     await response.write(chunk)
         else:
@@ -275,34 +277,35 @@ class NodeVideoListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
         if node.is_video:
             if not node.parent_id:
                 return []
-            path = await drive.get_path_by_id(node.parent_id)
+            path = await drive.resolve_path(node)
+            path = path.parent
             return [
                 {
-                    "id": node.id_,
+                    "id": node.id,
                     "name": node.name,
                     "mime_type": node.mime_type,
-                    "width": node.video_width,
-                    "height": node.video_height,
+                    "width": node.width,
+                    "height": node.height,
                     "path": str(path),
                 }
             ]
 
-        if node.is_file:
+        if not node.is_directory:
             return []
 
         manifest = []
         async for _root, _folders, files in drive.walk(node):
-            path = await drive.get_path(_root)
+            path = await drive.resolve_path(_root)
             for f in files:
                 if not f.is_video:
                     continue
                 manifest.append(
                     {
-                        "id": f.id_,
+                        "id": f.id,
                         "name": f.name,
                         "mime_type": f.mime_type,
-                        "width": f.video_width,
-                        "height": f.video_height,
+                        "width": f.width,
+                        "height": f.height,
                         "path": str(path),
                     }
                 )
@@ -318,7 +321,7 @@ class ChangesView(HasTokenMixin, View):
         drive: Drive = self.request.app["drive"]
         se: SearchEngine = self.request.app["se"]
         await se.clear_cache()
-        changes = [_ async for _ in drive.sync()]
+        changes = [dict_from_change(_) async for _ in drive.sync()]
         return json_response(changes)
 
 
