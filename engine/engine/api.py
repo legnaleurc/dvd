@@ -3,6 +3,7 @@ import json
 from logging import getLogger
 import shlex
 from typing import Any, Iterable, Type, TypeVar
+from pathlib import PurePath
 
 from aiohttp.web import StreamResponse, View
 from aiohttp.web_exceptions import (
@@ -72,7 +73,8 @@ class NodeView(
             if "parent_id" in kwargs:
                 parent_node = await drive.get_node_by_id(kwargs["parent_id"])
             if "parent_path" in kwargs:
-                parent_node = await drive.get_node_by_path(kwargs["parent_path"])
+                parent_path = PurePath(kwargs["parent_path"])
+                parent_node = await drive.get_node_by_path(parent_path)
             if "name" in kwargs:
                 name = kwargs["name"]
             await drive.move(node, new_parent=parent_node, new_name=name)
