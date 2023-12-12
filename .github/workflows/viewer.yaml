@@ -2,9 +2,11 @@ name: viewer CI
 
 on:
   push:
-    branches: [ master, develop ]
+    paths:
+      - 'viewer/**'
   pull_request:
-    branches: [ master, develop ]
+    paths:
+      - 'viewer/**'
 
 jobs:
   test:

@@ -2,9 +2,11 @@ name: engine CI
 
 on:
   push:
-    branches: [ master, develop ]
+    paths:
+      - 'engine/**'
   pull_request:
-    branches: [ master, develop ]
+    paths:
+      - 'engine/**'
 
 jobs:
   test:
