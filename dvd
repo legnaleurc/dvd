@@ -36,7 +36,7 @@ async def main(args: list[str] | None = None):
     private_listen: int = kwargs.private_listen
     token: str = kwargs.token
 
-    drive_path = Path(drive).absolute()
+    drive_path = Path(drive).expanduser().absolute()
 
     try:
         if not debug:
