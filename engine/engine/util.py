@@ -6,14 +6,15 @@ import time
 from contextlib import AsyncExitStack, asynccontextmanager
 from itertools import zip_longest
 from mimetypes import guess_type
-from typing import Self, TypedDict, TypeGuard
+from typing import Self, TypedDict
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from asyncio import Condition
 
 from PIL import Image
-from wcpan.drive.core.types import Node, Drive, ChangeAction, UpdateAction
+from wcpan.drive.core.types import Node, Drive, ChangeAction
 from wcpan.drive.core.exceptions import NodeNotFoundError
+from wcpan.drive.core.lib import dispatch_change
 import pillow_avif as pillow_avif
 
 
@@ -316,17 +317,15 @@ def dict_from_node(node: Node) -> NodeDict:
     }
 
 
-def is_update_change(change: ChangeAction) -> TypeGuard[UpdateAction]:
-    return not change[0]
-
-
 def dict_from_change(change: ChangeAction):
-    if is_update_change(change):
-        return {
-            "removed": change[0],
-            "node": dict_from_node(change[1]),
-        }
-    return {
-        "removed": change[0],
-        "id": change[1],
-    }
+    return dispatch_change(
+        change,
+        on_remove=lambda _: {
+            "removed": True,
+            "id": _,
+        },
+        on_update=lambda _: {
+            "removed": False,
+            "node": dict_from_node(_),
+        },
+    )
