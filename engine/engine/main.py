@@ -23,7 +23,6 @@ class Daemon(object):
             ConfigBuilder(path="/tmp/engine.log", rotate=True)
             .add("engine", level="D")
             .add("wcpan", level="I")
-            .add("aiohttp")
             .to_dict()
         )
         captureWarnings(True)
