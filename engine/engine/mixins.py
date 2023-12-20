@@ -82,11 +82,19 @@ class NodeRandomAccessMixin(AbstractView):
             await stream.seek(offset)
             async for chunk in stream:
                 if len(chunk) < length:
-                    await response.write(chunk)
+                    try:
+                        await response.write(chunk)
+                    except ConnectionResetError:
+                        # client closed
+                        break
                     length -= len(chunk)
                 else:
                     chunk = chunk[:length]
-                    await response.write(chunk)
+                    try:
+                        await response.write(chunk)
+                    except ConnectionResetError:
+                        # client closed
+                        break
                     break
 
 
