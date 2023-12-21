@@ -683,13 +683,13 @@ wcpan-drive-core = ">=4.1.0,<5.0.0"
 
 [[package]]
 name = "wcpan-drive-google"
-version = "9.1.6"
+version = "9.1.7"
 description = "Google Drive driver for wcpan.drive"
 optional = false
 python-versions = ">=3.12,<4.0"
 files = [
-    {file = "wcpan_drive_google-9.1.6-py3-none-any.whl", hash = "sha256:d6ca82e40d7ddd54206494c54e43526c622c940f6bd8bea812663c8d8338279f"},
-    {file = "wcpan_drive_google-9.1.6.tar.gz", hash = "sha256:fc68a527da33ea7daab99dd6935cd7946ea5f53c11de355aee174c567e95711c"},
+    {file = "wcpan_drive_google-9.1.7-py3-none-any.whl", hash = "sha256:35b8416944600c46c4a47c7df166a92979e7cf4970f1916211d402e1e2f0a539"},
+    {file = "wcpan_drive_google-9.1.7.tar.gz", hash = "sha256:3aeeb493c96a68d22e706f01093f1d3e96d49415ce480e2f7d019542a09d0292"},
 ]
 
 [package.dependencies]
@@ -698,18 +698,18 @@ wcpan-drive-core = ">=4.1.0,<5.0.0"
 
 [[package]]
 name = "wcpan-drive-sqlite"
-version = "1.0.2"
+version = "1.0.3"
 description = "sqlite3 snapshot service for wcpan.drive"
 optional = false
 python-versions = ">=3.12,<4.0"
 files = [
-    {file = "wcpan_drive_sqlite-1.0.2-py3-none-any.whl", hash = "sha256:061d6ec20c24993bbb57d9b5263e8d352a6b333e2d03f1f425f9decad3e6de4f"},
-    {file = "wcpan_drive_sqlite-1.0.2.tar.gz", hash = "sha256:b71cb623f8a41cc951e7ea79d4d70d6615f3b0c1fab0b1909cb1e6afa4b63b20"},
+    {file = "wcpan_drive_sqlite-1.0.3-py3-none-any.whl", hash = "sha256:b45e20d14a66dffe09fbea11c96286a327c4f5c6b2ec87da42d83f15be86b7e5"},
+    {file = "wcpan_drive_sqlite-1.0.3.tar.gz", hash = "sha256:9df85e81a0586202d9e081597573ac7f5df3af52343bc4a9de0b7b99a3ff22b9"},
 ]
 
 [package.dependencies]
 aiosqlite = ">=0.19.0,<0.20.0"
-wcpan-drive-core = ">=4.0.0,<5.0.0"
+wcpan-drive-core = ">=4.1.0,<5.0.0"
 
 [[package]]
 name = "wcpan-logging"
@@ -834,4 +834,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "7311dbee02cbcd4c4198b3a66c0a6ff5b212f7e44a98c5cec88d6d525207fb9b"
+content-hash = "1bdabb35afe6e1d7ff22526f4430bc376208d1520b3c7a3c8b5a88af8392106c"
