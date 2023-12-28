@@ -15,27 +15,27 @@ class PermissionMixin(metaclass=ABCMeta):
         ...
 
 
-class RetriveAPIMixin(PermissionMixin, metaclass=ABCMeta):
-    async def get(self):
+class RetriveAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
+    async def get(self) -> Response:
         if not await self.has_permission():
             await self.raise_permission_error()
         rv = await self.retrive()
         return json_response(rv, status=200)
 
     @abstractmethod
-    async def retrive(self):
+    async def retrive(self) -> T:
         ...
 
 
-class ListAPIMixin(PermissionMixin, metaclass=ABCMeta):
-    async def get(self):
+class ListAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
+    async def get(self) -> Response:
         if not await self.has_permission():
             await self.raise_permission_error()
         rv = await self.list_()
         return json_response(rv, status=200)
 
     @abstractmethod
-    async def list_(self):
+    async def list_(self) -> list[T]:
         ...
 
 
@@ -51,15 +51,15 @@ class PartialUpdateAPIMixin(PermissionMixin, metaclass=ABCMeta):
         ...
 
 
-class CreateAPIMixin(PermissionMixin, metaclass=ABCMeta):
-    async def post(self):
+class CreateAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
+    async def post(self) -> Response:
         if not await self.has_permission():
             await self.raise_permission_error()
         rv = await self.create()
         return json_response(rv, status=201)
 
     @abstractmethod
-    async def create(self):
+    async def create(self) -> T:
         ...
 
 

@@ -2,7 +2,7 @@ import asyncio
 import json
 from logging import getLogger
 import shlex
-from typing import Any, Iterable, Type, TypeVar
+from typing import Any, Iterable, Type
 from pathlib import PurePath
 
 from aiohttp.web import StreamResponse, View
@@ -15,7 +15,7 @@ from aiohttp.web_exceptions import (
     HTTPServiceUnavailable,
     HTTPUnauthorized,
 )
-from multidict import MultiDictProxy
+from multidict import MultiMapping
 from wcpan.drive.core.types import Drive
 
 from .mixins import NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin
@@ -31,20 +31,23 @@ from .search import (
     InvalidPatternError,
     SearchEngine,
     SearchFailedError,
+    SearchNodeDict,
 )
 from .util import (
+    NodeDict,
     UnpackEngine,
     UnpackFailedError,
     get_node,
     dict_from_node,
     dict_from_change,
 )
+from .types import ImageSizeDict, VideoSizeDict, ImageListCacheDict
 
 
 class NodeView(
     NodeObjectMixin,
     HasTokenMixin,
-    RetriveAPIMixin,
+    RetriveAPIMixin[NodeDict],
     PartialUpdateAPIMixin,
     DestroyAPIMixin,
     View,
@@ -90,7 +93,9 @@ class NodeView(
         await drive.move(node, trashed=True)
 
 
-class NodeListView(HasTokenMixin, ListAPIMixin, CreateAPIMixin, View):
+class NodeListView(
+    HasTokenMixin, ListAPIMixin[SearchNodeDict], CreateAPIMixin[NodeDict], View
+):
     async def list_(self):
         # node name
         name = get_query_variable(self.request.query, str, "name")
@@ -154,7 +159,7 @@ class NodeListView(HasTokenMixin, ListAPIMixin, CreateAPIMixin, View):
             raise HTTPConflict() from e
 
 
-class NodeChildrenView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
+class NodeChildrenView(NodeObjectMixin, HasTokenMixin, ListAPIMixin[NodeDict], View):
     async def list_(self):
         node = await self.get_object()
         drive: Drive = self.request.app["drive"]
@@ -199,8 +204,10 @@ class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, View):
         return response
 
 
-class NodeImageListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
-    async def list_(self):
+class NodeImageListView(
+    NodeObjectMixin, HasTokenMixin, ListAPIMixin[ImageSizeDict], View
+):
+    async def list_(self) -> list[ImageSizeDict]:
         node = await self.get_object()
 
         ue: UnpackEngine = self.request.app["ue"]
@@ -216,14 +223,13 @@ class NodeImageListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
                 )
             )
 
-        manifest = [
+        return [
             {
                 "width": _["width"],
                 "height": _["height"],
             }
             for _ in manifest
         ]
-        return manifest
 
 
 class NodeImageView(NodeObjectMixin, View):
@@ -271,8 +277,10 @@ class NodeImageView(NodeObjectMixin, View):
         return response
 
 
-class NodeVideoListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
-    async def list_(self):
+class NodeVideoListView(
+    NodeObjectMixin, HasTokenMixin, ListAPIMixin[VideoSizeDict], View
+):
+    async def list_(self) -> list[VideoSizeDict]:
         node = await self.get_object()
         drive: Drive = self.request.app["drive"]
 
@@ -295,7 +303,7 @@ class NodeVideoListView(NodeObjectMixin, HasTokenMixin, ListAPIMixin, View):
         if not node.is_directory:
             return []
 
-        manifest = []
+        manifest: list[VideoSizeDict] = []
         async for _root, _folders, files in drive.walk(node):
             path = await drive.resolve_path(_root)
             for f in files:
@@ -345,28 +353,27 @@ class ApplyView(HasTokenMixin, View):
         raise HTTPNoContent
 
 
-class CacheView(HasTokenMixin, ListAPIMixin, DestroyAPIMixin, View):
-    async def list_(self):
+class CacheView(HasTokenMixin, ListAPIMixin[ImageListCacheDict], DestroyAPIMixin, View):
+    async def list_(self) -> list[ImageListCacheDict]:
         ue: UnpackEngine = self.request.app["ue"]
         drive: Drive = self.request.app["drive"]
         cache = ue.cache
         node_list = (drive.get_node_by_id(_) for _ in cache.keys())
         node_list = await asyncio.gather(*node_list)
-        rv = [
+        return [
             {
-                "id": _.id_,
+                "id": _.id,
                 "name": _.name,
                 "image_list": [
                     {
                         "width": __["width"],
                         "height": __["height"],
                     }
-                    for __ in cache[_.id_]
+                    for __ in cache[_.id]
                 ],
             }
             for _ in node_list
         ]
-        return rv
 
     async def destory(self):
         ue: UnpackEngine = self.request.app["ue"]
@@ -378,12 +385,9 @@ def unpack_dict(d: dict[str, Any], keys: Iterable[str]) -> dict[str, Any]:
     return {key: d[key] for key in common_keys}
 
 
-T = TypeVar("T")
-
-
-def get_query_variable(
-    query: MultiDictProxy[str], type_: Type[T], key: str
-) -> T | None:
+def get_query_variable[
+    T
+](query: MultiMapping[str], type_: Type[T], key: str) -> T | None:
     value = query.get(key, None)
     if value is None:
         return None
