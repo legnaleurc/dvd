@@ -1,8 +1,7 @@
-import asyncio
 import itertools
 from logging import getLogger
 import re
-from asyncio import Condition
+from asyncio import Condition, as_completed
 from dataclasses import dataclass
 from typing import AsyncGenerator, Callable, cast
 from pathlib import PurePath
@@ -98,8 +97,8 @@ class SearchEngine(object):
         try:
             nodes = await self._pure_search(param)
             g = (_ for _ in nodes if not _.is_trashed)
-            h = (self._make_item(_) for _ in g)
-            results: list[SearchNodeDict] = await asyncio.gather(*h)
+            g = as_completed(self._make_item(_) for _ in g)
+            results = [await _ for _ in g]
             nodes = sorted(results, key=lambda _: (_["parent_path"], _["name"]))
             self._cache[param] = nodes
             return nodes

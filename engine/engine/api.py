@@ -4,6 +4,7 @@ from logging import getLogger
 import shlex
 from typing import Any, Iterable, Type
 from pathlib import PurePath
+from asyncio import as_completed
 
 from aiohttp.web import StreamResponse, View
 from aiohttp.web_exceptions import (
@@ -345,8 +346,7 @@ class ApplyView(HasTokenMixin, View):
         kwargs = kwargs["kwargs"]
 
         command = shlex.split(command)
-        command = (_.format(**kwargs) for _ in command)
-        command = list(command)
+        command = [_.format(**kwargs) for _ in command]
         p = await asyncio.create_subprocess_exec(*command)
         await p.communicate()
         assert p.returncode == 0
@@ -358,8 +358,8 @@ class CacheView(HasTokenMixin, ListAPIMixin[ImageListCacheDict], DestroyAPIMixin
         ue: UnpackEngine = self.request.app["ue"]
         drive: Drive = self.request.app["drive"]
         cache = ue.cache
-        node_list = (drive.get_node_by_id(_) for _ in cache.keys())
-        node_list = await asyncio.gather(*node_list)
+        node_list = as_completed(drive.get_node_by_id(_) for _ in cache.keys())
+        node_list = [await _ for _ in node_list]
         return [
             {
                 "id": _.id,
