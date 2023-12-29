@@ -1,7 +1,7 @@
-import { rest } from "msw";
+import { http, HttpResponse } from "msw";
 
 import type { VideoResponse } from "$types/api";
-import { assertIsString } from "./utils";
+import { assertIsString, status404 } from "./utils";
 
 const TABLE: Record<string, VideoResponse[]> = {
   __NORMAL__: [
@@ -17,12 +17,12 @@ const TABLE: Record<string, VideoResponse[]> = {
 };
 
 export const handlers = [
-  rest.get("/api/v1/nodes/:id/videos", (req, res, ctx) => {
-    const { id } = req.params;
+  http.get("/api/v1/nodes/:id/videos", ({ params }) => {
+    const { id } = params;
     assertIsString(id);
     if (!TABLE[id]) {
-      return res(ctx.status(404));
+      return status404();
     }
-    return res(ctx.status(200), ctx.json(TABLE[id]));
+    return HttpResponse.json(TABLE[id]);
   }),
 ];

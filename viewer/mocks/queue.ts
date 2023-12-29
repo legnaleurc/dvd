@@ -1,30 +1,32 @@
-import { rest } from "msw";
-import { assertIsString, folderResponse } from "./utils";
+import { http, HttpResponse } from "msw";
+
+import { assertIsString, folderResponse, status204, status404 } from "./utils";
 
 const VALID_ID = new Set(["a", "b", "c"]);
 
 export const handlers = [
-  rest.patch("/api/v1/nodes/:id", (req, res, ctx) => {
-    const { id } = req.params;
+  http.patch("/api/v1/nodes/:id", ({ params }) => {
+    const { id } = params;
     assertIsString(id);
     if (VALID_ID.has(id)) {
-      return res(ctx.status(204));
+      return status204();
     } else {
-      return res(ctx.status(404));
+      return status404();
     }
   }),
-  rest.delete("/api/v1/nodes/:id", (req, res, ctx) => {
-    const { id } = req.params;
+  http.delete("/api/v1/nodes/:id", ({ params }) => {
+    const { id } = params;
     assertIsString(id);
     if (VALID_ID.has(id)) {
-      return res(ctx.status(204));
+      return status204();
     } else {
-      return res(ctx.status(404));
+      return status404();
     }
   }),
-  rest.get("/api/v1/nodes", (req, res, ctx) => {
-    const path = req.url.searchParams.get("path");
+  http.get("/api/v1/nodes", ({ request }) => {
+    const url = new URL(request.url);
+    const path = url.searchParams.get("path");
     assertIsString(path);
-    return res(ctx.status(200), ctx.json([folderResponse(path, "__ROOT__")]));
+    return HttpResponse.json([folderResponse(path, "__ROOT__")]);
   }),
 ];

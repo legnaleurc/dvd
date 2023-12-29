@@ -1,7 +1,7 @@
-import { rest } from "msw";
+import { http, HttpResponse } from "msw";
 
 import type { ImageResponse } from "$types/api";
-import { assertIsString, folderResponse } from "./utils";
+import { assertIsString, folderResponse, status204 } from "./utils";
 
 const TABLE: Record<string, ImageResponse[]> = {
   __NORMAL__: [
@@ -13,29 +13,26 @@ const TABLE: Record<string, ImageResponse[]> = {
 };
 
 export const handlers = [
-  rest.get("/api/v1/nodes/:id/images", (req, res, ctx) => {
-    const { id } = req.params;
+  http.get("/api/v1/nodes/:id/images", ({ params }) => {
+    const { id } = params;
     assertIsString(id);
-    return res(ctx.status(200), ctx.json(TABLE[id]));
+    return HttpResponse.json(TABLE[id]);
   }),
-  rest.get("/api/v1/nodes/:id", (req, res, ctx) => {
-    const { id } = req.params;
+  http.get("/api/v1/nodes/:id", ({ params }) => {
+    const { id } = params;
     assertIsString(id);
-    return res(ctx.status(200), ctx.json(folderResponse(id, "__ROOT__")));
+    return HttpResponse.json(folderResponse(id, "__ROOT__"));
   }),
-  rest.get("/api/v1/cache", (_req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json([
-        {
-          id: "__NORMAL__",
-          name: "__NORMAL__",
-          image_list: TABLE["__NORMAL__"],
-        },
-      ]),
-    );
+  http.get("/api/v1/cache", () => {
+    return HttpResponse.json([
+      {
+        id: "__NORMAL__",
+        name: "__NORMAL__",
+        image_list: TABLE["__NORMAL__"],
+      },
+    ]);
   }),
-  rest.delete("/api/v1/cache", (_req, res, ctx) => {
-    return res(ctx.status(204));
+  http.delete("/api/v1/cache", () => {
+    return status204();
   }),
 ];

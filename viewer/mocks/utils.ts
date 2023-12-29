@@ -1,3 +1,5 @@
+import { HttpResponse } from "msw";
+
 import type { NodeResponse } from "$types/api";
 import type { Node_ } from "$types/filesystem";
 
@@ -105,4 +107,18 @@ export function rootResponse(): NodeResponse {
     mtime: "",
     is_trashed: false,
   };
+}
+
+export function status204(): HttpResponse {
+  return new HttpResponse(null, {
+    status: 204,
+    statusText: "No Content",
+  });
+}
+
+export function status404(): HttpResponse {
+  return new HttpResponse(null, {
+    status: 404,
+    statusText: "Not Found",
+  });
 }

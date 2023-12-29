@@ -1,7 +1,7 @@
-import { rest } from "msw";
+import { http, HttpResponse } from "msw";
 
 import type { ChangeResponse, NodeResponse } from "$types/api";
-import { assertIsString, fileResponse, rootResponse } from "./utils";
+import { assertIsString, fileResponse, rootResponse, status404 } from "./utils";
 
 const TABLE: Record<string, NodeResponse> = {
   __ROOT__: rootResponse(),
@@ -21,34 +21,34 @@ const CHANGE_LIST: ChangeResponse[] = [
 ];
 
 export const handlers = [
-  rest.get("/api/v1/nodes/root", (_req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(TABLE["__ROOT__"]));
+  http.get("/api/v1/nodes/root", () => {
+    return HttpResponse.json(TABLE["__ROOT__"]);
   }),
-  rest.get("/api/v1/nodes/:id", (req, res, ctx) => {
-    const { id } = req.params;
+  http.get("/api/v1/nodes/:id", ({ params }) => {
+    const { id } = params;
     assertIsString(id);
     if (!TABLE[id]) {
-      return res(ctx.status(404));
+      return status404();
     }
-    return res(ctx.status(200), ctx.json(TABLE[id]));
+    return HttpResponse.json(TABLE[id]);
   }),
-  rest.get("/api/v1/nodes/:id/children", (req, res, ctx) => {
-    const { id } = req.params;
+  http.get("/api/v1/nodes/:id/children", ({ params }) => {
+    const { id } = params;
     assertIsString(id);
     if (!CHILDREN[id]) {
-      return res(ctx.status(404));
+      return status404();
     }
     const children = CHILDREN[id];
     const rv = children.map((id) => TABLE[id]);
-    return res(ctx.status(200), ctx.json(rv));
+    return HttpResponse.json(rv);
   }),
-  rest.post("/api/v1/changes", (_req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(CHANGE_LIST));
+  http.post("/api/v1/changes", () => {
+    return HttpResponse.json(CHANGE_LIST);
   }),
-  rest.patch("/api/v1/nodes/:id", (_req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(null));
+  http.patch("/api/v1/nodes/:id", () => {
+    return HttpResponse.json(null);
   }),
-  rest.delete("/api/v1/nodes/:id", (_req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(null));
+  http.delete("/api/v1/nodes/:id", () => {
+    return HttpResponse.json(null);
   }),
 ];
