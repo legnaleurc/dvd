@@ -5,9 +5,10 @@ const redirect = (map: Record<string, string>): PluginOption => ({
   name: "redirect",
   configureServer: (server) => {
     server.middlewares.use((req, res, next) => {
-      if (map[req.url]) {
+      const url = req.originalUrl;
+      if (url && map[url]) {
         res.statusCode = 302;
-        res.setHeader("Location", map[req.url]);
+        res.setHeader("Location", map[url]);
         res.setHeader("Content-Length", "0");
         res.end();
       } else {
