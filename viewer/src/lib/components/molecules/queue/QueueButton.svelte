@@ -16,8 +16,8 @@
   $: icon = hasPending
     ? "hourglass_top"
     : hasResult
-    ? "hourglass_bottom"
-    : "hourglass_empty";
+      ? "hourglass_bottom"
+      : "hourglass_empty";
 </script>
 
 <IconButton on:click={() => (showQueue = true)}>
