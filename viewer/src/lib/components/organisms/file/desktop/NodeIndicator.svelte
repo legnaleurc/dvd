@@ -28,7 +28,7 @@
   {#if isFolder}
     {#if loading}
       <div class="flex animate-spin">
-        <Icon name="hourglass_full" />
+        <Icon name="progress_activity" />
       </div>
     {:else if expanded}
       <Icon name="keyboard_arrow_down" />
