@@ -16,4 +16,4 @@
   $: iconStyle = getIconStyle(style);
 </script>
 
-<span class={iconStyle}>{name}</span>
+<span class="material-symbols-outlined">{name}</span>

@@ -4,6 +4,6 @@
 
 <div class="flex justify-center">
   <div class="p-3 flex animate-spin">
-    <Icon name="hourglass_full" />
+    <Icon name="progress_activity" />
   </div>
 </div>
