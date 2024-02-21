@@ -46,6 +46,8 @@ class Daemon(object):
         drive_path: str = self._kwargs.drive
         static_path: str = self._kwargs.static
         token: str = self._kwargs.token
+        ipv6: bool = self._kwargs.ipv6
+        expose: bool = self._kwargs.expose
 
         async with application_context(
             port=port,
@@ -53,7 +55,12 @@ class Daemon(object):
             drive_path=drive_path,
             static_path=static_path,
             token=token,
-        ) as app, server_context(app, port):
+        ) as app, server_context(
+            app,
+            port,
+            ipv6=ipv6,
+            expose=expose,
+        ):
             await self._until_finished()
 
         return 0
@@ -75,6 +82,8 @@ def parse_args(args: list[str]):
     parser.add_argument("-d", "--drive", required=True, type=str)
     parser.add_argument("-s", "--static", type=str)
     parser.add_argument("-t", "--token", type=str, default="")
+    parser.add_argument("-6", "--ipv6", action="store_true")
+    parser.add_argument("--expose", action="store_true")
 
     kwargs = parser.parse_args(args)
     return kwargs
@@ -114,15 +123,23 @@ async def application_context(
 
 
 @asynccontextmanager
-async def server_context(app: Application, port: int):
+async def server_context(
+    app: Application,
+    port: int,
+    ipv6: bool,
+    expose: bool,
+):
     log_format = "%s %r (%b) %Tfs"
     runner = AppRunner(app, access_log_format=log_format)
     await runner.setup()
     try:
-        v4 = TCPSite(runner, host="127.1", port=port)
+        ip = "0.0.0.0" if expose else "127.1"
+        v4 = TCPSite(runner, host=ip, port=port)
         await v4.start()
-        v6 = TCPSite(runner, host="::1", port=port)
-        await v6.start()
+        if ipv6:
+            ip = "::" if expose else "::1"
+            v6 = TCPSite(runner, host=ip, port=port)
+            await v6.start()
         yield
     finally:
         await runner.cleanup()
