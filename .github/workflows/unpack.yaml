@@ -1,0 +1,48 @@
+name: unpack
+
+on:
+  push:
+    paths:
+      - 'unpack/**'
+  pull_request:
+    paths:
+      - 'unpack/**'
+
+jobs:
+  Ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build-type:
+          - debug
+          - release
+    steps:
+      - uses: actions/checkout@v4
+      - name: apt update
+        run: sudo apt-get update
+      - name: Install Dependencies
+        run: sudo apt-get install -y --no-install-recommends build-essential cmake libarchive-dev libcpprest-dev libboost-locale-dev
+      - name: Build
+        working-directory: unpack
+        run: make ${{ matrix.build-type }}
+  MacOSX:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build-type:
+          - debug
+          - release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install Dependencies
+        run: brew install libarchive boost cpprestsdk
+      - name: Build
+        working-directory: unpack
+        env:
+          CMAKE_PREFIX_PATH: /usr/local/opt/libarchive
+        run: make ${{ matrix.build-type }}

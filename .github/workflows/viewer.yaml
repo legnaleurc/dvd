@@ -1,4 +1,4 @@
-name: viewer CI
+name: viewer
 
 on:
   push:
