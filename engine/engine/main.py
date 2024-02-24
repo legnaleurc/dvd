@@ -19,14 +19,6 @@ class Daemon(object):
         self._kwargs = None
         self._finished = None
 
-        dictConfig(
-            ConfigBuilder(path="/tmp/engine.log", rotate=True)
-            .add("engine", level="D")
-            .add("wcpan", level="I")
-            .to_dict()
-        )
-        captureWarnings(True)
-
     async def __call__(self, args: list[str]):
         self._kwargs = parse_args(args[1:])
         self._finished = asyncio.Event()
@@ -48,6 +40,9 @@ class Daemon(object):
         token: str = self._kwargs.token
         ipv6: bool = self._kwargs.ipv6
         expose: bool = self._kwargs.expose
+        log_path: str = self._kwargs.log_path
+
+        setup_logging(Path(log_path))
 
         async with application_context(
             port=port,
@@ -84,9 +79,21 @@ def parse_args(args: list[str]):
     parser.add_argument("-t", "--token", type=str, default="")
     parser.add_argument("-6", "--ipv6", action="store_true")
     parser.add_argument("--expose", action="store_true")
+    parser.add_argument("--log-path", type=str, default="/tmp")
 
     kwargs = parser.parse_args(args)
     return kwargs
+
+
+def setup_logging(log_path: Path):
+    path = log_path / "engine.log"
+    dictConfig(
+        ConfigBuilder(path=path, rotate=True)
+        .add("engine", level="D")
+        .add("wcpan", level="I")
+        .to_dict()
+    )
+    captureWarnings(True)
 
 
 @asynccontextmanager
