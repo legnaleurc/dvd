@@ -1,0 +1,47 @@
+services:
+  unpack:
+    build:
+      context: ./unpack
+      target: production
+    volumes:
+      - binary:/mnt/binary:rw
+    command: sh -c "cp /app/unpack /mnt/binary"
+  engine:
+    build:
+      context: ./engine
+      target: production
+    volumes:
+      - binary:/mnt/binary:ro
+      - static:/mnt/static:ro
+      - ${DVD_CONFIG_DIR}:/mnt/config:ro
+      - ${DVD_DATA_DIR}:/mnt/data:rw
+      - ${DVD_TMP_DIR}:/tmp:rw
+    environment:
+      - TZ=${DVD_TZ}
+      - DVD_ENGINE_PORT=80
+      - DVD_ENGINE_UNPACK=/mnt/binary/unpack
+      - DVD_ENGINE_DRIVE=/mnt/config/${DVD_DRIVE_FILE}
+      - DVD_ENGINE_TOKEN=${DVD_TOKEN}
+    expose:
+      - 80
+    command: /app/docker/start.sh
+  viewer:
+    build:
+      context: ./viewer
+      target: production
+    volumes:
+      - static:/mnt/static:rw
+    command: sh -c "cp -R /app/* /mnt/static"
+  nginx:
+    image: nginx:1.25.4-bookworm
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d:ro
+      - static:/mnt/static:ro
+    environment:
+      - TZ=${DVD_TZ}
+      - NGINX_ENTRYPOINT_QUIET_LOGS=1
+    ports:
+      - "${DVD_PORT}:80"
+volumes:
+  binary:
+  static:
