@@ -3,7 +3,7 @@ project(unpack)
 
 find_package(LibArchive REQUIRED)
 find_package(cpprestsdk REQUIRED)
-find_package(Boost REQUIRED filesystem chrono locale)
+find_package(Boost REQUIRED filesystem locale)
 
 set(SOURCES
     "src/exception.cpp"
@@ -18,7 +18,6 @@ target_link_libraries(unpack PRIVATE
     LibArchive::LibArchive
     cpprestsdk::cpprest
     Boost::filesystem
-    Boost::chrono
     Boost::locale
     OpenSSL::Crypto)
 target_sources(unpack PRIVATE ${SOURCES})
