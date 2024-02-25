@@ -3,9 +3,11 @@ name: engine
 on:
   push:
     paths:
+      - '.github/workflows/engine.yaml'
       - 'engine/**'
   pull_request:
     paths:
+      - '.github/workflows/engine.yaml'
       - 'engine/**'
 
 jobs:

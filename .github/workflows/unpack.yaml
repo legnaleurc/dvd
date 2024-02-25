@@ -3,9 +3,11 @@ name: unpack
 on:
   push:
     paths:
+      - '.github/workflows/unpack.yaml'
       - 'unpack/**'
   pull_request:
     paths:
+      - '.github/workflows/unpack.yaml'
       - 'unpack/**'
 
 jobs:

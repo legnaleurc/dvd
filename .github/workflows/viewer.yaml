@@ -3,9 +3,11 @@ name: viewer
 on:
   push:
     paths:
+      - '.github/workflows/viewer.yaml'
       - 'viewer/**'
   pull_request:
     paths:
+      - '.github/workflows/viewer.yaml'
       - 'viewer/**'
 
 jobs:
