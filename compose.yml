@@ -5,6 +5,8 @@ services:
       target: production
     volumes:
       - binary:/mnt/binary:rw
+    cap_drop:
+      - ALL
     command: sh -c "cp /app/unpack /mnt/binary"
   engine:
     build:
@@ -31,6 +33,8 @@ services:
       target: production
     volumes:
       - static:/mnt/static:rw
+    cap_drop:
+      - ALL
     command: sh -c "cp -R /app/* /mnt/static"
   nginx:
     image: nginx:1.25.4-bookworm
