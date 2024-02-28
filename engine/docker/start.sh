@@ -1,5 +1,9 @@
 #! /bin/sh
 
+if [ -z "$DVD_ENGINE_UID" ] || [ -z "$DVD_ENGINE_GID" ] ; then
+    exit 1
+fi
+
 CMD="poetry run -- python3 -m engine"
 CMD="$CMD -p $DVD_ENGINE_PORT"
 CMD="$CMD -d $DVD_ENGINE_DRIVE"
@@ -10,4 +14,8 @@ if [ -n "$DVD_ENGINE_TOKEN" ] ; then
     CMD="$CMD -t $DVD_ENGINE_TOKEN"
 fi
 
-exec $CMD
+exec setpriv \
+    --reuid="$DVD_ENGINE_UID" \
+    --regid="$DVD_ENGINE_GID" \
+    --groups="$DVD_ENGINE_GID" \
+    $CMD
