@@ -12,7 +12,7 @@ RUN apt-get update \
 
 COPY . /app
 WORKDIR /app
-RUN make release
+RUN make release && strip /app/release/unpack
 
 FROM debian:bookworm-slim AS production
 
