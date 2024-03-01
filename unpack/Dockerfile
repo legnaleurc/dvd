@@ -1,8 +1,13 @@
 FROM debian:bookworm-slim AS builder
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential cmake libarchive-dev libcpprest-dev libboost-locale-dev \
-    && apt-get clean \
+RUN apt-get update \
+        && apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            libarchive-dev \
+            libcpprest-dev \
+            libboost-locale-dev \
+        && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . /app

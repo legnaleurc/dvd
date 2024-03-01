@@ -13,9 +13,10 @@ ENV PATH=$POETRY_HOME/bin:$PATH
 FROM base as builder
 
 # build-essential is required for GNU/Make and native modules
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && apt-get clean \
+RUN apt-get update \
+        && apt-get install -y --no-install-recommends \
+            build-essential \
+        && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # prepare environment
@@ -26,12 +27,13 @@ RUN make release
 FROM base as production
 
 # FIXME needed for unpack binary
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libarchive13 \
-    libcpprest2.10 \
-    libboost-locale1.74.0 \
-    libboost-filesystem1.74.0 \
-    && apt-get clean \
+RUN apt-get update \
+        && apt-get install -y --no-install-recommends \
+            libarchive13 \
+            libcpprest2.10 \
+            libboost-locale1.74.0 \
+            libboost-filesystem1.74.0 \
+        && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . /app
