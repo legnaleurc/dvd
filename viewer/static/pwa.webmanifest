@@ -1,5 +1,5 @@
 {
   "name": "Drive Viewer",
-  "start_url": "../",
+  "start_url": "/",
   "display": "standalone"
 }
