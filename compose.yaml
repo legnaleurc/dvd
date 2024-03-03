@@ -30,7 +30,7 @@ services:
       - DVD_ENGINE_UID=${DVD_UID}
       - DVD_ENGINE_GID=${DVD_GID}
     expose:
-      - 80
+      - "80"
     cap_drop:
       - ALL
     cap_add:
