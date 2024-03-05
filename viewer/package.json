@@ -2,8 +2,8 @@
   "name": "viewer",
   "version": "3.0.0",
   "scripts": {
-    "dev": "svelte-kit sync && vite dev",
-    "build": "svelte-kit sync && vite build",
+    "dev": "vite dev",
+    "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
