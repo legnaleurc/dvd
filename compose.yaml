@@ -55,7 +55,7 @@ services:
       - TZ=${DVD_TZ}
       - NGINX_ENTRYPOINT_QUIET_LOGS=1
     ports:
-      - "${DVD_PORT}:80"
+      - "${DVD_HOST}:${DVD_PORT}:80"
     cap_drop:
       - ALL
     cap_add:
