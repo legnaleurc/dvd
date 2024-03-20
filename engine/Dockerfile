@@ -2,7 +2,7 @@ FROM python:3.12.2-slim-bookworm as base
 
 # env
 ENV POETRY_HOME=/opt/poetry
-ENV POETRY_VERSION=1.7.1
+ENV POETRY_VERSION=1.8.2
 
 # setup poetry
 RUN python3 -m venv $POETRY_HOME
