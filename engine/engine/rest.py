@@ -11,8 +11,7 @@ class PermissionMixin(metaclass=ABCMeta):
         return True
 
     @abstractmethod
-    async def raise_permission_error(self):
-        ...
+    async def raise_permission_error(self): ...
 
 
 class RetriveAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
@@ -23,8 +22,7 @@ class RetriveAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
         return json_response(rv, status=200)
 
     @abstractmethod
-    async def retrive(self) -> T:
-        ...
+    async def retrive(self) -> T: ...
 
 
 class ListAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
@@ -35,8 +33,7 @@ class ListAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
         return json_response(rv, status=200)
 
     @abstractmethod
-    async def list_(self) -> list[T]:
-        ...
+    async def list_(self) -> list[T]: ...
 
 
 class PartialUpdateAPIMixin(PermissionMixin, metaclass=ABCMeta):
@@ -47,8 +44,7 @@ class PartialUpdateAPIMixin(PermissionMixin, metaclass=ABCMeta):
         return json_response(rv, status=200)
 
     @abstractmethod
-    async def partial_update(self):
-        ...
+    async def partial_update(self): ...
 
 
 class CreateAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
@@ -59,8 +55,7 @@ class CreateAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
         return json_response(rv, status=201)
 
     @abstractmethod
-    async def create(self) -> T:
-        ...
+    async def create(self) -> T: ...
 
 
 class DestroyAPIMixin(PermissionMixin, metaclass=ABCMeta):
@@ -71,8 +66,7 @@ class DestroyAPIMixin(PermissionMixin, metaclass=ABCMeta):
         raise HTTPNoContent()
 
     @abstractmethod
-    async def destory(self):
-        ...
+    async def destory(self): ...
 
 
 def json_response(data: Any, status: int = 200):

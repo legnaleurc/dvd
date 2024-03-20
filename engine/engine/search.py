@@ -144,9 +144,11 @@ class SearchEngine(object):
                 async for node in walk_node(
                     self._drive,
                     parent_node,
-                    None
-                    if pattern
-                    else lambda n: re.match(pattern, n.name, re.I) is not None,
+                    (
+                        None
+                        if pattern
+                        else lambda n: re.match(pattern, n.name, re.I) is not None
+                    ),
                 )
             ]
         elif pattern:
