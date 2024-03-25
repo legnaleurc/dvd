@@ -16,6 +16,6 @@
 </script>
 
 <ListItem on:click={handlePush}>
-  <span slot="title">{video.name}</span>
-  <span slot="caption">{video.path}</span>
+  <span slot="title" class="break-all">{video.name}</span>
+  <span slot="caption" class="break-all">{video.path}</span>
 </ListItem>

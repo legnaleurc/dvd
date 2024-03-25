@@ -34,7 +34,10 @@
           disabled={comic.unpacking || noContent}
           on:click={() => handleOpen(id)}
         >
-          <span slot="title" class:line-through={!comic.unpacking && noContent}
+          <span
+            slot="title"
+            class="break-all"
+            class:line-through={!comic.unpacking && noContent}
             >{comic.name}</span
           >
         </ListItem>
