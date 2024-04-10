@@ -16,9 +16,10 @@ services:
       - binary:/mnt/binary:ro
       - static:/mnt/static:ro
       - poetry:/mnt/poetry:rw
+      - poetry:/tmp:rw
       - ${DVD_CONFIG_DIR}:/mnt/config:ro
       - ${DVD_DATA_DIR}:/mnt/data:rw
-      - ${DVD_TMP_DIR}:/tmp:rw
+      - ${DVD_LOG_DIR}:/mnt/log:rw
     environment:
       - TZ=${DVD_TZ}
       - POETRY_CONFIG_DIR=/mnt/poetry
@@ -26,6 +27,7 @@ services:
       - DVD_ENGINE_PORT=80
       - DVD_ENGINE_UNPACK=/mnt/binary/unpack
       - DVD_ENGINE_DRIVE=/mnt/config/${DVD_DRIVE_FILE}
+      - DVD_ENGINE_LOG=/mnt/log
       - DVD_ENGINE_TOKEN=${DVD_TOKEN}
       - DVD_ENGINE_UID=${DVD_UID}
       - DVD_ENGINE_GID=${DVD_GID}
