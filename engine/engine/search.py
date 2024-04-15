@@ -2,8 +2,9 @@ import itertools
 from logging import getLogger
 import re
 from asyncio import Condition, as_completed
+from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
-from typing import AsyncGenerator, Callable, cast
+from typing import cast
 from pathlib import PurePath
 
 from wcpan.drive.core.types import Node, Drive
@@ -193,7 +194,7 @@ def inner_fuzzy_search_pattern(raw: str) -> str:
 
 async def walk_node(
     drive: Drive, root: Node, fn: Callable[[Node], bool] | None
-) -> AsyncGenerator[Node, None]:
+) -> AsyncIterator[Node]:
     async for _, folders, files in drive.walk(root):
         for f in itertools.chain(folders, files):
             if not fn or fn(f):
