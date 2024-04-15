@@ -88,7 +88,7 @@ def parse_args(args: list[str]):
 def setup_logging(log_path: Path):
     path = log_path / "engine.log"
     dictConfig(
-        ConfigBuilder(path=path, rotate=True)
+        ConfigBuilder(path=path, rotate=True, rotate_when="w6")
         .add("engine", level="D")
         .add("wcpan", level="I")
         .to_dict()
