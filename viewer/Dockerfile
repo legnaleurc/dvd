@@ -1,4 +1,4 @@
-FROM node:18.19.1-bookworm-slim AS builder
+FROM node:20-bookworm-slim AS builder
 
 RUN : \
     && apt-get update \

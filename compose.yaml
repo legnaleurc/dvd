@@ -49,7 +49,7 @@ services:
       - ALL
     command: sh -c "cp -R /app/* /mnt/static"
   nginx:
-    image: nginx:1.25.4-bookworm
+    image: nginx:stable-bookworm
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d:ro
       - static:/mnt/static:ro
