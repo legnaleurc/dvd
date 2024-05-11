@@ -24,7 +24,7 @@
     <div class="flex-0">
       <Button
         variant="secondary"
-        label="Cancel"
+        label=""
         icon="not_interested"
         on:click={() => dispatch("hide")}
       />
@@ -32,7 +32,7 @@
     <div class="flex-1" />
     <div class="flex-0">
       <Button
-        label="Trash"
+        label=""
         icon="delete"
         variant="danger"
         on:click={() => {

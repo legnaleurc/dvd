@@ -42,13 +42,13 @@
     <div class="flex">
       <Button
         variant="secondary"
-        label="Cancel"
+        label=""
         icon="close"
         on:click={() => dispatch("hide")}
       />
       <div class="flex-1" />
       <Button
-        label="OK"
+        label=""
         icon="check"
         variant="primary"
         disabled={newName.length <= 0}
