@@ -5,7 +5,7 @@
   import { getVideoContext } from "$stores/video";
   import { getStreamUrl } from "$tools/api";
   import { callExternal } from "$tools/external";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import Icon from "$atoms/Icon.svelte";
 
   const { videoMap, openVideo } = getVideoContext();
@@ -37,9 +37,9 @@
       {name}
     </div>
     <div class="flex-0 flex">
-      <IconButton on:click={handleOpen}>
+      <RoundedButton on:click={handleOpen}>
         <Icon name="open_in_new" />
-      </IconButton>
+      </RoundedButton>
     </div>
   </div>
   <div class="flex-1 flex flex-col justify-center items-center overflow-y-auto">

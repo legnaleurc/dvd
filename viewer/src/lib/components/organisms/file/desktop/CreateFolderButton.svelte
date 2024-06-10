@@ -6,7 +6,7 @@
   import { createFolder } from "$tools/api";
   import { getSelectionContext } from "$stores/selection";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import CreateFolderModal from "./CreateFolderModal.svelte";
 
   type $$Events = SvelteCustomEvents<{
@@ -52,9 +52,9 @@
   }
 </script>
 
-<IconButton disabled={!isSelectingOne} on:click={handleShowModal}>
+<RoundedButton disabled={!isSelectingOne} on:click={handleShowModal}>
   <Icon name="create_new_folder" />
-</IconButton>
+</RoundedButton>
 <CreateFolderModal
   id={$parentId}
   {getNameById}

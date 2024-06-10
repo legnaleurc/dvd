@@ -1,6 +1,6 @@
 <script lang="ts">
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import DeselectAllButton from "./DeselectAllButton.svelte";
   import DownloadButton from "./DownloadButton.svelte";
   import ExternalOpenButton from "./ExternalOpenButton.svelte";
@@ -37,9 +37,9 @@
   <div class="flex">
     <div class="flex-0 flex">
       <DeselectAllButton />
-      <IconButton on:click={toggleMenu}>
+      <RoundedButton on:click={toggleMenu}>
         <Icon name={expand ? "expand_less" : "expand_more"} />
-      </IconButton>
+      </RoundedButton>
       <TrashButton {trashNodes} />
     </div>
     <div class="flex-1" />

@@ -6,7 +6,7 @@
   import { getSelectionContext } from "$stores/selection";
   import { getDisabledContext } from "$stores/disabled";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import NodeIcon from "$atoms/NodeIcon.svelte";
   import ListItem from "$molecules/ListItem.svelte";
 
@@ -45,9 +45,9 @@
     </div>
     <svelte:fragment slot="action">
       {#if node.isFolder}
-        <IconButton {disabled} on:click={handleOpen}>
+        <RoundedButton {disabled} on:click={handleOpen}>
           <Icon name="chevron_right" />
-        </IconButton>
+        </RoundedButton>
       {/if}
     </svelte:fragment>
   </ListItem>

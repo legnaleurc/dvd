@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getVideoContext } from "$stores/video";
   import { getSelectionContext } from "$stores/selection";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import Icon from "$atoms/Icon.svelte";
 
   const { openVideo } = getVideoContext();
@@ -18,6 +18,6 @@
   }
 </script>
 
-<IconButton disabled={isSelectionEmpty} on:click={handleInternal}>
+<RoundedButton disabled={isSelectionEmpty} on:click={handleInternal}>
   <Icon name="ondemand_video" />
-</IconButton>
+</RoundedButton>

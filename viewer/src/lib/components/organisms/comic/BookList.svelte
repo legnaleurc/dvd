@@ -2,7 +2,7 @@
   import { goto } from "$app/navigation";
   import { getComicContext } from "$stores/comic";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import EmptyBlock from "$atoms/EmptyBlock.svelte";
   import ListItem from "$molecules/ListItem.svelte";
 
@@ -17,12 +17,12 @@
   <div class="flex-0 flex bg-pale-900">
     <div class="flex-1" />
     <div class="flex-0">
-      <IconButton on:click={clearComic}>
+      <RoundedButton on:click={clearComic}>
         <Icon name="playlist_remove" />
-      </IconButton>
-      <IconButton on:click={openCachedComic}>
+      </RoundedButton>
+      <RoundedButton on:click={openCachedComic}>
         <Icon name="restore" />
-      </IconButton>
+      </RoundedButton>
     </div>
   </div>
   <div class="flex-1 overflow-y-auto">

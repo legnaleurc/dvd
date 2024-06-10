@@ -1,7 +1,7 @@
 <script lang="ts">
   import { saveToken } from "$tools/storage";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import VoidForm from "$atoms/VoidForm.svelte";
   import InputGroup from "./InputGroup.svelte";
   import SettingsGroup from "./SettingsGroup.svelte";
@@ -33,12 +33,12 @@
       </VoidForm>
     </svelte:fragment>
     <svelte:fragment slot="action">
-      <IconButton on:click={handleSave}>
+      <RoundedButton on:click={handleSave}>
         <Icon name="save" />
-      </IconButton>
-      <IconButton on:click={handleReload}>
+      </RoundedButton>
+      <RoundedButton on:click={handleReload}>
         <Icon name="restore_page" />
-      </IconButton>
+      </RoundedButton>
     </svelte:fragment>
   </InputGroup>
 </SettingsGroup>

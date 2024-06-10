@@ -4,7 +4,7 @@
   import { getSelectionContext } from "$stores/selection";
   import { getDisabledContext } from "$stores/disabled";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import ShortcutMenu from "./ShortcutMenu.svelte";
   import ShortcutModal from "./ShortcutModal.svelte";
 
@@ -31,12 +31,12 @@
   let:showMenu
   on:shortcut={(event) => moveTarget.set(event.detail)}
 >
-  <IconButton
+  <RoundedButton
     disabled={isSelectionEmpty}
     on:click={(e) => showMenu(e.clientX, e.clientY)}
   >
     <Icon name="drive_file_move" />
-  </IconButton>
+  </RoundedButton>
 </ShortcutMenu>
 <ShortcutModal
   shortcut={$moveTarget}

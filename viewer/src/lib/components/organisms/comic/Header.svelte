@@ -3,7 +3,7 @@
 
   import type { SvelteCustomEvents } from "$types/traits";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
 
   type $$Events = SvelteCustomEvents<{
     first: null;
@@ -21,11 +21,11 @@
     {name}
   </div>
   <div class="flex-0 flex">
-    <IconButton on:click={() => dispatch("first")}>
+    <RoundedButton on:click={() => dispatch("first")}>
       <Icon name="vertical_align_top" />
-    </IconButton>
-    <IconButton on:click={() => dispatch("last")}>
+    </RoundedButton>
+    <RoundedButton on:click={() => dispatch("last")}>
       <Icon name="vertical_align_bottom" />
-    </IconButton>
+    </RoundedButton>
   </div>
 </div>

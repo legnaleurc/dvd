@@ -2,7 +2,7 @@
   import { getDownloadUrl } from "$tools/api";
   import { getSelectionContext } from "$stores/selection";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
 
   export let isFolderById: (id: string) => boolean;
 
@@ -22,6 +22,6 @@
   }
 </script>
 
-<IconButton disabled={isSelectionEmpty} on:click={handleDownload}>
+<RoundedButton disabled={isSelectionEmpty} on:click={handleDownload}>
   <Icon name="file_download" />
-</IconButton>
+</RoundedButton>

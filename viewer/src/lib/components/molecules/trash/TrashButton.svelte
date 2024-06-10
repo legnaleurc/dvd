@@ -4,7 +4,7 @@
   import { getSelectionContext } from "$stores/selection";
   import { getDisabledContext } from "$stores/disabled";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import TrashModal from "./TrashModal.svelte";
 
   export let trashNodes: (idList: string[]) => Promise<void>;
@@ -25,13 +25,13 @@
   }
 </script>
 
-<IconButton
+<RoundedButton
   variant="danger"
   disabled={isSelectionEmpty}
   on:click={() => showTrash.set(true)}
 >
   <Icon name="delete" />
-</IconButton>
+</RoundedButton>
 <TrashModal
   show={$showTrash}
   on:hide={() => showTrash.set(false)}

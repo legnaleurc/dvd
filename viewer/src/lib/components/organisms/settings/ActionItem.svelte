@@ -3,7 +3,7 @@
 
   import type { SvelteCustomEvents } from "$types/traits";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import TextInput from "$atoms/TextInput.svelte";
   import InputGroup from "./InputGroup.svelte";
 
@@ -37,18 +37,21 @@
     <InputGroup>
       <div slot="input" class="p-3 flex-0">{type}</div>
       <svelte:fragment slot="action">
-        <IconButton
+        <RoundedButton
           disabled={newCommand.length <= 0}
           on:click={() => dispatch("save", { type, command: newCommand })}
         >
           <Icon name="save" />
-        </IconButton>
-        <IconButton variant="danger" on:click={() => dispatch("remove", type)}>
+        </RoundedButton>
+        <RoundedButton
+          variant="danger"
+          on:click={() => dispatch("remove", type)}
+        >
           <Icon name="delete" />
-        </IconButton>
-        <IconButton on:click={restoreDefault}>
+        </RoundedButton>
+        <RoundedButton on:click={restoreDefault}>
           <Icon name="settings_backup_restore" />
-        </IconButton>
+        </RoundedButton>
       </svelte:fragment>
     </InputGroup>
   </div>

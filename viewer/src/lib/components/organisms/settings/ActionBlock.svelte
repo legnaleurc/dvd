@@ -3,7 +3,7 @@
 
   import { loadActionMap, saveActionMap } from "$tools/storage";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import TextInput from "$atoms/TextInput.svelte";
   import InputGroup from "./InputGroup.svelte";
   import SettingsGroup from "./SettingsGroup.svelte";
@@ -86,9 +86,9 @@
         />
         <svelte:fragment slot="action">
           <QuickCommandMenu let:showMenu on:command={handleQuickCommand}>
-            <IconButton on:click={(e) => showMenu(e.clientX, e.clientY)}>
+            <RoundedButton on:click={(e) => showMenu(e.clientX, e.clientY)}>
               <Icon name="input" />
-            </IconButton>
+            </RoundedButton>
           </QuickCommandMenu>
         </svelte:fragment>
       </InputGroup>
@@ -100,12 +100,12 @@
           bind:value={newType}
         />
         <svelte:fragment slot="action">
-          <IconButton
+          <RoundedButton
             disabled={!newType || !newCommand || hasSameType}
             on:click={handleAdd}
           >
             <Icon name="add" />
-          </IconButton>
+          </RoundedButton>
         </svelte:fragment>
       </InputGroup>
     </div>

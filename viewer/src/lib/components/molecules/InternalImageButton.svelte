@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getComicContext } from "$stores/comic";
   import { getSelectionContext } from "$stores/selection";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import Icon from "$atoms/Icon.svelte";
 
   export let getNameById: (id: string) => string;
@@ -21,6 +21,6 @@
   }
 </script>
 
-<IconButton disabled={isSelectionEmpty} on:click={handleInternal}>
+<RoundedButton disabled={isSelectionEmpty} on:click={handleInternal}>
   <Icon name="import_contacts" />
-</IconButton>
+</RoundedButton>

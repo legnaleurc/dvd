@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getVideoContext } from "$stores/video";
   import EmptyBlock from "$atoms/EmptyBlock.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import Icon from "$atoms/Icon.svelte";
   import VideoItem from "./VideoItem.svelte";
 
@@ -12,9 +12,9 @@
   <div class="flex-0 flex bg-pale-900">
     <div class="flex-1" />
     <div class="flex-0 flex">
-      <IconButton on:click={clearAllVideo}>
+      <RoundedButton on:click={clearAllVideo}>
         <Icon name="playlist_remove" />
-      </IconButton>
+      </RoundedButton>
     </div>
   </div>
   <div class="flex-1 overflow-y-auto">

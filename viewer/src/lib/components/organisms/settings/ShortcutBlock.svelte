@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getShortcutContext } from "$stores/shortcut";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import TextInput from "$atoms/TextInput.svelte";
   import InputGroup from "./InputGroup.svelte";
   import ShortcutItem from "./ShortcutItem.svelte";
@@ -35,9 +35,9 @@
         on:enterpress={handleNew}
       />
       <svelte:fragment slot="action">
-        <IconButton disabled={newShortcut.length <= 0} on:click={handleNew}>
+        <RoundedButton disabled={newShortcut.length <= 0} on:click={handleNew}>
           <Icon name="add" />
-        </IconButton>
+        </RoundedButton>
       </svelte:fragment>
     </InputGroup>
   </div>

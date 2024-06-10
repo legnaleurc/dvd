@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getShortcutContext } from "$stores/shortcut";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import TextInput from "$atoms/TextInput.svelte";
   import InputGroup from "./InputGroup.svelte";
 
@@ -35,14 +35,14 @@
 <InputGroup>
   <TextInput slot="input" class="flex-1" bind:value={newShortcut} />
   <svelte:fragment slot="action">
-    <IconButton disabled={newShortcut.length <= 0} on:click={handleSave}>
+    <RoundedButton disabled={newShortcut.length <= 0} on:click={handleSave}>
       <Icon name="save" />
-    </IconButton>
-    <IconButton variant="danger" on:click={handleRemove}>
+    </RoundedButton>
+    <RoundedButton variant="danger" on:click={handleRemove}>
       <Icon name="delete" />
-    </IconButton>
-    <IconButton on:click={restoreDefault}>
+    </RoundedButton>
+    <RoundedButton on:click={restoreDefault}>
       <Icon name="settings_backup_restore" />
-    </IconButton>
+    </RoundedButton>
   </svelte:fragment>
 </InputGroup>

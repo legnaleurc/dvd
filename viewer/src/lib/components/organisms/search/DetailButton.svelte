@@ -2,7 +2,7 @@
   import { getSearchContext } from "$stores/search";
   import { getSelectionContext } from "$stores/selection";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
 
   const { detailList } = getSearchContext();
   const { selectedId, deselectList, deselectAll } = getSelectionContext();
@@ -22,11 +22,11 @@
 </script>
 
 {#if !hasDetails}
-  <IconButton disabled={$selectedId.size <= 0} on:click={commitDetails}>
+  <RoundedButton disabled={$selectedId.size <= 0} on:click={commitDetails}>
     <Icon name="zoom_in" />
-  </IconButton>
+  </RoundedButton>
 {:else}
-  <IconButton on:click={flushDetails}>
+  <RoundedButton on:click={flushDetails}>
     <Icon name="zoom_out" />
-  </IconButton>
+  </RoundedButton>
 {/if}

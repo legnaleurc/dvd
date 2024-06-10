@@ -1,7 +1,7 @@
 <script lang="ts">
   import { callExternal } from "$tools/external";
   import { getSelectionContext } from "$stores/selection";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import Icon from "$atoms/Icon.svelte";
 
   export let getNameById: (id: string) => string;
@@ -20,6 +20,6 @@
   $: isSelectingOne = $selectedId.size === 1;
 </script>
 
-<IconButton disabled={!isSelectingOne} on:click={handleExternal}>
+<RoundedButton disabled={!isSelectingOne} on:click={handleExternal}>
   <Icon name="open_in_new" />
-</IconButton>
+</RoundedButton>

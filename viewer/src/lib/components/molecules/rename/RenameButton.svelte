@@ -4,7 +4,7 @@
   import { getSelectionContext } from "$stores/selection";
   import { getDisabledContext } from "$stores/disabled";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import RenameModal from "./RenameModal.svelte";
 
   export let getNameById: (id: string) => string;
@@ -34,9 +34,9 @@
   }
 </script>
 
-<IconButton disabled={!isSelectingOne} on:click={handleShowRename}>
+<RoundedButton disabled={!isSelectingOne} on:click={handleShowRename}>
   <Icon name="edit" />
-</IconButton>
+</RoundedButton>
 <RenameModal
   id={$renamingId}
   {getNameById}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getSelectionContext } from "$stores/selection";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import IconBadge from "$atoms/IconBadge.svelte";
   import Icon from "$atoms/Icon.svelte";
 
@@ -9,8 +9,8 @@
   $: isSelectionEmpty = $selectedId.size <= 0;
 </script>
 
-<IconButton disabled={isSelectionEmpty} on:click={deselectAll}>
+<RoundedButton disabled={isSelectionEmpty} on:click={deselectAll}>
   <IconBadge count={$selectedId.size} variant="primary">
     <Icon name="deselect" />
   </IconBadge>
-</IconButton>
+</RoundedButton>

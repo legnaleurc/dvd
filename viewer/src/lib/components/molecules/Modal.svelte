@@ -3,7 +3,7 @@
 
   import type { NeverRecord, SvelteCustomEvents } from "$types/traits";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import { useBodyScrolling, useMountedStore } from "$atoms/LifeCycle.svelte";
 
   type $$Events = SvelteCustomEvents<{
@@ -68,9 +68,9 @@
             <slot name="title" />
           </div>
           <div class="flex-0 flex">
-            <IconButton on:click={hide}>
+            <RoundedButton on:click={hide}>
               <Icon name="close" />
-            </IconButton>
+            </RoundedButton>
           </div>
         </div>
       {/if}

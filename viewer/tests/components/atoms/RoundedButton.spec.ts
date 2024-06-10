@@ -2,16 +2,16 @@
 
 import { describe, expect, it, afterEach, vi } from "vitest";
 import { render, fireEvent, cleanup } from "@testing-library/svelte";
-import IconButton from "$atoms/IconButton.svelte";
+import RoundedButton from "$atoms/RoundedButton.svelte";
 
-describe("IconButton", () => {
+describe("RoundedButton", () => {
   afterEach(() => {
     cleanup();
   });
 
   it("can trigger click event", async () => {
     const handler = vi.fn();
-    const { getByRole, component } = render(IconButton);
+    const { getByRole, component } = render(RoundedButton);
     component.$on("click", handler);
     const button = getByRole("button");
     await fireEvent.click(button);

@@ -2,7 +2,7 @@
   import { getQueueContext } from "$stores/queue";
   import Icon from "$atoms/Icon.svelte";
   import IconBadge from "$atoms/IconBadge.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import QueueModal from "./QueueModal.svelte";
 
   export let getNameById: (id: string) => string;
@@ -20,11 +20,11 @@
       : "hourglass_empty";
 </script>
 
-<IconButton on:click={() => (showQueue = true)}>
+<RoundedButton on:click={() => (showQueue = true)}>
   <IconBadge count={$pendingCount} variant="warning">
     <Icon name={icon} />
   </IconBadge>
-</IconButton>
+</RoundedButton>
 <QueueModal
   show={showQueue}
   {getNameById}

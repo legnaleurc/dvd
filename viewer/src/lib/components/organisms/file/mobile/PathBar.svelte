@@ -4,7 +4,7 @@
   import type { SvelteCustomEvents } from "$types/traits";
   import { getFileSystemContext } from "$stores/filesystem";
   import Icon from "$atoms/Icon.svelte";
-  import IconButton from "$atoms/IconButton.svelte";
+  import RoundedButton from "$atoms/RoundedButton.svelte";
   import QueueButton from "$molecules/queue";
   import SyncButton from "$organisms/file/common/SyncButton.svelte";
   import SortButton from "$organisms/file/common/SortButton.svelte";
@@ -27,9 +27,12 @@
 
 <div class="flex bg-pale-900">
   <div class="flex-0 flex">
-    <IconButton disabled={stack.length <= 1} on:click={() => dispatch("back")}>
+    <RoundedButton
+      disabled={stack.length <= 1}
+      on:click={() => dispatch("back")}
+    >
       <Icon name="chevron_left" />
-    </IconButton>
+    </RoundedButton>
   </div>
   <div class="flex-1 flex min-w-0">
     <Breadcrumb {stack} on:open={(event) => dispatch("backTo", event.detail)} />
