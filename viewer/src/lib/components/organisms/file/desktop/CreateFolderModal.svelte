@@ -3,6 +3,7 @@
 
   import type { SvelteCustomEvents } from "$types/traits";
   import Button from "$atoms/Button.svelte";
+  import Icon from "$atoms/Icon.svelte";
   import TextInput from "$atoms/TextInput.svelte";
   import Modal from "$molecules/Modal.svelte";
 
@@ -43,18 +44,17 @@
   </div>
   <div slot="footer">
     <div class="flex">
-      <Button
-        variant="secondary"
-        icon="close"
-        on:click={() => dispatch("hide")}
-      />
+      <Button variant="secondary" on:click={() => dispatch("hide")}>
+        <Icon name="close" />
+      </Button>
       <div class="flex-1" />
       <Button
-        icon="check"
         variant="primary"
         disabled={newName.length <= 0}
         on:click={handleAccept}
-      />
+      >
+        <Icon name="check" />
+      </Button>
     </div>
   </div>
 </Modal>

@@ -1,8 +1,6 @@
 <script lang="ts">
   import type { Variants } from "$types/button";
-  import Icon from "./Icon.svelte";
 
-  export let icon: string;
   export let variant: Variants = "vanilla";
   export let disabled = false;
 
@@ -19,5 +17,5 @@
   {disabled}
   on:click
 >
-  <Icon name={icon} />
+  <slot />
 </button>
