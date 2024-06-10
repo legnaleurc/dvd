@@ -12,7 +12,6 @@ describe("Button", () => {
   it("can trigger click event", async () => {
     const handler = vi.fn();
     const { getByRole, component } = render(Button, {
-      label: "",
       icon: "",
     });
     component.$on("click", handler);
