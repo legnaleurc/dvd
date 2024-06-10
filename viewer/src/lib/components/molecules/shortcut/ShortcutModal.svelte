@@ -24,7 +24,7 @@
   <div slot="footer" class="flex">
     <div class="flex-0">
       <Button variant="secondary" on:click={() => dispatch("hide")}>
-        <Icon name="not_interested" />
+        <Icon name="close" />
       </Button>
     </div>
     <div class="flex-1" />
