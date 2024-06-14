@@ -6,8 +6,8 @@ CMAKE := cmake
 CLANG_FORMAT := clang-format
 
 BLD_FILES := CMakeLists.txt
-HDR_FILES := src/*.hpp
-SRC_FILES := src/*.cpp
+HDR_FILES := src/*.hpp src/*.hxx
+SRC_FILES := src/*.cpp src/*.cxx
 
 .PHONY: release debug clean purge format
 

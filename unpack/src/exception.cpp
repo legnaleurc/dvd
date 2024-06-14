@@ -39,19 +39,3 @@ EntryError::what() const noexcept
 {
   return this->msg.c_str();
 }
-
-HttpError::HttpError(web::http::status_code status,
-                     const web::http::reason_phrase& reason) noexcept
-  : std::exception()
-  , msg()
-{
-  std::ostringstream sout;
-  sout << status << " " << reason;
-  this->msg = sout.str();
-}
-
-const char*
-HttpError::what() const noexcept
-{
-  return this->msg.c_str();
-}

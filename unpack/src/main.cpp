@@ -1,8 +1,5 @@
+#include "global.hpp"
 #include "unpack.hpp"
-
-#ifndef _WIN32
-#include <locale.h>
-#endif
 
 int
 main(int argc, char* argv[])
@@ -11,10 +8,7 @@ main(int argc, char* argv[])
     return 1;
   }
 
-  // libarchive/libarchive#587
-#ifndef _WIN32
-  setlocale(LC_ALL, "");
-#endif
+  initialize();
 
   auto port = std::stoul(argv[1]);
   unpackTo(port, argv[2], argv[3]);

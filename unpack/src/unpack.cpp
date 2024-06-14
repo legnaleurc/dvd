@@ -6,32 +6,25 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <boost/filesystem.hpp>
-#include <cpprest/http_client.h>
-#include <cpprest/rawptrstream.h>
 
 #include "exception.hpp"
+#include "stream.hpp"
 #include "text.hpp"
 #include "types.hpp"
-
-const uint64_t CHUNK_SIZE = 65536;
 
 class Context
 {
 public:
   Context(uint16_t port, const std::string& id);
 
-  web::http::http_response& getResponse();
-  int64_t readChunk(const void** buffer);
+  void open();
+  void close();
+  int64_t read(const void** buffer);
   int64_t seek(int64_t offset, int whence);
-  void reset();
 
 private:
-  web::uri base;
-  web::uri path;
-  web::http::http_response response;
-  int64_t offset;
-  int64_t length;
-  std::array<uint8_t, CHUNK_SIZE> chunk;
+  Stream stream;
+  std::vector<uint8_t> chunk;
 };
 using ContextHandle = std::shared_ptr<Context>;
 
@@ -46,10 +39,8 @@ resolvePath(Text& text,
             const std::string& entryName);
 void
 extractArchive(ArchiveHandle reader, ArchiveHandle writer);
-web::uri
-makeBase(uint16_t port);
-web::uri
-makePath(const std::string& id);
+std::string
+makeUrl(uint16_t port, const std::string& id);
 
 int
 openCallback(struct archive* handle, void* context);
@@ -197,7 +188,12 @@ int
 openCallback(struct archive* /*handle*/, void* context)
 {
   auto ctx = static_cast<Context*>(context);
-  ctx->reset();
+  try {
+    ctx->open();
+  } catch (std::exception& e) {
+    fprintf(stderr, "openCallback %s\n", e.what());
+    return ARCHIVE_FATAL;
+  }
   return ARCHIVE_OK;
 }
 
@@ -205,7 +201,12 @@ int
 closeCallback(struct archive* /*handle*/, void* context)
 {
   auto ctx = static_cast<Context*>(context);
-  ctx->reset();
+  try {
+    ctx->close();
+  } catch (std::exception& e) {
+    fprintf(stderr, "closeCallback %s\n", e.what());
+    return ARCHIVE_FATAL;
+  }
   return ARCHIVE_OK;
 }
 
@@ -214,7 +215,7 @@ readCallback(struct archive* /*handle*/, void* context, const void** buffer)
 {
   auto ctx = static_cast<Context*>(context);
   try {
-    return ctx->readChunk(buffer);
+    return ctx->read(buffer);
   } catch (std::exception& e) {
     fprintf(stderr, "readCallback %s\n", e.what());
     return ARCHIVE_FATAL;
@@ -235,24 +236,16 @@ seekCallback(struct archive* /*handle*/,
   return rv;
 }
 
-web::uri
-makeBase(uint16_t port)
-{
-  web::uri_builder builder;
-  builder.set_scheme("http");
-  builder.set_host("localhost");
-  builder.set_port(port);
-  return builder.to_uri();
-}
-
-web::uri
-makePath(const std::string& id)
+std::string
+makeUrl(uint16_t port, const std::string& id)
 {
   std::ostringstream sout;
-  sout << "/api/v1/nodes/" << id << "/stream";
-  web::uri_builder builder;
-  builder.set_path(sout.str());
-  return builder.to_uri();
+  sout << "http://localhost";
+  sout << ":" << port;
+  sout << "/api/v1/nodes";
+  sout << "/" << id;
+  sout << "/stream";
+  return sout.str();
 }
 
 std::string
@@ -269,87 +262,33 @@ resolvePath(Text& text,
 }
 
 Context::Context(uint16_t port, const std::string& id)
-  : base(makeBase(port))
-  , path(makePath(id))
-  , response()
-  , offset(0)
-  , length(-1)
+  : stream(makeUrl(port, id))
   , chunk()
 {
 }
 
-web::http::http_response&
-Context::getResponse()
+void
+Context::open()
 {
-  auto status = this->response.status_code();
-  if (status == web::http::status_codes::OK ||
-      status == web::http::status_codes::PartialContent) {
-    return this->response;
-  }
+  this->stream.open();
+}
 
-  web::http::http_request request;
-  request.set_method(web::http::methods::GET);
-  request.set_request_uri(this->path);
-  if (this->length >= 0) {
-    std::ostringstream sout;
-    sout << "bytes=" << this->offset << "-" << (this->length - 1);
-    request.headers().add("Range", sout.str());
-  }
-
-  web::http::client::http_client_config cfg;
-  cfg.set_timeout(std::chrono::minutes(1));
-  web::http::client::http_client client(this->base, cfg);
-  this->response = client.request(request).get();
-  status = this->response.status_code();
-  if (status == web::http::status_codes::OK) {
-    this->length = this->response.headers().content_length();
-  } else if (status != web::http::status_codes::PartialContent) {
-    throw HttpError(status, this->response.reason_phrase());
-  }
-  return this->response;
+void
+Context::close()
+{
+  this->stream.close();
 }
 
 int64_t
-Context::readChunk(const void** buffer)
+Context::read(const void** buffer)
 {
-  using Buffer = Concurrency::streams::rawptr_buffer<uint8_t>;
-
-  auto& response = this->getResponse();
-  Buffer glue(&this->chunk[0], CHUNK_SIZE);
-  auto length = response.body().read(glue, CHUNK_SIZE).get();
+  this->chunk = this->stream.read();
   *buffer = &this->chunk[0];
-  this->offset += length;
-  return length;
+  return this->chunk.size();
 }
 
 int64_t
 Context::seek(int64_t offset, int whence)
 {
-  this->response = web::http::http_response();
-
-  switch (whence) {
-    case SEEK_SET:
-      this->offset = offset;
-      break;
-    case SEEK_CUR:
-      this->offset += offset;
-      break;
-    case SEEK_END:
-      if (this->length < 0) {
-        return -1;
-      }
-      this->offset = this->length + offset;
-      break;
-    default:
-      return -1;
-  }
-  return this->offset;
-}
-
-void
-Context::reset()
-{
-  this->response = web::http::http_response();
-  this->offset = 0;
-  this->length = -1;
+  return this->stream.seek(offset, whence);
 }

@@ -31,7 +31,7 @@ RUN : \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         libarchive13 \
-        libcpprest2.10 \
+        libcurl4 \
         libboost-locale1.74.0 \
         libboost-filesystem1.74.0 \
     && apt-get clean \
