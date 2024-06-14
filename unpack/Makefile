@@ -21,16 +21,16 @@ purge:
 format:
 	$(CLANG_FORMAT) -i $(HDR_FILES) $(SRC_FILES)
 
-release/unpack: release/Makefile
+release/unpack: release/Makefile $(HDR_FILES) $(SRC_FILES)
 	$(MAKE) -C release
 
-release/Makefile: $(BLD_FILES) $(BLD_FILES) $(BLD_FILES)
+release/Makefile: $(BLD_FILES)
 	$(MKDIR) -p release
 	$(CD) release && $(CMAKE) -DCMAKE_BUILD_TYPE=Release ..
 
-debug/unpack: debug/Makefile
+debug/unpack: debug/Makefile $(HDR_FILES) $(SRC_FILES)
 	$(MAKE) -C debug
 
-debug/Makefile: $(BLD_FILES) $(BLD_FILES) $(BLD_FILES)
+debug/Makefile: $(BLD_FILES)
 	$(MKDIR) -p debug
 	$(CD) debug && $(CMAKE) -DCMAKE_BUILD_TYPE=Debug ..
