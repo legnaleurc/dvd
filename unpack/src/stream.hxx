@@ -52,6 +52,11 @@ public:
 
   Private(const std::string& url);
 
+  Private(const Private&) = delete;
+  Private& operator=(const Private&) = delete;
+  Private(Private&&) = delete;
+  Private& operator=(Private&&) = delete;
+
   void open(bool range);
   void close();
   std::vector<uint8_t> read();
