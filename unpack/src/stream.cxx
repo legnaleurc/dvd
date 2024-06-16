@@ -148,7 +148,7 @@ Stream::Private::open(bool range)
     throw std::runtime_error("CURLOPT_WRITEDATA");
   }
 
-  if (range && this->isRangeValid()) {
+  if (range) {
     std::ostringstream sout;
     sout << this->offset << "-" << (this->length - 1);
     auto value = sout.str();
@@ -215,7 +215,9 @@ Stream::Private::seek(int64_t offset, int whence)
       return -1;
   }
 
-  this->open(true);
+  if (this->isRangeValid()) {
+    this->open(true);
+  }
   return this->offset;
 }
 
