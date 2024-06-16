@@ -1,7 +1,7 @@
 #include "unpack.hpp"
 
-#include <iomanip>
 #include <memory>
+#include <sstream>
 
 #include <archive.h>
 #include <archive_entry.h>

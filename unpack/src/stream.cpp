@@ -1,9 +1,10 @@
 #include "stream.hpp"
-#include "stream.hxx"
 
 #include <cassert>
 
 #include <curl/curl.h>
+
+#include "stream.hxx"
 
 Stream::Stream(const std::string& url)
   : self(std::make_shared<Private>(url))
