@@ -24,7 +24,7 @@ jobs:
       - name: apt update
         run: sudo apt-get update
       - name: Install Dependencies
-        run: sudo apt-get install -y --no-install-recommends build-essential cmake libarchive-dev libcpprest-dev libboost-locale-dev
+        run: sudo apt-get install -y --no-install-recommends build-essential cmake libarchive-dev libboost-locale-dev libboost-filesystem-dev libcurl4-openssl-dev libssl-dev
       - name: Build
         working-directory: unpack
         run: make ${{ matrix.build-type }}
@@ -41,9 +41,9 @@ jobs:
       - name: Update Homebrew
         run: brew update
       - name: Install Dependencies
-        run: brew install libarchive boost cpprestsdk
+        run: brew install libarchive boost curl
       - name: Build
         working-directory: unpack
         env:
-          CMAKE_PREFIX_PATH: /usr/local/opt/libarchive
+          CMAKE_PREFIX_PATH: /opt/homebrew/opt/libarchive
         run: make ${{ matrix.build-type }}
