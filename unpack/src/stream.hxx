@@ -51,7 +51,6 @@ public:
                               void* userdata);
 
   Private(const std::string& url);
-  ~Private();
 
   void open(bool range);
   void close();

@@ -114,8 +114,6 @@ Stream::Private::Private(const std::string& url)
 {
 }
 
-Stream::Private::~Private() {}
-
 void
 Stream::Private::open(bool range)
 {
@@ -218,6 +216,6 @@ Stream::Private::writeCallback(char* ptr,
   std::vector<uint8_t> chunk(length);
   std::copy(ptr, ptr + length, &chunk[0]);
 
-  self->blocks.emplace_back(std::move(chunk));
+  self->blocks.push_back(std::move(chunk));
   return length;
 }
