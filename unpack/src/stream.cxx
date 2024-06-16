@@ -109,9 +109,21 @@ Stream::Private::Private(const std::string& url)
   , url(url)
   , easy(nullptr)
   , offset(0)
-  , length(0)
+  , length(-1)
   , blocks()
 {
+}
+
+bool
+Stream::Private::isLengthValid() const
+{
+  return this->length >= 0;
+}
+
+bool
+Stream::Private::isRangeValid() const
+{
+  return this->isLengthValid() && this->offset < this->length;
 }
 
 void
@@ -136,7 +148,7 @@ Stream::Private::open(bool range)
     throw std::runtime_error("CURLOPT_WRITEDATA");
   }
 
-  if (range && this->offset < this->length) {
+  if (range && this->isRangeValid()) {
     std::ostringstream sout;
     sout << this->offset << "-" << (this->length - 1);
     auto value = sout.str();
@@ -194,6 +206,9 @@ Stream::Private::seek(int64_t offset, int whence)
       this->offset += offset;
       break;
     case SEEK_END:
+      if (!this->isLengthValid()) {
+        return -1;
+      }
       this->offset = this->length + offset;
       break;
     default:

@@ -62,6 +62,9 @@ public:
   std::vector<uint8_t> read();
   int64_t seek(int64_t offset, int whence);
 
+  bool isLengthValid() const;
+  bool isRangeValid() const;
+
   CurlGlobal global;
   MultiHandle multi;
   std::string url;
