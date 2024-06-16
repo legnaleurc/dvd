@@ -228,11 +228,8 @@ Stream::Private::writeCallback(char* ptr,
                                void* userdata)
 {
   auto self = static_cast<Stream::Private*>(userdata);
-
+  auto chunk = static_cast<const uint8_t*>(static_cast<void*>(ptr));
   size_t length = size * nmemb;
-  std::vector<uint8_t> chunk(length);
-  std::copy(ptr, ptr + length, &chunk[0]);
-
-  self->blocks.push_back(std::move(chunk));
+  self->blocks.emplace_back(chunk, chunk + length);
   return length;
 }
