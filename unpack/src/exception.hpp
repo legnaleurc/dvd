@@ -2,6 +2,7 @@
 #define EXCEPTION_HPP
 
 #include <exception>
+#include <stdexcept>
 #include <string>
 
 #include "types.hpp"
@@ -26,6 +27,12 @@ public:
 
 private:
   std::string msg;
+};
+
+class HttpError : public std::runtime_error
+{
+public:
+  explicit HttpError(long status) noexcept;
 };
 
 #endif

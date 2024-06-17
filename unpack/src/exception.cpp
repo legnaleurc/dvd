@@ -39,3 +39,16 @@ EntryError::what() const noexcept
 {
   return this->msg.c_str();
 }
+
+std::string
+formatHttpError(long status)
+{
+  std::ostringstream sout;
+  sout << "HTTP status code: " << status;
+  return sout.str();
+}
+
+HttpError::HttpError(long status) noexcept
+  : std::runtime_error(formatHttpError(status))
+{
+}

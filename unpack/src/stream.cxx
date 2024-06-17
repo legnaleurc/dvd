@@ -4,6 +4,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "exception.hpp"
+
 EasyHandle
 createEasyHandle()
 {
@@ -163,7 +165,7 @@ Stream::Private::open(bool range)
   auto statusCode = this->easy->statusCode;
 
   if (statusCode != 200 && statusCode != 206) {
-    throw std::runtime_error("status_code");
+    throw HttpError(statusCode);
   }
 
   if (statusCode == 200) {
