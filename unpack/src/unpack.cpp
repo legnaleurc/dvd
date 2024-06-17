@@ -1,5 +1,6 @@
 #include "unpack.hpp"
 
+#include <cerrno>
 #include <filesystem>
 #include <memory>
 #include <sstream>
@@ -185,55 +186,56 @@ extractArchive(ArchiveHandle reader, ArchiveHandle writer)
 }
 
 int
-openCallback(struct archive* /*handle*/, void* context)
+openCallback(struct archive* handle, void* context)
 {
   auto ctx = static_cast<Context*>(context);
   try {
     ctx->open();
   } catch (std::exception& e) {
-    fprintf(stderr, "openCallback %s\n", e.what());
+    archive_set_error(handle, EIO, "failed to open stream: %s", e.what());
     return ARCHIVE_FATAL;
   }
   return ARCHIVE_OK;
 }
 
 int
-closeCallback(struct archive* /*handle*/, void* context)
+closeCallback(struct archive* handle, void* context)
 {
   auto ctx = static_cast<Context*>(context);
   try {
     ctx->close();
   } catch (std::exception& e) {
-    fprintf(stderr, "closeCallback %s\n", e.what());
+    archive_set_error(handle, EIO, "failed to close stream: %s", e.what());
     return ARCHIVE_FATAL;
   }
   return ARCHIVE_OK;
 }
 
 la_ssize_t
-readCallback(struct archive* /*handle*/, void* context, const void** buffer)
+readCallback(struct archive* handle, void* context, const void** buffer)
 {
   auto ctx = static_cast<Context*>(context);
   try {
     return ctx->read(buffer);
   } catch (std::exception& e) {
-    fprintf(stderr, "readCallback %s\n", e.what());
+    archive_set_error(handle, EIO, "failed to read stream: %s", e.what());
     return ARCHIVE_FATAL;
   }
 }
 
 la_int64_t
-seekCallback(struct archive* /*handle*/,
+seekCallback(struct archive* handle,
              void* context,
              la_int64_t offset,
              int whence)
 {
   auto ctx = static_cast<Context*>(context);
-  auto rv = ctx->seek(offset, whence);
-  if (rv < 0) {
+  try {
+    return ctx->seek(offset, whence);
+  } catch (std::exception& e) {
+    archive_set_error(handle, EIO, "failed to seek stream: %s", e.what());
     return ARCHIVE_FATAL;
   }
-  return rv;
 }
 
 std::string
@@ -291,5 +293,9 @@ Context::read(const void** buffer)
 int64_t
 Context::seek(int64_t offset, int whence)
 {
-  return this->stream.seek(offset, whence);
+  auto rv = this->stream.seek(offset, whence);
+  if (rv < 0) {
+    throw std::runtime_error("invalid position after seeking");
+  }
+  return rv;
 }
