@@ -47,7 +47,7 @@ CurlEasy::CurlEasy(MultiHandle multi, EasyHandle easy)
 {
   auto rv = curl_multi_add_handle(multi.get(), easy.get());
   if (rv != CURLM_OK) {
-    throw std::runtime_error("curl_multi_add_handle");
+    throw std::runtime_error(curl_multi_strerror(rv));
   }
 
   this->statusCode = this->readUntilStatusCode();
@@ -62,16 +62,16 @@ CurlEasy::~CurlEasy()
 void
 CurlEasy::read()
 {
-  CURLMcode multi_code;
-  int still_running;
-  int numfds;
-  multi_code = curl_multi_wait(this->multi.get(), NULL, 0, 1000, &numfds);
-  if (multi_code != CURLM_OK) {
-    throw std::runtime_error("curl_multi_wait");
+  CURLMcode rv;
+  int nRunning;
+  int nFD;
+  rv = curl_multi_wait(this->multi.get(), NULL, 0, 1000, &nFD);
+  if (rv != CURLM_OK) {
+    throw std::runtime_error(curl_multi_strerror(rv));
   }
-  multi_code = curl_multi_perform(this->multi.get(), &still_running);
-  if (multi_code != CURLM_OK) {
-    throw std::runtime_error("curl_multi_perform");
+  rv = curl_multi_perform(this->multi.get(), &nRunning);
+  if (rv != CURLM_OK) {
+    throw std::runtime_error(curl_multi_strerror(rv));
   }
 }
 
@@ -83,7 +83,7 @@ CurlEasy::readUntilStatusCode()
     auto rv =
       curl_easy_getinfo(this->easy.get(), CURLINFO_RESPONSE_CODE, &statusCode);
     if (rv != CURLE_OK) {
-      throw std::runtime_error("curl_easy_getinfo");
+      throw std::runtime_error(curl_easy_strerror(rv));
     }
     this->read();
   } while (statusCode == 0);
@@ -98,7 +98,7 @@ CurlEasy::readUntilContentLength()
     auto rv = curl_easy_getinfo(
       this->easy.get(), CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &contentLength);
     if (rv != CURLE_OK) {
-      throw std::runtime_error("curl_easy_getinfo");
+      throw std::runtime_error(curl_easy_strerror(rv));
     }
     this->read();
   } while (contentLength < 0);
@@ -136,18 +136,18 @@ Stream::Private::open(bool range)
 
   rv = curl_easy_setopt(easy.get(), CURLOPT_URL, this->url.c_str());
   if (rv != CURLE_OK) {
-    throw std::runtime_error("CURLOPT_URL");
+    throw std::runtime_error(curl_easy_strerror(rv));
   }
 
   rv = curl_easy_setopt(
     easy.get(), CURLOPT_WRITEFUNCTION, Stream::Private::writeCallback);
   if (rv != CURLE_OK) {
-    throw std::runtime_error("CURLOPT_WRITEFUNCTION");
+    throw std::runtime_error(curl_easy_strerror(rv));
   }
 
   rv = curl_easy_setopt(easy.get(), CURLOPT_WRITEDATA, this);
   if (rv != CURLE_OK) {
-    throw std::runtime_error("CURLOPT_WRITEDATA");
+    throw std::runtime_error(curl_easy_strerror(rv));
   }
 
   if (range) {
@@ -157,7 +157,7 @@ Stream::Private::open(bool range)
 
     rv = curl_easy_setopt(easy.get(), CURLOPT_RANGE, value.c_str());
     if (rv != CURLE_OK) {
-      throw std::runtime_error("CURLOPT_WRITEDATA");
+      throw std::runtime_error(curl_easy_strerror(rv));
     }
   }
 
