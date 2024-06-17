@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 project(unpack)
 
-find_package(Boost REQUIRED filesystem locale)
+find_package(Boost REQUIRED locale)
 find_package(LibArchive REQUIRED)
 find_package(CURL REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -16,10 +16,9 @@ set(SOURCES
     "src/main.cpp")
 
 add_executable(unpack)
-target_compile_features(unpack PUBLIC cxx_std_11)
+target_compile_features(unpack PUBLIC cxx_std_17)
 target_compile_options(unpack PRIVATE -Wall -Wextra -pedantic)
 target_link_libraries(unpack PRIVATE
-    Boost::filesystem
     Boost::locale
     CURL::libcurl
     LibArchive::LibArchive
