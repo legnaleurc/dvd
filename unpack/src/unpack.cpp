@@ -277,6 +277,7 @@ void
 Context::close()
 {
   this->stream.close();
+  this->chunk.clear();
 }
 
 int64_t
