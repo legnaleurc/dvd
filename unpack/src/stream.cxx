@@ -7,31 +7,33 @@
 #include "exception.hpp"
 
 namespace {
+
 const long HTTP_STATUS_OK = 200L;
 const long HTTP_STATUS_PARTIAL_CONTENT = 206L;
-}
 
-unpack::EasyHandle
-createEasyHandle()
+unpack::easy_handle
+create_easy_handle()
 {
   auto handle = curl_easy_init();
   if (!handle) {
     throw std::runtime_error("curl_easy_init");
   }
-  return unpack::EasyHandle{ handle, curl_easy_cleanup };
+  return unpack::easy_handle{ handle, curl_easy_cleanup };
 }
 
-unpack::MultiHandle
-createMultiHandle()
+unpack::multi_handle
+create_multi_handle()
 {
   auto handle = curl_multi_init();
   if (!handle) {
     throw std::runtime_error("curl_multi_init");
   }
-  return unpack::MultiHandle{ handle, curl_multi_cleanup };
+  return unpack::multi_handle{ handle, curl_multi_cleanup };
 }
 
-unpack::CurlGlobal::CurlGlobal()
+}
+
+unpack::curl_global::curl_global()
 {
   auto rv = curl_global_init(CURL_GLOBAL_DEFAULT);
   if (rv != 0) {
@@ -39,90 +41,91 @@ unpack::CurlGlobal::CurlGlobal()
   }
 }
 
-unpack::CurlGlobal::~CurlGlobal()
+unpack::curl_global::~curl_global()
 {
   curl_global_cleanup();
 }
 
-unpack::CurlEasy::CurlEasy(MultiHandle multi, EasyHandle easy)
+unpack::curl_easy::curl_easy(multi_handle multi, easy_handle easy)
   : multi(multi)
   , easy(easy)
-  , statusCode(0)
-  , contentLength(-1)
+  , status_code(0)
+  , content_length(-1)
 {
   auto rv = curl_multi_add_handle(multi.get(), easy.get());
   if (rv != CURLM_OK) {
     throw std::runtime_error(curl_multi_strerror(rv));
   }
 
-  this->readUntilStatusCode();
-  this->readUntilContentLength();
+  this->read_until_status_code();
+  this->read_until_content_length();
 }
 
-unpack::CurlEasy::~CurlEasy()
+unpack::curl_easy::~curl_easy()
 {
   curl_multi_remove_handle(this->multi.get(), this->easy.get());
 }
 
 void
-unpack::CurlEasy::read()
+unpack::curl_easy::read()
 {
   CURLMcode rv;
-  int nRunning;
-  int nFD;
-  rv = curl_multi_wait(this->multi.get(), NULL, 0, 1000, &nFD);
+  int n_active;
+  int n_fd;
+  rv = curl_multi_wait(this->multi.get(), NULL, 0, 1000, &n_fd);
   if (rv != CURLM_OK) {
     throw std::runtime_error(curl_multi_strerror(rv));
   }
-  rv = curl_multi_perform(this->multi.get(), &nRunning);
+  rv = curl_multi_perform(this->multi.get(), &n_active);
   if (rv != CURLM_OK) {
     throw std::runtime_error(curl_multi_strerror(rv));
   }
 }
 
 void
-unpack::CurlEasy::readStatusCode()
+unpack::curl_easy::read_status_code()
 {
   auto rv = curl_easy_getinfo(
-    this->easy.get(), CURLINFO_RESPONSE_CODE, &this->statusCode);
+    this->easy.get(), CURLINFO_RESPONSE_CODE, &this->status_code);
   if (rv != CURLE_OK) {
     throw std::runtime_error(curl_easy_strerror(rv));
   }
 }
 
 void
-unpack::CurlEasy::readUntilStatusCode()
+unpack::curl_easy::read_until_status_code()
 {
-  this->readStatusCode();
-  while (this->statusCode == 0) {
+  this->read_status_code();
+  while (this->status_code == 0) {
     this->read();
-    this->readStatusCode();
+    this->read_status_code();
   }
 }
 
 void
-unpack::CurlEasy::readContentLength()
+unpack::curl_easy::read_content_length()
 {
-  auto rv = curl_easy_getinfo(
-    this->easy.get(), CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &this->contentLength);
+  auto rv = curl_easy_getinfo(this->easy.get(),
+                              CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                              &this->content_length);
   if (rv != CURLE_OK) {
     throw std::runtime_error(curl_easy_strerror(rv));
   }
 }
 
 void
-unpack::CurlEasy::readUntilContentLength()
+unpack::curl_easy::read_until_content_length()
 {
-  this->readContentLength();
-  while (this->contentLength < 0) {
+  this->read_content_length();
+  while (this->content_length < 0) {
     this->read();
-    this->readContentLength();
+    this->read_content_length();
   }
 }
 
-unpack::Stream::Private::Private(const std::string& url)
+unpack::stream::detail::detail(const std::string& url)
   : global()
-  , multi(createMultiHandle())
+  , multi(create_multi_handle())
   , url(url)
   , easy(nullptr)
   , offset(0)
@@ -132,21 +135,21 @@ unpack::Stream::Private::Private(const std::string& url)
 }
 
 bool
-unpack::Stream::Private::isLengthValid() const
+unpack::stream::detail::is_length_valid() const
 {
   return this->length >= 0;
 }
 
 bool
-unpack::Stream::Private::isRangeValid() const
+unpack::stream::detail::is_range_valid() const
 {
-  return this->isLengthValid() && this->offset < this->length;
+  return this->is_length_valid() && this->offset < this->length;
 }
 
 void
-unpack::Stream::Private::open(bool range)
+unpack::stream::detail::open(bool range)
 {
-  auto easy = createEasyHandle();
+  auto easy = create_easy_handle();
   CURLcode rv = CURLE_OK;
 
   rv = curl_easy_setopt(easy.get(), CURLOPT_URL, this->url.c_str());
@@ -155,7 +158,7 @@ unpack::Stream::Private::open(bool range)
   }
 
   rv =
-    curl_easy_setopt(easy.get(), CURLOPT_WRITEFUNCTION, Stream::Private::write);
+    curl_easy_setopt(easy.get(), CURLOPT_WRITEFUNCTION, stream::detail::write);
   if (rv != CURLE_OK) {
     throw std::runtime_error(curl_easy_strerror(rv));
   }
@@ -176,28 +179,28 @@ unpack::Stream::Private::open(bool range)
     }
   }
 
-  this->easy = std::make_shared<CurlEasy>(this->multi, easy);
-  auto statusCode = this->easy->statusCode;
+  this->easy = std::make_shared<curl_easy>(this->multi, easy);
+  auto status_code = this->easy->status_code;
 
-  if (statusCode != HTTP_STATUS_OK &&
-      statusCode != HTTP_STATUS_PARTIAL_CONTENT) {
-    throw HttpError(statusCode);
+  if (status_code != HTTP_STATUS_OK &&
+      status_code != HTTP_STATUS_PARTIAL_CONTENT) {
+    throw http_error(status_code);
   }
 
-  if (statusCode == HTTP_STATUS_OK) {
-    this->length = this->easy->contentLength;
+  if (status_code == HTTP_STATUS_OK) {
+    this->length = this->easy->content_length;
   }
 }
 
 void
-unpack::Stream::Private::close()
+unpack::stream::detail::close()
 {
   this->blocks.clear();
   this->easy.reset();
 }
 
 std::vector<uint8_t>
-unpack::Stream::Private::read()
+unpack::stream::detail::read()
 {
   while (this->blocks.empty()) {
     this->easy->read();
@@ -212,7 +215,7 @@ unpack::Stream::Private::read()
 }
 
 int64_t
-unpack::Stream::Private::seek(int64_t offset, int whence)
+unpack::stream::detail::seek(int64_t offset, int whence)
 {
   this->close();
 
@@ -224,7 +227,7 @@ unpack::Stream::Private::seek(int64_t offset, int whence)
       this->offset += offset;
       break;
     case SEEK_END:
-      if (!this->isLengthValid()) {
+      if (!this->is_length_valid()) {
         throw std::runtime_error("invalid length for seeking");
       }
       this->offset = this->length + offset;
@@ -233,19 +236,19 @@ unpack::Stream::Private::seek(int64_t offset, int whence)
       throw std::invalid_argument("unknown seek direction");
   }
 
-  if (this->isRangeValid()) {
+  if (this->is_range_valid()) {
     this->open(true);
   }
   return this->offset;
 }
 
 size_t
-unpack::Stream::Private::write(char* ptr,
-                               size_t size,
-                               size_t nmemb,
-                               void* userdata)
+unpack::stream::detail::write(char* ptr,
+                              size_t size,
+                              size_t nmemb,
+                              void* userdata)
 {
-  auto self = static_cast<Stream::Private*>(userdata);
+  auto self = static_cast<stream::detail*>(userdata);
   auto chunk = static_cast<const uint8_t*>(static_cast<void*>(ptr));
   size_t length = size * nmemb;
   self->blocks.emplace_back(chunk, chunk + length);

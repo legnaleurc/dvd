@@ -8,22 +8,23 @@
 
 namespace unpack {
 
-class ArchiveError : public std::runtime_error
+class archive_error : public std::runtime_error
 {
 public:
-  ArchiveError(ArchiveHandle handle, const std::string& name) noexcept;
+  archive_error(archive_handle handle, const std::string& name) noexcept;
 };
 
-class EntryError : public std::runtime_error
+class archive_entry_error : public std::runtime_error
 {
 public:
-  EntryError(const std::string& name, const std::string& detail) noexcept;
+  archive_entry_error(const std::string& name,
+                      const std::string& detail) noexcept;
 };
 
-class HttpError : public std::runtime_error
+class http_error : public std::runtime_error
 {
 public:
-  explicit HttpError(long status) noexcept;
+  explicit http_error(long status) noexcept;
 };
 
 }

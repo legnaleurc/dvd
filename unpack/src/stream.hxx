@@ -10,66 +10,66 @@
 
 namespace unpack {
 
-using EasyHandle = std::shared_ptr<CURL>;
-using MultiHandle = std::shared_ptr<CURLM>;
+using easy_handle = std::shared_ptr<CURL>;
+using multi_handle = std::shared_ptr<CURLM>;
 
-class CurlGlobal
+class curl_global
 {
 public:
-  CurlGlobal();
-  ~CurlGlobal();
-  CurlGlobal(const CurlGlobal&) = delete;
-  CurlGlobal& operator=(const CurlGlobal&) = delete;
-  CurlGlobal(CurlGlobal&&) = delete;
-  CurlGlobal& operator=(CurlGlobal&&) = delete;
+  curl_global();
+  ~curl_global();
+  curl_global(const curl_global&) = delete;
+  curl_global& operator=(const curl_global&) = delete;
+  curl_global(curl_global&&) = delete;
+  curl_global& operator=(curl_global&&) = delete;
 };
 
-class CurlEasy
+class curl_easy
 {
 public:
-  CurlEasy(MultiHandle multi, EasyHandle easy);
-  ~CurlEasy();
+  curl_easy(multi_handle multi, easy_handle easy);
+  ~curl_easy();
 
   void read();
 
 private:
-  void readStatusCode();
-  void readUntilStatusCode();
-  void readContentLength();
-  void readUntilContentLength();
+  void read_status_code();
+  void read_until_status_code();
+  void read_content_length();
+  void read_until_content_length();
 
-  MultiHandle multi;
-  EasyHandle easy;
+  multi_handle multi;
+  easy_handle easy;
 
 public:
-  long statusCode;
-  int64_t contentLength;
+  long status_code;
+  int64_t content_length;
 };
 
-class Stream::Private
+class stream::detail
 {
 public:
   static size_t write(char* ptr, size_t size, size_t nmemb, void* userdata);
 
-  Private(const std::string& url);
+  detail(const std::string& url);
 
-  Private(const Private&) = delete;
-  Private& operator=(const Private&) = delete;
-  Private(Private&&) = delete;
-  Private& operator=(Private&&) = delete;
+  detail(const detail&) = delete;
+  detail& operator=(const detail&) = delete;
+  detail(detail&&) = delete;
+  detail& operator=(detail&&) = delete;
 
   void open(bool range);
   void close();
   std::vector<uint8_t> read();
   int64_t seek(int64_t offset, int whence);
 
-  bool isLengthValid() const;
-  bool isRangeValid() const;
+  bool is_length_valid() const;
+  bool is_range_valid() const;
 
-  CurlGlobal global;
-  MultiHandle multi;
+  curl_global global;
+  multi_handle multi;
   std::string url;
-  std::shared_ptr<CurlEasy> easy;
+  std::shared_ptr<curl_easy> easy;
   int64_t offset;
   int64_t length;
   std::deque<std::vector<uint8_t>> blocks;

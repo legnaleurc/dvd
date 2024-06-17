@@ -13,7 +13,7 @@
 #include "text.hpp"
 #include "types.hpp"
 
-class Context
+class context_t
 {
 public:
   static int open(struct archive* handle, void* context);
@@ -26,37 +26,37 @@ public:
                          la_int64_t offset,
                          int whence);
 
-  Context(uint16_t port, const std::string& id);
+  context_t(uint16_t port, const std::string& id);
 
 private:
-  unpack::Stream stream;
+  unpack::stream stream;
   std::vector<uint8_t> chunk;
 };
-using ContextHandle = std::shared_ptr<Context>;
+using context_handle = std::shared_ptr<context_t>;
 
-unpack::ArchiveHandle
-createArchiveReader(ContextHandle context);
-unpack::ArchiveHandle
-createDiskWriter();
+unpack::archive_handle
+create_archive_reader(context_handle context);
+unpack::archive_handle
+create_disk_writer();
 std::string
-resolvePath(unpack::Text& text,
-            const std::string& localPath,
-            const std::string& id,
-            const std::string& entryName);
+resolve_path(unpack::text_decoder& text,
+             const std::string& local_path,
+             const std::string& id,
+             const std::string& entry_name);
 void
-extractArchive(unpack::ArchiveHandle reader, unpack::ArchiveHandle writer);
+extract_archive(unpack::archive_handle reader, unpack::archive_handle writer);
 std::string
-makeUrl(uint16_t port, const std::string& id);
+make_url(uint16_t port, const std::string& id);
 
 void
-unpack::unpackTo(uint16_t port,
-                 const std::string& id,
-                 const std::string& localPath)
+unpack::unpack_to(uint16_t port,
+                  const std::string& id,
+                  const std::string& local_path)
 {
-  ContextHandle context = std::make_shared<Context>(port, id);
-  Text text;
-  auto reader = createArchiveReader(context);
-  auto writer = createDiskWriter();
+  context_handle context = std::make_shared<context_t>(port, id);
+  text_decoder text;
+  auto reader = create_archive_reader(context);
+  auto writer = create_disk_writer();
 
   for (;;) {
     struct archive_entry* entry = nullptr;
@@ -65,106 +65,107 @@ unpack::unpackTo(uint16_t port,
       break;
     }
     if (rv != ARCHIVE_OK) {
-      throw ArchiveError(reader, "archive_read_next_header");
+      throw archive_error(reader, "archive_read_next_header");
     }
 
     // skip folders
-    auto fileType = archive_entry_filetype(entry);
-    if (fileType & AE_IFDIR) {
+    auto file_type = archive_entry_filetype(entry);
+    if (file_type & AE_IFDIR) {
       continue;
     }
 
-    const char* entryName = archive_entry_pathname(entry);
-    if (!entryName) {
-      throw EntryError("archive_entry_pathname", "nullptr");
+    const char* entry_name = archive_entry_pathname(entry);
+    if (!entry_name) {
+      throw archive_entry_error("archive_entry_pathname", "nullptr");
     }
 
-    auto entryPath = resolvePath(text, localPath, id, entryName);
-    rv = archive_entry_update_pathname_utf8(entry, entryPath.c_str());
+    auto entry_path = resolve_path(text, local_path, id, entry_name);
+    rv = archive_entry_update_pathname_utf8(entry, entry_path.c_str());
     if (!rv) {
-      throw EntryError("archive_entry_update_pathname_utf8", entryPath);
+      throw archive_entry_error("archive_entry_update_pathname_utf8",
+                                entry_path);
     }
 
     rv = archive_write_header(writer.get(), entry);
     if (rv != ARCHIVE_OK) {
-      throw ArchiveError(writer, "archive_write_header");
+      throw archive_error(writer, "archive_write_header");
     }
 
-    extractArchive(reader, writer);
+    extract_archive(reader, writer);
 
     rv = archive_write_finish_entry(writer.get());
     if (rv != ARCHIVE_OK) {
-      throw ArchiveError(writer, "archive_write_finish_entry");
+      throw archive_error(writer, "archive_write_finish_entry");
     }
   }
 }
 
-unpack::ArchiveHandle
-createArchiveReader(ContextHandle context)
+unpack::archive_handle
+create_archive_reader(context_handle context)
 {
-  using unpack::ArchiveError;
-  using unpack::ArchiveHandle;
+  using unpack::archive_error;
+  using unpack::archive_handle;
 
   int rv = 0;
 
-  ArchiveHandle handle(
+  archive_handle handle(
     archive_read_new(),
-    [](ArchiveHandle::element_type* p) -> void { archive_read_free(p); });
+    [](archive_handle::element_type* p) -> void { archive_read_free(p); });
 
   rv = archive_read_support_filter_all(handle.get());
   if (rv != ARCHIVE_OK) {
-    throw ArchiveError(handle, "archive_read_support_filter_all");
+    throw archive_error(handle, "archive_read_support_filter_all");
   }
   rv = archive_read_support_format_all(handle.get());
   if (rv != ARCHIVE_OK) {
-    throw ArchiveError(handle, "archive_read_support_format_all");
+    throw archive_error(handle, "archive_read_support_format_all");
   }
 
-  rv = archive_read_set_open_callback(handle.get(), Context::open);
+  rv = archive_read_set_open_callback(handle.get(), context_t::open);
   if (rv != ARCHIVE_OK) {
-    throw ArchiveError(handle, "archive_read_set_open_callback");
+    throw archive_error(handle, "archive_read_set_open_callback");
   }
-  rv = archive_read_set_close_callback(handle.get(), Context::close);
+  rv = archive_read_set_close_callback(handle.get(), context_t::close);
   if (rv != ARCHIVE_OK) {
-    throw ArchiveError(handle, "archive_read_set_close_callback");
+    throw archive_error(handle, "archive_read_set_close_callback");
   }
-  rv = archive_read_set_read_callback(handle.get(), Context::read);
+  rv = archive_read_set_read_callback(handle.get(), context_t::read);
   if (rv != ARCHIVE_OK) {
-    throw ArchiveError(handle, "archive_read_set_read_callback");
+    throw archive_error(handle, "archive_read_set_read_callback");
   }
-  rv = archive_read_set_seek_callback(handle.get(), Context::seek);
+  rv = archive_read_set_seek_callback(handle.get(), context_t::seek);
   if (rv != ARCHIVE_OK) {
-    throw ArchiveError(handle, "archive_read_set_seek_callback");
+    throw archive_error(handle, "archive_read_set_seek_callback");
   }
 
   rv = archive_read_set_callback_data(handle.get(), context.get());
   if (rv != ARCHIVE_OK) {
-    throw ArchiveError(handle, "archive_read_set_callback_data");
+    throw archive_error(handle, "archive_read_set_callback_data");
   }
 
   rv = archive_read_open1(handle.get());
   if (rv != ARCHIVE_OK) {
-    throw ArchiveError(handle, "archive_read_open1");
+    throw archive_error(handle, "archive_read_open1");
   }
 
   return handle;
 }
 
-unpack::ArchiveHandle
-createDiskWriter()
+unpack::archive_handle
+create_disk_writer()
 {
-  using unpack::ArchiveHandle;
+  using unpack::archive_handle;
 
-  ArchiveHandle handle(
+  archive_handle handle(
     archive_write_disk_new(),
-    [](ArchiveHandle::element_type* p) -> void { archive_write_free(p); });
+    [](archive_handle::element_type* p) -> void { archive_write_free(p); });
   return handle;
 }
 
 void
-extractArchive(unpack::ArchiveHandle reader, unpack::ArchiveHandle writer)
+extract_archive(unpack::archive_handle reader, unpack::archive_handle writer)
 {
-  using unpack::ArchiveError;
+  using unpack::archive_error;
 
   for (;;) {
     int rv = 0;
@@ -177,20 +178,20 @@ extractArchive(unpack::ArchiveHandle reader, unpack::ArchiveHandle writer)
       break;
     }
     if (rv != ARCHIVE_OK) {
-      throw ArchiveError(reader, "archive_read_data_block");
+      throw archive_error(reader, "archive_read_data_block");
     }
 
     rv = archive_write_data_block(writer.get(), chunk, length, offset);
     if (rv != ARCHIVE_OK) {
-      throw ArchiveError(writer, "archive_write_data_block");
+      throw archive_error(writer, "archive_write_data_block");
     }
   }
 }
 
 int
-Context::open(struct archive* handle, void* context)
+context_t::open(struct archive* handle, void* context)
 {
-  auto ctx = static_cast<Context*>(context);
+  auto ctx = static_cast<context_t*>(context);
   try {
     ctx->stream.open();
   } catch (std::exception& e) {
@@ -201,9 +202,9 @@ Context::open(struct archive* handle, void* context)
 }
 
 int
-Context::close(struct archive* handle, void* context)
+context_t::close(struct archive* handle, void* context)
 {
-  auto ctx = static_cast<Context*>(context);
+  auto ctx = static_cast<context_t*>(context);
   try {
     ctx->chunk.clear();
     ctx->stream.close();
@@ -215,9 +216,9 @@ Context::close(struct archive* handle, void* context)
 }
 
 la_ssize_t
-Context::read(struct archive* handle, void* context, const void** buffer)
+context_t::read(struct archive* handle, void* context, const void** buffer)
 {
-  auto ctx = static_cast<Context*>(context);
+  auto ctx = static_cast<context_t*>(context);
   try {
     ctx->chunk = ctx->stream.read();
     *buffer = &ctx->chunk[0];
@@ -229,12 +230,12 @@ Context::read(struct archive* handle, void* context, const void** buffer)
 }
 
 la_int64_t
-Context::seek(struct archive* handle,
-              void* context,
-              la_int64_t offset,
-              int whence)
+context_t::seek(struct archive* handle,
+                void* context,
+                la_int64_t offset,
+                int whence)
 {
-  auto ctx = static_cast<Context*>(context);
+  auto ctx = static_cast<context_t*>(context);
   try {
     return ctx->stream.seek(offset, whence);
   } catch (std::exception& e) {
@@ -244,7 +245,7 @@ Context::seek(struct archive* handle,
 }
 
 std::string
-makeUrl(uint16_t port, const std::string& id)
+make_url(uint16_t port, const std::string& id)
 {
   std::ostringstream sout;
   sout << "http://localhost";
@@ -256,20 +257,20 @@ makeUrl(uint16_t port, const std::string& id)
 }
 
 std::string
-resolvePath(unpack::Text& text,
-            const std::string& localPath,
-            const std::string& id,
-            const std::string& entryName)
+resolve_path(unpack::text_decoder& text,
+             const std::string& local_path,
+             const std::string& id,
+             const std::string& entry_name)
 {
-  auto newEntryName = text.toUtf8(entryName);
-  std::filesystem::path path = localPath;
+  auto new_entry_name = text.toUtf8(entry_name);
+  std::filesystem::path path = local_path;
   path /= id;
-  path /= newEntryName;
+  path /= new_entry_name;
   return path.string();
 }
 
-Context::Context(uint16_t port, const std::string& id)
-  : stream(makeUrl(port, id))
+context_t::context_t(uint16_t port, const std::string& id)
+  : stream(make_url(port, id))
   , chunk()
 {
 }

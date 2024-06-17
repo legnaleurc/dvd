@@ -11,7 +11,7 @@ main(int argc, char* argv[])
   unpack::initialize();
 
   auto port = std::stoul(argv[1]);
-  unpack::unpackTo(port, argv[2], argv[3]);
+  unpack::unpack_to(port, argv[2], argv[3]);
 
   return 0;
 }

@@ -6,7 +6,7 @@
 struct archive;
 
 namespace unpack {
-using ArchiveHandle = std::shared_ptr<struct archive>;
+using archive_handle = std::shared_ptr<struct archive>;
 }
 
 #endif

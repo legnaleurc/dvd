@@ -7,15 +7,15 @@
 
 namespace unpack {
 
-class Stream
+class stream
 {
 public:
-  explicit Stream(const std::string& url);
+  explicit stream(const std::string& url);
 
-  Stream(const Stream&) = delete;
-  Stream& operator=(const Stream&) = delete;
-  Stream(Stream&&) = delete;
-  Stream& operator=(Stream&&) = delete;
+  stream(const stream&) = delete;
+  stream& operator=(const stream&) = delete;
+  stream(stream&&) = delete;
+  stream& operator=(stream&&) = delete;
 
   void open();
   void close();
@@ -23,8 +23,8 @@ public:
   int64_t seek(int64_t offset, int whence);
 
 private:
-  class Private;
-  std::shared_ptr<Private> self;
+  class detail;
+  std::shared_ptr<detail> self;
 };
 
 }

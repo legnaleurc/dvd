@@ -12,32 +12,32 @@ const char* TEXT_CODEC_LIST[] = {
 
 }
 
-unpack::Text::Text()
+unpack::text_decoder::text_decoder()
   : index(std::begin(TEXT_CODEC_LIST))
 {
 }
 
-unpack::Text::Text(unpack::Text&& that)
+unpack::text_decoder::text_decoder(unpack::text_decoder&& that)
   : index(that.index)
 {
 }
 
-unpack::Text&
-unpack::Text::operator=(unpack::Text&& that)
+unpack::text_decoder&
+unpack::text_decoder::operator=(unpack::text_decoder&& that)
 {
   this->index = that.index;
   return *this;
 }
 
 std::string
-unpack::Text::toUtf8(const std::string& encoded)
+unpack::text_decoder::toUtf8(const std::string& encoded)
 {
-  namespace Conv = boost::locale::conv;
+  namespace conv = boost::locale::conv;
 
   while (index != std::end(TEXT_CODEC_LIST)) {
     const auto codec = *index;
     try {
-      auto decoded = Conv::to_utf<char>(encoded, codec, Conv::stop);
+      auto decoded = conv::to_utf<char>(encoded, codec, conv::stop);
       return decoded;
     } catch (std::exception& e) {
       std::advance(index, 1);
