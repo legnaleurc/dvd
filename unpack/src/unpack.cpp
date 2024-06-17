@@ -1,11 +1,11 @@
 #include "unpack.hpp"
 
+#include <filesystem>
 #include <memory>
 #include <sstream>
 
 #include <archive.h>
 #include <archive_entry.h>
-#include <boost/filesystem.hpp>
 
 #include "exception.hpp"
 #include "stream.hpp"
@@ -255,7 +255,7 @@ resolvePath(Text& text,
             const std::string& entryName)
 {
   auto newEntryName = text.toUtf8(entryName);
-  boost::filesystem::path path = localPath;
+  std::filesystem::path path = localPath;
   path /= id;
   path /= newEntryName;
   return path.string();
