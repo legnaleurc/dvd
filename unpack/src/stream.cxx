@@ -6,6 +6,11 @@
 
 #include "exception.hpp"
 
+namespace {
+const long HTTP_STATUS_OK = 200L;
+const long HTTP_STATUS_PARTIAL_CONTENT = 206L;
+}
+
 EasyHandle
 createEasyHandle()
 {
@@ -174,11 +179,12 @@ Stream::Private::open(bool range)
   this->easy = std::make_shared<CurlEasy>(this->multi, easy);
   auto statusCode = this->easy->statusCode;
 
-  if (statusCode != 200 && statusCode != 206) {
+  if (statusCode != HTTP_STATUS_OK &&
+      statusCode != HTTP_STATUS_PARTIAL_CONTENT) {
     throw HttpError(statusCode);
   }
 
-  if (statusCode == 200) {
+  if (statusCode == HTTP_STATUS_OK) {
     this->length = this->easy->contentLength;
   }
 }
