@@ -7,7 +7,6 @@ RUN : \
         cmake \
         libarchive-dev \
         libcurl4-openssl-dev \
-        libboost-filesystem-dev \
         libboost-locale-dev \
         libssl-dev \
     && apt-get clean \

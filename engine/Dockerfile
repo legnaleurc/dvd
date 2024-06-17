@@ -33,7 +33,6 @@ RUN : \
         libarchive13 \
         libcurl4 \
         libboost-locale1.74.0 \
-        libboost-filesystem1.74.0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
