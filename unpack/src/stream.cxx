@@ -149,8 +149,8 @@ Stream::Private::open(bool range)
     throw std::runtime_error(curl_easy_strerror(rv));
   }
 
-  rv = curl_easy_setopt(
-    easy.get(), CURLOPT_WRITEFUNCTION, Stream::Private::writeCallback);
+  rv =
+    curl_easy_setopt(easy.get(), CURLOPT_WRITEFUNCTION, Stream::Private::write);
   if (rv != CURLE_OK) {
     throw std::runtime_error(curl_easy_strerror(rv));
   }
@@ -234,10 +234,7 @@ Stream::Private::seek(int64_t offset, int whence)
 }
 
 size_t
-Stream::Private::writeCallback(char* ptr,
-                               size_t size,
-                               size_t nmemb,
-                               void* userdata)
+Stream::Private::write(char* ptr, size_t size, size_t nmemb, void* userdata)
 {
   auto self = static_cast<Stream::Private*>(userdata);
   auto chunk = static_cast<const uint8_t*>(static_cast<void*>(ptr));

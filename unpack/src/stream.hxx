@@ -47,10 +47,7 @@ public:
 class Stream::Private
 {
 public:
-  static size_t writeCallback(char* ptr,
-                              size_t size,
-                              size_t nmemb,
-                              void* userdata);
+  static size_t write(char* ptr, size_t size, size_t nmemb, void* userdata);
 
   Private(const std::string& url);
 
