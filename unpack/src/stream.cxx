@@ -50,8 +50,8 @@ CurlEasy::CurlEasy(MultiHandle multi, EasyHandle easy)
     throw std::runtime_error(curl_multi_strerror(rv));
   }
 
-  this->statusCode = this->readUntilStatusCode();
-  this->contentLength = this->readUntilContentLength();
+  this->readUntilStatusCode();
+  this->readUntilContentLength();
 }
 
 CurlEasy::~CurlEasy()
@@ -75,34 +75,44 @@ CurlEasy::read()
   }
 }
 
-long
-CurlEasy::readUntilStatusCode()
+void
+CurlEasy::readStatusCode()
 {
-  long statusCode = 0;
-  do {
-    auto rv =
-      curl_easy_getinfo(this->easy.get(), CURLINFO_RESPONSE_CODE, &statusCode);
-    if (rv != CURLE_OK) {
-      throw std::runtime_error(curl_easy_strerror(rv));
-    }
-    this->read();
-  } while (statusCode == 0);
-  return statusCode;
+  auto rv = curl_easy_getinfo(
+    this->easy.get(), CURLINFO_RESPONSE_CODE, &this->statusCode);
+  if (rv != CURLE_OK) {
+    throw std::runtime_error(curl_easy_strerror(rv));
+  }
 }
 
-int64_t
+void
+CurlEasy::readUntilStatusCode()
+{
+  this->readStatusCode();
+  while (this->statusCode == 0) {
+    this->read();
+    this->readStatusCode();
+  }
+}
+
+void
+CurlEasy::readContentLength()
+{
+  auto rv = curl_easy_getinfo(
+    this->easy.get(), CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &this->contentLength);
+  if (rv != CURLE_OK) {
+    throw std::runtime_error(curl_easy_strerror(rv));
+  }
+}
+
+void
 CurlEasy::readUntilContentLength()
 {
-  curl_off_t contentLength = -1;
-  do {
-    auto rv = curl_easy_getinfo(
-      this->easy.get(), CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &contentLength);
-    if (rv != CURLE_OK) {
-      throw std::runtime_error(curl_easy_strerror(rv));
-    }
+  this->readContentLength();
+  while (this->contentLength < 0) {
     this->read();
-  } while (contentLength < 0);
-  return contentLength;
+    this->readContentLength();
+  }
 }
 
 Stream::Private::Private(const std::string& url)

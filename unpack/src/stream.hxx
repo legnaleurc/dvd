@@ -30,10 +30,12 @@ public:
 
   void read();
 
-  long readUntilStatusCode();
-  int64_t readUntilContentLength();
-
 private:
+  void readStatusCode();
+  void readUntilStatusCode();
+  void readContentLength();
+  void readUntilContentLength();
+
   MultiHandle multi;
   EasyHandle easy;
 
