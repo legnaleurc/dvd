@@ -44,6 +44,12 @@ resolve_path(unpack::text_decoder& text,
              const std::string& id,
              const std::string& entry_name);
 void
+prepare_entry(unpack::archive_handle writer,
+              struct archive_entry* entry,
+              unpack::text_decoder& text,
+              const std::string& local_path,
+              const std::string& id);
+void
 extract_archive(unpack::archive_handle reader, unpack::archive_handle writer);
 std::string
 make_url(uint16_t port, const std::string& id);
@@ -74,22 +80,7 @@ unpack::unpack_to(uint16_t port,
       continue;
     }
 
-    const char* entry_name = archive_entry_pathname(entry);
-    if (!entry_name) {
-      throw archive_entry_error("archive_entry_pathname", "nullptr");
-    }
-
-    auto entry_path = resolve_path(text, local_path, id, entry_name);
-    rv = archive_entry_update_pathname_utf8(entry, entry_path.c_str());
-    if (!rv) {
-      throw archive_entry_error("archive_entry_update_pathname_utf8",
-                                entry_path);
-    }
-
-    rv = archive_write_header(writer.get(), entry);
-    if (rv != ARCHIVE_OK) {
-      throw archive_error(writer, "archive_write_header");
-    }
+    prepare_entry(writer, entry, text, local_path, id);
 
     extract_archive(reader, writer);
 
@@ -160,6 +151,33 @@ create_disk_writer()
     archive_write_disk_new(),
     [](archive_handle::element_type* p) -> void { archive_write_free(p); });
   return handle;
+}
+
+void
+prepare_entry(unpack::archive_handle writer,
+              struct archive_entry* entry,
+              unpack::text_decoder& text,
+              const std::string& local_path,
+              const std::string& id)
+{
+  using unpack::archive_entry_error;
+  using unpack::archive_error;
+
+  auto entry_name = archive_entry_pathname(entry);
+  if (!entry_name) {
+    throw archive_entry_error("archive_entry_pathname", "nullptr");
+  }
+
+  auto entry_path = resolve_path(text, local_path, id, entry_name);
+  int rv = archive_entry_update_pathname_utf8(entry, entry_path.c_str());
+  if (!rv) {
+    throw archive_entry_error("archive_entry_update_pathname_utf8", entry_path);
+  }
+
+  rv = archive_write_header(writer.get(), entry);
+  if (rv != ARCHIVE_OK) {
+    throw archive_error(writer, "archive_write_header");
+  }
 }
 
 void
