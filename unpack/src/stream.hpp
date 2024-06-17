@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+namespace unpack {
+
 class Stream
 {
 public:
@@ -24,5 +26,7 @@ private:
   class Private;
   std::shared_ptr<Private> self;
 };
+
+}
 
 #endif

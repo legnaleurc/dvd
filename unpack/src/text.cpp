@@ -4,29 +4,33 @@
 
 #include <iterator>
 
+namespace {
+
 const char* TEXT_CODEC_LIST[] = {
   "UTF-8", "Shift-JIS", "CP932", "EUC-JP", "GB2312", "GBK", "GB18030",
 };
 
-Text::Text()
+}
+
+unpack::Text::Text()
   : index(std::begin(TEXT_CODEC_LIST))
 {
 }
 
-Text::Text(Text&& that)
+unpack::Text::Text(unpack::Text&& that)
   : index(that.index)
 {
 }
 
-Text&
-Text::operator=(Text&& that)
+unpack::Text&
+unpack::Text::operator=(unpack::Text&& that)
 {
   this->index = that.index;
   return *this;
 }
 
 std::string
-Text::toUtf8(const std::string& encoded)
+unpack::Text::toUtf8(const std::string& encoded)
 {
   namespace Conv = boost::locale::conv;
 

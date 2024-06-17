@@ -3,6 +3,8 @@
 
 #include <string>
 
+namespace unpack {
+
 // Only provides move semantic, no copy semantic to avoid race condition.
 class Text
 {
@@ -18,5 +20,7 @@ public:
 private:
   const char** index;
 };
+
+}
 
 #endif

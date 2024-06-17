@@ -11,27 +11,27 @@ const long HTTP_STATUS_OK = 200L;
 const long HTTP_STATUS_PARTIAL_CONTENT = 206L;
 }
 
-EasyHandle
+unpack::EasyHandle
 createEasyHandle()
 {
   auto handle = curl_easy_init();
   if (!handle) {
     throw std::runtime_error("curl_easy_init");
   }
-  return EasyHandle{ handle, curl_easy_cleanup };
+  return unpack::EasyHandle{ handle, curl_easy_cleanup };
 }
 
-MultiHandle
+unpack::MultiHandle
 createMultiHandle()
 {
   auto handle = curl_multi_init();
   if (!handle) {
     throw std::runtime_error("curl_multi_init");
   }
-  return MultiHandle{ handle, curl_multi_cleanup };
+  return unpack::MultiHandle{ handle, curl_multi_cleanup };
 }
 
-CurlGlobal::CurlGlobal()
+unpack::CurlGlobal::CurlGlobal()
 {
   auto rv = curl_global_init(CURL_GLOBAL_DEFAULT);
   if (rv != 0) {
@@ -39,12 +39,12 @@ CurlGlobal::CurlGlobal()
   }
 }
 
-CurlGlobal::~CurlGlobal()
+unpack::CurlGlobal::~CurlGlobal()
 {
   curl_global_cleanup();
 }
 
-CurlEasy::CurlEasy(MultiHandle multi, EasyHandle easy)
+unpack::CurlEasy::CurlEasy(MultiHandle multi, EasyHandle easy)
   : multi(multi)
   , easy(easy)
   , statusCode(0)
@@ -59,13 +59,13 @@ CurlEasy::CurlEasy(MultiHandle multi, EasyHandle easy)
   this->readUntilContentLength();
 }
 
-CurlEasy::~CurlEasy()
+unpack::CurlEasy::~CurlEasy()
 {
   curl_multi_remove_handle(this->multi.get(), this->easy.get());
 }
 
 void
-CurlEasy::read()
+unpack::CurlEasy::read()
 {
   CURLMcode rv;
   int nRunning;
@@ -81,7 +81,7 @@ CurlEasy::read()
 }
 
 void
-CurlEasy::readStatusCode()
+unpack::CurlEasy::readStatusCode()
 {
   auto rv = curl_easy_getinfo(
     this->easy.get(), CURLINFO_RESPONSE_CODE, &this->statusCode);
@@ -91,7 +91,7 @@ CurlEasy::readStatusCode()
 }
 
 void
-CurlEasy::readUntilStatusCode()
+unpack::CurlEasy::readUntilStatusCode()
 {
   this->readStatusCode();
   while (this->statusCode == 0) {
@@ -101,7 +101,7 @@ CurlEasy::readUntilStatusCode()
 }
 
 void
-CurlEasy::readContentLength()
+unpack::CurlEasy::readContentLength()
 {
   auto rv = curl_easy_getinfo(
     this->easy.get(), CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &this->contentLength);
@@ -111,7 +111,7 @@ CurlEasy::readContentLength()
 }
 
 void
-CurlEasy::readUntilContentLength()
+unpack::CurlEasy::readUntilContentLength()
 {
   this->readContentLength();
   while (this->contentLength < 0) {
@@ -120,7 +120,7 @@ CurlEasy::readUntilContentLength()
   }
 }
 
-Stream::Private::Private(const std::string& url)
+unpack::Stream::Private::Private(const std::string& url)
   : global()
   , multi(createMultiHandle())
   , url(url)
@@ -132,19 +132,19 @@ Stream::Private::Private(const std::string& url)
 }
 
 bool
-Stream::Private::isLengthValid() const
+unpack::Stream::Private::isLengthValid() const
 {
   return this->length >= 0;
 }
 
 bool
-Stream::Private::isRangeValid() const
+unpack::Stream::Private::isRangeValid() const
 {
   return this->isLengthValid() && this->offset < this->length;
 }
 
 void
-Stream::Private::open(bool range)
+unpack::Stream::Private::open(bool range)
 {
   auto easy = createEasyHandle();
   CURLcode rv = CURLE_OK;
@@ -190,14 +190,14 @@ Stream::Private::open(bool range)
 }
 
 void
-Stream::Private::close()
+unpack::Stream::Private::close()
 {
   this->blocks.clear();
   this->easy.reset();
 }
 
 std::vector<uint8_t>
-Stream::Private::read()
+unpack::Stream::Private::read()
 {
   while (this->blocks.empty()) {
     this->easy->read();
@@ -212,7 +212,7 @@ Stream::Private::read()
 }
 
 int64_t
-Stream::Private::seek(int64_t offset, int whence)
+unpack::Stream::Private::seek(int64_t offset, int whence)
 {
   this->close();
 
@@ -240,7 +240,10 @@ Stream::Private::seek(int64_t offset, int whence)
 }
 
 size_t
-Stream::Private::write(char* ptr, size_t size, size_t nmemb, void* userdata)
+unpack::Stream::Private::write(char* ptr,
+                               size_t size,
+                               size_t nmemb,
+                               void* userdata)
 {
   auto self = static_cast<Stream::Private*>(userdata);
   auto chunk = static_cast<const uint8_t*>(static_cast<void*>(ptr));

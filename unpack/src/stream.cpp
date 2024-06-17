@@ -6,31 +6,31 @@
 
 #include "stream.hxx"
 
-Stream::Stream(const std::string& url)
+unpack::Stream::Stream(const std::string& url)
   : self(std::make_shared<Private>(url))
 {
 }
 
 void
-Stream::open()
+unpack::Stream::open()
 {
   self->open(false);
 }
 
 void
-Stream::close()
+unpack::Stream::close()
 {
   self->close();
 }
 
 std::vector<uint8_t>
-Stream::read()
+unpack::Stream::read()
 {
   return self->read();
 }
 
 int64_t
-Stream::seek(int64_t offset, int whence)
+unpack::Stream::seek(int64_t offset, int whence)
 {
   return self->seek(offset, whence);
 }

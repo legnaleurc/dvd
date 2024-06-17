@@ -5,7 +5,7 @@
 #include <sstream>
 
 std::string
-formatArchiveError(ArchiveHandle handle, const std::string& name)
+formatArchiveError(unpack::ArchiveHandle handle, const std::string& name)
 {
   std::ostringstream sout;
   auto msg = archive_error_string(handle.get());
@@ -16,8 +16,8 @@ formatArchiveError(ArchiveHandle handle, const std::string& name)
   return sout.str();
 }
 
-ArchiveError::ArchiveError(ArchiveHandle handle,
-                           const std::string& name) noexcept
+unpack::ArchiveError::ArchiveError(ArchiveHandle handle,
+                                   const std::string& name) noexcept
   : std::runtime_error(formatArchiveError(handle, name))
 {
 }
@@ -30,8 +30,8 @@ formatEntryError(const std::string& name, const std::string& detail)
   return sout.str();
 }
 
-EntryError::EntryError(const std::string& name,
-                       const std::string& detail) noexcept
+unpack::EntryError::EntryError(const std::string& name,
+                               const std::string& detail) noexcept
   : std::runtime_error(formatEntryError(name, detail))
 {
 }
@@ -44,7 +44,7 @@ formatHttpError(long status)
   return sout.str();
 }
 
-HttpError::HttpError(long status) noexcept
+unpack::HttpError::HttpError(long status) noexcept
   : std::runtime_error(formatHttpError(status))
 {
 }

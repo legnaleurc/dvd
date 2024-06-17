@@ -5,7 +5,7 @@
 #endif
 
 void
-initialize()
+unpack::initialize()
 {
   // libarchive/libarchive#587
 #ifndef _WIN32

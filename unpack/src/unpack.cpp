@@ -29,27 +29,29 @@ public:
   Context(uint16_t port, const std::string& id);
 
 private:
-  Stream stream;
+  unpack::Stream stream;
   std::vector<uint8_t> chunk;
 };
 using ContextHandle = std::shared_ptr<Context>;
 
-ArchiveHandle
+unpack::ArchiveHandle
 createArchiveReader(ContextHandle context);
-ArchiveHandle
+unpack::ArchiveHandle
 createDiskWriter();
 std::string
-resolvePath(Text& text,
+resolvePath(unpack::Text& text,
             const std::string& localPath,
             const std::string& id,
             const std::string& entryName);
 void
-extractArchive(ArchiveHandle reader, ArchiveHandle writer);
+extractArchive(unpack::ArchiveHandle reader, unpack::ArchiveHandle writer);
 std::string
 makeUrl(uint16_t port, const std::string& id);
 
 void
-unpackTo(uint16_t port, const std::string& id, const std::string& localPath)
+unpack::unpackTo(uint16_t port,
+                 const std::string& id,
+                 const std::string& localPath)
 {
   ContextHandle context = std::make_shared<Context>(port, id);
   Text text;
@@ -97,9 +99,12 @@ unpackTo(uint16_t port, const std::string& id, const std::string& localPath)
   }
 }
 
-ArchiveHandle
+unpack::ArchiveHandle
 createArchiveReader(ContextHandle context)
 {
+  using unpack::ArchiveError;
+  using unpack::ArchiveHandle;
+
   int rv = 0;
 
   ArchiveHandle handle(
@@ -145,9 +150,11 @@ createArchiveReader(ContextHandle context)
   return handle;
 }
 
-ArchiveHandle
+unpack::ArchiveHandle
 createDiskWriter()
 {
+  using unpack::ArchiveHandle;
+
   ArchiveHandle handle(
     archive_write_disk_new(),
     [](ArchiveHandle::element_type* p) -> void { archive_write_free(p); });
@@ -155,8 +162,10 @@ createDiskWriter()
 }
 
 void
-extractArchive(ArchiveHandle reader, ArchiveHandle writer)
+extractArchive(unpack::ArchiveHandle reader, unpack::ArchiveHandle writer)
 {
+  using unpack::ArchiveError;
+
   for (;;) {
     int rv = 0;
     const void* chunk = nullptr;
@@ -247,7 +256,7 @@ makeUrl(uint16_t port, const std::string& id)
 }
 
 std::string
-resolvePath(Text& text,
+resolvePath(unpack::Text& text,
             const std::string& localPath,
             const std::string& id,
             const std::string& entryName)

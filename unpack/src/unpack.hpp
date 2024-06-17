@@ -3,7 +3,11 @@
 
 #include <string>
 
+namespace unpack {
+
 void
 unpackTo(uint16_t port, const std::string& id, const std::string& localPath);
+
+}
 
 #endif

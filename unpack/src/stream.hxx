@@ -8,6 +8,8 @@
 
 #include <curl/curl.h>
 
+namespace unpack {
+
 using EasyHandle = std::shared_ptr<CURL>;
 using MultiHandle = std::shared_ptr<CURLM>;
 
@@ -72,5 +74,7 @@ public:
   int64_t length;
   std::deque<std::vector<uint8_t>> blocks;
 };
+
+}
 
 #endif

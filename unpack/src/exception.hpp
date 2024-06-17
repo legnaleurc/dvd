@@ -6,6 +6,8 @@
 
 #include "types.hpp"
 
+namespace unpack {
+
 class ArchiveError : public std::runtime_error
 {
 public:
@@ -23,5 +25,7 @@ class HttpError : public std::runtime_error
 public:
   explicit HttpError(long status) noexcept;
 };
+
+}
 
 #endif
