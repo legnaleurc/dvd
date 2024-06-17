@@ -17,18 +17,6 @@ unpack::text_decoder::text_decoder()
 {
 }
 
-unpack::text_decoder::text_decoder(unpack::text_decoder&& that)
-  : index(that.index)
-{
-}
-
-unpack::text_decoder&
-unpack::text_decoder::operator=(unpack::text_decoder&& that)
-{
-  this->index = that.index;
-  return *this;
-}
-
 std::string
 unpack::text_decoder::toUtf8(const std::string& encoded)
 {
