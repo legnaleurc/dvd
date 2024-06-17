@@ -16,12 +16,17 @@
 class Context
 {
 public:
-  Context(uint16_t port, const std::string& id);
+  static int open(struct archive* handle, void* context);
+  static int close(struct archive* handle, void* context);
+  static la_ssize_t read(struct archive* handle,
+                         void* context,
+                         const void** buffer);
+  static la_int64_t seek(struct archive* handle,
+                         void* context,
+                         la_int64_t offset,
+                         int whence);
 
-  void open();
-  void close();
-  int64_t read(const void** buffer);
-  int64_t seek(int64_t offset, int whence);
+  Context(uint16_t port, const std::string& id);
 
 private:
   Stream stream;
@@ -42,18 +47,6 @@ void
 extractArchive(ArchiveHandle reader, ArchiveHandle writer);
 std::string
 makeUrl(uint16_t port, const std::string& id);
-
-int
-openCallback(struct archive* handle, void* context);
-int
-closeCallback(struct archive* handle, void* context);
-la_ssize_t
-readCallback(struct archive* handle, void* context, const void** buffer);
-la_int64_t
-seekCallback(struct archive* handle,
-             void* context,
-             la_int64_t offset,
-             int whence);
 
 void
 unpackTo(uint16_t port, const std::string& id, const std::string& localPath)
@@ -122,19 +115,19 @@ createArchiveReader(ContextHandle context)
     throw ArchiveError(handle, "archive_read_support_format_all");
   }
 
-  rv = archive_read_set_open_callback(handle.get(), openCallback);
+  rv = archive_read_set_open_callback(handle.get(), Context::open);
   if (rv != ARCHIVE_OK) {
     throw ArchiveError(handle, "archive_read_set_open_callback");
   }
-  rv = archive_read_set_close_callback(handle.get(), closeCallback);
+  rv = archive_read_set_close_callback(handle.get(), Context::close);
   if (rv != ARCHIVE_OK) {
     throw ArchiveError(handle, "archive_read_set_close_callback");
   }
-  rv = archive_read_set_read_callback(handle.get(), readCallback);
+  rv = archive_read_set_read_callback(handle.get(), Context::read);
   if (rv != ARCHIVE_OK) {
     throw ArchiveError(handle, "archive_read_set_read_callback");
   }
-  rv = archive_read_set_seek_callback(handle.get(), seekCallback);
+  rv = archive_read_set_seek_callback(handle.get(), Context::seek);
   if (rv != ARCHIVE_OK) {
     throw ArchiveError(handle, "archive_read_set_seek_callback");
   }
@@ -186,11 +179,11 @@ extractArchive(ArchiveHandle reader, ArchiveHandle writer)
 }
 
 int
-openCallback(struct archive* handle, void* context)
+Context::open(struct archive* handle, void* context)
 {
   auto ctx = static_cast<Context*>(context);
   try {
-    ctx->open();
+    ctx->stream.open();
   } catch (std::exception& e) {
     archive_set_error(handle, EIO, "failed to open stream: %s", e.what());
     return ARCHIVE_FATAL;
@@ -199,11 +192,12 @@ openCallback(struct archive* handle, void* context)
 }
 
 int
-closeCallback(struct archive* handle, void* context)
+Context::close(struct archive* handle, void* context)
 {
   auto ctx = static_cast<Context*>(context);
   try {
-    ctx->close();
+    ctx->chunk.clear();
+    ctx->stream.close();
   } catch (std::exception& e) {
     archive_set_error(handle, EIO, "failed to close stream: %s", e.what());
     return ARCHIVE_FATAL;
@@ -212,11 +206,13 @@ closeCallback(struct archive* handle, void* context)
 }
 
 la_ssize_t
-readCallback(struct archive* handle, void* context, const void** buffer)
+Context::read(struct archive* handle, void* context, const void** buffer)
 {
   auto ctx = static_cast<Context*>(context);
   try {
-    return ctx->read(buffer);
+    ctx->chunk = ctx->stream.read();
+    *buffer = &ctx->chunk[0];
+    return ctx->chunk.size();
   } catch (std::exception& e) {
     archive_set_error(handle, EIO, "failed to read stream: %s", e.what());
     return ARCHIVE_FATAL;
@@ -224,14 +220,14 @@ readCallback(struct archive* handle, void* context, const void** buffer)
 }
 
 la_int64_t
-seekCallback(struct archive* handle,
-             void* context,
-             la_int64_t offset,
-             int whence)
+Context::seek(struct archive* handle,
+              void* context,
+              la_int64_t offset,
+              int whence)
 {
   auto ctx = static_cast<Context*>(context);
   try {
-    return ctx->seek(offset, whence);
+    return ctx->stream.seek(offset, whence);
   } catch (std::exception& e) {
     archive_set_error(handle, EIO, "failed to seek stream: %s", e.what());
     return ARCHIVE_FATAL;
@@ -267,35 +263,4 @@ Context::Context(uint16_t port, const std::string& id)
   : stream(makeUrl(port, id))
   , chunk()
 {
-}
-
-void
-Context::open()
-{
-  this->stream.open();
-}
-
-void
-Context::close()
-{
-  this->stream.close();
-  this->chunk.clear();
-}
-
-int64_t
-Context::read(const void** buffer)
-{
-  this->chunk = this->stream.read();
-  *buffer = &this->chunk[0];
-  return this->chunk.size();
-}
-
-int64_t
-Context::seek(int64_t offset, int whence)
-{
-  auto rv = this->stream.seek(offset, whence);
-  if (rv < 0) {
-    throw std::runtime_error("invalid position after seeking");
-  }
-  return rv;
 }

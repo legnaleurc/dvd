@@ -219,12 +219,12 @@ Stream::Private::seek(int64_t offset, int whence)
       break;
     case SEEK_END:
       if (!this->isLengthValid()) {
-        return -1;
+        throw std::runtime_error("invalid length for seeking");
       }
       this->offset = this->length + offset;
       break;
     default:
-      return -1;
+      throw std::invalid_argument("unknown seek direction");
   }
 
   if (this->isRangeValid()) {
