@@ -4,40 +4,36 @@
 
 #include <sstream>
 
-ArchiveError::ArchiveError(ArchiveHandle handle,
-                           const std::string& name) noexcept
-  : std::exception()
-  , msg()
+std::string
+formatArchiveError(ArchiveHandle handle, const std::string& name)
 {
   std::ostringstream sout;
-  const char* msg = archive_error_string(handle.get());
+  auto msg = archive_error_string(handle.get());
   if (!msg) {
     msg = "(empty error message)";
   }
   sout << name << ": " << msg;
-  this->msg = sout.str();
+  return sout.str();
 }
 
-const char*
-ArchiveError::what() const noexcept
+ArchiveError::ArchiveError(ArchiveHandle handle,
+                           const std::string& name) noexcept
+  : std::runtime_error(formatArchiveError(handle, name))
 {
-  return this->msg.c_str();
+}
+
+std::string
+formatEntryError(const std::string& name, const std::string& detail)
+{
+  std::ostringstream sout;
+  sout << name << ": " << detail;
+  return sout.str();
 }
 
 EntryError::EntryError(const std::string& name,
                        const std::string& detail) noexcept
-  : std::exception()
-  , msg()
+  : std::runtime_error(formatEntryError(name, detail))
 {
-  std::ostringstream sout;
-  sout << name << ": " << detail;
-  this->msg = sout.str();
-}
-
-const char*
-EntryError::what() const noexcept
-{
-  return this->msg.c_str();
 }
 
 std::string
