@@ -24,7 +24,7 @@ jobs:
       - name: apt update
         run: sudo apt-get update
       - name: Install Dependencies
-        run: sudo apt-get install -y --no-install-recommends build-essential cmake libarchive-dev libboost-locale-dev libboost-filesystem-dev libcurl4-openssl-dev libssl-dev
+        run: sudo apt-get install -y --no-install-recommends build-essential cmake libarchive-dev libboost-locale-dev libcurl4-openssl-dev libssl-dev
       - name: Build
         working-directory: unpack
         run: make ${{ matrix.build-type }}
