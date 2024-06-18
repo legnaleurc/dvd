@@ -10,54 +10,7 @@
 #include "stream.hpp"
 #include "unpack.hxx"
 
-unpack::archive_handle
-create_archive_reader(unpack::context_handle context);
-unpack::archive_handle
-create_disk_writer();
-void
-extract_archive(unpack::archive_handle reader, unpack::archive_handle writer);
-
-void
-unpack::unpack_to(uint16_t port,
-                  const std::string& id,
-                  const std::string& local_path)
-{
-  context_handle context =
-    std::make_shared<archive_context>(port, id, local_path);
-  auto reader = create_archive_reader(context);
-  auto writer = create_disk_writer();
-
-  for (;;) {
-    struct archive_entry* entry = nullptr;
-    int rv = archive_read_next_header(reader.get(), &entry);
-    if (rv == ARCHIVE_EOF) {
-      break;
-    }
-    if (rv != ARCHIVE_OK) {
-      throw archive_error(reader, "archive_read_next_header");
-    }
-
-    // skip folders
-    auto file_type = archive_entry_filetype(entry);
-    if (file_type & AE_IFDIR) {
-      continue;
-    }
-
-    context->update_entry_path(entry);
-
-    rv = archive_write_header(writer.get(), entry);
-    if (rv != ARCHIVE_OK) {
-      throw archive_error(writer, "archive_write_header");
-    }
-
-    extract_archive(reader, writer);
-
-    rv = archive_write_finish_entry(writer.get());
-    if (rv != ARCHIVE_OK) {
-      throw archive_error(writer, "archive_write_finish_entry");
-    }
-  }
-}
+namespace {
 
 unpack::archive_handle
 create_archive_reader(unpack::context_handle context)
@@ -68,9 +21,10 @@ create_archive_reader(unpack::context_handle context)
 
   int rv = 0;
 
-  archive_handle handle(
-    archive_read_new(),
-    [](archive_handle::element_type* p) -> void { archive_read_free(p); });
+  archive_handle handle{ archive_read_new(),
+                         [](archive_handle::element_type* p) -> void {
+                           archive_read_free(p);
+                         } };
 
   rv = archive_read_support_filter_all(handle.get());
   if (rv != ARCHIVE_OK) {
@@ -112,13 +66,14 @@ create_archive_reader(unpack::context_handle context)
 }
 
 unpack::archive_handle
-create_disk_writer()
+create_archive_writer()
 {
   using unpack::archive_handle;
 
-  archive_handle handle(
-    archive_write_disk_new(),
-    [](archive_handle::element_type* p) -> void { archive_write_free(p); });
+  archive_handle handle{ archive_write_disk_new(),
+                         [](archive_handle::element_type* p) -> void {
+                           archive_write_free(p);
+                         } };
   return handle;
 }
 
@@ -144,6 +99,50 @@ extract_archive(unpack::archive_handle reader, unpack::archive_handle writer)
     rv = archive_write_data_block(writer.get(), chunk, length, offset);
     if (rv != ARCHIVE_OK) {
       throw archive_error(writer, "archive_write_data_block");
+    }
+  }
+}
+
+}
+
+void
+unpack::unpack_to(uint16_t port,
+                  const std::string& id,
+                  const std::string& local_path)
+{
+  context_handle context =
+    std::make_shared<archive_context>(port, id, local_path);
+  auto reader = create_archive_reader(context);
+  auto writer = create_archive_writer();
+
+  for (;;) {
+    struct archive_entry* entry = nullptr;
+    int rv = archive_read_next_header(reader.get(), &entry);
+    if (rv == ARCHIVE_EOF) {
+      break;
+    }
+    if (rv != ARCHIVE_OK) {
+      throw archive_error(reader, "archive_read_next_header");
+    }
+
+    // skip folders
+    auto file_type = archive_entry_filetype(entry);
+    if (file_type & AE_IFDIR) {
+      continue;
+    }
+
+    context->update_entry_path(entry);
+
+    rv = archive_write_header(writer.get(), entry);
+    if (rv != ARCHIVE_OK) {
+      throw archive_error(writer, "archive_write_header");
+    }
+
+    extract_archive(reader, writer);
+
+    rv = archive_write_finish_entry(writer.get());
+    if (rv != ARCHIVE_OK) {
+      throw archive_error(writer, "archive_write_finish_entry");
     }
   }
 }
