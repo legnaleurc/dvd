@@ -4,11 +4,18 @@
 #include "stream.hpp"
 
 #include <deque>
+#include <stdexcept>
 #include <vector>
 
 #include <curl/curl.h>
 
 namespace unpack {
+
+class http_error : public std::runtime_error
+{
+public:
+  explicit http_error(long status) noexcept;
+};
 
 using easy_handle = std::shared_ptr<CURL>;
 using multi_handle = std::shared_ptr<CURLM>;

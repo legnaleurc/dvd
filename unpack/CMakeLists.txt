@@ -7,12 +7,12 @@ find_package(CURL REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 set(SOURCES
-    "src/exception.cpp"
     "src/global.cpp"
-    "src/unpack.cpp"
     "src/stream.cpp"
     "src/stream.cxx"
     "src/text.cpp"
+    "src/unpack.cpp"
+    "src/unpack.cxx"
     "src/main.cpp")
 
 add_executable(unpack)

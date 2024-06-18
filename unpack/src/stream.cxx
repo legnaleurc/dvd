@@ -4,8 +4,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "exception.hpp"
-
 namespace {
 
 const long HTTP_STATUS_OK = 200L;
@@ -253,4 +251,19 @@ unpack::stream::detail::write(char* ptr,
   size_t length = size * nmemb;
   self->blocks.emplace_back(chunk, chunk + length);
   return length;
+}
+
+namespace {
+std::string
+format_http_error(long status)
+{
+  std::ostringstream sout;
+  sout << "HTTP status code: " << status;
+  return sout.str();
+}
+}
+
+unpack::http_error::http_error(long status) noexcept
+  : std::runtime_error(format_http_error(status))
+{
 }

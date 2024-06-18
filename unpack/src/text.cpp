@@ -18,7 +18,7 @@ unpack::text_decoder::text_decoder()
 }
 
 std::string
-unpack::text_decoder::toUtf8(const std::string& encoded)
+unpack::text_decoder::to_utf8(const std::string& encoded)
 {
   namespace conv = boost::locale::conv;
 
