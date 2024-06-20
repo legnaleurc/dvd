@@ -49,7 +49,6 @@ public:
 private:
   std::string to_output_path(const std::string& entry_name);
 
-  uint16_t port;
   std::string id;
   std::string local_path;
   text_decoder decoder;

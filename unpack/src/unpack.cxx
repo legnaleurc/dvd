@@ -80,8 +80,7 @@ make_url(uint16_t port, const std::string& id)
 unpack::archive_context::archive_context(uint16_t port,
                                          const std::string& id,
                                          const std::string& local_path)
-  : port(port)
-  , id(id)
+  : id(id)
   , local_path(local_path)
   , decoder()
   , stream(make_url(port, id))
