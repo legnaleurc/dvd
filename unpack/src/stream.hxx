@@ -3,11 +3,11 @@
 
 #include "stream.hpp"
 
+#include <curl/curl.h>
+
 #include <deque>
 #include <stdexcept>
 #include <vector>
-
-#include <curl/curl.h>
 
 namespace unpack {
 
@@ -19,17 +19,6 @@ public:
 
 using easy_handle = std::shared_ptr<CURL>;
 using multi_handle = std::shared_ptr<CURLM>;
-
-class curl_global
-{
-public:
-  curl_global();
-  ~curl_global();
-  curl_global(const curl_global&) = delete;
-  curl_global& operator=(const curl_global&) = delete;
-  curl_global(curl_global&&) = delete;
-  curl_global& operator=(curl_global&&) = delete;
-};
 
 class curl_easy
 {
@@ -73,7 +62,6 @@ public:
   bool is_length_valid() const;
   bool is_range_valid() const;
 
-  curl_global global;
   multi_handle multi;
   std::string url;
   std::shared_ptr<curl_easy> easy;

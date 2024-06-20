@@ -1,11 +1,11 @@
 #ifndef UNPACK_HXX
 #define UNPACK_HXX
 
+#include <archive.h>
+
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-#include <archive.h>
 
 #include "stream.hpp"
 #include "text.hpp"

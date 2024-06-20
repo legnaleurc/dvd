@@ -3,8 +3,20 @@
 
 namespace unpack {
 
-void
-initialize();
+class application
+{
+public:
+  application();
+  ~application();
+
+  application(const application&) = delete;
+  application& operator=(const application&) = delete;
+  application(application&&) = delete;
+  application& operator=(application&&) = delete;
+
+private:
+  const char* locale;
+};
 
 }
 

@@ -1,9 +1,9 @@
 #include "unpack.hxx"
 
+#include <archive_entry.h>
+
 #include <filesystem>
 #include <sstream>
-
-#include <archive_entry.h>
 
 int
 unpack::archive_context::open(struct archive* handle, void* context)

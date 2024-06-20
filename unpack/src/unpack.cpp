@@ -1,13 +1,12 @@
 #include "unpack.hpp"
 
+#include <archive.h>
+#include <archive_entry.h>
+
 #include <cerrno>
 #include <memory>
 #include <sstream>
 
-#include <archive.h>
-#include <archive_entry.h>
-
-#include "stream.hpp"
 #include "unpack.hxx"
 
 namespace {

@@ -1,6 +1,5 @@
 #include "stream.hxx"
 
-#include <algorithm>
 #include <sstream>
 #include <stdexcept>
 
@@ -29,19 +28,6 @@ create_multi_handle()
   return unpack::multi_handle{ handle, curl_multi_cleanup };
 }
 
-}
-
-unpack::curl_global::curl_global()
-{
-  auto rv = curl_global_init(CURL_GLOBAL_DEFAULT);
-  if (rv != 0) {
-    throw std::runtime_error("curl_global_init");
-  }
-}
-
-unpack::curl_global::~curl_global()
-{
-  curl_global_cleanup();
 }
 
 unpack::curl_easy::curl_easy(multi_handle multi, easy_handle easy)
@@ -131,8 +117,7 @@ unpack::curl_easy::read_until_content_length()
 }
 
 unpack::stream::detail::detail(const std::string& url)
-  : global()
-  , multi(create_multi_handle())
+  : multi(create_multi_handle())
   , url(url)
   , easy(nullptr)
   , offset(0)

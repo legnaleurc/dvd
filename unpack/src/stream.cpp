@@ -1,9 +1,4 @@
 #include "stream.hpp"
-
-#include <cassert>
-
-#include <curl/curl.h>
-
 #include "stream.hxx"
 
 unpack::stream::stream(const std::string& url)
