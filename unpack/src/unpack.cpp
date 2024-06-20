@@ -5,7 +5,6 @@
 
 #include <cerrno>
 #include <memory>
-#include <sstream>
 
 #include "unpack.hxx"
 

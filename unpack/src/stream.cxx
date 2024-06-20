@@ -1,6 +1,7 @@
 #include "stream.hxx"
 
-#include <sstream>
+#include <boost/format.hpp>
+
 #include <stdexcept>
 
 namespace {
@@ -161,9 +162,8 @@ unpack::stream::detail::open(bool range)
   }
 
   if (range) {
-    std::ostringstream sout;
-    sout << this->offset << "-" << (this->length - 1);
-    auto value = sout.str();
+    auto value =
+      (boost::format("%1%-%2%") % this->offset % (this->length - 1)).str();
 
     rv = curl_easy_setopt(easy.get(), CURLOPT_RANGE, value.c_str());
     if (rv != CURLE_OK) {
@@ -251,17 +251,7 @@ unpack::stream::detail::write(char* ptr,
   return length;
 }
 
-namespace {
-std::string
-format_http_error(long status)
-{
-  std::ostringstream sout;
-  sout << "HTTP status code: " << status;
-  return sout.str();
-}
-}
-
 unpack::http_error::http_error(long status) noexcept
-  : std::runtime_error(format_http_error(status))
+  : std::runtime_error((boost::format("HTTP status code: %1%") % status).str())
 {
 }

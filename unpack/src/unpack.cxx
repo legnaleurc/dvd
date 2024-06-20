@@ -2,8 +2,13 @@
 
 #include <archive_entry.h>
 
+#include <boost/format.hpp>
+
 #include <filesystem>
-#include <sstream>
+
+namespace {
+const char* STREAM_URL = "http://localhost:%1%/api/v1/nodes/%2%/stream";
+}
 
 int
 unpack::archive_context::open(struct archive* handle, void* context)
@@ -63,27 +68,13 @@ unpack::archive_context::seek(struct archive* handle,
   }
 }
 
-namespace {
-std::string
-make_url(uint16_t port, const std::string& id)
-{
-  std::ostringstream sout;
-  sout << "http://localhost";
-  sout << ":" << port;
-  sout << "/api/v1/nodes";
-  sout << "/" << id;
-  sout << "/stream";
-  return sout.str();
-}
-}
-
 unpack::archive_context::archive_context(uint16_t port,
                                          const std::string& id,
                                          const std::string& local_path)
   : id(id)
   , local_path(local_path)
   , decoder()
-  , stream(make_url(port, id))
+  , stream((boost::format(STREAM_URL) % port % id).str())
   , chunk()
 {
 }
@@ -117,13 +108,11 @@ namespace {
 std::string
 format_archive_error(unpack::archive_handle handle, const std::string& name)
 {
-  std::ostringstream sout;
   auto msg = archive_error_string(handle.get());
   if (!msg) {
     msg = "(empty error message)";
   }
-  sout << name << ": " << msg;
-  return sout.str();
+  return name + ": " + msg;
 }
 }
 
@@ -133,19 +122,9 @@ unpack::archive_error::archive_error(archive_handle handle,
 {
 }
 
-namespace {
-std::string
-format_entry_error(const std::string& name, const std::string& detail)
-{
-  std::ostringstream sout;
-  sout << name << ": " << detail;
-  return sout.str();
-}
-}
-
 unpack::archive_entry_error::archive_entry_error(
   const std::string& name,
   const std::string& detail) noexcept
-  : std::runtime_error(format_entry_error(name, detail))
+  : std::runtime_error(name + ": " + detail)
 {
 }
