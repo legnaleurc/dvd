@@ -5,14 +5,14 @@
 
 namespace unpack {
 
-class text_decoder
+class text_codec
 {
 public:
-  text_decoder();
-  text_decoder(const text_decoder& that) = delete;
-  text_decoder& operator=(const text_decoder& that) = delete;
-  text_decoder(text_decoder&& that) = delete;
-  text_decoder& operator=(text_decoder&& that) = delete;
+  text_codec();
+  text_codec(const text_codec& that) = delete;
+  text_codec& operator=(const text_codec& that) = delete;
+  text_codec(text_codec&& that) = delete;
+  text_codec& operator=(text_codec&& that) = delete;
 
   std::string to_utf8(const std::string& encoded);
 

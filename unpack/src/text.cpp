@@ -12,13 +12,13 @@ const char* TEXT_CODEC_LIST[] = {
 
 }
 
-unpack::text_decoder::text_decoder()
+unpack::text_codec::text_codec()
   : index(std::begin(TEXT_CODEC_LIST))
 {
 }
 
 std::string
-unpack::text_decoder::to_utf8(const std::string& encoded)
+unpack::text_codec::to_utf8(const std::string& encoded)
 {
   namespace conv = boost::locale::conv;
 

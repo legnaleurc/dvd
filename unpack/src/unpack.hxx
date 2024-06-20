@@ -51,7 +51,7 @@ private:
 
   std::string id;
   std::string local_path;
-  text_decoder decoder;
+  text_codec decoder;
   unpack::stream stream;
   std::vector<uint8_t> chunk;
 };
