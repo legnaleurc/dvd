@@ -37,12 +37,12 @@ public:
   curl_easy(multi_handle multi, easy_handle easy);
   ~curl_easy();
 
-  void read();
+  bool read();
 
 private:
-  void read_status_code();
+  void update_status_code();
   void read_until_status_code();
-  void read_content_length();
+  void update_content_length();
   void read_until_content_length();
 
   multi_handle multi;
