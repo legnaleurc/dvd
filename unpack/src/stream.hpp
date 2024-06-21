@@ -10,7 +10,7 @@ namespace unpack {
 class stream
 {
 public:
-  explicit stream(const std::string& url);
+  stream(uint16_t port, const std::string& id);
 
   stream(const stream&) = delete;
   stream& operator=(const stream&) = delete;

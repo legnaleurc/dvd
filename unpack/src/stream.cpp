@@ -1,8 +1,10 @@
 #include "stream.hpp"
+#include "format.hpp"
 #include "stream.hxx"
 
-unpack::stream::stream(const std::string& url)
-  : self(std::make_shared<detail>(url))
+unpack::stream::stream(uint16_t port, const std::string& id)
+  : self(std::make_shared<detail>(
+      ("http://localhost:%1%/api/v1/nodes/%2%/stream"_f % port % id).str()))
 {
 }
 

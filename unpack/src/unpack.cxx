@@ -2,13 +2,7 @@
 
 #include <archive_entry.h>
 
-#include <boost/format.hpp>
-
 #include <filesystem>
-
-namespace {
-const char* STREAM_URL = "http://localhost:%1%/api/v1/nodes/%2%/stream";
-}
 
 int
 unpack::archive_context::open(struct archive* handle, void* context)
@@ -74,7 +68,7 @@ unpack::archive_context::archive_context(uint16_t port,
   : id(id)
   , local_path(local_path)
   , decoder()
-  , stream((boost::format(STREAM_URL) % port % id).str())
+  , stream(port, id)
   , chunk()
 {
 }
