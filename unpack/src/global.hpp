@@ -1,5 +1,5 @@
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef UNPACK_GLOBAL_HPP
+#define UNPACK_GLOBAL_HPP
 
 namespace unpack {
 

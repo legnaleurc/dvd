@@ -237,15 +237,15 @@ unpack::stream::detail::seek(int64_t offset, int whence)
   return this->offset;
 }
 
-size_t
+std::size_t
 unpack::stream::detail::write(char* ptr,
-                              size_t size,
-                              size_t nmemb,
+                              std::size_t size,
+                              std::size_t nmemb,
                               void* userdata)
 {
   auto self = static_cast<stream::detail*>(userdata);
   auto chunk = static_cast<const uint8_t*>(static_cast<void*>(ptr));
-  size_t length = size * nmemb;
+  std::size_t length = size * nmemb;
   self->blocks.emplace_back(chunk, chunk + length);
   return length;
 }

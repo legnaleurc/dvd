@@ -1,5 +1,5 @@
-#ifndef UNPACK_HXX
-#define UNPACK_HXX
+#ifndef UNPACK_UNPACK_HXX
+#define UNPACK_UNPACK_HXX
 
 #include <archive.h>
 

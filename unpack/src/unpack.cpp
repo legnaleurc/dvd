@@ -83,7 +83,7 @@ extract_archive(unpack::archive_handle reader, unpack::archive_handle writer)
   for (;;) {
     int rv = 0;
     const void* chunk = nullptr;
-    size_t length = 0;
+    std::size_t length = 0;
     la_int64_t offset = 0;
 
     rv = archive_read_data_block(reader.get(), &chunk, &length, &offset);

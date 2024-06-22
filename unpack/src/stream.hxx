@@ -1,5 +1,5 @@
-#ifndef STREAM_HXX
-#define STREAM_HXX
+#ifndef UNPACK_STREAM_HXX
+#define UNPACK_STREAM_HXX
 
 #include "stream.hpp"
 
@@ -45,7 +45,10 @@ public:
 class stream::detail
 {
 public:
-  static size_t write(char* ptr, size_t size, size_t nmemb, void* userdata);
+  static std::size_t write(char* ptr,
+                           std::size_t size,
+                           std::size_t nmemb,
+                           void* userdata);
 
   detail(const std::string& url);
 

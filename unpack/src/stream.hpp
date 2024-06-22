@@ -1,5 +1,5 @@
-#ifndef STREAM_HPP
-#define STREAM_HPP
+#ifndef UNPACK_STREAM_HPP
+#define UNPACK_STREAM_HPP
 
 #include <memory>
 #include <string>

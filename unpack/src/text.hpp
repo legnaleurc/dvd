@@ -1,5 +1,5 @@
-#ifndef TEXT_HPP
-#define TEXT_HPP
+#ifndef UNPACK_TEXT_HPP
+#define UNPACK_TEXT_HPP
 
 #include <string>
 
