@@ -2,6 +2,7 @@
   import { createEventDispatcher, onDestroy } from "svelte";
 
   import type { NeverRecord, SvelteCustomEvents } from "$types/traits";
+  import { mouseclick } from "$actions/event";
   import Icon from "$atoms/Icon.svelte";
   import RoundedButton from "$atoms/RoundedButton.svelte";
   import { useBodyScrolling, useMountedStore } from "$atoms/LifeCycle.svelte";
@@ -59,7 +60,7 @@
     tabindex="-1"
     class="safe-area-inset-0 fixed flex flex-col justify-center items-center bg-black/70"
     bind:this={backdrop}
-    on:click|self={hide}
+    use:mouseclick={hide}
   >
     <div class="modal flex flex-col bg-pale-950">
       {#if $$slots.title}

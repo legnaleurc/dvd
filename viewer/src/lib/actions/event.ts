@@ -1,6 +1,7 @@
 import { makeAction } from "$tools/fp";
 
 type KeyboardEventHandler = (event: KeyboardEvent) => void;
+type MouseEventHandler = (event: MouseEvent) => void;
 
 export const enterpress = makeAction(
   (node: EventTarget, handler: KeyboardEventHandler) => {
@@ -14,6 +15,39 @@ export const enterpress = makeAction(
     node.addEventListener("keydown", handleKeyDown);
     return () => {
       node.removeEventListener("keydown", handleKeyDown);
+    };
+  },
+);
+
+export const mouseclick = makeAction(
+  (node: EventTarget, handler: MouseEventHandler) => {
+    let lastTarget: EventTarget = null;
+
+    function handleMouseDown(event: MouseEvent) {
+      lastTarget = null;
+      if (event.target !== event.currentTarget) {
+        return;
+      }
+      lastTarget = event.target;
+    }
+
+    function handleMouseUp(event: MouseEvent) {
+      const isIdentical = lastTarget === event.target;
+      lastTarget = null;
+      if (event.target !== event.currentTarget) {
+        return;
+      }
+      if (!isIdentical) {
+        return;
+      }
+      handler(event);
+    }
+
+    node.addEventListener("mousedown", handleMouseDown);
+    node.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      node.removeEventListener("mouseup", handleMouseUp);
+      node.removeEventListener("mousedown", handleMouseDown);
     };
   },
 );
