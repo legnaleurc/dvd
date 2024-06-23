@@ -20,13 +20,6 @@ public:
   archive_error(archive_handle handle, const std::string& name) noexcept;
 };
 
-class archive_entry_error : public std::runtime_error
-{
-public:
-  archive_entry_error(const std::string& name,
-                      const std::string& detail) noexcept;
-};
-
 class archive_context
 {
 public:

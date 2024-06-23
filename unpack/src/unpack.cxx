@@ -4,6 +4,8 @@
 
 #include <filesystem>
 
+#include "format.hpp"
+
 int
 unpack::archive_context::open(struct archive* handle, void* context)
 {
@@ -78,13 +80,13 @@ unpack::archive_context::update_entry_path(struct archive_entry* entry)
 {
   auto entry_name = archive_entry_pathname(entry);
   if (!entry_name) {
-    throw archive_entry_error("archive_entry_pathname", "nullptr");
+    throw std::runtime_error("entry name is null");
   }
 
   auto entry_path = this->to_output_path(entry_name);
   int rv = archive_entry_update_pathname_utf8(entry, entry_path.c_str());
   if (!rv) {
-    throw archive_entry_error("archive_entry_update_pathname_utf8", entry_path);
+    throw std::runtime_error(("utf-8 failure: %1%"_f % entry_path).str());
   }
 }
 
@@ -113,12 +115,5 @@ format_archive_error(unpack::archive_handle handle, const std::string& name)
 unpack::archive_error::archive_error(archive_handle handle,
                                      const std::string& name) noexcept
   : std::runtime_error(format_archive_error(handle, name))
-{
-}
-
-unpack::archive_entry_error::archive_entry_error(
-  const std::string& name,
-  const std::string& detail) noexcept
-  : std::runtime_error(name + ": " + detail)
 {
 }
