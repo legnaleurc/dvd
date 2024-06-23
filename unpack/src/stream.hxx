@@ -26,7 +26,7 @@ public:
   curl_easy(multi_handle multi, easy_handle easy);
   ~curl_easy();
 
-  bool read();
+  void read();
 
 private:
   void update_status_code();
@@ -36,6 +36,7 @@ private:
 
   multi_handle multi;
   easy_handle easy;
+  bool is_eof;
 
 public:
   long status_code;

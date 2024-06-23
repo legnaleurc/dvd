@@ -34,6 +34,7 @@ create_multi_handle()
 unpack::curl_easy::curl_easy(multi_handle multi, easy_handle easy)
   : multi(multi)
   , easy(easy)
+  , is_eof(false)
   , status_code(0)
   , content_length(-1)
 {
@@ -51,9 +52,13 @@ unpack::curl_easy::~curl_easy()
   curl_multi_remove_handle(this->multi.get(), this->easy.get());
 }
 
-bool
+void
 unpack::curl_easy::read()
 {
+  if (this->is_eof) {
+    throw std::runtime_error("read after eof");
+  }
+
   CURLMcode rv;
   int n_active;
   int n_fd;
@@ -65,7 +70,8 @@ unpack::curl_easy::read()
   if (rv != CURLM_OK) {
     throw std::runtime_error(curl_multi_strerror(rv));
   }
-  return n_active <= 0;
+
+  this->is_eof = n_active <= 0;
 }
 
 void
@@ -81,13 +87,9 @@ unpack::curl_easy::update_status_code()
 void
 unpack::curl_easy::read_until_status_code()
 {
-  bool is_eof = false;
   this->update_status_code();
   while (this->status_code == 0) {
-    if (is_eof) {
-      throw std::runtime_error("early eof");
-    }
-    is_eof = this->read();
+    this->read();
     this->update_status_code();
   }
 }
@@ -106,13 +108,9 @@ unpack::curl_easy::update_content_length()
 void
 unpack::curl_easy::read_until_content_length()
 {
-  bool is_eof = false;
   this->update_content_length();
   while (this->content_length < 0) {
-    if (is_eof) {
-      throw std::runtime_error("early eof");
-    }
-    is_eof = this->read();
+    this->read();
     this->update_content_length();
   }
 }
@@ -193,12 +191,8 @@ unpack::stream::detail::close()
 std::vector<uint8_t>
 unpack::stream::detail::read()
 {
-  bool is_eof = false;
   while (this->blocks.empty()) {
-    if (is_eof) {
-      throw std::runtime_error("early eof");
-    }
-    is_eof = this->easy->read();
+    this->easy->read();
   }
 
   auto top = std::move(this->blocks.front());
