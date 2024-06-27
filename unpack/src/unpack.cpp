@@ -104,7 +104,7 @@ extract_archive(unpack::archive_handle reader, unpack::archive_handle writer)
 }
 
 void
-unpack::unpack_to(uint16_t port,
+unpack::unpack_to(std::uint16_t port,
                   const std::string& id,
                   const std::string& local_path)
 {

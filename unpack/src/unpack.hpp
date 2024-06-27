@@ -6,7 +6,9 @@
 namespace unpack {
 
 void
-unpack_to(uint16_t port, const std::string& id, const std::string& local_path);
+unpack_to(std::uint16_t port,
+          const std::string& id,
+          const std::string& local_path);
 
 }
 

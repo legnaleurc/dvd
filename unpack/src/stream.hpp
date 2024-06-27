@@ -7,20 +7,22 @@
 
 namespace unpack {
 
-class stream
+using binary_chunk = std::vector<std::uint8_t>;
+
+class input_stream
 {
 public:
-  stream(uint16_t port, const std::string& id);
+  input_stream(std::uint16_t port, const std::string& id);
 
-  stream(const stream&) = delete;
-  stream& operator=(const stream&) = delete;
-  stream(stream&&) = delete;
-  stream& operator=(stream&&) = delete;
+  input_stream(const input_stream&) = delete;
+  input_stream& operator=(const input_stream&) = delete;
+  input_stream(input_stream&&) = delete;
+  input_stream& operator=(input_stream&&) = delete;
 
   void open();
   void close();
-  std::vector<uint8_t> read();
-  int64_t seek(int64_t offset, int whence);
+  binary_chunk read();
+  std::int64_t seek(std::int64_t offset, int whence);
 
 private:
   class detail;

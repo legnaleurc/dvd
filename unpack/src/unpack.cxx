@@ -64,7 +64,7 @@ unpack::archive_context::seek(struct archive* handle,
   }
 }
 
-unpack::archive_context::archive_context(uint16_t port,
+unpack::archive_context::archive_context(std::uint16_t port,
                                          const std::string& id,
                                          const std::string& local_path)
   : id(id)

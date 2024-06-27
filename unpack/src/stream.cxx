@@ -115,7 +115,7 @@ unpack::curl_easy::read_until_content_length()
   }
 }
 
-unpack::stream::detail::detail(const std::string& url)
+unpack::input_stream::detail::detail(const std::string& url)
   : multi(create_multi_handle())
   , url(url)
   , easy(nullptr)
@@ -126,19 +126,19 @@ unpack::stream::detail::detail(const std::string& url)
 }
 
 bool
-unpack::stream::detail::is_length_valid() const
+unpack::input_stream::detail::is_length_valid() const
 {
   return this->length >= 0;
 }
 
 bool
-unpack::stream::detail::is_range_valid() const
+unpack::input_stream::detail::is_range_valid() const
 {
   return this->is_length_valid() && this->offset < this->length;
 }
 
 void
-unpack::stream::detail::open(bool range)
+unpack::input_stream::detail::open(bool range)
 {
   auto easy = create_easy_handle();
   CURLcode rv = CURLE_OK;
@@ -148,8 +148,8 @@ unpack::stream::detail::open(bool range)
     throw std::runtime_error(curl_easy_strerror(rv));
   }
 
-  rv =
-    curl_easy_setopt(easy.get(), CURLOPT_WRITEFUNCTION, stream::detail::write);
+  rv = curl_easy_setopt(
+    easy.get(), CURLOPT_WRITEFUNCTION, input_stream::detail::write);
   if (rv != CURLE_OK) {
     throw std::runtime_error(curl_easy_strerror(rv));
   }
@@ -182,14 +182,14 @@ unpack::stream::detail::open(bool range)
 }
 
 void
-unpack::stream::detail::close()
+unpack::input_stream::detail::close()
 {
   this->blocks.clear();
   this->easy.reset();
 }
 
-std::vector<uint8_t>
-unpack::stream::detail::read()
+unpack::binary_chunk
+unpack::input_stream::detail::read()
 {
   while (this->blocks.empty()) {
     this->easy->read();
@@ -203,8 +203,8 @@ unpack::stream::detail::read()
   return top;
 }
 
-int64_t
-unpack::stream::detail::seek(int64_t offset, int whence)
+std::int64_t
+unpack::input_stream::detail::seek(std::int64_t offset, int whence)
 {
   this->close();
 
@@ -232,13 +232,13 @@ unpack::stream::detail::seek(int64_t offset, int whence)
 }
 
 std::size_t
-unpack::stream::detail::write(char* ptr,
-                              std::size_t size,
-                              std::size_t nmemb,
-                              void* userdata)
+unpack::input_stream::detail::write(char* ptr,
+                                    std::size_t size,
+                                    std::size_t nmemb,
+                                    void* userdata)
 {
-  auto self = static_cast<stream::detail*>(userdata);
-  auto chunk = static_cast<const uint8_t*>(static_cast<void*>(ptr));
+  auto self = static_cast<input_stream::detail*>(userdata);
+  auto chunk = static_cast<const std::uint8_t*>(static_cast<void*>(ptr));
   std::size_t length = size * nmemb;
   self->blocks.emplace_back(chunk, chunk + length);
   return length;
