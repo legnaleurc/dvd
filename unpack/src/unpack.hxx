@@ -33,7 +33,7 @@ public:
                          la_int64_t offset,
                          int whence);
 
-  archive_context(uint16_t port,
+  archive_context(std::uint16_t port,
                   const std::string& id,
                   const std::string& local_path);
 
@@ -45,8 +45,8 @@ private:
   std::string id;
   std::string local_path;
   text_codec decoder;
-  unpack::stream stream;
-  std::vector<uint8_t> chunk;
+  input_stream stream;
+  binary_chunk chunk;
 };
 
 using context_handle = std::shared_ptr<archive_context>;

@@ -5,7 +5,7 @@
 
 namespace unpack {
 
-boost::format operator""_f(const char* s, std::size_t l);
+boost::format operator""_f(const char* literal, std::size_t size);
 
 }
 

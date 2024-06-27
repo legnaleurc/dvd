@@ -7,7 +7,6 @@
 
 #include <deque>
 #include <stdexcept>
-#include <vector>
 
 namespace unpack {
 
@@ -40,10 +39,10 @@ private:
 
 public:
   long status_code;
-  int64_t content_length;
+  std::int64_t content_length;
 };
 
-class stream::detail
+class input_stream::detail
 {
 public:
   static std::size_t write(char* ptr,
@@ -51,7 +50,7 @@ public:
                            std::size_t nmemb,
                            void* userdata);
 
-  detail(const std::string& url);
+  explicit detail(const std::string& url);
 
   detail(const detail&) = delete;
   detail& operator=(const detail&) = delete;
@@ -60,8 +59,8 @@ public:
 
   void open(bool range);
   void close();
-  std::vector<uint8_t> read();
-  int64_t seek(int64_t offset, int whence);
+  binary_chunk read();
+  std::int64_t seek(std::int64_t offset, int whence);
 
   bool is_length_valid() const;
   bool is_range_valid() const;
@@ -69,9 +68,9 @@ public:
   multi_handle multi;
   std::string url;
   std::shared_ptr<curl_easy> easy;
-  int64_t offset;
-  int64_t length;
-  std::deque<std::vector<uint8_t>> blocks;
+  std::int64_t offset;
+  std::int64_t length;
+  std::deque<binary_chunk> blocks;
 };
 
 }
