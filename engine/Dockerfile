@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm as base
+FROM python:3.12-slim-bookworm AS base
 
 # env
 ENV POETRY_HOME=/opt/poetry
@@ -9,7 +9,7 @@ RUN $POETRY_HOME/bin/pip install poetry
 # add poetry to path
 ENV PATH=$POETRY_HOME/bin:$PATH
 
-FROM base as builder
+FROM base AS builder
 
 # build-essential is required for GNU/Make and native modules
 RUN : \
@@ -24,7 +24,7 @@ COPY pyproject.toml poetry.lock poetry.toml Makefile /app/
 WORKDIR /app
 RUN make release
 
-FROM base as production
+FROM base AS production
 
 # FIXME needed for unpack binary
 RUN : \
