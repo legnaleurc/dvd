@@ -2,8 +2,8 @@ import itertools
 from logging import getLogger
 import re
 from asyncio import Condition, as_completed
-from collections.abc import AsyncIterator, Callable
-from dataclasses import dataclass
+from collections.abc import AsyncIterator, Callable, Iterator
+from dataclasses import dataclass, asdict
 from typing import cast
 from pathlib import PurePath
 
@@ -12,6 +12,7 @@ from wcpan.drive.core.types import Node, Drive
 from .util import NodeDict, dict_from_node
 
 
+_MAX_HISTORY = 10
 _L = getLogger(__name__)
 
 
@@ -25,6 +26,17 @@ class SearchParam:
     fuzzy: bool | None
     parent_path: str | None
     size: int | None
+
+    def is_valid(self) -> bool:
+        return (
+            bool(self.name)
+            or self.fuzzy is not None
+            or bool(self.parent_path)
+            or self.size is not None
+        )
+
+    def to_dict(self):
+        return asdict(self)
 
 
 class SearchFailedError(Exception):
@@ -50,6 +62,11 @@ class SearchEngine(object):
         self._drive = drive
         self._cache: dict[SearchParam, list[SearchNodeDict]] = {}
         self._searching: dict[SearchParam, Condition] = {}
+        self._history: dict[SearchParam, None] = {}
+
+    @property
+    def history(self) -> Iterator[SearchParam]:
+        return reversed(self._history.keys())
 
     async def __call__(
         self,
@@ -60,7 +77,12 @@ class SearchEngine(object):
         size: int | None = None,
     ) -> list[SearchNodeDict]:
         param = SearchParam(name=name, fuzzy=fuzzy, parent_path=parent_path, size=size)
+        if not param.is_valid():
+            raise SearchFailedError(f"empty search param")
+
         _L.info(f"search {param}")
+
+        self._update_history(param)
 
         nodes = self._cache.get(param, None)
         if nodes is not None:
@@ -168,6 +190,15 @@ class SearchEngine(object):
             node_list = list(g)
 
         return node_list
+
+    def _update_history(self, param: SearchParam):
+        if param in self._history:
+            del self._history[param]
+        self._history[param] = None
+
+        if len(self._history) > _MAX_HISTORY:
+            oldest = next(iter(self._history))
+            del self._history[oldest]
 
 
 def to_normal_search_pattern(raw: str) -> str:
