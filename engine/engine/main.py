@@ -168,6 +168,7 @@ def setup_api_path(app: Application) -> None:
     app.router.add_view(r"/api/v1/changes", api.ChangesView)
     app.router.add_view(r"/api/v1/apply", api.ApplyView)
     app.router.add_view(r"/api/v1/cache", api.CacheView)
+    app.router.add_view(r"/api/v1/history", api.HistoryView)
 
 
 def setup_static_path(app: Application, path: str) -> None:

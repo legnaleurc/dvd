@@ -381,6 +381,13 @@ class CacheView(HasTokenMixin, ListAPIMixin[ImageListCacheDict], DestroyAPIMixin
         ue.clear_cache()
 
 
+class HistoryView(HasTokenMixin, ListAPIMixin[dict[str, Any]], View):
+    async def list_(self) -> list[dict[str, Any]]:
+        se: SearchEngine = self.request.app["se"]
+        history = [_.to_dict() for _ in se.history]
+        return history
+
+
 def unpack_dict(d: dict[str, Any], keys: Iterable[str]) -> dict[str, Any]:
     common_keys = set(keys) & set(d.keys())
     return {key: d[key] for key in common_keys}
