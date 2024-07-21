@@ -18,6 +18,9 @@ from wcpan.drive.core.lib import dispatch_change
 import pillow_avif as pillow_avif  # type: ignore
 
 
+_L = getLogger(__name__)
+
+
 class NodeDict(TypedDict):
     id: str
     name: str
@@ -104,11 +107,11 @@ class StorageManager(object):
         for child in self._path.iterdir():
             s = child.stat()
             d = now - s.st_mtime
-            getLogger(__name__).debug(f"check {child} ({d})")
+            _L.debug(f"check {child} ({d})")
             if d > DAY:
                 shutil.rmtree(str(child))
                 del self._cache[child.name]
-                getLogger(__name__).info(f"prune {child} ({d})")
+                _L.info(f"prune {child} ({d})")
 
     async def _loop(self):
         while True:
@@ -167,7 +170,7 @@ class UnpackEngine:
         except UnpackFailedError:
             raise
         except Exception as e:
-            getLogger(__name__).exception("unpack failed, abort")
+            _L.exception("unpack failed, abort")
             raise UnpackFailedError(str(e)) from e
         finally:
             del self._unpacking[node.id]
@@ -196,7 +199,7 @@ class UnpackEngine:
             str(self._storage.root_path),
         ]
 
-        getLogger(__name__).debug(" ".join(cmd))
+        _L.debug(" ".join(cmd))
 
         p = await asyncio.create_subprocess_exec(
             *cmd,
@@ -227,7 +230,7 @@ class UnpackEngine:
                 try:
                     image = Image.open(path)  # type: ignore
                 except OSError:
-                    getLogger(__name__).exception("unknown image")
+                    _L.exception("unknown image")
                     continue
                 width, height = image.size
                 rv.append(

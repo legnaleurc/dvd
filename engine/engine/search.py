@@ -12,6 +12,9 @@ from wcpan.drive.core.types import Node, Drive
 from .util import NodeDict, dict_from_node
 
 
+_L = getLogger(__name__)
+
+
 class SearchNodeDict(NodeDict):
     parent_path: str
 
@@ -57,7 +60,7 @@ class SearchEngine(object):
         size: int | None = None,
     ) -> list[SearchNodeDict]:
         param = SearchParam(name=name, fuzzy=fuzzy, parent_path=parent_path, size=size)
-        getLogger(__name__).info(f"search {param}")
+        _L.info(f"search {param}")
 
         nodes = self._cache.get(param, None)
         if nodes is not None:
@@ -104,7 +107,7 @@ class SearchEngine(object):
             self._cache[param] = nodes
             return nodes
         except Exception as e:
-            getLogger(__name__).exception("search failed, abort")
+            _L.exception("search failed, abort")
             raise SearchFailedError(str(e))
         finally:
             del self._searching[param]

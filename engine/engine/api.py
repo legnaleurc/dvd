@@ -45,6 +45,9 @@ from .util import (
 from .types import ImageSizeDict, VideoSizeDict, ImageListCacheDict
 
 
+_L = getLogger(__name__)
+
+
 class NodeView(
     NodeObjectMixin,
     HasTokenMixin,
@@ -86,7 +89,7 @@ class NodeView(
 
     async def destory(self):
         node = await self.get_object()
-        getLogger(__name__).info(f"trash {node.id} {node.name}")
+        _L.info(f"trash {node.id} {node.name}")
         drive: Drive = self.request.app["drive"]
         se: SearchEngine = self.request.app["se"]
         path = await drive.resolve_path(node)
@@ -154,7 +157,7 @@ class NodeListView(
             )
             return dict_from_node(node)
         except Exception as e:
-            getLogger(__name__).exception(
+            _L.exception(
                 f"failed to create folder, name: {name}, parent_id: {parent_id}"
             )
             raise HTTPConflict() from e
@@ -261,9 +264,7 @@ class NodeImageView(NodeObjectMixin, View):
         if node.is_directory:
             child = await get_node(drive, data["id"])
             if not child:
-                getLogger(__name__).error(
-                    f"tried to find child {data['id']} but not found"
-                )
+                _L.error(f"tried to find child {data['id']} but not found")
                 raise HTTPInternalServerError()
             async with drive.download_file(child) as stream:
                 async for chunk in stream:

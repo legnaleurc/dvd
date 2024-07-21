@@ -14,6 +14,9 @@ from . import api, view, search
 from .util import create_unpack_engine
 
 
+_L = getLogger(__name__)
+
+
 class Daemon(object):
     def __init__(self):
         self._kwargs = None
@@ -28,7 +31,7 @@ class Daemon(object):
         try:
             return await self._main()
         except Exception:
-            getLogger(__name__).exception("main function error")
+            _L.exception("main function error")
         return 1
 
     async def _main(self):
