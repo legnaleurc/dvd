@@ -93,7 +93,7 @@ class NodeView(
         drive: Drive = self.request.app["drive"]
         se: SearchEngine = self.request.app["se"]
         path = await drive.resolve_path(node)
-        se.drop_value(str(path))
+        se.invalidate_cache_by_path(str(path))
         await drive.move(node, trashed=True)
 
 
