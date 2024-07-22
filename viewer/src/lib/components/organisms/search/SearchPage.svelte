@@ -18,7 +18,7 @@
     default: NeverRecord;
   };
 
-  const { detailList } = setSearchContext();
+  const { detailList, loadSearchHistory } = setSearchContext();
   const { selectedId, deselectAll } = setSelectionContext();
   const { startQueue, stopQueue } = setQueueContext();
   setDisabledContext();
@@ -33,6 +33,7 @@
 
   onMount(() => {
     startQueue();
+    loadSearchHistory();
     return stopQueue;
   });
 
