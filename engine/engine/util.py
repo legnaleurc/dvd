@@ -15,7 +15,7 @@ from PIL import Image
 from wcpan.drive.core.types import Node, Drive, ChangeAction
 from wcpan.drive.core.exceptions import NodeNotFoundError
 from wcpan.drive.core.lib import dispatch_change
-import pillow_avif as pillow_avif
+import pillow_avif as pillow_avif  # type: ignore
 
 
 class NodeDict(TypedDict):
@@ -225,7 +225,7 @@ class UnpackEngine:
                 if not type_.startswith("image/"):
                     continue
                 try:
-                    image = Image.open(path)
+                    image = Image.open(path)  # type: ignore
                 except OSError:
                     getLogger(__name__).exception("unknown image")
                     continue
