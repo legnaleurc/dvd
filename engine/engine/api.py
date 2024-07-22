@@ -2,9 +2,10 @@ import asyncio
 import json
 from logging import getLogger
 import shlex
-from typing import Any, Iterable, Type
+from typing import Any
 from pathlib import PurePath
 from asyncio import as_completed
+from collections.abc import Callable, Iterable
 
 from aiohttp.web import StreamResponse, View
 from aiohttp.web_exceptions import (
@@ -99,13 +100,13 @@ class NodeListView(
 ):
     async def list_(self):
         # node name
-        name = get_query_variable(self.request.query, str, "name")
+        name = get_query_value(self.request.query, str, "name")
         # fuzzy match name
-        fuzzy = get_query_variable(self.request.query, bool, "fuzzy")
+        fuzzy = get_query_value(self.request.query, bool, "fuzzy")
         # node parent path
-        parent_path = get_query_variable(self.request.query, str, "parent_path")
+        parent_path = get_query_value(self.request.query, str, "parent_path")
         # node size
-        size = get_query_variable(self.request.query, int, "size")
+        size = get_query_value(self.request.query, int, "size")
 
         se: SearchEngine = self.request.app["se"]
         try:
@@ -385,10 +386,13 @@ def unpack_dict(d: dict[str, Any], keys: Iterable[str]) -> dict[str, Any]:
     return {key: d[key] for key in common_keys}
 
 
-def get_query_variable[
+type CastFunction[T] = Callable[[Any], T]
+
+
+def get_query_value[
     T
-](query: MultiMapping[str], type_: Type[T], key: str) -> T | None:
+](query: MultiMapping[str], fn: CastFunction[T], key: str) -> T | None:
     value = query.get(key, None)
     if value is None:
         return None
-    return type_(value)
+    return fn(value)
