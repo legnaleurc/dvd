@@ -1,10 +1,9 @@
-import asyncio
 import json
 from logging import getLogger
 import shlex
 from typing import Any
 from pathlib import PurePath
-from asyncio import as_completed
+from asyncio import as_completed, create_subprocess_exec
 from collections.abc import Callable, Iterable
 
 from aiohttp.web import StreamResponse, View
@@ -348,7 +347,7 @@ class ApplyView(HasTokenMixin, View):
 
         command = shlex.split(command)
         command = [_.format(**kwargs) for _ in command]
-        p = await asyncio.create_subprocess_exec(*command)
+        p = await create_subprocess_exec(*command)
         await p.communicate()
         assert p.returncode == 0
         raise HTTPNoContent
