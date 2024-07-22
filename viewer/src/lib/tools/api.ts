@@ -4,6 +4,7 @@ import type {
   ChangeResponse,
   ImageResponse,
   NodeResponse,
+  NodeSearchParam,
   SearchResponse,
   VideoResponse,
 } from "$types/api";
@@ -87,13 +88,7 @@ export async function renameNode(id: string, name: string) {
   });
 }
 
-type ListNode = Partial<{
-  name: string;
-  fuzzy: boolean;
-  parent_path: string;
-  size: number;
-}>;
-export async function listNode(param: ListNode) {
+export async function listNode(param: NodeSearchParam) {
   const r = await get("/api/v1/nodes", param);
   const rv: SearchResponse[] = await r.json();
   return rv;
@@ -104,6 +99,12 @@ export async function applyCommand(command: string, kwargs: object) {
     command,
     kwargs,
   });
+}
+
+export async function getSearchHistory(): Promise<NodeSearchParam[]> {
+  const r = await get("/api/v1/history");
+  const rv: NodeSearchParam[] = await r.json();
+  return rv;
 }
 
 export function getStreamUrl(id: string, name: string): string {

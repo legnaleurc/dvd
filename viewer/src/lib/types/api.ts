@@ -8,6 +8,13 @@ export interface NodeResponse {
   is_trashed: boolean;
 }
 
+export type NodeSearchParam = Partial<{
+  name: string;
+  fuzzy: boolean;
+  parent_path: string;
+  size: number;
+}>;
+
 export interface SearchResponse extends NodeResponse {
   hash: string;
   size: number;
