@@ -1,7 +1,4 @@
 <script lang="ts">
-  import { replaceState } from "$app/navigation";
-  import { page } from "$app/stores";
-
   import { getSelectionContext } from "$stores/selection";
   import { getSearchContext } from "$stores/search";
   import SearchInput from "$atoms/SearchInput.svelte";
@@ -11,27 +8,16 @@
   export let disabled: boolean;
 
   const { deselectAll } = getSelectionContext();
-  const { searchName, historyLoaded } = getSearchContext();
+  const { searchName } = getSearchContext();
 
-  let nameInput = "";
+  let text = "";
 
   function handleSearch() {
-    if (!nameInput) {
+    if (!text) {
       return;
     }
     deselectAll();
-    searchName(nameInput);
-  }
-
-  $: queryName = $page.url.searchParams.get("name");
-  $: if (queryName !== null && $historyLoaded) {
-    nameInput = queryName;
-
-    const url = $page.url;
-    url.searchParams.delete("name");
-    replaceState(url, $page.state);
-
-    handleSearch();
+    searchName(text);
   }
 </script>
 
@@ -39,6 +25,6 @@
   class={klass}
   {disabled}
   placeholder="Search"
-  bind:value={nameInput}
+  bind:value={text}
   on:enterpress={handleSearch}
 />

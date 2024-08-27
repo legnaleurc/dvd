@@ -11,19 +11,11 @@ export function createStore() {
   const idList = writable<string[]>([]);
   const resultMap = writable<Record<string, SearchResponse>>({});
   const historyList = writable<string[]>([]);
-  const historyLoaded = writable<boolean>(false);
   const detailList = writable<string[]>([]);
 
   async function loadSearchHistory() {
-    historyLoaded.set(false);
-    try {
-      const rawList = await getSearchHistory();
-      historyList.set(
-        rawList.map((param) => param.name).filter((name) => name),
-      );
-    } finally {
-      historyLoaded.set(true);
-    }
+    const rawList = await getSearchHistory();
+    historyList.set(rawList.map((param) => param.name).filter((name) => name));
   }
 
   async function searchText(text: string) {
@@ -64,7 +56,6 @@ export function createStore() {
     idList,
     resultMap,
     historyList,
-    historyLoaded,
     detailList,
     loadSearchHistory,
     searchName,

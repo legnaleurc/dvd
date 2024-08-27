@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { beforeNavigate } from "$app/navigation";
+  import { beforeNavigate, replaceState } from "$app/navigation";
+  import { page } from "$app/stores";
 
   import type { NeverRecord } from "$types/traits";
   import { setSelectionContext } from "$stores/selection";
@@ -18,12 +19,28 @@
     default: NeverRecord;
   };
 
-  const { detailList, loadSearchHistory } = setSearchContext();
+  const { detailList, loadSearchHistory, searchName } = setSearchContext();
   const { selectedId, deselectAll } = setSelectionContext();
   const { startQueue, stopQueue } = setQueueContext();
   setDisabledContext();
 
   const { isFullScreen } = getFullScreenContext();
+
+  function popQueryName(): string {
+    const routeId = $page.route.id;
+    if (routeId !== "/search") {
+      return "";
+    }
+
+    const queryName = $page.url.searchParams.get("name");
+    $page.url.searchParams.delete("name");
+    replaceState($page.url, $page.state);
+    if (!queryName) {
+      return "";
+    }
+
+    return queryName;
+  }
 
   let isSelectionEmpty = true;
 
@@ -33,8 +50,17 @@
 
   onMount(() => {
     startQueue();
-    loadSearchHistory();
     return stopQueue;
+  });
+
+  onMount(() => {
+    loadSearchHistory().then(() => {
+      const queryName = popQueryName();
+      if (!queryName) {
+        return;
+      }
+      return searchName(queryName);
+    });
   });
 
   $: {
