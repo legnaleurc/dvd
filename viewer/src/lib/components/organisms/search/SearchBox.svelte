@@ -8,16 +8,14 @@
   export let disabled: boolean;
 
   const { deselectAll } = getSelectionContext();
-  const { searchName } = getSearchContext();
-
-  let text = "";
+  const { searchName, nameInput } = getSearchContext();
 
   function handleSearch() {
-    if (!text) {
+    if (!$nameInput) {
       return;
     }
     deselectAll();
-    searchName(text);
+    searchName($nameInput);
   }
 </script>
 
@@ -25,6 +23,6 @@
   class={klass}
   {disabled}
   placeholder="Search"
-  bind:value={text}
+  bind:value={$nameInput}
   on:enterpress={handleSearch}
 />

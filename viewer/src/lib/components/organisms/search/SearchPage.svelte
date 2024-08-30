@@ -19,12 +19,12 @@
     default: NeverRecord;
   };
 
-  const { detailList, loadSearchHistory, searchName } = setSearchContext();
+  const { detailList, nameInput, loadSearchHistory, searchName } =
+    setSearchContext();
   const { selectedId, deselectAll } = setSelectionContext();
   const { startQueue, stopQueue } = setQueueContext();
-  setDisabledContext();
-
   const { isFullScreen } = getFullScreenContext();
+  setDisabledContext();
 
   function popQueryName(): string {
     const routeId = $page.route.id;
@@ -59,6 +59,7 @@
       if (!queryName) {
         return;
       }
+      $nameInput = queryName;
       return searchName(queryName);
     });
   });

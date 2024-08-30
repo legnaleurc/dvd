@@ -12,6 +12,7 @@ export function createStore() {
   const resultMap = writable<Record<string, SearchResponse>>({});
   const historyList = writable<string[]>([]);
   const detailList = writable<string[]>([]);
+  const nameInput = writable("");
 
   async function loadSearchHistory() {
     const rawList = await getSearchHistory();
@@ -48,6 +49,7 @@ export function createStore() {
     historyList.update((self) => {
       return [text, ...self.slice(0, index), ...self.slice(index + 1)];
     });
+    nameInput.set(text);
     await searchText(text);
   }
 
@@ -57,6 +59,7 @@ export function createStore() {
     resultMap,
     historyList,
     detailList,
+    nameInput,
     loadSearchHistory,
     searchName,
     searchHistory,
