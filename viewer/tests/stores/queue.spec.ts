@@ -8,12 +8,17 @@ import {
   beforeEach,
   afterEach,
   test,
+  vi,
 } from "vitest";
 import { get } from "svelte/store";
 import { setupServer } from "msw/node";
 
 import { handlers } from "$mocks/queue";
 import { createStore, type ActionQueueStore } from "$stores/queue";
+
+vi.mock(import("$tools/logging"), async () => ({
+  reportWarning() {},
+}));
 
 describe("queue", () => {
   const server = setupServer(...handlers);

@@ -8,6 +8,7 @@ import {
   listImage,
   readNode,
 } from "$tools/api";
+import { reportWarning } from "$tools/logging";
 
 type ImageData = ImageResponse;
 type ComicData = {
@@ -55,7 +56,7 @@ export function createStore() {
         return self;
       });
     } catch (e: unknown) {
-      console.warn(e);
+      reportWarning(e);
       comicMap.update((self) => {
         self[id].unpacking = false;
         return self;

@@ -3,6 +3,7 @@ import { writable } from "svelte/store";
 
 import { moveNodeToId, moveNodeToPath, trashNode } from "$tools/api";
 import { Queue } from "$tools/queue";
+import { reportWarning } from "$tools/logging";
 
 type Task = ((consumerId: number) => Promise<void>) | null;
 type ApiTask = (id: string) => Promise<void>;
@@ -56,7 +57,7 @@ export function createStore() {
           await api(id);
           fullfilledCount.update((self) => self + 1);
         } catch (e: unknown) {
-          console.warn(e);
+          reportWarning(e);
           rejectedCount.update((self) => self + 1);
         } finally {
           pendingCount.update((self) => self - 1);
@@ -119,7 +120,7 @@ async function consume(q: Queue<Task>, id: number) {
       }
       await task(id);
     } catch (e) {
-      console.warn(e);
+      reportWarning(e);
     } finally {
       q.taskDone();
     }

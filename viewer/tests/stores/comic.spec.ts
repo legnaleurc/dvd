@@ -1,11 +1,23 @@
 /// @vitest-environment jsdom
 
-import { describe, expect, beforeAll, afterAll, afterEach, test } from "vitest";
+import {
+  describe,
+  expect,
+  beforeAll,
+  afterAll,
+  afterEach,
+  test,
+  vi,
+} from "vitest";
 import { get } from "svelte/store";
 import { setupServer } from "msw/node";
 
 import { handlers } from "$mocks/comic";
 import { createStore } from "$stores/comic";
+
+vi.mock(import("$tools/logging"), async () => ({
+  reportWarning() {},
+}));
 
 describe("comic", () => {
   const server = setupServer(...handlers);
