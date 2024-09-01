@@ -31,6 +31,7 @@ export function createStore() {
       });
       rootId.set(node.id);
     } catch (e: unknown) {
+      console.warn(e);
       nodeMap.set({});
       childrenMap.set({});
       rootId.set("");

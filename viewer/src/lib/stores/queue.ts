@@ -56,6 +56,7 @@ export function createStore() {
           await api(id);
           fullfilledCount.update((self) => self + 1);
         } catch (e: unknown) {
+          console.warn(e);
           rejectedCount.update((self) => self + 1);
         } finally {
           pendingCount.update((self) => self - 1);
@@ -110,7 +111,6 @@ export function getQueueContext() {
 }
 
 async function consume(q: Queue<Task>, id: number) {
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const task = await q.get();
     try {

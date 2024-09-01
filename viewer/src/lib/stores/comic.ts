@@ -55,6 +55,7 @@ export function createStore() {
         return self;
       });
     } catch (e: unknown) {
+      console.warn(e);
       comicMap.update((self) => {
         self[id].unpacking = false;
         return self;
