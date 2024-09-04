@@ -21,6 +21,11 @@ import pillow_avif as pillow_avif  # type: ignore
 _L = getLogger(__name__)
 
 
+# relax decompression bomb check
+if Image.MAX_IMAGE_PIXELS is not None:
+    Image.MAX_IMAGE_PIXELS = Image.MAX_IMAGE_PIXELS * 2
+
+
 class NodeDict(TypedDict):
     id: str
     name: str
