@@ -11,19 +11,14 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from asyncio import Condition
 
-from PIL import Image
 from wcpan.drive.core.types import Node, Drive, ChangeAction
 from wcpan.drive.core.exceptions import NodeNotFoundError
 from wcpan.drive.core.lib import dispatch_change
-import pillow_avif as pillow_avif  # type: ignore
+
+from .image import get_image_size
 
 
 _L = getLogger(__name__)
-
-
-# relax decompression bomb check
-if Image.MAX_IMAGE_PIXELS is not None:
-    Image.MAX_IMAGE_PIXELS = Image.MAX_IMAGE_PIXELS * 2
 
 
 class NodeDict(TypedDict):
@@ -233,11 +228,10 @@ class UnpackEngine:
                 if not type_.startswith("image/"):
                     continue
                 try:
-                    image = Image.open(path)  # type: ignore
-                except OSError:
+                    width, height = get_image_size(path)
+                except Exception:
                     _L.exception("unknown image")
                     continue
-                width, height = image.size
                 rv.append(
                     {
                         "id": str(path),
