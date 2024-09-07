@@ -12,7 +12,7 @@ from wcpan.logging import ConfigBuilder
 
 from . import api, view, search
 from .app import KEY_DRIVE, KEY_SEARCH_ENGINE, KEY_STATIC, KEY_TOKEN, KEY_UNPACK_ENGINE
-from .util import create_unpack_engine
+from .unpack import create_unpack_engine
 
 
 _L = getLogger(__name__)

@@ -1,13 +1,15 @@
+from typing import cast
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, Mock, NonCallableMock
 
 from engine.search import SearchEngine
+from engine.types import SearchNodeDict
 
 
 class SearchTest(IsolatedAsyncioTestCase):
     def setUp(self):
         self._nodes = [
-            Mock(),
+            cast(SearchNodeDict, Mock()),
         ]
         self._drive = create_fake_drive(self._nodes)
         self._engine = SearchEngine(self._drive)
@@ -22,7 +24,7 @@ class SearchTest(IsolatedAsyncioTestCase):
         self.assertEqual(self._drive.find_nodes_by_regex.call_count, 1)
 
 
-def create_fake_drive(nodes):
+def create_fake_drive(nodes: list[SearchNodeDict]):
     drive = NonCallableMock()
     drive.find_nodes_by_regex = AsyncMock(return_value=nodes)
     return drive

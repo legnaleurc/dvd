@@ -33,13 +33,8 @@ from .search import (
     SearchFailedError,
     SearchNodeDict,
 )
-from .util import (
-    NodeDict,
-    UnpackFailedError,
-    get_node,
-    dict_from_node,
-    dict_from_change,
-)
+from .unpack import UnpackFailedError
+from .lib import NodeDict, get_node, dict_from_node, dict_from_change
 from .types import ImageSizeDict, VideoSizeDict, ImageListCacheDict
 
 

@@ -10,7 +10,7 @@ from aiohttp.web_exceptions import (
 from wcpan.drive.core.types import Node
 
 from .app import KEY_DRIVE, KEY_TOKEN
-from .util import get_node
+from .lib import get_node
 from .rest import PermissionMixin
 
 

@@ -9,15 +9,12 @@ from pathlib import PurePath
 
 from wcpan.drive.core.types import Node, Drive
 
-from .util import NodeDict, dict_from_node
+from .lib import dict_from_node
+from .types import SearchNodeDict
 
 
 _MAX_HISTORY = 10
 _L = getLogger(__name__)
-
-
-class SearchNodeDict(NodeDict):
-    parent_path: str
 
 
 @dataclass(frozen=True)

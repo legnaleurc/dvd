@@ -1,122 +1,24 @@
-import asyncio
-from logging import getLogger
 import re
-import shutil
-import time
-from contextlib import AsyncExitStack, asynccontextmanager
+from asyncio import Condition, create_subprocess_exec
+from asyncio.subprocess import PIPE
+from contextlib import asynccontextmanager
 from itertools import zip_longest
+from logging import getLogger
 from mimetypes import guess_type
-from typing import Self, TypedDict
-from tempfile import TemporaryDirectory
-from pathlib import Path
-from asyncio import Condition
+from typing import Self
 
-from wcpan.drive.core.types import Node, Drive, ChangeAction
-from wcpan.drive.core.exceptions import NodeNotFoundError
-from wcpan.drive.core.lib import dispatch_change
+from wcpan.drive.core.types import Node, Drive
 
 from .image import get_image_size
+from .storage import StorageManager, create_storage_manager
+from .types import ImageDict
 
 
 _L = getLogger(__name__)
 
 
-class NodeDict(TypedDict):
-    id: str
-    name: str
-    parent_id: str | None
-    is_trashed: bool
-    is_directory: bool
-    mtime: str
-    mime_type: str
-    hash: str
-    size: int
-
-
-class ImageDict(TypedDict):
-    type: str
-    width: int
-    height: int
-    size: int
-    id: str
-
-
 class UnpackFailedError(Exception):
-    def __init__(self, message: str) -> None:
-        self._message = message
-
-    def __str__(self) -> str:
-        return self._message
-
-
-@asynccontextmanager
-async def create_storage_manager():
-    async with AsyncExitStack() as stack:
-        tmp = stack.enter_context(TemporaryDirectory())
-        path = Path(tmp)
-        storage = StorageManager(path)
-        await stack.enter_async_context(storage.watch())
-        yield storage
-
-
-class StorageManager(object):
-    def __init__(self, path: Path):
-        self._cache: dict[str, list[ImageDict]] = {}
-        self._path = path
-
-    def clear_cache(self):
-        self._cache = {}
-        for child in self._path.iterdir():
-            shutil.rmtree(str(child))
-
-    def get_cache(self, id_: str) -> list[ImageDict]:
-        return self._cache[id_]
-
-    def get_cache_or_none(self, id_: str) -> list[ImageDict] | None:
-        return self._cache.get(id_, None)
-
-    def set_cache(self, id_: str, manifest: list[ImageDict]) -> None:
-        self._cache[id_] = manifest
-
-    def get_path(self, id_: str) -> Path:
-        return self._path / id_
-
-    @property
-    def cache(self):
-        return self._cache
-
-    @property
-    def root_path(self) -> Path:
-        return self._path
-
-    @asynccontextmanager
-    async def watch(self):
-        task = asyncio.create_task(self._loop())
-        try:
-            yield
-        finally:
-            task.cancel()
-            try:
-                await task
-            except asyncio.CancelledError:
-                task = None
-
-    def _check(self):
-        DAY = 60 * 60 * 24
-        now = time.time()
-        for child in self._path.iterdir():
-            s = child.stat()
-            d = now - s.st_mtime
-            _L.debug(f"check {child} ({d})")
-            if d > DAY:
-                shutil.rmtree(str(child))
-                del self._cache[child.name]
-                _L.info(f"prune {child} ({d})")
-
-    async def _loop(self):
-        while True:
-            await asyncio.sleep(60 * 60)
-            self._check()
+    pass
 
 
 @asynccontextmanager
@@ -150,15 +52,12 @@ class UnpackEngine:
 
     @property
     def cache(self):
-        assert self._storage is not None
         return self._storage.cache
 
     def clear_cache(self):
-        assert self._storage is not None
         self._storage.clear_cache()
 
     async def _unpack(self, node: Node) -> list[ImageDict]:
-        assert self._storage is not None
         lock = self._unpacking[node.id]
         try:
             if node.is_directory:
@@ -179,10 +78,9 @@ class UnpackEngine:
 
     async def _wait_for_result(
         self,
-        lock: asyncio.Condition,
+        lock: Condition,
         node_id: str,
     ) -> list[ImageDict]:
-        assert self._storage is not None
         async with lock:
             await lock.wait()
         try:
@@ -191,7 +89,6 @@ class UnpackEngine:
             raise UnpackFailedError(f"{node_id} canceled unpack")
 
     async def _unpack_local(self, node_id: str) -> list[ImageDict]:
-        assert self._storage is not None
         cmd = [
             self._unpack_path,
             str(self._port),
@@ -201,10 +98,10 @@ class UnpackEngine:
 
         _L.debug(" ".join(cmd))
 
-        p = await asyncio.create_subprocess_exec(
+        p = await create_subprocess_exec(
             *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
         )
         _out, err = await p.communicate()
         if p.returncode != 0:
@@ -214,7 +111,6 @@ class UnpackEngine:
         return self._scan_local(node_id)
 
     def _scan_local(self, node_id: str) -> list[ImageDict]:
-        assert self._storage is not None
         rv: list[ImageDict] = []
         top = self._storage.get_path(node_id)
         for dirpath, dirnames, filenames in top.walk():
@@ -271,7 +167,7 @@ class UnpackEngine:
         return rv
 
 
-class FuzzyName(object):
+class FuzzyName:
     def __init__(self, name: str) -> None:
         seg_list = re.findall(r"\d+|\D+", name)
         seg_list = [int(_) if _.isdigit() else _ for _ in seg_list]
@@ -293,41 +189,3 @@ class FuzzyName(object):
             if l != r:
                 return l < r
         return False
-
-
-async def get_node(drive: Drive, id_or_root: str) -> Node | None:
-    try:
-        if id_or_root == "root":
-            return await drive.get_root()
-        else:
-            return await drive.get_node_by_id(id_or_root)
-    except NodeNotFoundError:
-        return None
-
-
-def dict_from_node(node: Node) -> NodeDict:
-    return {
-        "id": node.id,
-        "name": node.name,
-        "parent_id": node.parent_id,
-        "is_trashed": node.is_trashed,
-        "is_directory": node.is_directory,
-        "mtime": node.mtime.isoformat(),
-        "mime_type": node.mime_type,
-        "hash": node.hash,
-        "size": node.size,
-    }
-
-
-def dict_from_change(change: ChangeAction):
-    return dispatch_change(
-        change,
-        on_remove=lambda _: {
-            "removed": True,
-            "id": _,
-        },
-        on_update=lambda _: {
-            "removed": False,
-            "node": dict_from_node(_),
-        },
-    )

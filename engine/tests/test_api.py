@@ -12,7 +12,7 @@ from wcpan.drive.core.exceptions import NodeNotFoundError
 
 from engine.app import KEY_DRIVE, KEY_UNPACK_ENGINE
 from engine.main import application_context
-from engine.util import dict_from_node
+from engine.lib import dict_from_node
 
 
 class ApiTestCase(IsolatedAsyncioTestCase):
@@ -267,7 +267,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             },
         )
 
-    @patch("asyncio.create_subprocess_exec")
+    @patch("engine.unpack.create_subprocess_exec")
     async def testImageListForFiles(self, fake_create_process: MagicMock):
         assert self._client.app
 
