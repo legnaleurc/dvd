@@ -11,6 +11,7 @@ from wcpan.drive.cli.lib import create_drive_from_config
 from wcpan.logging import ConfigBuilder
 
 from . import api, view, search
+from .app import KEY_DRIVE, KEY_SEARCH_ENGINE, KEY_STATIC, KEY_TOKEN, KEY_UNPACK_ENGINE
 from .util import create_unpack_engine
 
 
@@ -114,7 +115,7 @@ async def application_context(
 
     # static
     if static_path:
-        app["static"] = static_path
+        app[KEY_STATIC] = Path(static_path)
         setup_static_path(app, static_path)
 
     # drive
@@ -124,10 +125,10 @@ async def application_context(
     async with create_drive_from_config(config_path) as drive, create_unpack_engine(
         drive, port, unpack_path
     ) as ue:
-        app["drive"] = drive
-        app["ue"] = ue
-        app["se"] = search.SearchEngine(drive)
-        app["token"] = token
+        app[KEY_DRIVE] = drive
+        app[KEY_UNPACK_ENGINE] = ue
+        app[KEY_SEARCH_ENGINE] = search.SearchEngine(drive)
+        app[KEY_TOKEN] = token
 
         yield app
 

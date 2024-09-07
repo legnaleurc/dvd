@@ -7,8 +7,9 @@ from aiohttp.web_exceptions import (
     HTTPNotFound,
     HTTPUnauthorized,
 )
-from wcpan.drive.core.types import Node, Drive
+from wcpan.drive.core.types import Node
 
+from .app import KEY_DRIVE, KEY_TOKEN
 from .util import get_node
 from .rest import PermissionMixin
 
@@ -19,7 +20,7 @@ class NodeObjectMixin(AbstractView):
         if not id_:
             raise HTTPBadRequest()
 
-        drive = self.request.app["drive"]
+        drive = self.request.app[KEY_DRIVE]
         node = await get_node(drive, id_)
         if not node:
             raise HTTPNotFound()
@@ -77,7 +78,7 @@ class NodeRandomAccessMixin(AbstractView):
             return
 
         offset, length = good_range
-        drive: Drive = self.request.app["drive"]
+        drive = self.request.app[KEY_DRIVE]
         async with drive.download_file(node) as stream:
             await stream.seek(offset)
             async for chunk in stream:
@@ -100,7 +101,7 @@ class NodeRandomAccessMixin(AbstractView):
 
 class HasTokenMixin(PermissionMixin, AbstractView):
     async def has_permission(self):
-        token: str = self.request.app["token"]
+        token: str = self.request.app[KEY_TOKEN]
         if not token:
             return True
         authorization = self.request.headers.get("Authorization")

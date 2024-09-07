@@ -1,13 +1,12 @@
-from os.path import join
-
 from aiohttp.web import View, FileResponse, HTTPFound
+
+from .app import KEY_STATIC
 
 
 class IndexView(View):
     async def get(self):
-        path = self.request.app["static"]
-        path = join(path, "index.html")
-        return FileResponse(path=path)
+        path = self.request.app[KEY_STATIC]
+        return FileResponse(path=path / "index.html")
 
 
 class IndexRedirect(View):

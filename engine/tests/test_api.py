@@ -10,6 +10,7 @@ from aiohttp.test_utils import TestServer, TestClient
 from wcpan.drive.core.types import Node
 from wcpan.drive.core.exceptions import NodeNotFoundError
 
+from engine.app import KEY_DRIVE, KEY_UNPACK_ENGINE
 from engine.main import application_context
 from engine.util import dict_from_node
 
@@ -41,7 +42,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
 
         expected = []
 
-        drive = self._client.app["drive"]
+        drive = self._client.app[KEY_DRIVE]
         drive.sync = MagicMock(return_value=AsyncMock(side_effect=expected))
 
         rv = await self._client.post("/api/v1/changes")
@@ -61,8 +62,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
 
         expected = make_node({})
 
-        drive = self._client.app["drive"]
-        drive.get_root.return_value = expected
+        drive = self._client.app[KEY_DRIVE]
+        aexpect(drive.get_root).return_value = expected
 
         rv = await self._client.get("/api/v1/nodes/root")
         self.assertEqual(rv.status, 401)
@@ -81,8 +82,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
 
         expected = make_node({})
 
-        drive = self._client.app["drive"]
-        drive.get_node_by_id.return_value = expected
+        drive = self._client.app[KEY_DRIVE]
+        aexpect(drive.get_node_by_id).return_value = expected
 
         rv = await self._client.get("/api/v1/nodes/1")
         self.assertEqual(rv.status, 401)
@@ -95,13 +96,13 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(rv.status, 200)
         body = await rv.json()
         self.assertEqual(body, dict_from_node(expected))
-        drive.get_node_by_id.assert_called_once_with("1")
+        aexpect(drive.get_node_by_id).assert_called_once_with("1")
 
     async def testGetNodeWith404(self):
         assert self._client.app
 
-        drive = self._client.app["drive"]
-        drive.get_node_by_id.side_effect = NodeNotFoundError("1")
+        drive = self._client.app[KEY_DRIVE]
+        aexpect(drive.get_node_by_id).side_effect = NodeNotFoundError("1")
 
         rv = await self._client.get("/api/v1/nodes/1")
         self.assertEqual(rv.status, 401)
@@ -123,7 +124,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                 }
             )
 
-        drive = self._client.app["drive"]
+        drive = self._client.app[KEY_DRIVE]
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
 
         rv = await self._client.patch(
@@ -143,7 +144,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             },
         )
         self.assertEqual(rv.status, 204)
-        drive.move.assert_called_once_with(
+        aexpect(drive.move).assert_called_once_with(
             make_node({"id": "1"}),
             new_parent=make_node({"id": "2"}),
             new_name=None,
@@ -159,7 +160,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                 }
             )
 
-        drive = self._client.app["drive"]
+        drive = self._client.app[KEY_DRIVE]
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
 
         rv = await self._client.patch(
@@ -179,7 +180,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             },
         )
         self.assertEqual(rv.status, 204)
-        drive.move.assert_called_once_with(
+        aexpect(drive.move).assert_called_once_with(
             make_node({"id": "1"}),
             new_parent=None,
             new_name="test",
@@ -195,7 +196,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                 }
             )
 
-        drive = self._client.app["drive"]
+        drive = self._client.app[KEY_DRIVE]
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
 
         rv = await self._client.delete("/api/v1/nodes/1")
@@ -207,7 +208,9 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             },
         )
         self.assertEqual(rv.status, 204)
-        drive.move.assert_called_once_with(make_node({"id": "1"}), trashed=True)
+        aexpect(drive.move).assert_called_once_with(
+            make_node({"id": "1"}), trashed=True
+        )
 
     async def testImageListForFolders(self):
         assert self._client.app
@@ -221,7 +224,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             )
 
         async def fake_walk(node: Node):
-            yield node, [], [
+            yield node, cast(list[Node], []), [
                 make_node(
                     {
                         "id": "2",
@@ -241,9 +244,9 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                 ),
             ]
 
-        drive = self._client.app["drive"]
+        drive = self._client.app[KEY_DRIVE]
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
-        drive.walk = fake_walk
+        drive.walk = cast(AsyncMock, fake_walk)
 
         rv = await self._client.get("/api/v1/nodes/1/images")
         self.assertEqual(rv.status, 401)
@@ -276,13 +279,13 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                 }
             )
 
-        ue = self._client.app["ue"]
-        tmp_path = ue._storage._path
+        ue = self._client.app[KEY_UNPACK_ENGINE]
+        tmp_path = ue._storage._path  # type: ignore
         fake_process = AsyncMock()
         fake_process.communicate.return_value = None, None
         fake_process.returncode = 0
         fake_create_process.return_value = fake_process
-        drive = self._client.app["drive"]
+        drive = self._client.app[KEY_DRIVE]
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
 
         rv = await self._client.get("/api/v1/nodes/1/images")
@@ -304,6 +307,10 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
+
+
+def aexpect(unknown: object) -> AsyncMock:
+    return cast(AsyncMock, unknown)
 
 
 def make_node(d: Any):

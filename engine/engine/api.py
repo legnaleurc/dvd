@@ -17,8 +17,8 @@ from aiohttp.web_exceptions import (
     HTTPUnauthorized,
 )
 from multidict import MultiMapping
-from wcpan.drive.core.types import Drive
 
+from .app import KEY_DRIVE, KEY_SEARCH_ENGINE, KEY_UNPACK_ENGINE
 from .mixins import NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin
 from .rest import (
     CreateAPIMixin,
@@ -30,13 +30,11 @@ from .rest import (
 )
 from .search import (
     InvalidPatternError,
-    SearchEngine,
     SearchFailedError,
     SearchNodeDict,
 )
 from .util import (
     NodeDict,
-    UnpackEngine,
     UnpackFailedError,
     get_node,
     dict_from_node,
@@ -62,7 +60,7 @@ class NodeView(
 
     async def partial_update(self):
         node = await self.get_object()
-        drive: Drive = self.request.app["drive"]
+        drive = self.request.app[KEY_DRIVE]
         kwargs = await self.request.json()
         kwargs = unpack_dict(
             kwargs,
@@ -90,8 +88,8 @@ class NodeView(
     async def destory(self):
         node = await self.get_object()
         _L.info(f"trash {node.id} {node.name}")
-        drive: Drive = self.request.app["drive"]
-        se: SearchEngine = self.request.app["se"]
+        drive = self.request.app[KEY_DRIVE]
+        se = self.request.app[KEY_SEARCH_ENGINE]
         path = await drive.resolve_path(node)
         se.invalidate_cache_by_path(str(path))
         await drive.move(node, trashed=True)
@@ -110,7 +108,7 @@ class NodeListView(
         # node size
         size = get_query_value(self.request.query, int, "size")
 
-        se: SearchEngine = self.request.app["se"]
+        se = self.request.app[KEY_SEARCH_ENGINE]
         try:
             nodes = await se(name=name, fuzzy=fuzzy, parent_path=parent_path, size=size)
         except InvalidPatternError:
@@ -142,7 +140,7 @@ class NodeListView(
         if not ok:
             raise HTTPBadRequest()
 
-        drive: Drive = self.request.app["drive"]
+        drive = self.request.app[KEY_DRIVE]
         parent_id = kwargs["parent_id"]
         name = kwargs["name"]
         parent = await drive.get_node_by_id(parent_id)
@@ -166,7 +164,7 @@ class NodeListView(
 class NodeChildrenView(NodeObjectMixin, HasTokenMixin, ListAPIMixin[NodeDict], View):
     async def list_(self):
         node = await self.get_object()
-        drive: Drive = self.request.app["drive"]
+        drive = self.request.app[KEY_DRIVE]
         children = await drive.get_children(node)
         children = filter(lambda _: not _.is_trashed, children)
         children = [dict_from_node(_) for _ in children]
@@ -214,7 +212,7 @@ class NodeImageListView(
     async def list_(self) -> list[ImageSizeDict]:
         node = await self.get_object()
 
-        ue: UnpackEngine = self.request.app["ue"]
+        ue = self.request.app[KEY_UNPACK_ENGINE]
         try:
             manifest = await ue.get_manifest(node)
         except UnpackFailedError as e:
@@ -244,7 +242,7 @@ class NodeImageView(NodeObjectMixin, View):
         image_id = int(image_id)
 
         node = await self.get_object()
-        ue: UnpackEngine = self.request.app["ue"]
+        ue = self.request.app[KEY_UNPACK_ENGINE]
         try:
             manifest = await ue.get_manifest(node)
         except UnpackFailedError:
@@ -255,7 +253,7 @@ class NodeImageView(NodeObjectMixin, View):
         except IndexError:
             raise HTTPNotFound()
 
-        drive: Drive = self.request.app["drive"]
+        drive = self.request.app[KEY_DRIVE]
         response = StreamResponse(status=200)
         response.content_type = data["type"]
         response.content_length = data["size"]
@@ -284,7 +282,7 @@ class NodeVideoListView(
 ):
     async def list_(self) -> list[VideoSizeDict]:
         node = await self.get_object()
-        drive: Drive = self.request.app["drive"]
+        drive = self.request.app[KEY_DRIVE]
 
         if node.is_video:
             if not node.parent_id:
@@ -330,8 +328,8 @@ class ChangesView(HasTokenMixin, View):
         if not await self.has_permission():
             raise HTTPUnauthorized()
 
-        drive: Drive = self.request.app["drive"]
-        se: SearchEngine = self.request.app["se"]
+        drive = self.request.app[KEY_DRIVE]
+        se = self.request.app[KEY_SEARCH_ENGINE]
         await se.clear_cache()
         changes = [dict_from_change(_) async for _ in drive.sync()]
         return json_response(changes)
@@ -356,8 +354,8 @@ class ApplyView(HasTokenMixin, View):
 
 class CacheView(HasTokenMixin, ListAPIMixin[ImageListCacheDict], DestroyAPIMixin, View):
     async def list_(self) -> list[ImageListCacheDict]:
-        ue: UnpackEngine = self.request.app["ue"]
-        drive: Drive = self.request.app["drive"]
+        ue = self.request.app[KEY_UNPACK_ENGINE]
+        drive = self.request.app[KEY_DRIVE]
         cache = ue.cache
         node_list = as_completed(drive.get_node_by_id(_) for _ in cache.keys())
         node_list = [await _ for _ in node_list]
@@ -377,13 +375,13 @@ class CacheView(HasTokenMixin, ListAPIMixin[ImageListCacheDict], DestroyAPIMixin
         ]
 
     async def destory(self):
-        ue: UnpackEngine = self.request.app["ue"]
+        ue = self.request.app[KEY_UNPACK_ENGINE]
         ue.clear_cache()
 
 
 class HistoryView(HasTokenMixin, ListAPIMixin[dict[str, Any]], View):
     async def list_(self) -> list[dict[str, Any]]:
-        se: SearchEngine = self.request.app["se"]
+        se = self.request.app[KEY_SEARCH_ENGINE]
         history = [_.to_dict() for _ in se.history]
         return history
 
