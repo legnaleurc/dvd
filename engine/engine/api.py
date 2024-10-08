@@ -107,11 +107,14 @@ class NodeListView(
         try:
             nodes = await se(name=name, fuzzy=fuzzy, parent_path=parent_path, size=size)
         except InvalidPatternError:
+            _L.exception(f"invalid pattern: {name}")
             raise HTTPBadRequest()
         except SearchFailedError:
+            _L.exception(f"search failed")
             raise HTTPServiceUnavailable()
         except Exception:
-            raise HTTPBadRequest()
+            _L.exception(f"unexpected error")
+            raise HTTPServiceUnavailable()
         return nodes
 
     async def create(self):
