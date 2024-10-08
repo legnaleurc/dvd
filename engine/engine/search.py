@@ -104,6 +104,9 @@ class SearchEngine(object):
             if not k.name or re.search(k.name, value, re.I):
                 del self._cache[k]
 
+    def _invalidate_cache_by_param(self, param: SearchParam) -> None:
+        del self._cache[param]
+
     async def _wait_for_result(
         self, lock: Condition, param: SearchParam
     ) -> list[SearchNodeDict]:
@@ -196,6 +199,7 @@ class SearchEngine(object):
         if len(self._history) > _MAX_HISTORY:
             oldest = next(iter(self._history))
             del self._history[oldest]
+            self._invalidate_cache_by_param(oldest)
 
 
 def to_normal_search_pattern(raw: str) -> str:
