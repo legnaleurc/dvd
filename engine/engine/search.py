@@ -105,7 +105,8 @@ class SearchEngine(object):
                 del self._cache[k]
 
     def _invalidate_cache_by_param(self, param: SearchParam) -> None:
-        del self._cache[param]
+        if param in self._cache:
+            del self._cache[param]
 
     async def _wait_for_result(
         self, lock: Condition, param: SearchParam
