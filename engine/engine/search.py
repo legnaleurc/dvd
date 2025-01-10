@@ -104,6 +104,16 @@ class SearchEngine(object):
             if not k.name or re.search(k.name, value, re.I):
                 del self._cache[k]
 
+    def invalidate_cache_by_node(self, node: Node) -> None:
+        keys = list(self._cache.keys())
+        for k in keys:
+            if k in self._searching:
+                # Going to be updated.
+                continue
+            if is_node_match_param(node, k):
+                del self._cache[k]
+                _L.debug(f"invalided search param {k}")
+
     def _invalidate_cache_by_param(self, param: SearchParam) -> None:
         if param in self._cache:
             del self._cache[param]
@@ -235,3 +245,15 @@ async def walk_node(
         for f in itertools.chain(folders, files):
             if not fn or fn(f):
                 yield f
+
+
+def is_node_match_param(node: Node, param: SearchParam) -> bool:
+    name = param.name
+    fuzzy = param.fuzzy
+
+    if not name:
+        return False
+
+    pattern = to_fuzzy_search_pattern(name) if fuzzy else to_normal_search_pattern(name)
+    rv = re.search(pattern, node.name, re.I)
+    return rv is not None
