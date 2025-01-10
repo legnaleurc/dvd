@@ -98,12 +98,6 @@ class SearchEngine(object):
                 await lock.wait()
         self._cache: dict[SearchParam, list[SearchNodeDict]] = {}
 
-    def invalidate_cache_by_path(self, value: str) -> None:
-        keys = list(self._cache.keys())
-        for k in keys:
-            if not k.name or re.search(k.name, value, re.I):
-                del self._cache[k]
-
     def invalidate_cache_by_node(self, node: Node) -> None:
         keys = list(self._cache.keys())
         for k in keys:
