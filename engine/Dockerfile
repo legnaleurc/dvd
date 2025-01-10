@@ -5,7 +5,7 @@ ENV POETRY_HOME=/opt/poetry
 
 # setup poetry
 RUN python3 -m venv $POETRY_HOME
-RUN $POETRY_HOME/bin/pip install poetry
+RUN $POETRY_HOME/bin/pip install "poetry>=1.0.0,<2.0.0"
 # add poetry to path
 ENV PATH=$POETRY_HOME/bin:$PATH
 
@@ -20,7 +20,7 @@ RUN : \
     && rm -rf /var/lib/apt/lists/*
 
 # prepare environment
-COPY pyproject.toml poetry.lock poetry.toml Makefile /app/
+COPY pyproject.toml poetry.lock poetry.toml Makefile README.md /app/
 WORKDIR /app
 RUN make release
 
