@@ -96,7 +96,7 @@ class SearchEngine(object):
             _pattern, lock = next(iter(self._searching.items()))
             async with lock:
                 await lock.wait()
-        self._cache = {}
+        self._cache: dict[SearchParam, list[SearchNodeDict]] = {}
 
     def invalidate_cache_by_path(self, value: str) -> None:
         keys = list(self._cache.keys())
