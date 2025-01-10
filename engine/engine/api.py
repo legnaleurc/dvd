@@ -85,8 +85,7 @@ class NodeView(
         _L.info(f"trash {node.id} {node.name}")
         drive = self.request.app[KEY_DRIVE]
         se = self.request.app[KEY_SEARCH_ENGINE]
-        path = await drive.resolve_path(node)
-        se.invalidate_cache_by_path(str(path))
+        se.invalidate_cache_by_node(node)
         await drive.move(node, trashed=True)
 
 
