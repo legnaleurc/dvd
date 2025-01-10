@@ -17,6 +17,8 @@ from aiohttp.web_exceptions import (
     HTTPUnauthorized,
 )
 from multidict import MultiMapping
+from wcpan.drive.core.lib import dispatch_change
+from wcpan.drive.core.types import ChangeAction
 
 from .app import KEY_DRIVE, KEY_SEARCH_ENGINE, KEY_UNPACK_ENGINE
 from .mixins import NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin
@@ -30,6 +32,7 @@ from .rest import (
 )
 from .search import (
     InvalidPatternError,
+    SearchEngine,
     SearchFailedError,
     SearchNodeDict,
 )
@@ -327,8 +330,10 @@ class ChangesView(HasTokenMixin, View):
 
         drive = self.request.app[KEY_DRIVE]
         se = self.request.app[KEY_SEARCH_ENGINE]
-        await se.clear_cache()
-        changes = [dict_from_change(_) async for _ in drive.sync()]
+        cache_invalidation = (
+            invalidate_cache_by_change(se, _) async for _ in drive.sync()
+        )
+        changes = [dict_from_change(_) async for _ in cache_invalidation]
         return json_response(changes)
 
 
@@ -398,3 +403,14 @@ def get_query_value[
     if value is None:
         return None
     return fn(value)
+
+
+def invalidate_cache_by_change(
+    engine: SearchEngine, change: ChangeAction
+) -> ChangeAction:
+    dispatch_change(
+        change,
+        on_remove=lambda _: None,
+        on_update=lambda node: engine.invalidate_cache_by_node(node),
+    )
+    return change
