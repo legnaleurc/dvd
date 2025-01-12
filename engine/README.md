@@ -1,11 +1,11 @@
 # engine
 
-This module requires Python 3.11+.
+This module requires Python 3.12+.
 
 ## prepare dependencies
 
 ```sh
-make setup
+make debug
 ```
 
 ## initialize drive
