@@ -28,7 +28,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install
         working-directory: engine
-        run: make
+        run: make debug
       - name: Lint
         working-directory: engine
         run: make lint
