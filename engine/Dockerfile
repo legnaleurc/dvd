@@ -20,7 +20,7 @@ RUN : \
     && rm -rf /var/lib/apt/lists/*
 
 # prepare environment
-COPY pyproject.toml poetry.lock poetry.toml Makefile README.md /app/
+COPY pyproject.toml poetry.lock poetry.toml Makefile /app/
 WORKDIR /app
 RUN make release
 
