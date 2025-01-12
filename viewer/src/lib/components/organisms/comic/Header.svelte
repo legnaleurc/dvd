@@ -4,6 +4,7 @@
   import type { SvelteCustomEvents } from "$types/traits";
   import Icon from "$atoms/Icon.svelte";
   import RoundedButton from "$atoms/RoundedButton.svelte";
+  import CopyCircleAuthorButton from "$molecules/CopyCircleAuthorButton.svelte";
 
   type $$Events = SvelteCustomEvents<{
     first: null;
@@ -21,6 +22,7 @@
     {name}
   </div>
   <div class="flex-0 flex">
+    <CopyCircleAuthorButton {name} />
     <RoundedButton on:click={() => dispatch("first")}>
       <Icon name="vertical_align_top" />
     </RoundedButton>
