@@ -40,13 +40,13 @@ export async function listImage(id: string): Promise<ImageResponse[]> {
 }
 
 export async function listCachedImage(): Promise<CachedImageResponse[]> {
-  const res = await get("/api/v1/cache");
+  const res = await get("/api/v1/caches/images");
   const rv: CachedImageResponse[] = await res.json();
   return rv;
 }
 
 export async function clearCachedImage(): Promise<void> {
-  await delete_("/api/v1/cache");
+  await delete_("/api/v1/caches/images");
 }
 
 export function getImageUrl(id: string, index: number): string {

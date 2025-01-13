@@ -23,7 +23,7 @@ export const handlers = [
     assertIsString(id);
     return HttpResponse.json(folderResponse(id, "__ROOT__"));
   }),
-  http.get("/api/v1/cache", () => {
+  http.get("/api/v1/caches/images", () => {
     return HttpResponse.json([
       {
         id: "__NORMAL__",
@@ -32,7 +32,7 @@ export const handlers = [
       },
     ]);
   }),
-  http.delete("/api/v1/cache", () => {
+  http.delete("/api/v1/caches/images", () => {
     return status204();
   }),
 ];
