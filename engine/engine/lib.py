@@ -1,8 +1,24 @@
+from datetime import datetime
+from typing import Any
+
 from wcpan.drive.core.types import Node, Drive, ChangeAction
 from wcpan.drive.core.exceptions import NodeNotFoundError
 from wcpan.drive.core.lib import dispatch_change
 
 from .types import NodeDict
+
+
+def json_decoder_hook(d: dict[str, Any]) -> Any:
+    if "__type__" not in d or "__value__" not in d:
+        return d
+
+    match d["__type__"]:
+        case "Node":
+            return Node(**d["__value__"])
+        case "datetime":
+            return datetime.fromisoformat(d["__value__"])
+        case _:
+            return d
 
 
 async def get_node(drive: Drive, id_or_root: str) -> Node | None:

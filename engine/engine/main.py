@@ -168,7 +168,9 @@ def setup_api_path(app: Application) -> None:
     app.router.add_view(r"/api/v1/nodes/{id}/videos", api.NodeVideoListView)
     app.router.add_view(r"/api/v1/changes", api.ChangesView)
     app.router.add_view(r"/api/v1/apply", api.ApplyView)
-    app.router.add_view(r"/api/v1/cache", api.CacheView)
+    app.router.add_view(r"/api/v1/cache", api.CachesImagesView)
+    app.router.add_view(r"/api/v1/caches/images", api.CachesImagesView)
+    app.router.add_view(r"/api/v1/caches/searches", api.CachesSearchesView)
     app.router.add_view(r"/api/v1/history", api.HistoryView)
 
 

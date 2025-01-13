@@ -1,10 +1,11 @@
 import json
-from logging import getLogger
 import shlex
 from typing import Any
 from pathlib import PurePath
 from asyncio import as_completed, create_subprocess_exec
 from collections.abc import Callable, Iterable
+from logging import getLogger
+from functools import partial
 
 from aiohttp.web import StreamResponse, View
 from aiohttp.web_exceptions import (
@@ -18,7 +19,7 @@ from aiohttp.web_exceptions import (
 )
 from multidict import MultiMapping
 from wcpan.drive.core.lib import dispatch_change
-from wcpan.drive.core.types import ChangeAction
+from wcpan.drive.core.types import ChangeAction, Node
 
 from .app import KEY_DRIVE, KEY_SEARCH_ENGINE, KEY_UNPACK_ENGINE
 from .mixins import NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin
@@ -37,7 +38,7 @@ from .search import (
     SearchNodeDict,
 )
 from .unpack import UnpackFailedError
-from .lib import NodeDict, get_node, dict_from_node, dict_from_change
+from .lib import NodeDict, get_node, dict_from_node, dict_from_change, json_decoder_hook
 from .types import ImageSizeDict, VideoSizeDict, ImageListCacheDict
 
 
@@ -351,10 +352,12 @@ class ApplyView(HasTokenMixin, View):
         p = await create_subprocess_exec(*command)
         await p.communicate()
         assert p.returncode == 0
-        raise HTTPNoContent
+        raise HTTPNoContent()
 
 
-class CacheView(HasTokenMixin, ListAPIMixin[ImageListCacheDict], DestroyAPIMixin, View):
+class CachesImagesView(
+    HasTokenMixin, ListAPIMixin[ImageListCacheDict], DestroyAPIMixin, View
+):
     async def list_(self) -> list[ImageListCacheDict]:
         ue = self.request.app[KEY_UNPACK_ENGINE]
         drive = self.request.app[KEY_DRIVE]
@@ -379,6 +382,20 @@ class CacheView(HasTokenMixin, ListAPIMixin[ImageListCacheDict], DestroyAPIMixin
     async def destory(self):
         ue = self.request.app[KEY_UNPACK_ENGINE]
         ue.clear_cache()
+
+
+class CachesSearchesView(HasTokenMixin, View):
+    async def post(self):
+        if not await self.has_permission():
+            raise HTTPUnauthorized()
+
+        parser = partial(json.loads, object_hook=json_decoder_hook)
+        nodes: list[Node] = await self.request.json(loads=parser)
+
+        se = self.request.app[KEY_SEARCH_ENGINE]
+        for node in nodes:
+            se.invalidate_cache_by_node(node)
+        raise HTTPNoContent()
 
 
 class HistoryView(HasTokenMixin, ListAPIMixin[dict[str, Any]], View):
