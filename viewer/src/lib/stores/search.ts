@@ -16,7 +16,11 @@ export function createStore() {
 
   async function loadSearchHistory() {
     const rawList = await getSearchHistory();
-    historyList.set(rawList.map((param) => param.name).filter((name) => name));
+    historyList.set(
+      rawList
+        .map((param) => param.name)
+        .filter((name): name is string => !!name),
+    );
   }
 
   async function searchText(text: string) {

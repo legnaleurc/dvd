@@ -11,6 +11,7 @@ export default {
     }),
     alias: {
       $mocks: "mocks",
+      $tests: "tests",
       $actions: "src/lib/actions",
       $stores: "src/lib/stores",
       $tools: "src/lib/tools",

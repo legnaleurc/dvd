@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test } from "vitest";
 import { get } from "svelte/store";
 
 import { createStore } from "$stores/shortcut";
+import { expectNotNull } from "$tests/lib";
 
 describe("shortcut", () => {
   afterEach(() => {
@@ -19,7 +20,9 @@ describe("shortcut", () => {
     const store = createStore();
     store.addShortcut("a");
     expect(get(store.shortcutList)).toContain("a");
-    expect(JSON.parse(localStorage.getItem("shortcutList"))).toEqual(["a"]);
+    const rv = localStorage.getItem("shortcutList");
+    expectNotNull(rv);
+    expect(JSON.parse(rv)).toEqual(["a"]);
   });
 
   test("update shortcut", () => {
@@ -27,7 +30,9 @@ describe("shortcut", () => {
     store.shortcutList.set(["a"]);
     store.updateShortcut(0, "b");
     expect(get(store.shortcutList)).toContain("b");
-    expect(JSON.parse(localStorage.getItem("shortcutList"))).toEqual(["b"]);
+    const rv = localStorage.getItem("shortcutList");
+    expectNotNull(rv);
+    expect(JSON.parse(rv)).toEqual(["b"]);
   });
 
   test("update shortcut", () => {
@@ -35,6 +40,8 @@ describe("shortcut", () => {
     store.shortcutList.set(["a"]);
     store.removeShortcut(0);
     expect(get(store.shortcutList)).not.toContain("a");
-    expect(JSON.parse(localStorage.getItem("shortcutList"))).toEqual([]);
+    const rv = localStorage.getItem("shortcutList");
+    expectNotNull(rv);
+    expect(JSON.parse(rv)).toEqual([]);
   });
 });

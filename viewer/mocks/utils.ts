@@ -25,7 +25,7 @@ function toNode(
     parentId,
     name: optional?.name ?? id,
     isFolder,
-    mimeType: isFolder ? null : "text/plain",
+    mimeType: isFolder ? "" : "text/plain",
     category: isFolder ? "folder" : "text",
     modified: optional?.modified ?? 0,
   };
@@ -51,9 +51,9 @@ export function rootNode(): Node_ {
   return {
     id: "__ROOT__",
     parentId: null,
-    name: null,
+    name: "",
     isFolder: true,
-    mimeType: null,
+    mimeType: "",
     category: "folder",
     modified: 0,
   };
@@ -75,7 +75,7 @@ function toResponse(
     parent_id: parentId,
     is_directory: isFolder,
     name: optional?.name ?? id,
-    mime_type: isFolder ? null : "text/plain",
+    mime_type: isFolder ? "" : "text/plain",
     mtime: "",
     is_trashed: optional?.trashed ?? false,
   };
@@ -101,9 +101,9 @@ export function rootResponse(): NodeResponse {
   return {
     id: "__ROOT__",
     parent_id: null,
-    name: null,
+    name: "",
     is_directory: true,
-    mime_type: null,
+    mime_type: "",
     mtime: "",
     is_trashed: false,
   };

@@ -1,7 +1,7 @@
 <script lang="ts">
   export let id = "";
-  export let checked: boolean = undefined;
-  export let disabled: boolean = undefined;
+  export let checked: boolean | undefined = undefined;
+  export let disabled: boolean | undefined = undefined;
 </script>
 
 <input

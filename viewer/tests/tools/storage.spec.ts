@@ -10,6 +10,7 @@ import {
   loadToken,
   saveToken,
 } from "$tools/storage";
+import { expectNotNull } from "$tests/lib";
 
 describe("storage", () => {
   afterEach(() => {
@@ -39,7 +40,7 @@ describe("storage", () => {
       };
       saveActionMap(expected);
       const rv = localStorage.getItem("actionMap");
-      expect(rv).not.toBeNull();
+      expectNotNull(rv);
       expect(JSON.parse(rv)).toEqual(expected);
     });
   });
@@ -63,7 +64,7 @@ describe("storage", () => {
       const expected = ["/dev/run"];
       saveShortcutList(expected);
       const rv = localStorage.getItem("shortcutList");
-      expect(rv).not.toBeNull();
+      expectNotNull(rv);
       expect(JSON.parse(rv)).toEqual(expected);
     });
   });

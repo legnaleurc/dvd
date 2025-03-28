@@ -15,7 +15,7 @@
 
   export let getNameById: (id: string) => string;
   export let isFolderById: (id: string) => boolean;
-  export let getParentById: (id: string) => string;
+  export let getParentById: (id: string) => string | null;
 
   const { selectedId, deselectList } = getSelectionContext();
   const dispatch = createEventDispatcher();

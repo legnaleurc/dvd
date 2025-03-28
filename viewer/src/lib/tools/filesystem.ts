@@ -1,7 +1,7 @@
 import type { ChangeResponse, NodeResponse } from "$types/api";
 import type { Node_, NodeMap, ChildrenMap } from "$types/filesystem";
 
-function getParentId(rawNode: NodeResponse): string {
+function getParentId(rawNode: NodeResponse): string | null {
   if (!rawNode) {
     return null;
   }

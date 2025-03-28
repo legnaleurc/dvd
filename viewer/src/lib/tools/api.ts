@@ -94,7 +94,7 @@ export async function listNode(param: NodeSearchParam) {
   return rv;
 }
 
-export async function applyCommand(command: string, kwargs: object) {
+export async function applyCommand(command: string, kwargs: unknown) {
   await post("/api/v1/apply", {
     command,
     kwargs,

@@ -16,8 +16,8 @@
   const bodyScrolling = useBodyScrolling();
   const isMounted = useMountedStore();
 
-  let rootEl: HTMLDivElement = null;
-  let menuEl: HTMLDivElement = null;
+  let rootEl: HTMLDivElement | null = null;
+  let menuEl: HTMLDivElement | null = null;
   let present: boolean;
   let cursorX = 0;
   let cursorY = 0;
@@ -70,7 +70,8 @@
   // In this case we need to manually cleanup detached elements and global
   // styles.
   onDestroy(() => {
-    if (present) {
+    if (present && rootEl) {
+      // eslint-disable-next-line svelte/no-dom-manipulating
       rootEl.remove();
     }
     bodyScrolling.release();

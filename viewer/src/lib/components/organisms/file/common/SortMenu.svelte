@@ -31,7 +31,7 @@
             <Icon name="check" />
           </div>
         {:else}
-          <div class="w-6 h-6" />
+          <div class="w-6 h-6"></div>
         {/if}
         <div class:font-bold={$method === m}>
           {getLabel(m)}

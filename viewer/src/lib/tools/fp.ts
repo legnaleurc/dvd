@@ -17,6 +17,9 @@ export function makeAction<N, P>(
   setEffect: EffectFunction<N, P>,
 ): Action<N, P> {
   return (node: N, params?: P) => {
+    if (!params) {
+      throw new Error("No params provided");
+    }
     let clear = setEffect(node, params);
     return {
       update(newParams: P) {

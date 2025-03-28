@@ -15,7 +15,7 @@
 
 <div class="w-full h-full flex flex-col">
   <div class="flex bg-pale-900">
-    <div class="flex-1" />
+    <div class="flex-1"></div>
     <div>
       <RoundedButton on:click={clearComic}>
         <Icon name="playlist_remove" />

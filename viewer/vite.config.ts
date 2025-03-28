@@ -22,7 +22,7 @@ const redirect = (map: Record<string, string>): PluginOption => ({
 const config: UserConfig = {
   server: {
     proxy: {
-      "/api": process.env.BACKEND_BASE_URL,
+      "/api": process.env.BACKEND_BASE_URL ?? "",
     },
   },
   plugins: [tailwindcss(), sveltekit(), redirect({ "/": "/files" })],

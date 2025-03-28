@@ -6,9 +6,9 @@ export function getBaseUrl(): string {
 
 export async function get(
   path: string,
-  params?: Record<string, unknown>,
+  params?: Record<string, boolean | number | string>,
 ): Promise<Response> {
-  const res = await ajax("GET", path, params);
+  const res = await FetchBuilder.builder("GET", path).query(params).build();
   if (res.status < 200 || res.status >= 300) {
     throw new Error(res.statusText);
   }
@@ -19,7 +19,7 @@ export async function post(
   path: string,
   params?: Record<string, unknown>,
 ): Promise<Response> {
-  const res = await ajax("POST", path, params);
+  const res = await FetchBuilder.builder("POST", path).body(params).build();
   if (res.status < 200 || res.status >= 300) {
     throw new Error(res.statusText);
   }
@@ -30,7 +30,7 @@ export async function patch(
   path: string,
   params?: Record<string, unknown>,
 ): Promise<Response> {
-  const res = await ajax("PATCH", path, params);
+  const res = await FetchBuilder.builder("PATCH", path).body(params).build();
   if (res.status < 200 || res.status >= 300) {
     throw new Error(res.statusText);
   }
@@ -38,43 +38,56 @@ export async function patch(
 }
 
 export async function delete_(path: string): Promise<Response> {
-  const res = await ajax("DELETE", path);
+  const res = await FetchBuilder.builder("DELETE", path).build();
   if (res.status < 200 || res.status >= 300) {
     throw new Error(res.statusText);
   }
   return res;
 }
 
-export async function ajax(
-  method: string,
-  path: string,
-  params?: Record<string, unknown>,
-): Promise<Response> {
-  const url = new URL(path, getBaseUrl());
+class FetchBuilder {
+  private _method: string;
+  private _url: URL;
+  private _body: string | null = null;
 
-  let body = null;
-  if (params) {
-    if (method === "GET") {
+  private constructor(method: string, path: string) {
+    this._method = method;
+    this._url = new URL(path, getBaseUrl());
+  }
+
+  static builder(method: string, path: string): FetchBuilder {
+    return new FetchBuilder(method, path);
+  }
+
+  query(params?: Record<string, boolean | number | string>): FetchBuilder {
+    if (params) {
       Object.keys(params).forEach((k) => {
-        url.searchParams.append(k, params[k].toString());
+        this._url.searchParams.append(k, params[k].toString());
       });
-    } else {
-      body = JSON.stringify(params);
     }
+    return this;
   }
 
-  const headers: Record<string, string> = {};
-  const token = loadToken();
-  if (token) {
-    headers["Authorization"] = `Token ${token}`;
+  body(params?: Record<string, unknown>): FetchBuilder {
+    if (params) {
+      this._body = JSON.stringify(params);
+    }
+    return this;
   }
 
-  const rqst = new Request(url.toString(), {
-    method,
-    headers,
-    cache: "no-cache",
-    body,
-    mode: "cors",
-  });
-  return await fetch(rqst);
+  async build(): Promise<Response> {
+    const headers: Record<string, string> = {};
+    const token = loadToken();
+    if (token) {
+      headers["Authorization"] = `Token ${token}`;
+    }
+    const request = new Request(this._url.toString(), {
+      method: this._method,
+      headers,
+      cache: "no-cache",
+      body: this._body,
+      mode: "cors",
+    });
+    return await fetch(request);
+  }
 }

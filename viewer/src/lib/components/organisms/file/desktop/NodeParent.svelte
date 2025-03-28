@@ -83,7 +83,7 @@
   }
 
   function handleDragEnter(event: DragEvent) {
-    if (disabled) {
+    if (disabled && event.dataTransfer) {
       event.dataTransfer.dropEffect = "none";
     }
   }
@@ -147,7 +147,7 @@
     <SortedList {id} autoLoad={false} let:idList let:loaded>
       {#if loaded}
         <div class="flex" class:hidden={!expanded}>
-          <div class="w-6" />
+          <div class="w-6"></div>
           <NodeChildren {idList} />
         </div>
       {/if}

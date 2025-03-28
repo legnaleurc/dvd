@@ -47,7 +47,7 @@
       <Button variant="secondary" on:click={() => dispatch("hide")}>
         <Icon name="close" />
       </Button>
-      <div class="flex-1" />
+      <div class="flex-1"></div>
       <Button
         variant="primary"
         disabled={newName.length <= 0}

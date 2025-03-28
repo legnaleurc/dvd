@@ -10,7 +10,7 @@
 
   let klass = "";
   export { klass as class };
-  export let value: string = undefined;
+  export let value: string | undefined = undefined;
   export let placeholder = "";
 
   const dispatch = createEventDispatcher();

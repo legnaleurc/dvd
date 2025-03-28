@@ -4,6 +4,8 @@ export class Future<T> {
   private _reject: (e: unknown) => void;
 
   constructor() {
+    this._resolve = () => {};
+    this._reject = () => {};
     this._promise = new Promise((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;

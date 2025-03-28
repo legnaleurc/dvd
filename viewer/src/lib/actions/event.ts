@@ -3,7 +3,7 @@ import { makeAction } from "$tools/fp";
 type EventHandler<E> = (event: E) => void;
 
 export const enterpress = makeAction(
-  (node: EventTarget, handler: EventHandler<KeyboardEvent>) => {
+  (node: HTMLElement, handler: EventHandler<KeyboardEvent>) => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key !== "Enter") {
         return;
@@ -19,8 +19,8 @@ export const enterpress = makeAction(
 );
 
 export const mouseclick = makeAction(
-  (node: EventTarget, handler: EventHandler<MouseEvent>) => {
-    let lastTarget: EventTarget = null;
+  (node: HTMLElement, handler: EventHandler<MouseEvent>) => {
+    let lastTarget: EventTarget | null = null;
 
     function handleMouseDown(event: MouseEvent) {
       lastTarget = null;

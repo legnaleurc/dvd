@@ -27,7 +27,7 @@
 
 <div class="flex flex-col bg-pale-900">
   <div class="flex" class:hidden={!expand}>
-    <div class="flex-1" />
+    <div class="flex-1"></div>
     <div class="flex">
       <CopyUrlButton {getNameById} {isFolderById} />
       <DownloadButton {isFolderById} />
@@ -42,7 +42,7 @@
       </RoundedButton>
       <TrashButton {trashNodes} />
     </div>
-    <div class="flex-1" />
+    <div class="flex-1"></div>
     <div class="flex">
       <InternalVideoButton />
       <RenameButton {getNameById} {renameNode} />

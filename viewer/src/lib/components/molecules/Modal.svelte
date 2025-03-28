@@ -22,13 +22,14 @@
   const bodyScrolling = useBodyScrolling();
   const isMounted = useMountedStore();
 
-  let backdrop: HTMLDivElement = null;
+  let backdrop: HTMLDivElement | null = null;
 
   // It is possible to unmount without hide(), e.g. the parent was unmounted.
   // In this case we need to manually cleanup detached elements and global
   // styles.
   onDestroy(() => {
-    if (show) {
+    if (show && backdrop) {
+      // eslint-disable-next-line svelte/no-dom-manipulating
       backdrop.remove();
     }
     bodyScrolling.release();

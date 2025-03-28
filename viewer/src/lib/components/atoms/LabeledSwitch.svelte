@@ -3,7 +3,7 @@
 
   export let id: string;
   export let label: string;
-  export let checked: boolean = undefined;
+  export let checked: boolean | undefined = undefined;
 </script>
 
 <div class="p-3 flex items-center">
