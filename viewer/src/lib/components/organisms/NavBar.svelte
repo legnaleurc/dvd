@@ -37,7 +37,7 @@
 <nav class="bg-pale-900" class:hidden={$isFullScreen}>
   <ul class="h-12 w-full flex flex-row">
     {#each TAB_MAP as tab (tab.path)}
-      <li class="flex-grow">
+      <li class="grow">
         <a
           draggable="false"
           class="w-full h-full flex justify-center items-center active:bg-pale-700"

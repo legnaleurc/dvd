@@ -1,5 +1,6 @@
 import type { PluginOption, UserConfig } from "vite";
 import { sveltekit } from "@sveltejs/kit/vite";
+import tailwindcss from "@tailwindcss/vite";
 
 const redirect = (map: Record<string, string>): PluginOption => ({
   name: "redirect",
@@ -24,7 +25,7 @@ const config: UserConfig = {
       "/api": process.env.BACKEND_BASE_URL,
     },
   },
-  plugins: [sveltekit(), redirect({ "/": "/files" })],
+  plugins: [tailwindcss(), sveltekit(), redirect({ "/": "/files" })],
 };
 
 export default config;
