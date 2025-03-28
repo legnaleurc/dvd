@@ -17,8 +17,8 @@
 </script>
 
 <div class="w-full h-full flex flex-col">
-  <div class="flex-0 flex bg-pale-900">
-    <div class="flex-0">
+  <div class="flex bg-pale-900">
+    <div>
       <LabeledSwitch
         id="switch-two-column-mode"
         label="Two Column Mode"
@@ -26,7 +26,7 @@
       />
     </div>
     <div class="flex-1" />
-    <div class="flex-0 flex">
+    <div class="flex">
       <QueueButton {getNameById} />
       <SyncButton />
     </div>

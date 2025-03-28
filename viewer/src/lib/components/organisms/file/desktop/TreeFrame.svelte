@@ -16,7 +16,7 @@
 
 <div class="w-full h-full flex">
   {#if placement === "left"}
-    <div class="flex-0">
+    <div>
       <DesktopToolBar />
     </div>
   {/if}
@@ -26,7 +26,7 @@
     </SortedList>
   </div>
   {#if placement === "right"}
-    <div class="flex-0">
+    <div>
       <DesktopToolBar />
     </div>
   {/if}

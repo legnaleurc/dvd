@@ -68,7 +68,7 @@
           <div class="flex-1 p-3 flex">
             <slot name="title" />
           </div>
-          <div class="flex-0 flex">
+          <div class="flex">
             <RoundedButton on:click={hide}>
               <Icon name="close" />
             </RoundedButton>

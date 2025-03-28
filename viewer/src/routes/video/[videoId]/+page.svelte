@@ -36,7 +36,7 @@
     <div class="flex-1 p-3 whitespace-nowrap overflow-x-auto select-text">
       {name}
     </div>
-    <div class="flex-0 flex">
+    <div class="flex">
       <RoundedButton on:click={handleOpen}>
         <Icon name="open_in_new" />
       </RoundedButton>

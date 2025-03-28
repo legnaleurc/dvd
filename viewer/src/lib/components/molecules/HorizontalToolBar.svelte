@@ -28,14 +28,14 @@
 <div class="flex flex-col bg-pale-900">
   <div class="flex" class:hidden={!expand}>
     <div class="flex-1" />
-    <div class="flex-0 flex">
+    <div class="flex">
       <CopyUrlButton {getNameById} {isFolderById} />
       <DownloadButton {isFolderById} />
       <ExternalOpenButton {getNameById} {getMimeTypeById} />
     </div>
   </div>
   <div class="flex">
-    <div class="flex-0 flex">
+    <div class="flex">
       <DeselectAllButton />
       <RoundedButton on:click={toggleMenu}>
         <Icon name={expand ? "expand_less" : "expand_more"} />
@@ -43,7 +43,7 @@
       <TrashButton {trashNodes} />
     </div>
     <div class="flex-1" />
-    <div class="flex-0 flex">
+    <div class="flex">
       <InternalVideoButton />
       <RenameButton {getNameById} {renameNode} />
       <ShortcutButton {moveNodesToPath} />

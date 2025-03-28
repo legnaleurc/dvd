@@ -40,7 +40,7 @@
 </script>
 
 <div class="w-full h-full flex flex-col">
-  <div class="flex-0">
+  <div>
     <Header
       hidden={$isFullScreen}
       name={data.name}

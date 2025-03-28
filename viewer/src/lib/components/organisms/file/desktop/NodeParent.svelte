@@ -121,7 +121,7 @@
         onDrop: handleDrop,
       }}
     >
-      <div class="flex-0">
+      <div>
         <NodeIndicator
           category={node.category}
           isFolder={node.isFolder}

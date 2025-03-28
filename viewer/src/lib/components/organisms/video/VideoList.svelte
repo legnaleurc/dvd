@@ -9,9 +9,9 @@
 </script>
 
 <div class="w-full h-full flex flex-col">
-  <div class="flex-0 flex bg-pale-900">
+  <div class="flex bg-pale-900">
     <div class="flex-1" />
-    <div class="flex-0 flex">
+    <div class="flex">
       <RoundedButton on:click={clearAllVideo}>
         <Icon name="playlist_remove" />
       </RoundedButton>

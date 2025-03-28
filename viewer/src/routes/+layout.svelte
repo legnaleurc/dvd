@@ -31,7 +31,7 @@
       <slot />
     </MainPage>
   </div>
-  <div class="flex-0">
+  <div>
     <NavBar />
   </div>
 </div>

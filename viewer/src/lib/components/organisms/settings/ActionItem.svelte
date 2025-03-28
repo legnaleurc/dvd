@@ -35,7 +35,7 @@
   <TextInput bind:value={newCommand} />
   <div class="flex-1">
     <InputGroup>
-      <div slot="input" class="p-3 flex-0">{type}</div>
+      <div slot="input" class="p-3">{type}</div>
       <svelte:fragment slot="action">
         <RoundedButton
           disabled={newCommand.length <= 0}

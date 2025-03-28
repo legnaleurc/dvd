@@ -22,13 +22,13 @@
   <span slot="title">Warning</span>
   <div slot="body">About to move {$selectedId.size} item(s) to {shortcut}!</div>
   <div slot="footer" class="flex">
-    <div class="flex-0">
+    <div>
       <Button variant="secondary" on:click={() => dispatch("hide")}>
         <Icon name="close" />
       </Button>
     </div>
     <div class="flex-1" />
-    <div class="flex-0">
+    <div>
       <Button
         variant="primary"
         on:click={() => {

@@ -21,7 +21,7 @@
   <div class="flex-1 p-3 overflow-x-auto whitespace-nowrap select-text">
     {name}
   </div>
-  <div class="flex-0 flex">
+  <div class="flex">
     <CopyCircleAuthorButton {name} />
     <RoundedButton on:click={() => dispatch("first")}>
       <Icon name="vertical_align_top" />

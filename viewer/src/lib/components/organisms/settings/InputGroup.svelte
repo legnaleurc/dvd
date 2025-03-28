@@ -2,7 +2,7 @@
   <div class="flex-1 flex">
     <slot name="input" />
   </div>
-  <div class="flex-0 flex">
+  <div class="flex">
     <slot name="action" />
   </div>
 </div>

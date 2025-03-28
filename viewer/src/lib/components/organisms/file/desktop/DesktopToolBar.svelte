@@ -43,11 +43,11 @@
 </script>
 
 <div class="w-full h-full flex flex-col bg-pale-900">
-  <div class="flex-0 flex flex-col">
+  <div class="flex flex-col">
     <SortButton />
     <DeselectAllButton />
   </div>
-  <div class="flex-0 flex flex-col overflow-y-auto overflow-x-hidden">
+  <div class="flex flex-col overflow-y-auto overflow-x-hidden">
     <InternalImageButton {getNameById} />
     <InternalVideoButton />
     <RenameButton {getNameById} renameNode={handleRename} />
@@ -61,7 +61,7 @@
     <CopyUrlButton {getNameById} {isFolderById} />
   </div>
   <div class="flex-1" />
-  <div class="flex-0 flex flex-col">
+  <div class="flex flex-col">
     <TrashButton trashNodes={handleTrash} />
   </div>
 </div>

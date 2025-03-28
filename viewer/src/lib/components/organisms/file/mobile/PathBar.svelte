@@ -26,7 +26,7 @@
 </script>
 
 <div class="flex bg-pale-900">
-  <div class="flex-0 flex">
+  <div class="flex">
     <RoundedButton
       disabled={stack.length <= 1}
       on:click={() => dispatch("back")}
@@ -37,7 +37,7 @@
   <div class="flex-1 flex min-w-0">
     <Breadcrumb {stack} on:open={(event) => dispatch("backTo", event.detail)} />
   </div>
-  <div class="flex-0 flex">
+  <div class="flex">
     <SortButton />
     <QueueButton {getNameById} />
     <SyncButton />

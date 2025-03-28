@@ -28,7 +28,7 @@
       <slot name="caption" />
     </div>
   </button>
-  <div class="flex-0">
+  <div>
     <slot name="action" />
   </div>
 </div>
