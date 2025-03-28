@@ -45,7 +45,7 @@ $(DEBUG_TAG): $(PKG_LOCK)
 	touch "$@" "$(ENV_TAG)"
 
 $(PKG_LOCK): $(PKG_FILES)
-	$(POETRY) lock --no-update
+	$(POETRY) lock
 	touch "$@"
 
 auth: $(ENV_TAG)
