@@ -1,11 +1,11 @@
 import json
 import shlex
-from typing import Any
-from pathlib import PurePath
 from asyncio import as_completed, create_subprocess_exec
 from collections.abc import Callable, Iterable
-from logging import getLogger
 from functools import partial
+from logging import getLogger
+from pathlib import PurePath
+from typing import Any
 
 from aiohttp.web import StreamResponse, View
 from aiohttp.web_exceptions import (
@@ -22,13 +22,14 @@ from wcpan.drive.core.lib import dispatch_change
 from wcpan.drive.core.types import ChangeAction, Node
 
 from .app import KEY_DRIVE, KEY_SEARCH_ENGINE, KEY_UNPACK_ENGINE
-from .mixins import NodeObjectMixin, NodeRandomAccessMixin, HasTokenMixin
+from .lib import NodeDict, dict_from_change, dict_from_node, get_node, json_decoder_hook
+from .mixins import HasTokenMixin, NodeObjectMixin, NodeRandomAccessMixin
 from .rest import (
     CreateAPIMixin,
-    RetriveAPIMixin,
-    PartialUpdateAPIMixin,
     DestroyAPIMixin,
     ListAPIMixin,
+    PartialUpdateAPIMixin,
+    RetriveAPIMixin,
     json_response,
 )
 from .search import (
@@ -37,9 +38,8 @@ from .search import (
     SearchFailedError,
     SearchNodeDict,
 )
+from .types import ImageListCacheDict, ImageSizeDict, VideoSizeDict
 from .unpack import UnpackFailedError
-from .lib import NodeDict, get_node, dict_from_node, dict_from_change, json_decoder_hook
-from .types import ImageSizeDict, VideoSizeDict, ImageListCacheDict
 
 
 _L = getLogger(__name__)
@@ -413,9 +413,9 @@ def unpack_dict(d: dict[str, Any], keys: Iterable[str]) -> dict[str, Any]:
 type CastFunction[T] = Callable[[Any], T]
 
 
-def get_query_value[
-    T
-](query: MultiMapping[str], fn: CastFunction[T], key: str) -> T | None:
+def get_query_value[T](
+    query: MultiMapping[str], fn: CastFunction[T], key: str
+) -> T | None:
     value = query.get(key, None)
     if value is None:
         return None

@@ -1,18 +1,18 @@
 import asyncio
+from datetime import datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Any, cast
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, MagicMock, patch
-from typing import cast, Any
-from datetime import datetime
 
-from aiohttp.test_utils import TestServer, TestClient
-from wcpan.drive.core.types import Node
+from aiohttp.test_utils import TestClient, TestServer
 from wcpan.drive.core.exceptions import NodeNotFoundError
+from wcpan.drive.core.types import Node
 
 from engine.app import KEY_DRIVE, KEY_UNPACK_ENGINE
-from engine.main import application_context
 from engine.lib import dict_from_node
+from engine.main import application_context
 
 
 class ApiTestCase(IsolatedAsyncioTestCase):
@@ -224,25 +224,29 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             )
 
         async def fake_walk(node: Node):
-            yield node, cast(list[Node], []), [
-                make_node(
-                    {
-                        "id": "2",
-                        "name": "image2",
-                        "mime_type": "image/png",
-                        "is_image": True,
-                        "width": 640,
-                        "height": 480,
-                    }
-                ),
-                make_node(
-                    {
-                        "id": "3",
-                        "name": "file3",
-                        "mime_type": "text/plain",
-                    }
-                ),
-            ]
+            yield (
+                node,
+                cast(list[Node], []),
+                [
+                    make_node(
+                        {
+                            "id": "2",
+                            "name": "image2",
+                            "mime_type": "image/png",
+                            "is_image": True,
+                            "width": 640,
+                            "height": 480,
+                        }
+                    ),
+                    make_node(
+                        {
+                            "id": "3",
+                            "name": "file3",
+                            "mime_type": "text/plain",
+                        }
+                    ),
+                ],
+            )
 
         drive = self._client.app[KEY_DRIVE]
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)

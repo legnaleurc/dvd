@@ -7,7 +7,7 @@ from logging import getLogger
 from mimetypes import guess_type
 from typing import Self
 
-from wcpan.drive.core.types import Node, Drive
+from wcpan.drive.core.types import Drive, Node
 
 from .image import get_image_size
 from .storage import StorageManager, create_storage_manager
@@ -106,7 +106,7 @@ class UnpackEngine:
         _out, err = await p.communicate()
         if p.returncode != 0:
             raise UnpackFailedError(
-                f'unpack failed code: {p.returncode}\n\n{err.decode("utf-8")}'
+                f"unpack failed code: {p.returncode}\n\n{err.decode('utf-8')}"
             )
         return self._scan_local(node_id)
 

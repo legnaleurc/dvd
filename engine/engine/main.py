@@ -1,16 +1,16 @@
 import argparse
 import asyncio
-from logging import captureWarnings, getLogger
-from logging.config import dictConfig
 import signal
 from contextlib import asynccontextmanager
+from logging import captureWarnings, getLogger
+from logging.config import dictConfig
 from pathlib import Path
 
 from aiohttp.web import Application, AppRunner, TCPSite
 from wcpan.drive.cli.lib import create_drive_from_config
 from wcpan.logging import ConfigBuilder
 
-from . import api, view, search
+from . import api, search, view
 from .app import KEY_DRIVE, KEY_SEARCH_ENGINE, KEY_STATIC, KEY_TOKEN, KEY_UNPACK_ENGINE
 from .unpack import create_unpack_engine
 
@@ -48,17 +48,20 @@ class Daemon(object):
 
         setup_logging(Path(log_path))
 
-        async with application_context(
-            port=port,
-            unpack_path=unpack_path,
-            drive_path=drive_path,
-            static_path=static_path,
-            token=token,
-        ) as app, server_context(
-            app,
-            port,
-            ipv6=ipv6,
-            expose=expose,
+        async with (
+            application_context(
+                port=port,
+                unpack_path=unpack_path,
+                drive_path=drive_path,
+                static_path=static_path,
+                token=token,
+            ) as app,
+            server_context(
+                app,
+                port,
+                ipv6=ipv6,
+                expose=expose,
+            ),
         ):
             await self._until_finished()
 
@@ -122,9 +125,10 @@ async def application_context(
     config_path = Path(drive_path)
 
     # context
-    async with create_drive_from_config(config_path) as drive, create_unpack_engine(
-        drive, port, unpack_path
-    ) as ue:
+    async with (
+        create_drive_from_config(config_path) as drive,
+        create_unpack_engine(drive, port, unpack_path) as ue,
+    ):
         app[KEY_DRIVE] = drive
         app[KEY_UNPACK_ENGINE] = ue
         app[KEY_SEARCH_ENGINE] = search.SearchEngine(drive)

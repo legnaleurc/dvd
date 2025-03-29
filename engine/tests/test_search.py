@@ -3,9 +3,10 @@ from typing import cast
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, Mock, NonCallableMock
 
+from wcpan.drive.core.types import Node
+
 from engine.search import SearchEngine, SearchParam
 from engine.types import SearchNodeDict
-from wcpan.drive.core.types import Node
 
 
 class SearchTest(IsolatedAsyncioTestCase):

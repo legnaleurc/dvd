@@ -1,4 +1,4 @@
-from aiohttp.web import View, FileResponse, HTTPFound
+from aiohttp.web import FileResponse, HTTPFound, View
 
 from .app import KEY_STATIC
 
