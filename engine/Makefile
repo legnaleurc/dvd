@@ -1,7 +1,7 @@
 RM := rm -rf
 POETRY := poetry
 PYTHON := $(POETRY) run -- python3
-BLACK := $(POETRY) run -- black
+RUFF := $(POETRY) run -- ruff
 
 PKG_FILES := pyproject.toml
 PKG_LOCK := poetry.lock
@@ -55,7 +55,9 @@ sync: $(ENV_TAG)
 	$(PYTHON) -m wcpan.drive.cli sync
 
 lint: debug
-	$(BLACK) --check engine tests
+	$(RUFF) check engine tests
+	$(RUFF) format --check engine tests
 
 format: debug
-	$(BLACK) engine tests
+	$(RUFF) check --fix engine tests
+	$(RUFF) format engine tests
