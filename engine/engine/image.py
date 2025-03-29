@@ -1,13 +1,8 @@
 from pathlib import Path
 
-from PIL import Image
-import pillow_avif as pillow_avif  # type: ignore
-
-
-# relax decompression bomb check
-Image.MAX_IMAGE_PIXELS = None
+from wcpan.drive.cli.lib import get_image_info
 
 
 def get_image_size(path: Path) -> tuple[int, int]:
-    image = Image.open(path)  # type: ignore
-    return image.size
+    info = get_image_info(path)
+    return info.width, info.height
