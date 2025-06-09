@@ -13,6 +13,14 @@ from argparse import ArgumentParser
 PUBLIC_PORT = 8000
 PRIVATE_PORT = 9000
 
+CMD_POETRY = ['poetry', 'run']
+CMD_WATCHDOG = ['python3', '-m', 'wcpan.watchdog']
+CMD_ENGINE = ['python3', '-m', 'engine']
+
+CMD_DEV_ENGINE = CMD_POETRY + ['--'] + CMD_WATCHDOG + ['--'] + CMD_ENGINE
+CMD_PRD_ENGINE = CMD_POETRY + ['--'] + CMD_ENGINE
+CMD_DEV_VIEWER = ['npm', 'run', 'dev', '--']
+
 
 class ProcessError(Exception):
 
@@ -77,12 +85,11 @@ def parse_args(args: list[str]):
 async def run_release(drive: Path, public_listen: int, token: str):
     await run_or_die(['make', '-j', 'release'])
     cmd = [
-        'poetry', 'run', '--',
-            'python3', '-m', 'engine',
-                '-d', str(drive),
-                '-u', '../unpack/release/unpack',
-                '-s', '../viewer/build',
-                '-p', str(public_listen),
+        *CMD_PRD_ENGINE,
+        '-d', str(drive),
+        '-u', '../unpack/release/unpack',
+        '-s', '../viewer/build',
+        '-p', str(public_listen),
     ]
     if token:
         cmd.extend(['-t', token])
@@ -98,12 +105,10 @@ async def run_debug(
     await run_or_die(['make', '-j', 'debug'])
 
     cmd = [
-        'poetry', 'run', '--',
-            'python3', '-m', 'wcpan.watchdog', '--',
-                'python3', '-m', 'engine',
-                    '-d', str(drive),
-                    '-u', '../unpack/debug/unpack',
-                    '-p', str(private_listen),
+        *CMD_DEV_ENGINE,
+        '-d', str(drive),
+        '-u', '../unpack/debug/unpack',
+        '-p', str(private_listen),
     ]
     if token:
         cmd.extend(['-t', token])
@@ -114,9 +119,9 @@ async def run_debug(
     backend_task = asyncio.create_task(ok_or_die(backend_process))
 
     cmd = [
-        'npm', 'run', 'dev', '--',
-            '--host=0.0.0.0',
-            f'--port={public_listen}',
+        *CMD_DEV_VIEWER,
+        '--host=0.0.0.0',
+        f'--port={public_listen}',
     ]
     frontend_process = await spawn(
         cmd,
