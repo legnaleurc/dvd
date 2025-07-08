@@ -14,7 +14,6 @@ from aiohttp.web_exceptions import (
     HTTPInternalServerError,
     HTTPNoContent,
     HTTPNotFound,
-    HTTPServiceUnavailable,
     HTTPUnauthorized,
 )
 from multidict import MultiMapping
@@ -114,10 +113,10 @@ class NodeListView(
             raise HTTPBadRequest()
         except SearchFailedError:
             _L.exception(f"search failed")
-            raise HTTPServiceUnavailable()
+            raise HTTPInternalServerError()
         except Exception:
             _L.exception(f"unexpected error")
-            raise HTTPServiceUnavailable()
+            raise HTTPInternalServerError()
         return nodes
 
     async def create(self):
@@ -217,7 +216,8 @@ class NodeImageListView(
         try:
             manifest = await ue.get_manifest(node)
         except UnpackFailedError as e:
-            raise HTTPServiceUnavailable(
+            _L.exception(f"failed to get image list from node {node.id}")
+            raise HTTPInternalServerError(
                 text=json.dumps(
                     {
                         "type": "UnpackFailedError",
@@ -247,6 +247,7 @@ class NodeImageView(NodeObjectMixin, View):
         try:
             manifest = await ue.get_manifest(node)
         except UnpackFailedError:
+            _L.exception(f"failed to get image list from node {node.id}")
             raise HTTPInternalServerError()
 
         try:
