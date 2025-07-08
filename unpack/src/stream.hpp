@@ -13,6 +13,7 @@ class input_stream
 {
 public:
   input_stream(std::uint16_t port, const std::string& id);
+  input_stream(const std::string& file_path);
 
   input_stream(const input_stream&) = delete;
   input_stream& operator=(const input_stream&) = delete;
