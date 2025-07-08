@@ -10,6 +10,9 @@ unpack_to(std::uint16_t port,
           const std::string& id,
           const std::string& local_path);
 
+void
+unpack_to(const std::string& archive_path, const std::string& local_path);
+
 }
 
 #endif

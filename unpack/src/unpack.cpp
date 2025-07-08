@@ -101,15 +101,9 @@ extract_archive(unpack::archive_handle reader, unpack::archive_handle writer)
   }
 }
 
-}
-
 void
-unpack::unpack_to(std::uint16_t port,
-                  const std::string& id,
-                  const std::string& local_path)
+unpack_to(unpack::context_handle context)
 {
-  context_handle context =
-    std::make_shared<archive_context>(port, id, local_path);
   auto reader = create_archive_reader(context);
   auto writer = create_archive_writer();
 
@@ -120,7 +114,7 @@ unpack::unpack_to(std::uint16_t port,
       break;
     }
     if (rv != ARCHIVE_OK) {
-      throw archive_error(reader, "archive_read_next_header");
+      throw unpack::archive_error(reader, "archive_read_next_header");
     }
 
     // skip folders
@@ -133,14 +127,35 @@ unpack::unpack_to(std::uint16_t port,
 
     rv = archive_write_header(writer.get(), entry);
     if (rv != ARCHIVE_OK) {
-      throw archive_error(writer, "archive_write_header");
+      throw unpack::archive_error(writer, "archive_write_header");
     }
 
     extract_archive(reader, writer);
 
     rv = archive_write_finish_entry(writer.get());
     if (rv != ARCHIVE_OK) {
-      throw archive_error(writer, "archive_write_finish_entry");
+      throw unpack::archive_error(writer, "archive_write_finish_entry");
     }
   }
+}
+
+}
+
+void
+unpack::unpack_to(std::uint16_t port,
+                  const std::string& id,
+                  const std::string& local_path)
+{
+  context_handle context =
+    std::make_shared<archive_context>(port, id, local_path);
+  ::unpack_to(context);
+}
+
+void
+unpack::unpack_to(const std::string& archive_path,
+                  const std::string& local_path)
+{
+  context_handle context =
+    std::make_shared<archive_context>(archive_path, local_path);
+  ::unpack_to(context);
 }

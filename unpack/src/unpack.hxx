@@ -37,6 +37,9 @@ public:
                   const std::string& id,
                   const std::string& local_path);
 
+  archive_context(const std::string& archive_path,
+                  const std::string& local_path);
+
   void update_entry_path(struct archive_entry* entry);
 
 private:
