@@ -1,6 +1,7 @@
 #ifndef UNPACK_UNPACK_HPP
 #define UNPACK_UNPACK_HPP
 
+#include <cstdint>
 #include <string>
 
 namespace unpack {
