@@ -90,6 +90,7 @@ async def run_release(drive: Path, public_listen: int, token: str):
         '-u', '../unpack/release/unpack',
         '-s', '../viewer/build',
         '-p', str(public_listen),
+        '--log-path=/tmp/engine.log',
     ]
     if token:
         cmd.extend(['-t', token])
@@ -109,6 +110,7 @@ async def run_debug(
         '-d', str(drive),
         '-u', '../unpack/debug/unpack',
         '-p', str(private_listen),
+        '--log-path=/tmp/engine.log',
     ]
     if token:
         cmd.extend(['-t', token])

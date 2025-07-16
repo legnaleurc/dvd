@@ -9,7 +9,6 @@ CMD="$CMD -p $DVD_ENGINE_PORT"
 CMD="$CMD -d $DVD_ENGINE_DRIVE"
 CMD="$CMD -u $DVD_ENGINE_UNPACK"
 CMD="$CMD --expose"
-CMD="$CMD --log-path=$DVD_ENGINE_LOG"
 
 if [ -n "$DVD_ENGINE_TOKEN" ] ; then
     CMD="$CMD -t $DVD_ENGINE_TOKEN"

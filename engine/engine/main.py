@@ -46,7 +46,7 @@ class Daemon(object):
         expose: bool = self._kwargs.expose
         log_path: str = self._kwargs.log_path
 
-        setup_logging(Path(log_path))
+        setup_logging(Path(log_path) if log_path else None)
 
         async with (
             application_context(
@@ -86,16 +86,15 @@ def parse_args(args: list[str]):
     parser.add_argument("-t", "--token", type=str, default="")
     parser.add_argument("-6", "--ipv6", action="store_true")
     parser.add_argument("--expose", action="store_true")
-    parser.add_argument("--log-path", type=str, default="/tmp")
+    parser.add_argument("--log-path", type=str, default="")
 
     kwargs = parser.parse_args(args)
     return kwargs
 
 
-def setup_logging(log_path: Path):
-    path = log_path / "engine.log"
+def setup_logging(log_path: Path | None):
     dictConfig(
-        ConfigBuilder(path=path, rotate=True, rotate_when="w6")
+        ConfigBuilder(path=log_path, rotate=True, rotate_when="w6")
         .add("engine", level="D")
         .add("wcpan", level="I")
         .to_dict()
