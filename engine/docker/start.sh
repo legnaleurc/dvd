@@ -14,6 +14,8 @@ if [ -n "$DVD_ENGINE_TOKEN" ] ; then
     CMD="$CMD -t $DVD_ENGINE_TOKEN"
 fi
 
+export TMPDIR="$DVD_ENGINE_TMP"
+
 exec setpriv \
     --reuid="$DVD_ENGINE_UID" \
     --regid="$DVD_ENGINE_GID" \
