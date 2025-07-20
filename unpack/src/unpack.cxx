@@ -64,35 +64,13 @@ unpack::archive_context::seek(struct archive* handle,
   }
 }
 
-unpack::archive_context::archive_context(std::uint16_t port,
-                                         const std::string& id,
+unpack::archive_context::archive_context(const std::string& archive_uri,
                                          const std::string& local_path)
-  : id(id)
-  , local_path(local_path)
+  : local_path(local_path)
   , decoder()
-  , stream(port, id)
+  , stream(archive_uri)
   , chunk()
 {
-}
-
-unpack::archive_context::archive_context(const std::string& archive_path,
-                                         const std::string& local_path)
-  : id()
-  , local_path(local_path)
-  , decoder()
-  , stream(archive_path)
-  , chunk()
-{
-  auto path = std::filesystem::path(archive_path);
-  if (path.has_filename()) {
-    if (path.has_extension()) {
-      this->id = path.stem().string();
-    } else {
-      this->id = path.filename().string();
-    }
-  } else {
-    throw std::runtime_error("archive path does not have a filename");
-  }
 }
 
 void
@@ -114,8 +92,7 @@ std::string
 unpack::archive_context::to_output_path(const std::string& entry_name)
 {
   auto new_entry_name = this->decoder.to_utf8(entry_name);
-  std::filesystem::path path = local_path;
-  path /= this->id;
+  std::filesystem::path path = this->local_path;
   path /= new_entry_name;
   return path.string();
 }

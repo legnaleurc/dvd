@@ -7,6 +7,8 @@ namespace unpack {
 class input_stream::detail
 {
 public:
+  static std::shared_ptr<detail> create(const std::string& uri);
+
   virtual ~detail() = default;
   virtual void open() = 0;
   virtual void close() = 0;

@@ -1,7 +1,6 @@
 #ifndef UNPACK_STREAM_HPP
 #define UNPACK_STREAM_HPP
 
-#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -13,8 +12,7 @@ using binary_chunk = std::vector<std::uint8_t>;
 class input_stream
 {
 public:
-  input_stream(std::uint16_t port, const std::string& id);
-  input_stream(const std::string& file_path);
+  explicit input_stream(const std::string& uri);
 
   input_stream(const input_stream&) = delete;
   input_stream& operator=(const input_stream&) = delete;

@@ -91,9 +91,8 @@ class UnpackEngine:
     async def _unpack_local(self, node_id: str) -> list[ImageDict]:
         cmd = [
             self._unpack_path,
-            str(self._port),
-            node_id,
-            str(self._storage.root_path),
+            _get_node_url(self._port, node_id),
+            str(self._storage.get_path(node_id)),
         ]
 
         _L.debug(" ".join(cmd))
@@ -189,3 +188,7 @@ class FuzzyName:
             if l != r:
                 return l < r
         return False
+
+
+def _get_node_url(port: int, node_id: str) -> str:
+    return f"http://localhost:{port}/api/v1/nodes/{node_id}/stream"

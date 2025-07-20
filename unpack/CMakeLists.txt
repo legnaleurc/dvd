@@ -10,6 +10,7 @@ set(SOURCES
     "src/format.cpp"
     "src/global.cpp"
     "src/stream.cpp"
+    "src/stream.cxx"
     "src/stream_file.cxx"
     "src/stream_http.cxx"
     "src/text.cpp"

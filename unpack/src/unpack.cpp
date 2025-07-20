@@ -142,20 +142,9 @@ unpack_to(unpack::context_handle context)
 }
 
 void
-unpack::unpack_to(std::uint16_t port,
-                  const std::string& id,
-                  const std::string& local_path)
+unpack::unpack_to(const std::string& archive_uri, const std::string& local_path)
 {
   context_handle context =
-    std::make_shared<archive_context>(port, id, local_path);
-  ::unpack_to(context);
-}
-
-void
-unpack::unpack_to(const std::string& archive_path,
-                  const std::string& local_path)
-{
-  context_handle context =
-    std::make_shared<archive_context>(archive_path, local_path);
+    std::make_shared<archive_context>(archive_uri, local_path);
   ::unpack_to(context);
 }

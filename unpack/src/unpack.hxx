@@ -33,11 +33,7 @@ public:
                          la_int64_t offset,
                          int whence);
 
-  archive_context(std::uint16_t port,
-                  const std::string& id,
-                  const std::string& local_path);
-
-  archive_context(const std::string& archive_path,
+  archive_context(const std::string& archive_uri,
                   const std::string& local_path);
 
   void update_entry_path(struct archive_entry* entry);
@@ -45,7 +41,6 @@ public:
 private:
   std::string to_output_path(const std::string& entry_name);
 
-  std::string id;
   std::string local_path;
   text_codec decoder;
   input_stream stream;
