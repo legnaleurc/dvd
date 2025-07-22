@@ -13,6 +13,7 @@ class input_stream
 {
 public:
   explicit input_stream(const std::string& uri);
+  ~input_stream();
 
   input_stream(const input_stream&) = delete;
   input_stream& operator=(const input_stream&) = delete;
@@ -26,7 +27,7 @@ public:
 
 private:
   class detail;
-  std::shared_ptr<detail> self;
+  std::unique_ptr<detail> self;
 };
 
 }

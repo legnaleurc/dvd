@@ -14,13 +14,13 @@ starts_with(const std::string& str, const std::string& prefix)
 
 namespace unpack {
 
-std::shared_ptr<input_stream::detail>
+std::unique_ptr<input_stream::detail>
 input_stream::detail::create(const std::string& uri)
 {
   if (starts_with(uri, "http://") || starts_with(uri, "https://")) {
-    return std::make_shared<http_detail>(uri);
+    return std::make_unique<http_detail>(uri);
   } else {
-    return std::make_shared<file_detail>(uri);
+    return std::make_unique<file_detail>(uri);
   }
 }
 

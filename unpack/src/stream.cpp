@@ -6,6 +6,8 @@ unpack::input_stream::input_stream(const std::string& uri)
 {
 }
 
+unpack::input_stream::~input_stream() = default;
+
 void
 unpack::input_stream::open()
 {
