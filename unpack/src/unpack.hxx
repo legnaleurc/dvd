@@ -36,6 +36,11 @@ public:
   archive_context(const std::string& archive_uri,
                   const std::string& local_path);
 
+  archive_context(const archive_context&) = delete;
+  archive_context& operator=(const archive_context&) = delete;
+  archive_context(archive_context&&) = delete;
+  archive_context& operator=(archive_context&&) = delete;
+
   void update_entry_path(struct archive_entry* entry);
 
 private:
