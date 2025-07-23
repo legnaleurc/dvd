@@ -11,7 +11,7 @@
 namespace {
 
 unpack::archive_handle
-create_archive_reader(unpack::context_handle context)
+create_archive_reader(unpack::archive_context& context)
 {
   using unpack::archive_context;
   using unpack::archive_error;
@@ -50,7 +50,7 @@ create_archive_reader(unpack::context_handle context)
     throw archive_error(handle, "archive_read_set_seek_callback");
   }
 
-  rv = archive_read_set_callback_data(handle.get(), context.get());
+  rv = archive_read_set_callback_data(handle.get(), &context);
   if (rv != ARCHIVE_OK) {
     throw archive_error(handle, "archive_read_set_callback_data");
   }
@@ -102,7 +102,7 @@ extract_archive(unpack::archive_handle reader, unpack::archive_handle writer)
 }
 
 void
-unpack_to(unpack::context_handle context)
+unpack_to(unpack::archive_context& context)
 {
   auto reader = create_archive_reader(context);
   auto writer = create_archive_writer();
@@ -123,7 +123,7 @@ unpack_to(unpack::context_handle context)
       continue;
     }
 
-    context->update_entry_path(entry);
+    context.update_entry_path(entry);
 
     rv = archive_write_header(writer.get(), entry);
     if (rv != ARCHIVE_OK) {
@@ -144,7 +144,6 @@ unpack_to(unpack::context_handle context)
 void
 unpack::unpack_to(const std::string& archive_uri, const std::string& local_path)
 {
-  context_handle context =
-    std::make_shared<archive_context>(archive_uri, local_path);
+  auto context = unpack::archive_context{ archive_uri, local_path };
   ::unpack_to(context);
 }

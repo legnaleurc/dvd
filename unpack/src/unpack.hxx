@@ -52,8 +52,6 @@ private:
   binary_chunk chunk;
 };
 
-using context_handle = std::shared_ptr<archive_context>;
-
 }
 
 #endif
