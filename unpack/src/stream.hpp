@@ -1,6 +1,7 @@
 #ifndef UNPACK_STREAM_HPP
 #define UNPACK_STREAM_HPP
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
