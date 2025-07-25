@@ -19,45 +19,42 @@ create_archive_reader(unpack::archive_context& context)
 
   int rv = 0;
 
-  archive_handle handle{ archive_read_new(),
-                         [](archive_handle::element_type* p) -> void {
-                           archive_read_free(p);
-                         } };
+  archive_handle handle{ archive_read_new(), archive_read_free };
 
   rv = archive_read_support_filter_all(handle.get());
   if (rv != ARCHIVE_OK) {
-    throw archive_error(handle, "archive_read_support_filter_all");
+    throw archive_error(handle.get(), "archive_read_support_filter_all");
   }
   rv = archive_read_support_format_all(handle.get());
   if (rv != ARCHIVE_OK) {
-    throw archive_error(handle, "archive_read_support_format_all");
+    throw archive_error(handle.get(), "archive_read_support_format_all");
   }
 
   rv = archive_read_set_open_callback(handle.get(), archive_context::open);
   if (rv != ARCHIVE_OK) {
-    throw archive_error(handle, "archive_read_set_open_callback");
+    throw archive_error(handle.get(), "archive_read_set_open_callback");
   }
   rv = archive_read_set_close_callback(handle.get(), archive_context::close);
   if (rv != ARCHIVE_OK) {
-    throw archive_error(handle, "archive_read_set_close_callback");
+    throw archive_error(handle.get(), "archive_read_set_close_callback");
   }
   rv = archive_read_set_read_callback(handle.get(), archive_context::read);
   if (rv != ARCHIVE_OK) {
-    throw archive_error(handle, "archive_read_set_read_callback");
+    throw archive_error(handle.get(), "archive_read_set_read_callback");
   }
   rv = archive_read_set_seek_callback(handle.get(), archive_context::seek);
   if (rv != ARCHIVE_OK) {
-    throw archive_error(handle, "archive_read_set_seek_callback");
+    throw archive_error(handle.get(), "archive_read_set_seek_callback");
   }
 
   rv = archive_read_set_callback_data(handle.get(), &context);
   if (rv != ARCHIVE_OK) {
-    throw archive_error(handle, "archive_read_set_callback_data");
+    throw archive_error(handle.get(), "archive_read_set_callback_data");
   }
 
   rv = archive_read_open1(handle.get());
   if (rv != ARCHIVE_OK) {
-    throw archive_error(handle, "archive_read_open1");
+    throw archive_error(handle.get(), "archive_read_open1");
   }
 
   return handle;
@@ -68,15 +65,12 @@ create_archive_writer()
 {
   using unpack::archive_handle;
 
-  archive_handle handle{ archive_write_disk_new(),
-                         [](archive_handle::element_type* p) -> void {
-                           archive_write_free(p);
-                         } };
+  archive_handle handle{ archive_write_disk_new(), archive_write_free };
   return handle;
 }
 
 void
-extract_archive(unpack::archive_handle reader, unpack::archive_handle writer)
+extract_archive(archive* reader, archive* writer)
 {
   using unpack::archive_error;
 
@@ -86,7 +80,7 @@ extract_archive(unpack::archive_handle reader, unpack::archive_handle writer)
     std::size_t length = 0;
     la_int64_t offset = 0;
 
-    rv = archive_read_data_block(reader.get(), &chunk, &length, &offset);
+    rv = archive_read_data_block(reader, &chunk, &length, &offset);
     if (rv == ARCHIVE_EOF) {
       break;
     }
@@ -94,7 +88,7 @@ extract_archive(unpack::archive_handle reader, unpack::archive_handle writer)
       throw archive_error(reader, "archive_read_data_block");
     }
 
-    rv = archive_write_data_block(writer.get(), chunk, length, offset);
+    rv = archive_write_data_block(writer, chunk, length, offset);
     if (rv != ARCHIVE_OK) {
       throw archive_error(writer, "archive_write_data_block");
     }
@@ -104,6 +98,8 @@ extract_archive(unpack::archive_handle reader, unpack::archive_handle writer)
 void
 unpack_to(unpack::archive_context& context)
 {
+  using unpack::archive_error;
+
   auto reader = create_archive_reader(context);
   auto writer = create_archive_writer();
 
@@ -114,7 +110,7 @@ unpack_to(unpack::archive_context& context)
       break;
     }
     if (rv != ARCHIVE_OK) {
-      throw unpack::archive_error(reader, "archive_read_next_header");
+      throw archive_error(reader.get(), "archive_read_next_header");
     }
 
     // skip folders
@@ -127,14 +123,14 @@ unpack_to(unpack::archive_context& context)
 
     rv = archive_write_header(writer.get(), entry);
     if (rv != ARCHIVE_OK) {
-      throw unpack::archive_error(writer, "archive_write_header");
+      throw archive_error(writer.get(), "archive_write_header");
     }
 
-    extract_archive(reader, writer);
+    extract_archive(reader.get(), writer.get());
 
     rv = archive_write_finish_entry(writer.get());
     if (rv != ARCHIVE_OK) {
-      throw unpack::archive_error(writer, "archive_write_finish_entry");
+      throw archive_error(writer.get(), "archive_write_finish_entry");
     }
   }
 }

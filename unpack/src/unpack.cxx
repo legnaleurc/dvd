@@ -99,9 +99,9 @@ unpack::archive_context::to_output_path(const std::string& entry_name)
 
 namespace {
 std::string
-format_archive_error(unpack::archive_handle handle, const std::string& name)
+format_archive_error(archive* handle, const std::string& name)
 {
-  auto msg = archive_error_string(handle.get());
+  auto msg = archive_error_string(handle);
   if (!msg) {
     msg = "(empty error message)";
   }
@@ -109,7 +109,7 @@ format_archive_error(unpack::archive_handle handle, const std::string& name)
 }
 }
 
-unpack::archive_error::archive_error(archive_handle handle,
+unpack::archive_error::archive_error(archive* handle,
                                      const std::string& name) noexcept
   : std::runtime_error(format_archive_error(handle, name))
 {

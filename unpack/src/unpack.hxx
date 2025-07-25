@@ -12,12 +12,12 @@
 
 namespace unpack {
 
-using archive_handle = std::shared_ptr<archive>;
+using archive_handle = std::unique_ptr<archive, int (*)(archive*)>;
 
 class archive_error : public std::runtime_error
 {
 public:
-  archive_error(archive_handle handle, const std::string& name) noexcept;
+  archive_error(archive* handle, const std::string& name) noexcept;
 };
 
 class archive_context
