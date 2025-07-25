@@ -7,7 +7,7 @@
 #include "format.hpp"
 
 int
-unpack::archive_context::open(struct archive* handle, void* context)
+unpack::archive_context::open(archive* handle, void* context)
 {
   auto ctx = static_cast<archive_context*>(context);
   try {
@@ -20,7 +20,7 @@ unpack::archive_context::open(struct archive* handle, void* context)
 }
 
 int
-unpack::archive_context::close(struct archive* handle, void* context)
+unpack::archive_context::close(archive* handle, void* context)
 {
   auto ctx = static_cast<archive_context*>(context);
   try {
@@ -34,7 +34,7 @@ unpack::archive_context::close(struct archive* handle, void* context)
 }
 
 la_ssize_t
-unpack::archive_context::read(struct archive* handle,
+unpack::archive_context::read(archive* handle,
                               void* context,
                               const void** buffer)
 {
@@ -50,7 +50,7 @@ unpack::archive_context::read(struct archive* handle,
 }
 
 la_int64_t
-unpack::archive_context::seek(struct archive* handle,
+unpack::archive_context::seek(archive* handle,
                               void* context,
                               la_int64_t offset,
                               int whence)
@@ -74,7 +74,7 @@ unpack::archive_context::archive_context(const std::string& archive_uri,
 }
 
 void
-unpack::archive_context::update_entry_path(struct archive_entry* entry)
+unpack::archive_context::update_entry_path(archive_entry* entry)
 {
   auto entry_name = archive_entry_pathname(entry);
   if (!entry_name) {

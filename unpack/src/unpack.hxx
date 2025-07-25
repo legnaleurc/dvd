@@ -12,7 +12,7 @@
 
 namespace unpack {
 
-using archive_handle = std::shared_ptr<struct archive>;
+using archive_handle = std::shared_ptr<archive>;
 
 class archive_error : public std::runtime_error
 {
@@ -23,12 +23,10 @@ public:
 class archive_context
 {
 public:
-  static int open(struct archive* handle, void* context);
-  static int close(struct archive* handle, void* context);
-  static la_ssize_t read(struct archive* handle,
-                         void* context,
-                         const void** buffer);
-  static la_int64_t seek(struct archive* handle,
+  static int open(archive* handle, void* context);
+  static int close(archive* handle, void* context);
+  static la_ssize_t read(archive* handle, void* context, const void** buffer);
+  static la_int64_t seek(archive* handle,
                          void* context,
                          la_int64_t offset,
                          int whence);
@@ -41,7 +39,7 @@ public:
   archive_context(archive_context&&) = delete;
   archive_context& operator=(archive_context&&) = delete;
 
-  void update_entry_path(struct archive_entry* entry);
+  void update_entry_path(archive_entry* entry);
 
 private:
   std::string to_output_path(const std::string& entry_name);

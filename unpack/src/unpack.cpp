@@ -108,7 +108,7 @@ unpack_to(unpack::archive_context& context)
   auto writer = create_archive_writer();
 
   for (;;) {
-    struct archive_entry* entry = nullptr;
+    archive_entry* entry = nullptr;
     int rv = archive_read_next_header(reader.get(), &entry);
     if (rv == ARCHIVE_EOF) {
       break;
