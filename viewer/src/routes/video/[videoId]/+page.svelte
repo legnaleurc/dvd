@@ -11,6 +11,7 @@
   const { videoMap, openVideo } = getVideoContext();
 
   let url = "";
+  let videoElement: HTMLVideoElement | null = null;
 
   $: id = $page.params.videoId;
   $: video = $videoMap[id];
@@ -21,6 +22,12 @@
 
   async function handleOpen() {
     await callExternal(video.id, video.name, video.mimeType);
+  }
+
+  async function handleFullscreen() {
+    if (videoElement && videoElement.requestFullscreen) {
+      await videoElement.requestFullscreen();
+    }
   }
 
   onMount(async () => {
@@ -37,7 +44,12 @@
       {name}
     </div>
     <div class="flex">
-      <RoundedButton on:click={handleOpen}>
+      {#if document.fullscreenEnabled}
+        <RoundedButton on:click={handleFullscreen} disabled={!videoElement}>
+          <Icon name="fullscreen" />
+        </RoundedButton>
+      {/if}
+      <RoundedButton on:click={handleOpen} disabled={!videoElement}>
         <Icon name="open_in_new" />
       </RoundedButton>
     </div>
@@ -45,6 +57,7 @@
   <div class="flex-1 flex flex-col justify-center items-center overflow-y-auto">
     {#if width && height && mimeType && url}
       <video
+        bind:this={videoElement}
         autoplay={false}
         controls={true}
         preload="metadata"
