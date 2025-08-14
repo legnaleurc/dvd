@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim AS builder
+FROM debian:trixie-slim AS builder
 
 RUN : \
     && apt-get update \
@@ -16,7 +16,7 @@ COPY . /app
 WORKDIR /app
 RUN make release && strip /app/release/unpack
 
-FROM debian:bookworm-slim AS production
+FROM debian:trixie-slim AS production
 
 COPY --from=builder /app/release/unpack /app/unpack
 WORKDIR /app

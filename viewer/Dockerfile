@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim AS builder
+FROM node:20-trixie-slim AS builder
 
 RUN : \
     && apt-get update \
@@ -11,7 +11,7 @@ COPY . /app
 WORKDIR /app
 RUN make release
 
-FROM debian:bookworm-slim AS production
+FROM debian:trixie-slim AS production
 
 COPY --from=builder /app/build /app
 WORKDIR /app

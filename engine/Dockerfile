@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm AS base
+FROM python:3.12-slim-trixie AS base
 
 # env
 ENV POETRY_HOME=/opt/poetry
@@ -30,9 +30,9 @@ FROM base AS production
 RUN : \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
-        libarchive13 \
-        libcurl4 \
-        libboost-locale1.74.0 \
+        libarchive13t64 \
+        libcurl4t64 \
+        libboost-locale1.83.0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
