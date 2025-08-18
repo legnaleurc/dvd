@@ -1,13 +1,3 @@
-<script lang="ts" context="module">
-  function createDummyImage(width: number, height: number) {
-    const svg = [
-      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`,
-      "</svg>",
-    ].join("");
-    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-  }
-</script>
-
 <script lang="ts">
   import { debounce } from "$tools/fp";
   import { retry } from "$actions/image";
@@ -20,26 +10,42 @@
 
   let isLazy = true;
 
-  $: srcUrl = isLazy ? createDummyImage(width, height) : src;
-
   const handleIntersect = debounce((isIntersecting: boolean) => {
-    if (isIntersecting) {
-      isLazy = false;
-    }
+    isLazy = !isIntersecting;
   }, 200);
 </script>
 
-<img
-  draggable="false"
-  alt=""
-  class="bg-pale-700"
-  {width}
-  {height}
-  src={srcUrl}
-  decoding="async"
-  use:retry
-  use:subscribeIntersection={{
-    onIntersect: handleIntersect,
-    isActive: isActive && isLazy,
-  }}
-/>
+{#if isLazy}
+  <div
+    class="bg-pale-700 placeholder"
+    style:--width={width}
+    style:--height={height}
+    use:subscribeIntersection={{
+      onIntersect: handleIntersect,
+      isActive,
+    }}
+  ></div>
+{:else}
+  <img
+    draggable="false"
+    alt=""
+    class="bg-pale-700"
+    {width}
+    {height}
+    {src}
+    decoding="async"
+    use:retry
+    use:subscribeIntersection={{
+      onIntersect: handleIntersect,
+      isActive,
+    }}
+  />
+{/if}
+
+<style lang="scss">
+  .placeholder {
+    width: calc(var(--width) * 1px);
+    max-width: 100%;
+    aspect-ratio: var(--width) / var(--height);
+  }
+</style>
