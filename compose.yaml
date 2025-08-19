@@ -53,10 +53,10 @@ services:
       - ALL
     command: sh -c "cp -R /app/* /mnt/static"
   nginx:
-    image: nginx:stable-bookworm
+    image: nginx:stable-alpine-slim
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro
       - ./docker/nginx:/etc/nginx/conf.d:ro
       - static:/mnt/static:ro
     ports:
