@@ -305,9 +305,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(len(body), 0)
         fake_create_process.assert_called_once_with(
             "fake_unpack",
-            "9999",
-            "1",
-            str(tmp_path),
+            "http://localhost:9999/api/v1/nodes/1/stream",
+            str(tmp_path / "1"),
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
