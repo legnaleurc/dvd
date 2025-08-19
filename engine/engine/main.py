@@ -23,7 +23,7 @@ class Daemon(object):
         self._kwargs = None
         self._finished = None
 
-    async def __call__(self, args: list[str]):
+    async def __call__(self, args: list[str]) -> int:
         self._kwargs = parse_args(args[1:])
         self._finished = asyncio.Event()
         loop = asyncio.get_running_loop()
@@ -35,7 +35,7 @@ class Daemon(object):
             _L.exception("main function error")
         return 1
 
-    async def _main(self):
+    async def _main(self) -> int:
         assert self._kwargs is not None
         port: int = self._kwargs.port
         unpack_path: str = self._kwargs.unpack
