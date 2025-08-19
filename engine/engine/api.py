@@ -2,18 +2,20 @@ import json
 import shlex
 from asyncio import as_completed, create_subprocess_exec
 from collections.abc import Callable, Iterable
+from datetime import datetime
 from functools import partial
 from logging import getLogger
 from pathlib import PurePath
 from typing import Any
 
-from aiohttp.web import StreamResponse, View
+from aiohttp.web import Request, Response, StreamResponse, View
 from aiohttp.web_exceptions import (
     HTTPBadRequest,
     HTTPConflict,
     HTTPInternalServerError,
     HTTPNoContent,
     HTTPNotFound,
+    HTTPNotModified,
     HTTPUnauthorized,
 )
 from multidict import MultiMapping
@@ -255,10 +257,24 @@ class NodeImageView(NodeObjectMixin, View):
         except IndexError:
             raise HTTPNotFound()
 
+        # check cache before streaming
+        if not entity_modified(
+            self.request, etag=data["etag"], last_modified=data["mtime"]
+        ):
+            response = Response(status=HTTPNotModified.status_code)
+            setup_cache_control(
+                response, etag=data["etag"], last_modified=data["mtime"]
+            )
+            return response
+
+        # setup streaming response
         drive = self.request.app[KEY_DRIVE]
         response = StreamResponse(status=200)
         response.content_type = data["type"]
         response.content_length = data["size"]
+
+        # setup cache headers
+        setup_cache_control(response, etag=data["etag"], last_modified=data["mtime"])
 
         await response.prepare(self.request)
         if node.is_directory:
@@ -432,3 +448,20 @@ def invalidate_cache_by_change(
         on_update=lambda node: engine.invalidate_cache_by_node(node),
     )
     return change
+
+
+def entity_modified(request: Request, *, etag: str, last_modified: datetime) -> bool:
+    if etags := request.if_none_match:
+        return all(etag != _.value for _ in etags)
+    if since := request.if_modified_since:
+        return last_modified > since
+    # Not a conditional request, treat as modified.
+    return True
+
+
+def setup_cache_control(
+    response: StreamResponse, *, etag: str, last_modified: datetime
+) -> None:
+    response.headers["Cache-Control"] = "private, max-age=86400, immutable"
+    response.etag = etag
+    response.last_modified = last_modified

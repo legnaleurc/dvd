@@ -107,9 +107,11 @@ class UnpackEngine:
             raise UnpackFailedError(
                 f"unpack failed code: {p.returncode}\n\n{err.decode('utf-8')}"
             )
-        return self._scan_local(node_id)
+        return await self._scan_local(node_id)
 
-    def _scan_local(self, node_id: str) -> list[ImageDict]:
+    async def _scan_local(self, node_id: str) -> list[ImageDict]:
+        parent_node = await self._drive.get_node_by_id(node_id)
+
         rv: list[ImageDict] = []
         top = self._storage.get_path(node_id)
         for dirpath, dirnames, filenames in top.walk():
@@ -122,16 +124,20 @@ class UnpackEngine:
                     continue
                 if not type_.startswith("image/"):
                     continue
+
                 try:
                     width, height = get_image_size(path)
                 except Exception:
                     _L.exception("unknown image")
                     continue
+
                 rv.append(
                     {
                         "id": str(path),
                         "type": type_,
                         "size": path.stat().st_size,
+                        "etag": parent_node.hash,
+                        "mtime": parent_node.mtime,
                         "width": width,
                         "height": height,
                     }
@@ -159,6 +165,8 @@ class UnpackEngine:
                         "id": f.id,
                         "type": type_,
                         "size": f.size,
+                        "etag": f.hash,
+                        "mtime": f.mtime,
                         "width": f.width,
                         "height": f.height,
                     }

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import TypedDict
 
 
@@ -43,3 +44,5 @@ class ImageDict(TypedDict):
     height: int
     size: int
     id: str
+    etag: str
+    mtime: datetime
