@@ -3,8 +3,7 @@
 #include <archive_entry.h>
 
 #include <filesystem>
-
-#include "format.hpp"
+#include <format>
 
 int
 unpack::archive_context::open(archive* handle, void* context)
@@ -84,7 +83,7 @@ unpack::archive_context::update_entry_path(archive_entry* entry)
   auto entry_path = this->to_output_path(entry_name);
   int rv = archive_entry_update_pathname_utf8(entry, entry_path.c_str());
   if (!rv) {
-    throw std::runtime_error(("utf-8 failure: %1%"_f % entry_path).str());
+    throw std::runtime_error(std::format("utf-8 failure: {}", entry_path));
   }
 }
 

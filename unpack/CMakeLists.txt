@@ -7,7 +7,6 @@ find_package(CURL REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 set(SOURCES
-    "src/format.cpp"
     "src/global.cpp"
     "src/stream.cpp"
     "src/stream.cxx"
