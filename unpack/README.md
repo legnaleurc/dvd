@@ -1,6 +1,6 @@
 # unpack
 
-Toolchain minimal require C++17.
+Toolchain minimal require C++20.
 
 Other libraries you will need:
 
