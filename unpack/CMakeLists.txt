@@ -19,7 +19,7 @@ set(SOURCES
     "src/main.cpp")
 
 add_executable(unpack)
-target_compile_features(unpack PUBLIC cxx_std_17)
+target_compile_features(unpack PUBLIC cxx_std_20)
 target_compile_options(unpack PRIVATE -Wall -Wextra -pedantic)
 target_link_libraries(unpack PRIVATE
     Boost::locale
