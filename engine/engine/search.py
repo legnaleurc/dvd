@@ -104,7 +104,7 @@ class SearchEngine(object):
             if k in self._searching:
                 # Going to be updated.
                 continue
-            if is_node_match_param(node, k):
+            if _is_node_match_param(node, k):
                 del self._cache[k]
                 _L.debug(f"invalided search param {k}")
 
@@ -165,14 +165,14 @@ class SearchEngine(object):
             pattern = ""
         else:
             if fuzzy:
-                pattern = to_fuzzy_search_pattern(name)
+                pattern = _to_fuzzy_search_pattern(name)
             else:
-                pattern = to_normal_search_pattern(name)
+                pattern = _to_normal_search_pattern(name)
 
         if parent_node:
             node_list = [
                 node
-                async for node in walk_node(
+                async for node in _walk_node(
                     self._drive,
                     parent_node,
                     (
@@ -207,24 +207,24 @@ class SearchEngine(object):
             self._invalidate_cache_by_param(oldest)
 
 
-def to_normal_search_pattern(raw: str) -> str:
+def _to_normal_search_pattern(raw: str) -> str:
     safe = re.escape(raw)
     return f".*{safe}.*"
 
 
-def to_fuzzy_search_pattern(raw: str) -> str:
+def _to_fuzzy_search_pattern(raw: str) -> str:
     rv = re.match(r"(.+?)\s*\((.+)\)", raw)
     if rv:
         rv = rv.groups()
     else:
         rv = (raw,)
-    rv = map(inner_fuzzy_search_pattern, rv)
+    rv = map(_inner_fuzzy_search_pattern, rv)
     rv = "|".join(rv)
     rv = f".*({rv}).*"
     return rv
 
 
-def inner_fuzzy_search_pattern(raw: str) -> str:
+def _inner_fuzzy_search_pattern(raw: str) -> str:
     rv = re.split(r"(?:\s|-)+", raw)
     rv = map(re.escape, rv)
     rv = map(str, rv)
@@ -232,7 +232,7 @@ def inner_fuzzy_search_pattern(raw: str) -> str:
     return rv
 
 
-async def walk_node(
+async def _walk_node(
     drive: Drive, root: Node, fn: Callable[[Node], bool] | None
 ) -> AsyncIterator[Node]:
     async for _, folders, files in drive.walk(root):
@@ -241,13 +241,15 @@ async def walk_node(
                 yield f
 
 
-def is_node_match_param(node: Node, param: SearchParam) -> bool:
+def _is_node_match_param(node: Node, param: SearchParam) -> bool:
     name = param.name
     fuzzy = param.fuzzy
 
     if not name:
         return False
 
-    pattern = to_fuzzy_search_pattern(name) if fuzzy else to_normal_search_pattern(name)
+    pattern = (
+        _to_fuzzy_search_pattern(name) if fuzzy else _to_normal_search_pattern(name)
+    )
     rv = re.search(pattern, node.name, re.I)
     return rv is not None

@@ -62,7 +62,7 @@ class NodeView(
         node = await self.get_object()
         drive = self.request.app[KEY_DRIVE]
         kwargs = await self.request.json()
-        kwargs = unpack_dict(
+        kwargs = _unpack_dict(
             kwargs,
             (
                 "parent_id",
@@ -99,13 +99,13 @@ class NodeListView(
 ):
     async def list_(self):
         # node name
-        name = get_query_value(self.request.query, str, "name")
+        name = _get_query_value(self.request.query, str, "name")
         # fuzzy match name
-        fuzzy = get_query_value(self.request.query, bool, "fuzzy")
+        fuzzy = _get_query_value(self.request.query, bool, "fuzzy")
         # node parent path
-        parent_path = get_query_value(self.request.query, str, "parent_path")
+        parent_path = _get_query_value(self.request.query, str, "parent_path")
         # node size
-        size = get_query_value(self.request.query, int, "size")
+        size = _get_query_value(self.request.query, int, "size")
 
         se = self.request.app[KEY_SEARCH_ENGINE]
         try:
@@ -123,7 +123,7 @@ class NodeListView(
 
     async def create(self):
         kwargs = await self.request.json()
-        kwargs = unpack_dict(
+        kwargs = _unpack_dict(
             kwargs,
             (
                 "parent_id",
@@ -258,11 +258,11 @@ class NodeImageView(NodeObjectMixin, View):
             raise HTTPNotFound()
 
         # check cache before streaming
-        if not entity_modified(
+        if not _entity_modified(
             self.request, etag=data["etag"], last_modified=data["mtime"]
         ):
             response = Response(status=HTTPNotModified.status_code)
-            setup_cache_control(
+            _setup_cache_control(
                 response, etag=data["etag"], last_modified=data["mtime"]
             )
             return response
@@ -274,7 +274,7 @@ class NodeImageView(NodeObjectMixin, View):
         response.content_length = data["size"]
 
         # setup cache headers
-        setup_cache_control(response, etag=data["etag"], last_modified=data["mtime"])
+        _setup_cache_control(response, etag=data["etag"], last_modified=data["mtime"])
 
         await response.prepare(self.request)
         if node.is_directory:
@@ -349,7 +349,7 @@ class ChangesView(HasTokenMixin, View):
         drive = self.request.app[KEY_DRIVE]
         se = self.request.app[KEY_SEARCH_ENGINE]
         cache_invalidation = (
-            invalidate_cache_by_change(se, _) async for _ in drive.sync()
+            _invalidate_cache_by_change(se, _) async for _ in drive.sync()
         )
         changes = [dict_from_change(_) async for _ in cache_invalidation]
         return json_response(changes)
@@ -422,16 +422,16 @@ class HistoryView(HasTokenMixin, ListAPIMixin[dict[str, Any]], View):
         return history
 
 
-def unpack_dict(d: dict[str, Any], keys: Iterable[str]) -> dict[str, Any]:
+def _unpack_dict(d: dict[str, Any], keys: Iterable[str]) -> dict[str, Any]:
     common_keys = set(keys) & set(d.keys())
     return {key: d[key] for key in common_keys}
 
 
-type CastFunction[T] = Callable[[Any], T]
+type _CastFunction[T] = Callable[[Any], T]
 
 
-def get_query_value[T](
-    query: MultiMapping[str], fn: CastFunction[T], key: str
+def _get_query_value[T](
+    query: MultiMapping[str], fn: _CastFunction[T], key: str
 ) -> T | None:
     value = query.get(key, None)
     if value is None:
@@ -439,7 +439,7 @@ def get_query_value[T](
     return fn(value)
 
 
-def invalidate_cache_by_change(
+def _invalidate_cache_by_change(
     engine: SearchEngine, change: ChangeAction
 ) -> ChangeAction:
     dispatch_change(
@@ -450,7 +450,7 @@ def invalidate_cache_by_change(
     return change
 
 
-def entity_modified(request: Request, *, etag: str, last_modified: datetime) -> bool:
+def _entity_modified(request: Request, *, etag: str, last_modified: datetime) -> bool:
     if etags := request.if_none_match:
         return all(etag != _.value for _ in etags)
     if since := request.if_modified_since:
@@ -459,7 +459,7 @@ def entity_modified(request: Request, *, etag: str, last_modified: datetime) -> 
     return True
 
 
-def setup_cache_control(
+def _setup_cache_control(
     response: StreamResponse, *, etag: str, last_modified: datetime
 ) -> None:
     response.headers["Cache-Control"] = "private, max-age=86400, immutable"

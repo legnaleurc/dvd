@@ -24,7 +24,7 @@ class Daemon(object):
         self._finished = None
 
     async def __call__(self, args: list[str]) -> int:
-        self._kwargs = parse_args(args[1:])
+        self._kwargs = _parse_args(args[1:])
         self._finished = asyncio.Event()
         loop = asyncio.get_running_loop()
         loop.add_signal_handler(signal.SIGINT, self._close)
@@ -46,17 +46,17 @@ class Daemon(object):
         expose: bool = self._kwargs.expose
         log_path: str = self._kwargs.log_path
 
-        setup_logging(Path(log_path) if log_path else None)
+        _setup_logging(Path(log_path) if log_path else None)
 
         async with (
-            application_context(
+            _application_context(
                 port=port,
                 unpack_path=unpack_path,
                 drive_path=drive_path,
                 static_path=static_path,
                 token=token,
             ) as app,
-            server_context(
+            _server_context(
                 app,
                 port,
                 ipv6=ipv6,
@@ -76,7 +76,7 @@ class Daemon(object):
         self._finished.set()
 
 
-def parse_args(args: list[str]):
+def _parse_args(args: list[str]):
     parser = argparse.ArgumentParser("engine")
 
     parser.add_argument("-p", "--port", required=True, type=int)
@@ -92,7 +92,7 @@ def parse_args(args: list[str]):
     return kwargs
 
 
-def setup_logging(log_path: Path | None):
+def _setup_logging(log_path: Path | None):
     dictConfig(
         ConfigBuilder(path=log_path, rotate=True, rotate_when="w6")
         .add("engine", level="D")
@@ -103,7 +103,7 @@ def setup_logging(log_path: Path | None):
 
 
 @asynccontextmanager
-async def application_context(
+async def _application_context(
     port: int,
     unpack_path: str,
     drive_path: str,
@@ -113,12 +113,12 @@ async def application_context(
     app = Application()
 
     # api
-    setup_api_path(app)
+    _setup_api_path(app)
 
     # static
     if static_path:
         app[KEY_STATIC] = Path(static_path)
-        setup_static_path(app, static_path)
+        _setup_static_path(app, static_path)
 
     # drive
     config_path = Path(drive_path)
@@ -137,7 +137,7 @@ async def application_context(
 
 
 @asynccontextmanager
-async def server_context(
+async def _server_context(
     app: Application,
     port: int,
     ipv6: bool,
@@ -159,7 +159,7 @@ async def server_context(
         await runner.cleanup()
 
 
-def setup_api_path(app: Application) -> None:
+def _setup_api_path(app: Application) -> None:
     app.router.add_view(r"/api/v1/nodes", api.NodeListView)
     app.router.add_view(r"/api/v1/nodes/{id}", api.NodeView)
     app.router.add_view(r"/api/v1/nodes/{id}/children", api.NodeChildrenView)
@@ -177,7 +177,7 @@ def setup_api_path(app: Application) -> None:
     app.router.add_view(r"/api/v1/history", api.HistoryView)
 
 
-def setup_static_path(app: Application, path: str) -> None:
+def _setup_static_path(app: Application, path: str) -> None:
     app.router.add_view(r"/", view.IndexRedirect)
     app.router.add_view(r"/files", view.IndexView)
     app.router.add_view(r"/search", view.IndexView)

@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from aiohttp.test_utils import TestClient, TestServer
 
-from engine.main import application_context
+from engine.main import _application_context
 
 
 class ViewTestCase(IsolatedAsyncioTestCase):
@@ -15,7 +15,7 @@ class ViewTestCase(IsolatedAsyncioTestCase):
         static_path = self.enterContext(TemporaryDirectory())
         self.enterContext(patch("engine.main.create_drive_from_config"))
         app = await self.enterAsyncContext(
-            application_context(
+            _application_context(
                 port=9999,
                 unpack_path="",
                 drive_path="drive_path",

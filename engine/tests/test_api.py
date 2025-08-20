@@ -12,7 +12,7 @@ from wcpan.drive.core.types import Node
 
 from engine.app import KEY_DRIVE, KEY_UNPACK_ENGINE
 from engine.lib import dict_from_node
-from engine.main import application_context
+from engine.main import _application_context
 
 
 class ApiTestCase(IsolatedAsyncioTestCase):
@@ -22,7 +22,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         static_path = self.enterContext(TemporaryDirectory())
         self.enterContext(patch("engine.main.create_drive_from_config"))
         app = await self.enterAsyncContext(
-            application_context(
+            _application_context(
                 port=9999,
                 unpack_path="fake_unpack",
                 drive_path="fake_drive",

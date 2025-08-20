@@ -49,7 +49,7 @@ class NodeRandomAccessMixin(AbstractView):
         stop = node.size if range_.stop is None else range_.stop
         length = stop - offset
         # Not out of range.
-        good_range = is_valid_range(range_, node.size)
+        good_range = _is_valid_range(range_, node.size)
         # The response needs Content-Range.
         want_range = range_.start is not None or range_.stop is not None
 
@@ -120,7 +120,7 @@ class HasTokenMixin(PermissionMixin, AbstractView):
         )
 
 
-def is_valid_range(range_: slice, size: int) -> bool:
+def _is_valid_range(range_: slice, size: int) -> bool:
     if range_.start is None and range_.stop is None:
         return True
     if range_.start is None:
