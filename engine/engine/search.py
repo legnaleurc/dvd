@@ -106,7 +106,7 @@ class SearchEngine(object):
                 continue
             if _is_node_match_param(node, k):
                 del self._cache[k]
-                _L.debug(f"invalided search param {k}")
+                _L.debug(f"invalidated search param {k}")
 
     def _invalidate_cache_by_param(self, param: SearchParam) -> None:
         if param in self._cache:

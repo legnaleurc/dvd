@@ -261,6 +261,7 @@ class NodeImageView(NodeObjectMixin, View):
         if not _entity_modified(
             self.request, etag=data["etag"], last_modified=data["mtime"]
         ):
+            _L.debug(f"304 not modified: {node.id} {image_id}")
             response = Response(status=HTTPNotModified.status_code)
             _setup_cache_control(
                 response, etag=data["etag"], last_modified=data["mtime"]
