@@ -7,9 +7,9 @@ from logging import getLogger
 from mimetypes import guess_type
 from typing import Self
 
+from wcpan.drive.cli.lib import get_image_info
 from wcpan.drive.core.types import Drive, Node
 
-from .image import get_image_size
 from .storage import StorageManager, create_storage_manager
 from .types import ImageDict
 
@@ -126,7 +126,7 @@ class UnpackEngine:
                     continue
 
                 try:
-                    width, height = get_image_size(path)
+                    media_info = get_image_info(path)
                 except Exception:
                     _L.exception("unknown image")
                     continue
@@ -138,8 +138,8 @@ class UnpackEngine:
                         "size": path.stat().st_size,
                         "etag": parent_node.hash,
                         "mtime": parent_node.mtime,
-                        "width": width,
-                        "height": height,
+                        "width": media_info.width,
+                        "height": media_info.height,
                     }
                 )
         return rv
