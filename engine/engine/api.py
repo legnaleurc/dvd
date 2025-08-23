@@ -239,7 +239,7 @@ class NodeImageListView(
 
 class NodeImageView(NodeObjectMixin, View):
     async def get(self):
-        image_id = self.request.match_info.get("image_id", None)
+        image_id = self.request.match_info.get("image_id")
         if not image_id:
             raise HTTPBadRequest()
         image_id = int(image_id)
