@@ -7,8 +7,8 @@ from .search import SearchEngine
 from .unpack import UnpackEngine
 
 
-KEY_DRIVE = AppKey("KEY_DRIVE", Drive)
-KEY_SEARCH_ENGINE = AppKey("KEY_SEARCH_ENGINE", SearchEngine)
-KEY_STATIC = AppKey("KEY_STATIC", Path)
-KEY_TOKEN = AppKey("KEY_TOKEN", str)
-KEY_UNPACK_ENGINE = AppKey("KEY_UNPACK_ENGINE", UnpackEngine)
+KEY_DRIVE = AppKey[Drive]("KEY_DRIVE")
+KEY_SEARCH_ENGINE = AppKey[SearchEngine]("KEY_SEARCH_ENGINE")
+KEY_STATIC = AppKey[Path]("KEY_STATIC")
+KEY_TOKEN = AppKey[str | None]("KEY_TOKEN")
+KEY_UNPACK_ENGINE = AppKey[UnpackEngine]("KEY_UNPACK_ENGINE")

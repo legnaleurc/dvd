@@ -49,9 +49,8 @@ async def amain(args: list[str]) -> int:
         ) as app,
         _server_context(
             app,
-            kwargs.port,
-            ipv6=kwargs.ipv6,
-            expose=kwargs.expose,
+            host=kwargs.host,
+            port=kwargs.port,
         ),
     ):
         await finished.wait()
@@ -80,11 +79,12 @@ def _setup_signals() -> Event:
 
 @asynccontextmanager
 async def _application_context(
+    *,
     port: int,
     unpack_path: str,
     drive_path: str,
-    static_path: str,
-    token: str,
+    static_path: str | None,
+    token: str | None,
 ):
     app = Application()
 
@@ -115,21 +115,16 @@ async def _application_context(
 @asynccontextmanager
 async def _server_context(
     app: Application,
+    *,
+    host: str,
     port: int,
-    ipv6: bool,
-    expose: bool,
 ):
     log_format = "%s %r (%b) %Tfs"
     runner = AppRunner(app, access_log_format=log_format)
     await runner.setup()
     try:
-        ip = "0.0.0.0" if expose else "127.1"
-        v4 = TCPSite(runner, host=ip, port=port)
-        await v4.start()
-        if ipv6:
-            ip = "::" if expose else "::1"
-            v6 = TCPSite(runner, host=ip, port=port)
-            await v6.start()
+        site = TCPSite(runner, host=host, port=port)
+        await site.start()
         yield
     finally:
         await runner.cleanup()

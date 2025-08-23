@@ -101,7 +101,7 @@ class NodeRandomAccessMixin(AbstractView):
 
 class HasTokenMixin(PermissionMixin, AbstractView):
     async def has_permission(self):
-        token: str = self.request.app[KEY_TOKEN]
+        token = self.request.app[KEY_TOKEN]
         if not token:
             return True
         authorization = self.request.headers.get("Authorization")
