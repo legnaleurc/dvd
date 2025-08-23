@@ -1,7 +1,7 @@
-import argparse
-import asyncio
-import signal
+from asyncio import Event, get_running_loop
+from collections.abc import Callable, Coroutine
 from contextlib import asynccontextmanager
+from functools import wraps
 from logging import captureWarnings, getLogger
 from logging.config import dictConfig
 from pathlib import Path
@@ -12,87 +12,53 @@ from wcpan.logging import ConfigBuilder
 
 from . import api, search, view
 from .app import KEY_DRIVE, KEY_SEARCH_ENGINE, KEY_STATIC, KEY_TOKEN, KEY_UNPACK_ENGINE
+from .args import parse_args
 from .unpack import create_unpack_engine
 
 
 _L = getLogger(__name__)
 
 
-class Daemon(object):
-    def __init__(self):
-        self._kwargs = None
-        self._finished = None
-
-    async def __call__(self, args: list[str]) -> int:
-        self._kwargs = _parse_args(args[1:])
-        self._finished = asyncio.Event()
-        loop = asyncio.get_running_loop()
-        loop.add_signal_handler(signal.SIGINT, self._close)
-        loop.add_signal_handler(signal.SIGTERM, self._close)
+def _catch_error(
+    fn: Callable[[list[str]], Coroutine[None, None, int]],
+) -> Callable[[list[str]], Coroutine[None, None, int]]:
+    @wraps(fn)
+    async def wrapper(args: list[str]) -> int:
         try:
-            return await self._main()
+            return await fn(args)
         except Exception:
             _L.exception("main function error")
-        return 1
+            return 1
 
-    async def _main(self) -> int:
-        assert self._kwargs is not None
-        port: int = self._kwargs.port
-        unpack_path: str = self._kwargs.unpack
-        drive_path: str = self._kwargs.drive
-        static_path: str = self._kwargs.static
-        token: str = self._kwargs.token
-        ipv6: bool = self._kwargs.ipv6
-        expose: bool = self._kwargs.expose
-        log_path: str = self._kwargs.log_path
-
-        _setup_logging(Path(log_path) if log_path else None)
-
-        async with (
-            _application_context(
-                port=port,
-                unpack_path=unpack_path,
-                drive_path=drive_path,
-                static_path=static_path,
-                token=token,
-            ) as app,
-            _server_context(
-                app,
-                port,
-                ipv6=ipv6,
-                expose=expose,
-            ),
-        ):
-            await self._until_finished()
-
-        return 0
-
-    async def _until_finished(self):
-        assert self._finished is not None
-        await self._finished.wait()
-
-    def _close(self):
-        assert self._finished is not None
-        self._finished.set()
+    return wrapper
 
 
-def _parse_args(args: list[str]):
-    parser = argparse.ArgumentParser("engine")
+@_catch_error
+async def amain(args: list[str]) -> int:
+    kwargs = parse_args(args)
+    _setup_logging(Path(kwargs.log_path) if kwargs.log_path else None)
+    finished = _setup_signals()
 
-    parser.add_argument("-p", "--port", required=True, type=int)
-    parser.add_argument("-u", "--unpack", required=True, type=str)
-    parser.add_argument("-d", "--drive", required=True, type=str)
-    parser.add_argument("-s", "--static", type=str)
-    parser.add_argument("-t", "--token", type=str, default="")
-    parser.add_argument("-6", "--ipv6", action="store_true")
-    parser.add_argument("--expose", action="store_true")
-    parser.add_argument("--log-path", type=str, default="")
+    async with (
+        _application_context(
+            port=kwargs.port,
+            unpack_path=kwargs.unpack,
+            drive_path=kwargs.drive,
+            static_path=kwargs.static,
+            token=kwargs.token,
+        ) as app,
+        _server_context(
+            app,
+            kwargs.port,
+            ipv6=kwargs.ipv6,
+            expose=kwargs.expose,
+        ),
+    ):
+        await finished.wait()
+    return 0
 
-    kwargs = parser.parse_args(args)
-    return kwargs
 
-
-def _setup_logging(log_path: Path | None):
+def _setup_logging(log_path: Path | None) -> None:
     dictConfig(
         ConfigBuilder(path=log_path, rotate=True, rotate_when="w6")
         .add("engine", level="D")
@@ -100,6 +66,16 @@ def _setup_logging(log_path: Path | None):
         .to_dict()
     )
     captureWarnings(True)
+
+
+def _setup_signals() -> Event:
+    import signal
+
+    loop = get_running_loop()
+    finished = Event()
+    loop.add_signal_handler(signal.SIGINT, lambda: finished.set())
+    loop.add_signal_handler(signal.SIGTERM, lambda: finished.set())
+    return finished
 
 
 @asynccontextmanager
@@ -187,6 +163,3 @@ def _setup_static_path(app: Application, path: str) -> None:
     app.router.add_view(r"/video", view.IndexView)
     app.router.add_view(r"/video/{id}", view.IndexView)
     app.router.add_static(r"/", path)
-
-
-main = Daemon()

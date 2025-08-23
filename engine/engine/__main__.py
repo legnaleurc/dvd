@@ -1,9 +1,7 @@
 import asyncio
 import sys
 
-from .main import main
+from .main import amain
 
 
-rv = main(sys.argv)
-rv = asyncio.run(rv)
-sys.exit(rv)
+sys.exit(asyncio.run(amain(sys.argv[1:])))
