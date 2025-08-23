@@ -16,7 +16,7 @@ COPY . /app
 WORKDIR /app
 RUN make release && strip /app/release/unpack
 
-FROM debian:trixie-slim AS production
+FROM alpine:latest AS production
 
 COPY --from=builder /app/release/unpack /app/unpack
 WORKDIR /app
