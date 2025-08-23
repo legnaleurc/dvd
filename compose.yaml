@@ -3,6 +3,7 @@ services:
     build:
       context: ./unpack
       target: production
+    restart: no
     volumes:
       - binary:/mnt/binary:rw
     cap_drop:
@@ -39,14 +40,15 @@ services:
       - SETUID
       - SETGID
     logging:
-      driver: "syslog"
+      driver: syslog
       options:
-        tag: "dvd-engine"
+        tag: dvd-engine
     command: /app/docker/start.sh
   viewer:
     build:
       context: ./viewer
       target: production
+    restart: no
     volumes:
       - static:/mnt/static:rw
     cap_drop:
@@ -68,9 +70,9 @@ services:
       - SETUID
       - SETGID
     logging:
-      driver: "syslog"
+      driver: syslog
       options:
-        tag: "dvd-nginx"
+        tag: dvd-nginx
 volumes:
   binary:
   static:
