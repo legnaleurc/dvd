@@ -34,13 +34,8 @@ services:
       DVD_ENGINE_GID: ${DVD_GID}
     expose:
       - "80"
-    cap_drop:
-      - ALL
-    cap_add:
-      - SETUID
-      - SETGID
     logging:
-      driver: syslog
+      driver: journald
       options:
         tag: dvd-engine
     command: /app/docker/start.sh
@@ -55,7 +50,7 @@ services:
       - ALL
     command: sh -c "cp -R /app/* /mnt/static"
   nginx:
-    image: nginx:stable-alpine-slim
+    image: docker.io/library/nginx:stable-alpine-slim
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /usr/share/zoneinfo:/usr/share/zoneinfo:ro
@@ -63,14 +58,8 @@ services:
       - static:/mnt/static:ro
     ports:
       - "${DVD_HOST}:${DVD_PORT}:80"
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - SETUID
-      - SETGID
     logging:
-      driver: syslog
+      driver: journald
       options:
         tag: dvd-nginx
 volumes:
