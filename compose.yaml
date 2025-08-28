@@ -3,7 +3,7 @@ services:
     build:
       context: ./unpack
       target: production
-    restart: no
+    restart: "no"
     volumes:
       - binary:/mnt/binary:rw
     cap_drop:
@@ -48,7 +48,7 @@ services:
     build:
       context: ./viewer
       target: production
-    restart: no
+    restart: "no"
     volumes:
       - static:/mnt/static:rw
     cap_drop:
