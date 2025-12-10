@@ -22,17 +22,21 @@ RUN : \
 # prepare environment
 COPY pyproject.toml poetry.lock poetry.toml Makefile /app/
 WORKDIR /app
+# do not use bundled mediainfo
+ARG POETRY_INSTALLER_NO_BINARY=pymediainfo
 RUN make release
 
 FROM base AS production
 
-# FIXME needed for unpack binary
+# FIXME needed for unpack binary and pymediainfo
 RUN : \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         libarchive13t64 \
         libcurl4t64 \
         libboost-locale1.83.0 \
+    && apt-get install -y --no-install-recommends \
+        libmediainfo0v5 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
