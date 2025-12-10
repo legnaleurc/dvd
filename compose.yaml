@@ -30,8 +30,6 @@ services:
       DVD_ENGINE_DRIVE: /mnt/drive.yaml
       DVD_ENGINE_TMP: /mnt/tmp
       DVD_ENGINE_TOKEN: ${DVD_TOKEN}
-      DVD_ENGINE_UID: ${DVD_UID}
-      DVD_ENGINE_GID: ${DVD_GID}
     expose:
       - "80"
     logging:
