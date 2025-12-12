@@ -15,13 +15,21 @@
   export let disabled = false;
 
   const dispatch = createEventDispatcher();
+
+  function handleEnterPress(event: KeyboardEvent) {
+    const self = event.currentTarget as HTMLInputElement;
+    dispatch("enterpress");
+    // Dismiss keyboard in iOS 26.
+    self.blur();
+  }
 </script>
 
 <input
   class="m-3 px-3 bg-black disabled:text-pale-400 {klass}"
   type="search"
+  enterkeyhint="search"
   {placeholder}
   {disabled}
-  use:enterpress={() => dispatch("enterpress")}
+  use:enterpress={handleEnterPress}
   bind:value
 />
