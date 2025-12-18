@@ -3,6 +3,7 @@
 
   import { beforeNavigate } from "$app/navigation";
 
+  import { setComicContext } from "$stores/comic";
   import { setFullScreenContext } from "$stores/fullscreen";
   import { setShortcutContext } from "$stores/shortcut";
   import NavBar from "$organisms/NavBar.svelte";
@@ -15,6 +16,7 @@
     default: NeverRecord;
   };
 
+  const { initializeMaxSize } = setComicContext();
   const { isFullScreen } = setFullScreenContext();
   const { loadShortcut } = setShortcutContext();
 
@@ -22,7 +24,10 @@
     isFullScreen.set(false);
   });
 
-  onMount(loadShortcut);
+  onMount(() => {
+    loadShortcut();
+    initializeMaxSize();
+  });
 </script>
 
 <div class="w-full h-full flex flex-col text-pale-50 bg-pale-950">

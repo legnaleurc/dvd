@@ -32,3 +32,12 @@ export function loadActionMap() {
   const actionMap: Record<string, string> = JSON.parse(rv);
   return actionMap;
 }
+
+export function saveMaxSize(maxSize: number) {
+  window.localStorage.setItem("maxSize", maxSize.toString());
+}
+
+export function loadMaxSize(): number {
+  const maxSize = window.localStorage.getItem("maxSize");
+  return maxSize ? parseInt(maxSize, 10) : 0;
+}

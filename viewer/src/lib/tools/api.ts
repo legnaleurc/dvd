@@ -33,14 +33,27 @@ export async function createChangeList(): Promise<ChangeResponse[]> {
   return rv;
 }
 
-export async function listImage(id: string): Promise<ImageResponse[]> {
-  const res = await get(`/api/v1/nodes/${id}/images`);
+export async function listImage(
+  id: string,
+  maxSize?: number,
+): Promise<ImageResponse[]> {
+  let url = `/api/v1/nodes/${id}/images`;
+  if (maxSize !== undefined && maxSize > 0) {
+    url += `?max_size=${maxSize}`;
+  }
+  const res = await get(url);
   const rv: ImageResponse[] = await res.json();
   return rv;
 }
 
-export async function listCachedImage(): Promise<CachedImageResponse[]> {
-  const res = await get("/api/v1/caches/images");
+export async function listCachedImage(
+  maxSize?: number,
+): Promise<CachedImageResponse[]> {
+  let url = "/api/v1/caches/images";
+  if (maxSize !== undefined && maxSize > 0) {
+    url += `?max_size=${maxSize}`;
+  }
+  const res = await get(url);
   const rv: CachedImageResponse[] = await res.json();
   return rv;
 }
@@ -49,8 +62,16 @@ export async function clearCachedImage(): Promise<void> {
   await delete_("/api/v1/caches/images");
 }
 
-export function getImageUrl(id: string, index: number): string {
-  return `${getBaseUrl()}/api/v1/nodes/${id}/images/${index}`;
+export function getImageUrl(
+  id: string,
+  index: number,
+  maxSize?: number,
+): string {
+  let url = `${getBaseUrl()}/api/v1/nodes/${id}/images/${index}`;
+  if (maxSize !== undefined && maxSize > 0) {
+    url += `?max_size=${maxSize}`;
+  }
+  return url;
 }
 
 export async function listVideo(id: string): Promise<VideoResponse[]> {

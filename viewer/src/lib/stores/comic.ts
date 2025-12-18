@@ -9,6 +9,7 @@ import {
   readNode,
 } from "$tools/api";
 import { reportWarning } from "$tools/logging";
+import { loadMaxSize, saveMaxSize } from "$tools/storage";
 
 type ImageData = ImageResponse;
 type ComicData = {
@@ -23,8 +24,20 @@ const KEY = Symbol();
 export function createStore() {
   const idList = writable<string[]>([]);
   const comicMap = writable<ComicMap>({});
+  const maxSize = writable<number>(0);
+
+  function initializeMaxSize() {
+    maxSize.set(loadMaxSize());
+  }
+
+  function updateMaxSize(value: number) {
+    maxSize.set(value);
+    saveMaxSize(value);
+  }
 
   async function openComic(id: string, name: string) {
+    const currentMaxSize = get(maxSize);
+
     comicMap.update((self) => {
       self[id] = {
         name,
@@ -49,7 +62,7 @@ export function createStore() {
         });
       }
 
-      const imageList = await listImage(id);
+      const imageList = await listImage(id, currentMaxSize);
       comicMap.update((self) => {
         self[id].imageList = imageList;
         self[id].unpacking = false;
@@ -72,7 +85,8 @@ export function createStore() {
       await Promise.all(reloadList);
     }
 
-    const cacheList = await listCachedImage();
+    const currentMaxSize = get(maxSize);
+    const cacheList = await listCachedImage(currentMaxSize);
     const _comicMap = get(comicMap);
     const _idList = get(idList);
     for (const cache of cacheList) {
@@ -100,6 +114,9 @@ export function createStore() {
   return {
     idList,
     comicMap,
+    maxSize,
+    initializeMaxSize,
+    updateMaxSize,
     openComic,
     openCachedComic,
     clearComic,

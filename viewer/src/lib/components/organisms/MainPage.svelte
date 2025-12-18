@@ -2,7 +2,6 @@
   import { page } from "$app/stores";
 
   import type { NeverRecord, SvelteComponentModule } from "$types/traits";
-  import { setComicContext } from "$stores/comic";
   import { setVideoContext } from "$stores/video";
   import LazyLoad from "$atoms/LazyLoad.svelte";
   import LoadingBlock from "$atoms/LoadingBlock.svelte";
@@ -11,7 +10,6 @@
     default: NeverRecord;
   };
 
-  setComicContext();
   setVideoContext();
 
   type Page = {

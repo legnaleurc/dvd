@@ -9,7 +9,7 @@
   export let id: string;
   export let isActive: boolean;
 
-  const { comicMap } = getComicContext();
+  const { comicMap, maxSize } = getComicContext();
   const { isFullScreen, toggleFullScreen } = getFullScreenContext();
 
   let container: HTMLDivElement;
@@ -60,7 +60,7 @@
         {isActive}
         width={image.width}
         height={image.height}
-        src={getImageUrl(id, index)}
+        src={getImageUrl(id, index, $maxSize)}
       />
     {/each}
   </div>
