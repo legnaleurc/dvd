@@ -214,9 +214,16 @@ class NodeImageListView(
     async def list_(self) -> list[ImageSizeDict]:
         node = await self.get_object()
 
+        # Parse and validate max_size parameter
+        max_size = _get_query_value(self.request.query, int, "max_size")
+        if max_size is None:
+            max_size = 0
+        if max_size < 0:
+            raise HTTPBadRequest(text="max_size must be >= 0")
+
         ue = self.request.app[KEY_UNPACK_ENGINE]
         try:
-            manifest = await ue.get_manifest(node)
+            manifest = await ue.get_manifest(node, max_size)
         except UnpackFailedError as e:
             _L.exception(f"failed to get image list from node {node.id}")
             raise HTTPInternalServerError(
@@ -244,10 +251,17 @@ class NodeImageView(NodeObjectMixin, View):
             raise HTTPBadRequest()
         image_id = int(image_id)
 
+        # Parse and validate max_size parameter
+        max_size = _get_query_value(self.request.query, int, "max_size")
+        if max_size is None:
+            max_size = 0
+        if max_size < 0:
+            raise HTTPBadRequest(text="max_size must be >= 0")
+
         node = await self.get_object()
         ue = self.request.app[KEY_UNPACK_ENGINE]
         try:
-            manifest = await ue.get_manifest(node)
+            manifest = await ue.get_manifest(node, max_size)
         except UnpackFailedError:
             _L.exception(f"failed to get image list from node {node.id}")
             raise HTTPInternalServerError()
@@ -380,8 +394,22 @@ class CachesImagesView(
         ue = self.request.app[KEY_UNPACK_ENGINE]
         drive = self.request.app[KEY_DRIVE]
         cache = ue.cache
-        node_list = as_completed(drive.get_node_by_id(_) for _ in cache.keys())
+
+        # Parse max_size parameter (optional, for filtering)
+        max_size = _get_query_value(self.request.query, int, "max_size")
+        if max_size is None:
+            max_size = 0  # Default to original size
+        if max_size < 0:
+            raise HTTPBadRequest(text="max_size must be >= 0")
+
+        # Filter cache entries by max_size
+        filtered_keys = [k for k in cache.keys() if k[1] == max_size]
+        node_ids = set(node_id for node_id, _ in filtered_keys)
+
+        # Fetch node info and return
+        node_list = as_completed(drive.get_node_by_id(_) for _ in node_ids)
         node_list = [await _ for _ in node_list]
+
         return [
             {
                 "id": _.id,
@@ -391,7 +419,7 @@ class CachesImagesView(
                         "width": __["width"],
                         "height": __["height"],
                     }
-                    for __ in cache[_.id]
+                    for __ in cache[(_.id, max_size)]
                 ],
             }
             for _ in node_list

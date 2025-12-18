@@ -25,7 +25,7 @@ async def create_storage_manager():
 
 class StorageManager:
     def __init__(self, path: Path):
-        self._cache: dict[str, list[ImageDict]] = {}
+        self._cache: dict[tuple[str, int], list[ImageDict]] = {}
         self._path = path
 
     def clear_cache(self):
@@ -33,17 +33,17 @@ class StorageManager:
         for child in self._path.iterdir():
             shutil.rmtree(str(child))
 
-    def get_cache(self, id_: str) -> list[ImageDict]:
-        return self._cache[id_]
+    def get_cache(self, id_: str, max_size: int = 0) -> list[ImageDict]:
+        return self._cache[(id_, max_size)]
 
-    def get_cache_or_none(self, id_: str) -> list[ImageDict] | None:
-        return self._cache.get(id_, None)
+    def get_cache_or_none(self, id_: str, max_size: int = 0) -> list[ImageDict] | None:
+        return self._cache.get((id_, max_size), None)
 
-    def set_cache(self, id_: str, manifest: list[ImageDict]) -> None:
-        self._cache[id_] = manifest
+    def set_cache(self, id_: str, max_size: int, manifest: list[ImageDict]) -> None:
+        self._cache[(id_, max_size)] = manifest
 
-    def get_path(self, id_: str) -> Path:
-        return self._path / id_
+    def get_path(self, id_: str, max_size: int = 0) -> Path:
+        return self._path / str(max_size) / id_
 
     @property
     def cache(self):
@@ -56,14 +56,25 @@ class StorageManager:
     def check(self):
         DAY = 60 * 60 * 24
         now = time.time()
-        for child in self._path.iterdir():
-            s = child.stat()
-            d = now - s.st_mtime
-            _L.debug(f"check {child} ({d})")
-            if d > DAY:
-                shutil.rmtree(str(child))
-                del self._cache[child.name]
-                _L.info(f"prune {child} ({d})")
+        for size_dir in self._path.iterdir():
+            if not size_dir.is_dir():
+                continue
+            max_size = int(size_dir.name)
+
+            # Check each node_id subdirectory
+            for node_dir in size_dir.iterdir():
+                if not node_dir.is_dir():
+                    continue
+                node_id = node_dir.name
+                s = node_dir.stat()
+                d = now - s.st_mtime
+                _L.debug(f"check {node_dir} ({d})")
+                if d > DAY:
+                    shutil.rmtree(str(node_dir))
+                    cache_key = (node_id, max_size)
+                    if cache_key in self._cache:
+                        del self._cache[cache_key]
+                    _L.info(f"prune {node_dir} ({d})")
 
 
 @asynccontextmanager

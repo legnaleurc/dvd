@@ -22,6 +22,7 @@ wcpan-watchdog = "^1.0.0"
 wcpan-drive-cli = "^3.8.1"
 wcpan-logging = "^2.1.0"
 wcpan-drive-sqlite = "^2.0.0"
+pillow = "^12.0.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.11.2"

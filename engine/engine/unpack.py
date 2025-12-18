@@ -1,12 +1,16 @@
+import asyncio
 import re
-from asyncio import Condition, create_subprocess_exec
+from asyncio import Condition, as_completed, create_subprocess_exec
 from asyncio.subprocess import PIPE
+from concurrent.futures import ProcessPoolExecutor
 from contextlib import asynccontextmanager
 from itertools import zip_longest
 from logging import getLogger
 from mimetypes import guess_type
+from pathlib import Path
 from typing import Self
 
+from PIL import Image
 from wcpan.drive.cli.lib import get_image_info
 from wcpan.drive.core.types import Drive, Node
 
@@ -37,18 +41,18 @@ class UnpackEngine:
         self._unpacking: dict[str, Condition] = {}
         self._storage = storage
 
-    async def get_manifest(self, node: Node) -> list[ImageDict]:
-        manifest = self._storage.get_cache_or_none(node.id)
+    async def get_manifest(self, node: Node, max_size: int = 0) -> list[ImageDict]:
+        manifest = self._storage.get_cache_or_none(node.id, max_size)
         if manifest is not None:
             return manifest
 
         if node.id in self._unpacking:
             lock = self._unpacking[node.id]
-            return await self._wait_for_result(lock, node.id)
+            return await self._wait_for_result(lock, node.id, max_size)
 
         lock = Condition()
         self._unpacking[node.id] = lock
-        return await self._unpack(node)
+        return await self._unpack(node, max_size)
 
     @property
     def cache(self):
@@ -57,14 +61,14 @@ class UnpackEngine:
     def clear_cache(self):
         self._storage.clear_cache()
 
-    async def _unpack(self, node: Node) -> list[ImageDict]:
+    async def _unpack(self, node: Node, max_size: int) -> list[ImageDict]:
         lock = self._unpacking[node.id]
         try:
             if node.is_directory:
                 manifest = await self._unpack_remote(node)
             else:
-                manifest = await self._unpack_local(node.id)
-            self._storage.set_cache(node.id, manifest)
+                manifest = await self._unpack_local(node.id, max_size)
+            self._storage.set_cache(node.id, max_size, manifest)
             return manifest
         except UnpackFailedError:
             raise
@@ -80,19 +84,20 @@ class UnpackEngine:
         self,
         lock: Condition,
         node_id: str,
+        max_size: int,
     ) -> list[ImageDict]:
         async with lock:
             await lock.wait()
         try:
-            return self._storage.get_cache(node_id)
+            return self._storage.get_cache(node_id, max_size)
         except KeyError:
             raise UnpackFailedError(f"{node_id} canceled unpack")
 
-    async def _unpack_local(self, node_id: str) -> list[ImageDict]:
+    async def _unpack_local(self, node_id: str, max_size: int) -> list[ImageDict]:
         cmd = [
             self._unpack_path,
             _get_node_url(self._port, node_id),
-            str(self._storage.get_path(node_id)),
+            str(self._storage.get_path(node_id, max_size)),
         ]
 
         _L.debug(" ".join(cmd))
@@ -107,13 +112,14 @@ class UnpackEngine:
             raise UnpackFailedError(
                 f"unpack failed code: {p.returncode}\n\n{err.decode('utf-8')}"
             )
-        return await self._scan_local(node_id)
+        return await self._scan_local(node_id, max_size)
 
-    async def _scan_local(self, node_id: str) -> list[ImageDict]:
+    async def _scan_local(self, node_id: str, max_size: int) -> list[ImageDict]:
         parent_node = await self._drive.get_node_by_id(node_id)
 
-        rv: list[ImageDict] = []
-        top = self._storage.get_path(node_id)
+        # First pass: collect all image files
+        files_to_process: list[tuple[Path, str]] = []
+        top = self._storage.get_path(node_id, max_size)
         for dirpath, dirnames, filenames in top.walk():
             dirnames.sort(key=FuzzyName)
             filenames.sort(key=FuzzyName)
@@ -125,23 +131,50 @@ class UnpackEngine:
                 if not type_.startswith("image/"):
                     continue
 
-                try:
-                    media_info = get_image_info(path)
-                except Exception:
-                    _L.exception("unknown image")
-                    continue
+                files_to_process.append((path, type_))
 
-                rv.append(
-                    {
-                        "id": str(path),
-                        "type": type_,
-                        "size": path.stat().st_size,
-                        "etag": parent_node.hash,
-                        "mtime": parent_node.mtime,
-                        "width": media_info.width,
-                        "height": media_info.height,
-                    }
+        if not files_to_process:
+            return []
+
+        # Process images in parallel using process pool
+        loop = asyncio.get_event_loop()
+        results: list[tuple[int, Path, str, int, int]] = []
+
+        with ProcessPoolExecutor() as executor:
+            # Submit all tasks using enumerate for index tracking
+            tasks = [
+                loop.run_in_executor(
+                    executor, _resize_image_with_index, idx, path, max_size
                 )
+                for idx, (path, type_) in enumerate(files_to_process)
+            ]
+
+            # Collect results as they complete
+            for completed_task in as_completed(tasks):
+                try:
+                    idx, width, height = await completed_task
+                    # Get the corresponding path and type from the original list
+                    path, type_ = files_to_process[idx]
+                    results.append((idx, path, type_, width, height))
+                except Exception as e:
+                    _L.exception(f"failed to process image: {e}")
+
+        # Sort by index to preserve order
+        results.sort(key=lambda x: x[0])
+
+        # Build final result list using list comprehension
+        rv: list[ImageDict] = [
+            {
+                "id": str(path),
+                "type": type_,
+                "size": path.stat().st_size,
+                "etag": parent_node.hash,
+                "mtime": parent_node.mtime,
+                "width": width,
+                "height": height,
+            }
+            for idx, path, type_, width, height in results
+        ]
         return rv
 
     async def _unpack_remote(self, node: Node) -> list[ImageDict]:
@@ -200,3 +233,74 @@ class FuzzyName:
 
 def _get_node_url(port: int, node_id: str) -> str:
     return f"http://localhost:{port}/api/v1/nodes/{node_id}/stream"
+
+
+def _resize_image(input_path: Path, max_size: int) -> tuple[int, int]:
+    """
+    Resize image in-place if dimensions exceed max_size.
+    Maintains aspect ratio, scaling so both width and height are <= max_size.
+
+    Args:
+        input_path: Path to the image file
+        max_size: Maximum dimension (0 means no resize)
+
+    Returns:
+        Tuple of (width, height) after resize
+
+    Raises:
+        Exception if image processing fails
+    """
+    # Use get_image_info for lighter processing to check dimensions first
+    image_info = get_image_info(input_path)
+    original_width = image_info.width
+    original_height = image_info.height
+
+    # No resizing needed
+    if max_size == 0 or (original_width <= max_size and original_height <= max_size):
+        return original_width, original_height
+
+    # Calculate new dimensions maintaining aspect ratio
+    # Scale so max(width, height) = max_size
+    scale = max_size / max(original_width, original_height)
+    new_width = int(original_width * scale)
+    new_height = int(original_height * scale)
+
+    # Now open with PIL for actual resizing
+    with Image.open(input_path) as img:
+        # Resize using high-quality Lanczos resampling
+        resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+        # Determine save parameters based on format
+        save_kwargs = {}
+        if img.format == "JPEG":
+            save_kwargs["quality"] = 85
+            save_kwargs["optimize"] = True
+        elif img.format == "PNG":
+            save_kwargs["optimize"] = True
+
+        # Save in-place, preserving format
+        resized_img.save(input_path, format=img.format, **save_kwargs)
+
+    _L.info(
+        f"resized image: {input_path.name}, {original_width}x{original_height} -> {new_width}x{new_height}"
+    )
+
+    return new_width, new_height
+
+
+def _resize_image_with_index(
+    idx: int, input_path: Path, max_size: int
+) -> tuple[int, int, int]:
+    """
+    Wrapper function to resize image with index for preserving order.
+
+    Args:
+        idx: Index to preserve file order
+        input_path: Path to the image file
+        max_size: Maximum dimension (0 means no resize)
+
+    Returns:
+        Tuple of (idx, width, height) after resize
+    """
+    width, height = _resize_image(input_path, max_size)
+    return idx, width, height
