@@ -13,12 +13,12 @@ from argparse import ArgumentParser
 PUBLIC_PORT = 8000
 PRIVATE_PORT = 9000
 
-CMD_POETRY = ['poetry', 'run']
+CMD_UV = ['uv', 'run']
 CMD_WATCHDOG = ['python3', '-m', 'wcpan.watchdog']
 CMD_ENGINE = ['python3', '-m', 'engine']
 
-CMD_DEV_ENGINE = CMD_POETRY + ['--'] + CMD_WATCHDOG + ['--'] + CMD_ENGINE
-CMD_PRD_ENGINE = CMD_POETRY + ['--'] + CMD_ENGINE
+CMD_DEV_ENGINE = CMD_UV + ['--'] + CMD_WATCHDOG + ['--'] + CMD_ENGINE
+CMD_PRD_ENGINE = CMD_UV + ['--'] + CMD_ENGINE
 CMD_DEV_VIEWER = ['npm', 'run', 'dev', '--']
 
 
