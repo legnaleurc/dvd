@@ -1,10 +1,10 @@
 RM := rm -rf
-POETRY := poetry
-PYTHON := $(POETRY) run -- python3
-RUFF := $(POETRY) run -- ruff
+UV := uv
+PYTHON := $(UV) run -- python3
+RUFF := $(UV) run -- ruff
 
 PKG_FILES := pyproject.toml
-PKG_LOCK := poetry.lock
+PKG_LOCK := uv.lock
 ENV_DIR := .venv
 RELEASE_TAG := $(ENV_DIR)/DVD_RELEASE
 DEBUG_TAG := $(ENV_DIR)/DVD_DEBUG
@@ -36,16 +36,16 @@ test: $(ENV_TAG)
 
 $(RELEASE_TAG): $(PKG_LOCK)
 	$(call check_env_release)
-	$(POETRY) install --no-root --only=main
+	$(UV) sync --no-dev
 	touch "$@" "$(ENV_TAG)"
 
 $(DEBUG_TAG): $(PKG_LOCK)
 	$(call check_env_debug)
-	$(POETRY) install
+	$(UV) sync
 	touch "$@" "$(ENV_TAG)"
 
 $(PKG_LOCK): $(PKG_FILES)
-	$(POETRY) lock
+	$(UV) lock
 	touch "$@"
 
 auth: $(ENV_TAG)

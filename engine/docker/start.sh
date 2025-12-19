@@ -1,6 +1,6 @@
 #! /bin/sh
 
-CMD="poetry run -- python3 -m engine"
+CMD="/app/.venv/bin/python3 -m engine"
 CMD="$CMD -H 0.0.0.0"
 CMD="$CMD -p $DVD_ENGINE_PORT"
 CMD="$CMD -d $DVD_ENGINE_DRIVE"

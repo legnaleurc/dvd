@@ -1,15 +1,4 @@
-FROM python:3.13-slim-trixie AS base
-
-# env
-ENV POETRY_HOME=/opt/poetry
-
-# setup poetry
-RUN python3 -m venv $POETRY_HOME
-RUN $POETRY_HOME/bin/pip install "poetry>=2.1.0,<3.0.0"
-# add poetry to path
-ENV PATH=$POETRY_HOME/bin:$PATH
-
-FROM base AS builder
+FROM python:3.13-slim-trixie AS builder
 
 # build-essential is required for GNU/Make and native modules
 RUN : \
@@ -19,14 +8,18 @@ RUN : \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# prepare environment
-COPY pyproject.toml poetry.lock poetry.toml Makefile /app/
-WORKDIR /app
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+ENV UV_SYSTEM_PYTHON=1
 # do not use bundled mediainfo
-ARG POETRY_INSTALLER_NO_BINARY=pymediainfo
+ENV UV_NO_BINARY_PACKAGE=pymediainfo
+
+# build venv
+COPY pyproject.toml uv.lock Makefile /app/
+WORKDIR /app
 RUN make release
 
-FROM base AS production
+FROM python:3.13-slim-trixie AS production
 
 # FIXME needed for unpack binary and pymediainfo
 RUN : \
