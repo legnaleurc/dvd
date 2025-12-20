@@ -24,5 +24,5 @@ You may need to add the above libraries to CMAKE_PREFIX_PATH, because Homebrew
 wont do that for you, e.g.:
 
 ```sh
-export CMAKE_PREFIX_PATH="/usr/local/opt/libarchive:/usr/local/opt/openssl"
+export CMAKE_PREFIX_PATH="/opt/homebrew/opt/libarchive"
 ```
