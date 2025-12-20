@@ -23,8 +23,6 @@ services:
       - ${DVD_DATA_DIR}:/mnt/data:rw
       - ${DVD_TMP_DIR}:/mnt/tmp:rw
     environment:
-      POETRY_CONFIG_DIR: /tmp
-      POETRY_CACHE_DIR: /tmp
       DVD_ENGINE_PORT: "80"
       DVD_ENGINE_UNPACK: /mnt/binary/unpack
       DVD_ENGINE_DRIVE: /mnt/drive.yaml
