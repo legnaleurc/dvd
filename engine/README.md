@@ -1,6 +1,6 @@
 # engine
 
-This module requires Python 3.12+.
+This module requires Python 3.13+.
 
 ## prepare dependencies
 
