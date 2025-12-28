@@ -73,7 +73,7 @@ public:
   std::deque<binary_chunk> blocks;
 
   // Backpressure limit
-  static constexpr std::size_t MAX_BUFFERED_CHUNKS = 2;
+  static constexpr std::size_t MAX_BUFFERED_CHUNKS = 8;
 };
 
 }
