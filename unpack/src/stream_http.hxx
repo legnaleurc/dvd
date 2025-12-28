@@ -33,13 +33,11 @@ public:
   http_detail& operator=(http_detail&&) = delete;
 
   void open() override;
+  void open(bool use_range);
   void close() override;
   binary_chunk read() override;
   std::int64_t seek(std::int64_t offset, int whence) override;
 
-private:
-  // Helper methods
-  void open_impl(bool use_range);
   void parse_url();
   void tcp_connect();
   void send_request(bool use_range);
@@ -50,29 +48,29 @@ private:
   bool is_range_valid() const;
 
   // Parsed URL components
-  std::string url_;
-  std::string host_;
-  std::string port_;
-  std::string target_;
+  std::string url;
+  std::string host;
+  std::string port;
+  std::string target;
 
   // Boost.Beast/Asio components
-  boost::asio::io_context io_ctx_;
-  std::optional<boost::beast::tcp_stream> stream_;
-  boost::beast::flat_buffer buffer_;
+  boost::asio::io_context io_ctx;
+  std::optional<boost::beast::tcp_stream> stream;
+  boost::beast::flat_buffer buffer;
   std::optional<boost::beast::http::response_parser<
     boost::beast::http::string_body>>
-    parser_;
+    parser;
 
   // HTTP state
-  bool headers_received_;
-  bool eof_;
-  bool pending_read_;
-  std::optional<boost::system::error_code> error_;
+  bool headers_received;
+  bool eof;
+  bool pending_read;
+  std::optional<boost::system::error_code> error;
 
   // Stream state
-  std::int64_t offset_;
-  std::int64_t length_;
-  std::deque<binary_chunk> blocks_;
+  std::int64_t offset;
+  std::int64_t length;
+  std::deque<binary_chunk> blocks;
 
   // Backpressure limit
   static constexpr std::size_t MAX_BUFFERED_CHUNKS = 2;

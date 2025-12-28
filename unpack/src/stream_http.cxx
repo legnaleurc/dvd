@@ -23,40 +23,40 @@ http_error::http_error(unsigned status) noexcept
 
 // http_detail implementation
 input_stream::detail::http_detail::http_detail(const std::string& url)
-  : url_(url)
-  , host_()
-  , port_()
-  , target_()
-  , io_ctx_()
-  , stream_()
-  , buffer_()
-  , parser_()
-  , headers_received_(false)
-  , eof_(false)
-  , pending_read_(false)
-  , error_()
-  , offset_(0)
-  , length_(-1)
-  , blocks_()
+  : url(url)
+  , host()
+  , port()
+  , target()
+  , io_ctx()
+  , stream()
+  , buffer()
+  , parser()
+  , headers_received(false)
+  , eof(false)
+  , pending_read(false)
+  , error()
+  , offset(0)
+  , length(-1)
+  , blocks()
 {
-  parse_url();
+  this->parse_url();
 }
 
 input_stream::detail::http_detail::~http_detail()
 {
   try {
-    close();
+    this->close();
   } catch (...) {
     // Destructor must not throw
   }
 }
 
 void
-input_stream::detail::http_detail::parse_url()
+unpack::input_stream::detail::http_detail::parse_url()
 {
-  auto result = boost::urls::parse_uri(url_);
+  auto result = boost::urls::parse_uri(this->url);
   if (!result) {
-    throw std::runtime_error(std::format("Invalid URL: {}", url_));
+    throw std::runtime_error(std::format("Invalid URL: {}", this->url));
   }
 
   auto url = *result;
@@ -67,192 +67,192 @@ input_stream::detail::http_detail::parse_url()
       std::format("Only HTTP supported, got scheme: {}", std::string(url.scheme())));
   }
 
-  host_ = std::string(url.host());
-  port_ = url.has_port() ? std::string(url.port()) : "80";
+  this->host = std::string(url.host());
+  this->port = url.has_port() ? std::string(url.port()) : "80";
 
   // Construct target (path + query)
   auto path_str = std::string(url.path());
   if (!path_str.empty()) {
-    target_ = path_str;
+    this->target = path_str;
   } else {
-    target_ = "/";
+    this->target = "/";
   }
 
   if (url.has_query()) {
-    target_ += "?";
-    target_ += std::string(url.query());
+    this->target += "?";
+    this->target += std::string(url.query());
   }
 }
 
 void
-input_stream::detail::http_detail::open()
+unpack::input_stream::detail::http_detail::open()
 {
-  open_impl(false);
+  this->open(false);
 }
 
 void
-input_stream::detail::http_detail::open_impl(bool use_range)
+unpack::input_stream::detail::http_detail::open(bool use_range)
 {
   namespace beast = boost::beast;
 
   // Reset state
-  io_ctx_.restart();
-  buffer_.clear();
-  blocks_.clear();
-  headers_received_ = false;
-  eof_ = false;
-  pending_read_ = false;
-  error_.reset();
+  this->io_ctx.restart();
+  this->buffer.clear();
+  this->blocks.clear();
+  this->headers_received = false;
+  this->eof = false;
+  this->pending_read = false;
+  this->error.reset();
 
   // Create fresh TCP stream
-  stream_.emplace(io_ctx_);
+  this->stream.emplace(this->io_ctx);
 
   // Perform connection and header exchange
-  tcp_connect();
-  send_request(use_range);
-  receive_headers();
+  this->tcp_connect();
+  this->send_request(use_range);
+  this->receive_headers();
 }
 
 void
-input_stream::detail::http_detail::tcp_connect()
+unpack::input_stream::detail::http_detail::tcp_connect()
 {
   namespace asio = boost::asio;
   using tcp = asio::ip::tcp;
 
   // Resolve hostname
-  tcp::resolver resolver(io_ctx_);
+  tcp::resolver resolver(this->io_ctx);
   boost::system::error_code ec;
 
-  auto results = resolver.resolve(host_, port_, ec);
+  auto results = resolver.resolve(this->host, this->port, ec);
   if (ec) {
     throw std::runtime_error(
       std::format("DNS resolution failed: {}", ec.message()));
   }
 
   // Connect to server with timeout
-  stream_->expires_after(std::chrono::seconds(30));
-  stream_->connect(results, ec);
+  this->stream->expires_after(std::chrono::seconds(30));
+  this->stream->connect(results, ec);
   if (ec) {
     throw std::runtime_error(std::format("Connection failed: {}", ec.message()));
   }
 }
 
 void
-input_stream::detail::http_detail::send_request(bool use_range)
+unpack::input_stream::detail::http_detail::send_request(bool use_range)
 {
   namespace beast = boost::beast;
   namespace http = beast::http;
 
   // Build HTTP request
-  http::request<http::empty_body> req{ http::verb::get, target_, 11 };
-  req.set(http::field::host, host_);
+  http::request<http::empty_body> req{ http::verb::get, this->target, 11 };
+  req.set(http::field::host, this->host);
   req.set(http::field::user_agent, "dvd-unpack/1.0");
   req.set(http::field::connection, "keep-alive");
 
-  if (use_range && is_range_valid()) {
+  if (use_range && this->is_range_valid()) {
     // Format: "bytes=offset-end"
-    auto range_value = std::format("bytes={}-{}", offset_, length_ - 1);
+    auto range_value = std::format("bytes={}-{}", this->offset, this->length - 1);
     req.set(http::field::range, range_value);
   }
 
   // Send request
   boost::system::error_code ec;
-  http::write(*stream_, req, ec);
+  http::write(*this->stream, req, ec);
   if (ec) {
     throw std::runtime_error(std::format("Request send failed: {}", ec.message()));
   }
 }
 
 void
-input_stream::detail::http_detail::receive_headers()
+unpack::input_stream::detail::http_detail::receive_headers()
 {
   namespace beast = boost::beast;
   namespace http = beast::http;
 
   // Create response parser
-  parser_.emplace();
-  parser_->body_limit(std::numeric_limits<std::uint64_t>::max());
+  this->parser.emplace();
+  this->parser->body_limit(std::numeric_limits<std::uint64_t>::max());
 
   // Read headers only
   boost::system::error_code ec;
-  http::read_header(*stream_, buffer_, *parser_, ec);
+  http::read_header(*this->stream, this->buffer, *this->parser, ec);
   if (ec) {
     throw std::runtime_error(std::format("Header read failed: {}", ec.message()));
   }
 
-  headers_received_ = true;
+  this->headers_received = true;
 
   // Validate status code
-  auto status = parser_->get().result_int();
+  auto status = this->parser->get().result_int();
   if (status != HTTP_STATUS_OK && status != HTTP_STATUS_PARTIAL_CONTENT) {
     throw http_error(status);
   }
 
   // Extract Content-Length (for 200 OK)
   if (status == HTTP_STATUS_OK) {
-    auto& headers = parser_->get();
+    auto& headers = this->parser->get();
     auto it = headers.find(http::field::content_length);
     if (it != headers.end()) {
       try {
-        length_ = std::stoll(std::string(it->value()));
+        this->length = std::stoll(std::string(it->value()));
       } catch (...) {
-        length_ = -1; // Invalid Content-Length
+        this->length = -1; // Invalid Content-Length
       }
     }
   }
 }
 
 binary_chunk
-input_stream::detail::http_detail::read()
+unpack::input_stream::detail::http_detail::read()
 {
   // Check for async errors
-  if (error_) {
+  if (this->error) {
     throw std::runtime_error(
-      std::format("HTTP read error: {}", error_->message()));
+      std::format("HTTP read error: {}", this->error->message()));
   }
 
   // Fast path: return buffered chunk
-  if (!blocks_.empty()) {
-    auto chunk = std::move(blocks_.front());
-    blocks_.pop_front();
-    offset_ += chunk.size();
+  if (!this->blocks.empty()) {
+    auto chunk = std::move(this->blocks.front());
+    this->blocks.pop_front();
+    this->offset += chunk.size();
 
     // Start fetching next chunk for pipelining (with backpressure check)
-    if (should_start_read()) {
-      start_async_read();
+    if (this->should_start_read()) {
+      this->start_async_read();
     }
 
     // Make progress on async operations without blocking
-    io_ctx_.poll();
+    this->io_ctx.poll();
 
     return chunk;
   }
 
   // No buffered data, need to fetch
-  if (!eof_ && stream_ && parser_) {
-    if (!pending_read_) {
-      start_async_read();
+  if (!this->eof && this->stream && this->parser) {
+    if (!this->pending_read) {
+      this->start_async_read();
     }
 
     // Block until data arrives
-    io_ctx_.run();
-    io_ctx_.restart();
+    this->io_ctx.run();
+    this->io_ctx.restart();
 
     // Check for errors after blocking
-    if (error_) {
+    if (this->error) {
       throw std::runtime_error(
-        std::format("HTTP read error: {}", error_->message()));
+        std::format("HTTP read error: {}", this->error->message()));
     }
 
     // Try again after running
-    if (!blocks_.empty()) {
-      auto chunk = std::move(blocks_.front());
-      blocks_.pop_front();
-      offset_ += chunk.size();
+    if (!this->blocks.empty()) {
+      auto chunk = std::move(this->blocks.front());
+      this->blocks.pop_front();
+      this->offset += chunk.size();
 
       // Start next read immediately (with backpressure check)
-      if (should_start_read()) {
-        start_async_read();
+      if (this->should_start_read()) {
+        this->start_async_read();
       }
 
       return chunk;
@@ -263,115 +263,115 @@ input_stream::detail::http_detail::read()
 }
 
 void
-input_stream::detail::http_detail::start_async_read()
+unpack::input_stream::detail::http_detail::start_async_read()
 {
   namespace beast = boost::beast;
   namespace http = beast::http;
   namespace asio = boost::asio;
 
-  pending_read_ = true;
+  this->pending_read = true;
 
   http::async_read_some(
-    *stream_,
-    buffer_,
-    *parser_,
+    *this->stream,
+    this->buffer,
+    *this->parser,
     [this](boost::system::error_code ec, std::size_t) {
-      pending_read_ = false;
+      this->pending_read = false;
 
       if (ec == http::error::end_of_stream || ec == asio::error::eof) {
-        eof_ = true;
+        this->eof = true;
         return;
       }
 
       if (ec) {
-        error_ = ec; // Store error to throw later
+        this->error = ec; // Store error to throw later
         return;
       }
 
       // Extract body and add to queue
-      auto& body = parser_->get().body();
+      auto& body = this->parser->get().body();
       if (!body.empty()) {
-        blocks_.push_back(binary_chunk(body.begin(), body.end()));
+        this->blocks.push_back(binary_chunk(body.begin(), body.end()));
         body.clear();
       }
 
-      if (parser_->is_done()) {
-        eof_ = true;
+      if (this->parser->is_done()) {
+        this->eof = true;
       }
     });
 }
 
 bool
-input_stream::detail::http_detail::should_start_read() const
+unpack::input_stream::detail::http_detail::should_start_read() const
 {
-  return !pending_read_ && !eof_ && stream_.has_value() &&
-         parser_.has_value() && blocks_.size() < MAX_BUFFERED_CHUNKS;
+  return !this->pending_read && !this->eof && this->stream.has_value() &&
+         this->parser.has_value() && this->blocks.size() < MAX_BUFFERED_CHUNKS;
 }
 
 std::int64_t
-input_stream::detail::http_detail::seek(std::int64_t new_offset, int whence)
+unpack::input_stream::detail::http_detail::seek(std::int64_t new_offset, int whence)
 {
   // Close current connection
-  close();
+  this->close();
 
   // Calculate new offset
   switch (whence) {
     case SEEK_SET:
-      offset_ = new_offset;
+      this->offset = new_offset;
       break;
     case SEEK_CUR:
-      offset_ += new_offset;
+      this->offset += new_offset;
       break;
     case SEEK_END:
-      if (!is_length_valid()) {
+      if (!this->is_length_valid()) {
         throw std::runtime_error(
           "Cannot seek from end without Content-Length");
       }
-      offset_ = length_ + new_offset;
+      this->offset = this->length + new_offset;
       break;
     default:
       throw std::invalid_argument("Invalid seek whence");
   }
 
   // Reopen with Range header if valid
-  if (is_range_valid()) {
-    open_impl(true);
+  if (this->is_range_valid()) {
+    this->open(true);
   }
 
-  return offset_;
+  return this->offset;
 }
 
 bool
-input_stream::detail::http_detail::is_length_valid() const
+unpack::input_stream::detail::http_detail::is_length_valid() const
 {
-  return length_ >= 0;
+  return this->length >= 0;
 }
 
 bool
-input_stream::detail::http_detail::is_range_valid() const
+unpack::input_stream::detail::http_detail::is_range_valid() const
 {
-  return is_length_valid() && offset_ >= 0 && offset_ < length_;
+  return this->is_length_valid() && this->offset >= 0 && this->offset < this->length;
 }
 
 void
-input_stream::detail::http_detail::close()
+unpack::input_stream::detail::http_detail::close()
 {
   namespace asio = boost::asio;
   using tcp = asio::ip::tcp;
 
-  blocks_.clear();
-  buffer_.clear();
-  parser_.reset();
-  headers_received_ = false;
-  eof_ = false;
-  pending_read_ = false;
-  error_.reset();
+  this->blocks.clear();
+  this->buffer.clear();
+  this->parser.reset();
+  this->headers_received = false;
+  this->eof = false;
+  this->pending_read = false;
+  this->error.reset();
 
-  if (stream_) {
+  if (this->stream) {
     boost::system::error_code ec;
-    stream_->socket().shutdown(tcp::socket::shutdown_both, ec);
+    this->stream->socket().shutdown(tcp::socket::shutdown_both, ec);
     // Ignore errors on shutdown
-    stream_.reset();
+    this->stream.reset();
   }
 }
 
