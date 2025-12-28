@@ -5,19 +5,19 @@ Toolchain minimal require C++20.
 Other libraries you will need:
 
 * Boost.Locale
+* Boost.URL
 * libarchive
-* libcurl
 
 For Debian based system:
 
 ```sh
-apt install libboost-locale-dev libarchive-dev libcurl4-openssl-dev
+apt install libboost-locale-dev libboost-url-dev libarchive-dev
 ```
 
 For Mac OS X which using Homebrew:
 
 ```sh
-brew install boost libarchive curl
+brew install boost libarchive
 ```
 
 You may need to add the above libraries to CMAKE_PREFIX_PATH, because Homebrew

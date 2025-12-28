@@ -1,127 +1,407 @@
 #include "stream_http.hxx"
 
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/url/parse.hpp>
+#include <boost/url/url_view.hpp>
+
+#include <chrono>
 #include <format>
-#include <stdexcept>
+#include <limits>
+
+namespace unpack {
 
 namespace {
+constexpr unsigned HTTP_STATUS_OK = 200;
+constexpr unsigned HTTP_STATUS_PARTIAL_CONTENT = 206;
+// Backpressure limit
+constexpr std::size_t MAX_BUFFERED_CHUNKS = 8;
+}
 
-const long HTTP_STATUS_OK = 200L;
-const long HTTP_STATUS_PARTIAL_CONTENT = 206L;
-
-unpack::easy_handle
-create_easy_handle()
+// http_error implementation
+http_error::http_error(unsigned status) noexcept
+  : std::runtime_error(std::format("HTTP status code: {}", status))
 {
-  auto handle = curl_easy_init();
-  if (!handle) {
-    throw std::runtime_error("curl_easy_init");
-  }
-  return unpack::easy_handle{ handle, curl_easy_cleanup };
 }
 
-unpack::multi_handle
-create_multi_handle()
-{
-  auto handle = curl_multi_init();
-  if (!handle) {
-    throw std::runtime_error("curl_multi_init");
-  }
-  return unpack::multi_handle{ handle, curl_multi_cleanup };
-}
-
-}
-
-unpack::curl_easy::curl_easy(multi_handle multi, easy_handle easy)
-  : multi(multi)
-  , easy(easy)
-  , is_eof(false)
-  , status_code(0)
-  , content_length(-1)
-{
-  auto rv = curl_multi_add_handle(multi.get(), easy.get());
-  if (rv != CURLM_OK) {
-    throw std::runtime_error(curl_multi_strerror(rv));
-  }
-
-  this->read_until_status_code();
-  this->read_until_content_length();
-}
-
-unpack::curl_easy::~curl_easy()
-{
-  curl_multi_remove_handle(this->multi.get(), this->easy.get());
-}
-
-void
-unpack::curl_easy::read()
-{
-  if (this->is_eof) {
-    throw std::runtime_error("read after eof");
-  }
-
-  CURLMcode rv;
-  int n_active;
-  int n_fd;
-  rv = curl_multi_wait(this->multi.get(), NULL, 0, 1000, &n_fd);
-  if (rv != CURLM_OK) {
-    throw std::runtime_error(curl_multi_strerror(rv));
-  }
-  rv = curl_multi_perform(this->multi.get(), &n_active);
-  if (rv != CURLM_OK) {
-    throw std::runtime_error(curl_multi_strerror(rv));
-  }
-
-  this->is_eof = n_active <= 0;
-}
-
-void
-unpack::curl_easy::update_status_code()
-{
-  auto rv = curl_easy_getinfo(
-    this->easy.get(), CURLINFO_RESPONSE_CODE, &this->status_code);
-  if (rv != CURLE_OK) {
-    throw std::runtime_error(curl_easy_strerror(rv));
-  }
-}
-
-void
-unpack::curl_easy::read_until_status_code()
-{
-  this->update_status_code();
-  while (this->status_code == 0) {
-    this->read();
-    this->update_status_code();
-  }
-}
-
-void
-unpack::curl_easy::update_content_length()
-{
-  auto rv = curl_easy_getinfo(this->easy.get(),
-                              CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                              &this->content_length);
-  if (rv != CURLE_OK) {
-    throw std::runtime_error(curl_easy_strerror(rv));
-  }
-}
-
-void
-unpack::curl_easy::read_until_content_length()
-{
-  this->update_content_length();
-  while (this->content_length < 0) {
-    this->read();
-    this->update_content_length();
-  }
-}
-
-unpack::input_stream::detail::http_detail::http_detail(const std::string& url)
-  : multi(create_multi_handle())
-  , url(url)
-  , easy(nullptr)
-  , offset(0)
-  , length(-1)
+// http_connection_state implementation
+connection::connection()
+  : io_ctx()
+  , stream()
+  , buffer()
+  , parser()
+  , headers_received(false)
+  , eof(false)
+  , pending_read(false)
+  , error()
   , blocks()
 {
+}
+
+connection::~connection()
+{
+  namespace asio = boost::asio;
+  using tcp = asio::ip::tcp;
+
+  // Mark connection as closing
+  this->pending_read = false;
+  this->eof = true;
+
+  // Close stream (cancels pending async ops)
+  if (this->stream) {
+    boost::system::error_code ec;
+    this->stream->socket().shutdown(tcp::socket::shutdown_both, ec);
+    this->stream.reset();
+  }
+
+  // Drain queued handlers (they'll see stream=nullptr and bail)
+  while (this->io_ctx.poll_one() > 0) {
+    // Continue draining
+  }
+
+  // Now safe to destroy buffer, parser, blocks via automatic cleanup
+}
+
+// http_detail implementation
+input_stream::detail::http_detail::http_detail(const std::string& url)
+  : url(url)
+  , host()
+  , port()
+  , target()
+  , link()
+  , offset(0)
+  , length(-1)
+{
+  this->parse_url();
+}
+
+input_stream::detail::http_detail::~http_detail()
+{
+  try {
+    this->close();
+  } catch (...) {
+    // Destructor must not throw
+  }
+}
+
+void
+unpack::input_stream::detail::http_detail::parse_url()
+{
+  auto result = boost::urls::parse_uri(this->url);
+  if (!result) {
+    throw std::runtime_error(std::format("Invalid URL: {}", this->url));
+  }
+
+  auto url = *result;
+
+  // Only accept http:// (no https://)
+  if (url.scheme() != "http") {
+    throw std::runtime_error(
+      std::format("Only HTTP supported, got scheme: {}", std::string(url.scheme())));
+  }
+
+  // Extract host (strip IPv6 brackets if present)
+  auto host_str = std::string(url.host());
+  if (host_str.size() >= 2 && host_str.front() == '[' && host_str.back() == ']') {
+    // IPv6 address - strip brackets for resolver
+    this->host = host_str.substr(1, host_str.size() - 2);
+  } else {
+    this->host = host_str;
+  }
+
+  this->port = url.has_port() ? std::string(url.port()) : "80";
+
+  // Construct target (path + query)
+  auto path_str = std::string(url.path());
+  if (!path_str.empty()) {
+    this->target = path_str;
+  } else {
+    this->target = "/";
+  }
+
+  if (url.has_query()) {
+    this->target += "?";
+    this->target += std::string(url.query());
+  }
+}
+
+void
+unpack::input_stream::detail::http_detail::open()
+{
+  this->open(false);
+}
+
+void
+unpack::input_stream::detail::http_detail::open(bool use_range)
+{
+  // Create fresh connection (destroys old one automatically via unique_ptr)
+  this->link = std::make_unique<connection>();
+
+  // Create fresh TCP stream
+  this->link->stream.emplace(this->link->io_ctx);
+
+  // Perform connection and header exchange
+  this->tcp_connect();
+  this->send_request(use_range);
+  this->receive_headers();
+}
+
+void
+unpack::input_stream::detail::http_detail::tcp_connect()
+{
+  namespace asio = boost::asio;
+  using tcp = asio::ip::tcp;
+
+  if (!this->link) {
+    throw std::runtime_error("No connection state");
+  }
+
+  // Resolve hostname
+  tcp::resolver resolver(this->link->io_ctx);
+  boost::system::error_code ec;
+
+  auto results = resolver.resolve(this->host, this->port, ec);
+  if (ec) {
+    throw std::runtime_error(
+      std::format("DNS resolution failed: {}", ec.message()));
+  }
+
+  // Connect to server with timeout
+  this->link->stream->expires_after(std::chrono::seconds(30));
+  this->link->stream->connect(results, ec);
+  if (ec) {
+    throw std::runtime_error(std::format("Connection failed: {}", ec.message()));
+  }
+}
+
+void
+unpack::input_stream::detail::http_detail::send_request(bool use_range)
+{
+  namespace beast = boost::beast;
+  namespace http = beast::http;
+
+  if (!this->link) {
+    throw std::runtime_error("No connection state");
+  }
+
+  // Build HTTP request
+  http::request<http::empty_body> req{ http::verb::get, this->target, 11 };
+  req.set(http::field::host, this->host);
+  req.set(http::field::user_agent, "dvd-unpack/1.0");
+  req.set(http::field::connection, "keep-alive");
+
+  if (use_range && this->is_range_valid()) {
+    // Format: "bytes=offset-end"
+    auto range_value = std::format("bytes={}-{}", this->offset, this->length - 1);
+    req.set(http::field::range, range_value);
+  }
+
+  // Send request
+  boost::system::error_code ec;
+  http::write(*this->link->stream, req, ec);
+  if (ec) {
+    throw std::runtime_error(std::format("Request send failed: {}", ec.message()));
+  }
+}
+
+void
+unpack::input_stream::detail::http_detail::receive_headers()
+{
+  namespace beast = boost::beast;
+  namespace http = beast::http;
+
+  if (!this->link) {
+    throw std::runtime_error("No connection state");
+  }
+
+  // Create response parser
+  this->link->parser.emplace();
+  this->link->parser->body_limit(std::numeric_limits<std::uint64_t>::max());
+
+  // Read headers only
+  boost::system::error_code ec;
+  http::read_header(*this->link->stream, this->link->buffer, *this->link->parser, ec);
+  if (ec) {
+    throw std::runtime_error(std::format("Header read failed: {}", ec.message()));
+  }
+
+  this->link->headers_received = true;
+
+  // Validate status code
+  auto status = this->link->parser->get().result_int();
+  if (status != HTTP_STATUS_OK && status != HTTP_STATUS_PARTIAL_CONTENT) {
+    throw http_error(status);
+  }
+
+  // Extract Content-Length (for 200 OK)
+  if (status == HTTP_STATUS_OK) {
+    auto& headers = this->link->parser->get();
+    auto it = headers.find(http::field::content_length);
+    if (it != headers.end()) {
+      try {
+        this->length = std::stoll(std::string(it->value()));
+      } catch (...) {
+        this->length = -1; // Invalid Content-Length
+      }
+    }
+  }
+}
+
+binary_chunk
+unpack::input_stream::detail::http_detail::read()
+{
+  if (!this->link) {
+    return {}; // No connection
+  }
+
+  // Check for async errors
+  if (this->link->error) {
+    throw std::runtime_error(
+      std::format("HTTP read error: {}", this->link->error->message()));
+  }
+
+  // Fast path: return buffered chunk
+  if (!this->link->blocks.empty()) {
+    auto chunk = std::move(this->link->blocks.front());
+    this->link->blocks.pop_front();
+    this->offset += chunk.size();
+
+    // Start fetching next chunk for pipelining (with backpressure check)
+    if (this->should_start_read()) {
+      this->start_async_read();
+    }
+
+    // Make progress on async operations without blocking
+    this->link->io_ctx.poll();
+
+    return chunk;
+  }
+
+  // No buffered data, need to fetch
+  if (!this->link->eof && this->link->stream && this->link->parser) {
+    if (!this->link->pending_read) {
+      this->start_async_read();
+    }
+
+    // Block until data arrives
+    this->link->io_ctx.run();
+    this->link->io_ctx.restart();
+
+    // Check for errors after blocking
+    if (this->link->error) {
+      throw std::runtime_error(
+        std::format("HTTP read error: {}", this->link->error->message()));
+    }
+
+    // Try again after running
+    if (!this->link->blocks.empty()) {
+      auto chunk = std::move(this->link->blocks.front());
+      this->link->blocks.pop_front();
+      this->offset += chunk.size();
+
+      // Start next read immediately (with backpressure check)
+      if (this->should_start_read()) {
+        this->start_async_read();
+      }
+
+      return chunk;
+    }
+  }
+
+  return {}; // EOF
+}
+
+void
+unpack::input_stream::detail::http_detail::start_async_read()
+{
+  namespace beast = boost::beast;
+  namespace http = beast::http;
+  namespace asio = boost::asio;
+
+  if (!this->link) {
+    return;
+  }
+
+  this->link->pending_read = true;
+
+  // Capture raw pointer to conn for lambda
+  auto* conn_ptr = this->link.get();
+
+  http::async_read_some(
+    *this->link->stream,
+    this->link->buffer,
+    *this->link->parser,
+    [conn_ptr](boost::system::error_code ec, std::size_t) {
+      conn_ptr->pending_read = false;
+
+      // If connection was closed (eof=true from close()), don't process data
+      if (!conn_ptr->stream || !conn_ptr->parser) {
+        return;
+      }
+
+      if (ec == http::error::end_of_stream || ec == asio::error::eof) {
+        conn_ptr->eof = true;
+        return;
+      }
+
+      if (ec) {
+        conn_ptr->error = ec; // Store error to throw later
+        return;
+      }
+
+      // Extract body and add to queue
+      auto& body = conn_ptr->parser->get().body();
+      if (!body.empty()) {
+        conn_ptr->blocks.push_back(binary_chunk(body.begin(), body.end()));
+        body.clear();
+      }
+
+      if (conn_ptr->parser->is_done()) {
+        conn_ptr->eof = true;
+      }
+    });
+}
+
+bool
+unpack::input_stream::detail::http_detail::should_start_read() const
+{
+  if (!this->link) {
+    return false;
+  }
+  return !this->link->pending_read && !this->link->eof && this->link->stream.has_value() &&
+         this->link->parser.has_value() && this->link->blocks.size() < MAX_BUFFERED_CHUNKS;
+}
+
+std::int64_t
+unpack::input_stream::detail::http_detail::seek(std::int64_t new_offset, int whence)
+{
+  // Close current connection
+  this->close();
+
+  // Calculate new offset
+  switch (whence) {
+    case SEEK_SET:
+      this->offset = new_offset;
+      break;
+    case SEEK_CUR:
+      this->offset += new_offset;
+      break;
+    case SEEK_END:
+      if (!this->is_length_valid()) {
+        throw std::runtime_error(
+          "Cannot seek from end without Content-Length");
+      }
+      this->offset = this->length + new_offset;
+      break;
+    default:
+      throw std::invalid_argument("Invalid seek whence");
+  }
+
+  // Reopen with Range header if valid
+  if (this->is_range_valid()) {
+    this->open(true);
+  }
+
+  return this->offset;
 }
 
 bool
@@ -133,124 +413,13 @@ unpack::input_stream::detail::http_detail::is_length_valid() const
 bool
 unpack::input_stream::detail::http_detail::is_range_valid() const
 {
-  return this->is_length_valid() && this->offset < this->length;
-}
-
-void
-unpack::input_stream::detail::http_detail::open()
-{
-  this->open(false);
-}
-
-void
-unpack::input_stream::detail::http_detail::open(bool range)
-{
-  auto easy = create_easy_handle();
-  CURLcode rv = CURLE_OK;
-
-  rv = curl_easy_setopt(easy.get(), CURLOPT_URL, this->url.c_str());
-  if (rv != CURLE_OK) {
-    throw std::runtime_error(curl_easy_strerror(rv));
-  }
-
-  rv = curl_easy_setopt(easy.get(),
-                        CURLOPT_WRITEFUNCTION,
-                        input_stream::detail::http_detail::write);
-  if (rv != CURLE_OK) {
-    throw std::runtime_error(curl_easy_strerror(rv));
-  }
-
-  rv = curl_easy_setopt(easy.get(), CURLOPT_WRITEDATA, this);
-  if (rv != CURLE_OK) {
-    throw std::runtime_error(curl_easy_strerror(rv));
-  }
-
-  if (range) {
-    auto value = std::format("{}-{}", this->offset, this->length - 1);
-
-    rv = curl_easy_setopt(easy.get(), CURLOPT_RANGE, value.c_str());
-    if (rv != CURLE_OK) {
-      throw std::runtime_error(curl_easy_strerror(rv));
-    }
-  }
-
-  this->easy = std::make_shared<curl_easy>(this->multi, easy);
-  auto status_code = this->easy->status_code;
-
-  if (status_code != HTTP_STATUS_OK &&
-      status_code != HTTP_STATUS_PARTIAL_CONTENT) {
-    throw http_error(status_code);
-  }
-
-  if (status_code == HTTP_STATUS_OK) {
-    this->length = this->easy->content_length;
-  }
+  return this->is_length_valid() && this->offset >= 0 && this->offset < this->length;
 }
 
 void
 unpack::input_stream::detail::http_detail::close()
 {
-  this->blocks.clear();
-  this->easy.reset();
+  this->link.reset();
 }
 
-unpack::binary_chunk
-unpack::input_stream::detail::http_detail::read()
-{
-  while (this->blocks.empty()) {
-    this->easy->read();
-  }
-
-  auto top = std::move(this->blocks.front());
-  this->blocks.pop_front();
-
-  this->offset += top.size();
-
-  return top;
-}
-
-std::int64_t
-unpack::input_stream::detail::http_detail::seek(std::int64_t offset, int whence)
-{
-  this->close();
-
-  switch (whence) {
-    case SEEK_SET:
-      this->offset = offset;
-      break;
-    case SEEK_CUR:
-      this->offset += offset;
-      break;
-    case SEEK_END:
-      if (!this->is_length_valid()) {
-        throw std::runtime_error("invalid length for seeking");
-      }
-      this->offset = this->length + offset;
-      break;
-    default:
-      throw std::invalid_argument("unknown seek direction");
-  }
-
-  if (this->is_range_valid()) {
-    this->open(true);
-  }
-  return this->offset;
-}
-
-std::size_t
-unpack::input_stream::detail::http_detail::write(char* ptr,
-                                                 std::size_t size,
-                                                 std::size_t nmemb,
-                                                 void* userdata)
-{
-  auto self = static_cast<input_stream::detail::http_detail*>(userdata);
-  auto chunk = static_cast<const std::uint8_t*>(static_cast<void*>(ptr));
-  std::size_t length = size * nmemb;
-  self->blocks.emplace_back(chunk, chunk + length);
-  return length;
-}
-
-unpack::http_error::http_error(long status) noexcept
-  : std::runtime_error(std::format("HTTP status code: {}", status))
-{
 }

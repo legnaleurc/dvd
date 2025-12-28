@@ -3,74 +3,83 @@
 
 #include "stream.hxx"
 
-#include <curl/curl.h>
+#include <boost/asio/io_context.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/system/error_code.hpp>
 
 #include <deque>
+#include <optional>
 #include <stdexcept>
+#include <string>
 
 namespace unpack {
 
 class http_error : public std::runtime_error
 {
 public:
-  explicit http_error(long status) noexcept;
+  explicit http_error(unsigned status) noexcept;
 };
 
-using easy_handle = std::shared_ptr<CURL>;
-using multi_handle = std::shared_ptr<CURLM>;
-
-class curl_easy
+// Per-connection state - isolated for clean RAII cleanup
+struct connection
 {
-public:
-  curl_easy(multi_handle multi, easy_handle easy);
-  ~curl_easy();
+  boost::asio::io_context io_ctx;
+  std::optional<boost::beast::tcp_stream> stream;
+  boost::beast::flat_buffer buffer;
+  std::optional<boost::beast::http::response_parser<
+    boost::beast::http::string_body>>
+    parser;
+  bool headers_received;
+  bool eof;
+  bool pending_read;
+  std::optional<boost::system::error_code> error;
+  std::deque<binary_chunk> blocks;
 
-  void read();
-
-private:
-  void update_status_code();
-  void read_until_status_code();
-  void update_content_length();
-  void read_until_content_length();
-
-  multi_handle multi;
-  easy_handle easy;
-  bool is_eof;
-
-public:
-  long status_code;
-  std::int64_t content_length;
+  connection();
+  ~connection();
+  connection(const connection&) = delete;
+  connection& operator=(const connection&) = delete;
 };
 
 class input_stream::detail::http_detail : public input_stream::detail
 {
 public:
-  static std::size_t write(char* ptr,
-                           std::size_t size,
-                           std::size_t nmemb,
-                           void* userdata);
-
   explicit http_detail(const std::string& url);
+  ~http_detail() override;
 
   http_detail(const http_detail&) = delete;
   http_detail& operator=(const http_detail&) = delete;
   http_detail(http_detail&&) = delete;
   http_detail& operator=(http_detail&&) = delete;
+
   void open() override;
+  void open(bool use_range);
   void close() override;
   binary_chunk read() override;
   std::int64_t seek(std::int64_t offset, int whence) override;
 
+  void parse_url();
+  void tcp_connect();
+  void send_request(bool use_range);
+  void receive_headers();
+  void start_async_read();
+  bool should_start_read() const;
   bool is_length_valid() const;
   bool is_range_valid() const;
-  void open(bool range);
 
-  multi_handle multi;
+  // Parsed URL components (constant across connections)
   std::string url;
-  std::shared_ptr<curl_easy> easy;
+  std::string host;
+  std::string port;
+  std::string target;
+
+  // Current connection (nullptr = closed)
+  std::unique_ptr<connection> link;
+
+  // Stream state (persists across reconnections)
   std::int64_t offset;
   std::int64_t length;
-  std::deque<binary_chunk> blocks;
 };
 
 }
