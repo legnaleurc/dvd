@@ -6,9 +6,9 @@ RUN : \
         build-essential \
         cmake \
         libarchive-dev \
-        libcurl4-openssl-dev \
         libboost-locale-dev \
-        libssl-dev \
+        libboost-system-dev \
+        libboost-url-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
