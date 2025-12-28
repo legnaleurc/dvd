@@ -63,8 +63,8 @@ unpack::input_stream::detail::http_detail::parse_url()
 
   // Only accept http:// (no https://)
   if (url.scheme() != "http") {
-    throw std::runtime_error(
-      std::format("Only HTTP supported, got scheme: {}", std::string(url.scheme())));
+    throw std::runtime_error(std::format("Only HTTP supported, got scheme: {}",
+                                         std::string(url.scheme())));
   }
 
   this->host = std::string(url.host());
@@ -133,7 +133,8 @@ unpack::input_stream::detail::http_detail::tcp_connect()
   this->stream->expires_after(std::chrono::seconds(30));
   this->stream->connect(results, ec);
   if (ec) {
-    throw std::runtime_error(std::format("Connection failed: {}", ec.message()));
+    throw std::runtime_error(
+      std::format("Connection failed: {}", ec.message()));
   }
 }
 
@@ -151,7 +152,8 @@ unpack::input_stream::detail::http_detail::send_request(bool use_range)
 
   if (use_range && this->is_range_valid()) {
     // Format: "bytes=offset-end"
-    auto range_value = std::format("bytes={}-{}", this->offset, this->length - 1);
+    auto range_value =
+      std::format("bytes={}-{}", this->offset, this->length - 1);
     req.set(http::field::range, range_value);
   }
 
@@ -159,7 +161,8 @@ unpack::input_stream::detail::http_detail::send_request(bool use_range)
   boost::system::error_code ec;
   http::write(*this->stream, req, ec);
   if (ec) {
-    throw std::runtime_error(std::format("Request send failed: {}", ec.message()));
+    throw std::runtime_error(
+      std::format("Request send failed: {}", ec.message()));
   }
 }
 
@@ -177,7 +180,8 @@ unpack::input_stream::detail::http_detail::receive_headers()
   boost::system::error_code ec;
   http::read_header(*this->stream, this->buffer, *this->parser, ec);
   if (ec) {
-    throw std::runtime_error(std::format("Header read failed: {}", ec.message()));
+    throw std::runtime_error(
+      std::format("Header read failed: {}", ec.message()));
   }
 
   this->headers_received = true;
@@ -309,7 +313,8 @@ unpack::input_stream::detail::http_detail::should_start_read() const
 }
 
 std::int64_t
-unpack::input_stream::detail::http_detail::seek(std::int64_t new_offset, int whence)
+unpack::input_stream::detail::http_detail::seek(std::int64_t new_offset,
+                                                int whence)
 {
   // Close current connection
   this->close();
@@ -324,8 +329,7 @@ unpack::input_stream::detail::http_detail::seek(std::int64_t new_offset, int whe
       break;
     case SEEK_END:
       if (!this->is_length_valid()) {
-        throw std::runtime_error(
-          "Cannot seek from end without Content-Length");
+        throw std::runtime_error("Cannot seek from end without Content-Length");
       }
       this->offset = this->length + new_offset;
       break;
@@ -350,7 +354,8 @@ unpack::input_stream::detail::http_detail::is_length_valid() const
 bool
 unpack::input_stream::detail::http_detail::is_range_valid() const
 {
-  return this->is_length_valid() && this->offset >= 0 && this->offset < this->length;
+  return this->is_length_valid() && this->offset >= 0 &&
+         this->offset < this->length;
 }
 
 void

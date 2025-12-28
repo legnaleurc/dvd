@@ -57,8 +57,8 @@ public:
   boost::asio::io_context io_ctx;
   std::optional<boost::beast::tcp_stream> stream;
   boost::beast::flat_buffer buffer;
-  std::optional<boost::beast::http::response_parser<
-    boost::beast::http::string_body>>
+  std::optional<
+    boost::beast::http::response_parser<boost::beast::http::string_body>>
     parser;
 
   // HTTP state
