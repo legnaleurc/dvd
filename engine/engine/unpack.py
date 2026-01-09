@@ -261,9 +261,12 @@ def _resize_image(input_path: Path, max_size: int) -> tuple[int, int]:
 
     # Calculate new dimensions maintaining aspect ratio
     # Scale so max(width, height) = max_size
-    scale = max_size / max(original_width, original_height)
-    new_width = int(original_width * scale)
-    new_height = int(original_height * scale)
+    if original_width > original_height:
+        new_width = max_size
+        new_height = round(original_height * max_size / original_width)
+    else:
+        new_height = max_size
+        new_width = round(original_width * max_size / original_height)
 
     # Now open with PIL for actual resizing
     with Image.open(input_path) as img:
