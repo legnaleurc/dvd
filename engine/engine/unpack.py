@@ -264,6 +264,9 @@ def _resize_image(input_path: Path, max_size: int) -> tuple[int, int]:
     if original_width > original_height:
         new_width = max_size
         new_height = round(original_height * max_size / original_width)
+    elif original_width == original_height:
+        new_width = max_size
+        new_height = max_size
     else:
         new_height = max_size
         new_width = round(original_width * max_size / original_height)
