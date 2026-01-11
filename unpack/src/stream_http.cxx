@@ -360,7 +360,9 @@ unpack::input_stream::detail::http_detail::start_async_read()
       }
 
       // Keep pipeline full: immediately start next read if buffer not full
-      if (conn_ptr->blocks.size() < MAX_BUFFERED_CHUNKS) {
+      // Only continue if we're still the active connection (not closed/replaced by seek)
+      if (conn_ptr->blocks.size() < MAX_BUFFERED_CHUNKS &&
+          self->link.get() == conn_ptr) {
         self->start_async_read();
       }
     });
