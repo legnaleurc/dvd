@@ -279,11 +279,15 @@ unpack::input_stream::detail::http_detail::read()
     return {}; // No connection
   }
 
-  // Fast path: return buffered chunk
+  // Drain any completed async operations (non-blocking)
+  // This allows chunks to accumulate in the queue for pipelining
+  while (this->link->io_ctx.poll_one() > 0) {
+    // Continue draining completed handlers
+  }
+
+  // Try to extract chunk
   auto chunk = this->try_extract_chunk();
   if (!chunk.empty()) {
-    // Make progress on async operations without blocking
-    this->link->io_ctx.poll();
     return chunk;
   }
 
@@ -317,14 +321,15 @@ unpack::input_stream::detail::http_detail::start_async_read()
 
   this->link->pending_read = true;
 
-  // Capture raw pointer to conn for lambda
+  // Capture both connection and this for recursive async calls
   auto* conn_ptr = this->link.get();
+  auto* self = this;
 
   http::async_read_some(
     *this->link->stream,
     this->link->buffer,
     *this->link->parser,
-    [conn_ptr](boost::system::error_code ec, std::size_t) {
+    [conn_ptr, self](boost::system::error_code ec, std::size_t) {
       conn_ptr->pending_read = false;
 
       // If connection was closed (eof=true from close()), don't process data
@@ -351,6 +356,12 @@ unpack::input_stream::detail::http_detail::start_async_read()
 
       if (conn_ptr->parser->is_done()) {
         conn_ptr->eof = true;
+        return;
+      }
+
+      // Keep pipeline full: immediately start next read if buffer not full
+      if (conn_ptr->blocks.size() < MAX_BUFFERED_CHUNKS) {
+        self->start_async_read();
       }
     });
 }
