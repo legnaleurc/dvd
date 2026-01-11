@@ -321,51 +321,52 @@ unpack::input_stream::detail::http_detail::start_async_read()
 
   this->link->pending_read = true;
 
-  // Capture both connection and this for recursive async calls
+  // Capture connection pointer for handler
   auto* conn_ptr = this->link.get();
-  auto* self = this;
 
-  http::async_read_some(
-    *this->link->stream,
-    this->link->buffer,
-    *this->link->parser,
-    [conn_ptr, self](boost::system::error_code ec, std::size_t) {
-      conn_ptr->pending_read = false;
+  // Create a shared handler function to allow recursion
+  using handler_t = std::function<void(boost::system::error_code, std::size_t)>;
+  auto handler = std::make_shared<handler_t>();
 
-      // If connection was closed (eof=true from close()), don't process data
-      if (!conn_ptr->stream || !conn_ptr->parser) {
-        return;
-      }
+  *handler = [conn_ptr, handler](boost::system::error_code ec, std::size_t) {
+    conn_ptr->pending_read = false;
 
-      if (ec == http::error::end_of_stream || ec == asio::error::eof) {
-        conn_ptr->eof = true;
-        return;
-      }
+    // If connection was closed, don't process data
+    if (!conn_ptr->stream || !conn_ptr->parser) {
+      return;
+    }
 
-      if (ec) {
-        conn_ptr->error = ec; // Store error to throw later
-        return;
-      }
+    if (ec == http::error::end_of_stream || ec == asio::error::eof) {
+      conn_ptr->eof = true;
+      return;
+    }
 
-      // Extract body and add to queue
-      auto& body = conn_ptr->parser->get().body();
-      if (!body.empty()) {
-        conn_ptr->blocks.push_back(binary_chunk(body.begin(), body.end()));
-        body.clear();
-      }
+    if (ec) {
+      conn_ptr->error = ec;
+      return;
+    }
 
-      if (conn_ptr->parser->is_done()) {
-        conn_ptr->eof = true;
-        return;
-      }
+    // Extract body and add to queue
+    auto& body = conn_ptr->parser->get().body();
+    if (!body.empty()) {
+      conn_ptr->blocks.push_back(binary_chunk(body.begin(), body.end()));
+      body.clear();
+    }
 
-      // Keep pipeline full: immediately start next read if buffer not full
-      // Only continue if we're still the active connection (not closed/replaced by seek)
-      if (conn_ptr->blocks.size() < MAX_BUFFERED_CHUNKS &&
-          self->link.get() == conn_ptr) {
-        self->start_async_read();
-      }
-    });
+    if (conn_ptr->parser->is_done()) {
+      conn_ptr->eof = true;
+      return;
+    }
+
+    // Keep pipeline full: chain next read if buffer not full
+    if (conn_ptr->blocks.size() < MAX_BUFFERED_CHUNKS &&
+        conn_ptr->stream && conn_ptr->parser) {
+      conn_ptr->pending_read = true;
+      http::async_read_some(*conn_ptr->stream, conn_ptr->buffer, *conn_ptr->parser, *handler);
+    }
+  };
+
+  http::async_read_some(*this->link->stream, this->link->buffer, *this->link->parser, *handler);
 }
 
 bool
