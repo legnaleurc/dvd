@@ -247,19 +247,15 @@ unpack::input_stream::detail::http_detail::receive_headers()
 }
 
 binary_chunk
-unpack::input_stream::detail::http_detail::read()
+unpack::input_stream::detail::http_detail::try_extract_chunk()
 {
-  if (!this->link) {
-    return {}; // No connection
-  }
-
   // Check for async errors
   if (this->link->error) {
     throw std::runtime_error(
       std::format("HTTP read error: {}", this->link->error->message()));
   }
 
-  // Fast path: return buffered chunk
+  // Extract chunk if available
   if (!this->link->blocks.empty()) {
     auto chunk = std::move(this->link->blocks.front());
     this->link->blocks.pop_front();
@@ -270,9 +266,24 @@ unpack::input_stream::detail::http_detail::read()
       this->start_async_read();
     }
 
+    return chunk;
+  }
+
+  return {}; // No chunk available
+}
+
+binary_chunk
+unpack::input_stream::detail::http_detail::read()
+{
+  if (!this->link) {
+    return {}; // No connection
+  }
+
+  // Fast path: return buffered chunk
+  auto chunk = this->try_extract_chunk();
+  if (!chunk.empty()) {
     // Make progress on async operations without blocking
     this->link->io_ctx.poll();
-
     return chunk;
   }
 
@@ -286,25 +297,8 @@ unpack::input_stream::detail::http_detail::read()
     this->link->io_ctx.run();
     this->link->io_ctx.restart();
 
-    // Check for errors after blocking
-    if (this->link->error) {
-      throw std::runtime_error(
-        std::format("HTTP read error: {}", this->link->error->message()));
-    }
-
     // Try again after running
-    if (!this->link->blocks.empty()) {
-      auto chunk = std::move(this->link->blocks.front());
-      this->link->blocks.pop_front();
-      this->offset += chunk.size();
-
-      // Start next read immediately (with backpressure check)
-      if (this->should_start_read()) {
-        this->start_async_read();
-      }
-
-      return chunk;
-    }
+    return this->try_extract_chunk();
   }
 
   return {}; // EOF

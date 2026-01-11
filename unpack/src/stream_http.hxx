@@ -67,6 +67,7 @@ public:
   bool should_start_read() const;
   bool is_length_valid() const;
   bool is_range_valid() const;
+  binary_chunk try_extract_chunk();
 
   // Parsed URL components (constant across connections)
   std::string url;
