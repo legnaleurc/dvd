@@ -61,6 +61,63 @@ connection::~connection()
   // Now safe to destroy buffer, parser, blocks via automatic cleanup
 }
 
+void
+connection::start_read_loop()
+{
+  namespace beast = boost::beast;
+  namespace http = beast::http;
+  namespace asio = boost::asio;
+
+  if (!this->stream || !this->parser || this->eof || this->pending_read) {
+    return;
+  }
+
+  this->pending_read = true;
+
+  // Capture shared_ptr to keep connection alive while handler is pending
+  auto self = shared_from_this();
+
+  http::async_read_some(
+    *this->stream,
+    this->buffer,
+    *this->parser,
+    [self](boost::system::error_code ec, std::size_t) {
+      self->pending_read = false;
+
+      // If connection was closed, don't process data
+      if (!self->stream || !self->parser) {
+        return;
+      }
+
+      if (ec == http::error::end_of_stream || ec == asio::error::eof) {
+        self->eof = true;
+        return;
+      }
+
+      if (ec) {
+        self->error = ec;
+        return;
+      }
+
+      // Extract body and add to queue
+      auto& body = self->parser->get().body();
+      if (!body.empty()) {
+        self->blocks.push_back(binary_chunk(body.begin(), body.end()));
+        body.clear();
+      }
+
+      if (self->parser->is_done()) {
+        self->eof = true;
+        return;
+      }
+
+      // Keep pipeline full: recursively chain if buffer not full
+      if (self->blocks.size() < MAX_BUFFERED_CHUNKS) {
+        self->start_read_loop();
+      }
+    });
+}
+
 // http_detail implementation
 input_stream::detail::http_detail::http_detail(const std::string& url)
   : url(url)
@@ -133,8 +190,8 @@ unpack::input_stream::detail::http_detail::open()
 void
 unpack::input_stream::detail::http_detail::open(bool use_range)
 {
-  // Create fresh connection (destroys old one automatically via unique_ptr)
-  this->link = std::make_unique<connection>();
+  // Create fresh connection (destroys old one automatically via shared_ptr)
+  this->link = std::make_shared<connection>();
 
   // Create fresh TCP stream
   this->link->stream.emplace(this->link->io_ctx);
@@ -143,6 +200,9 @@ unpack::input_stream::detail::http_detail::open(bool use_range)
   this->tcp_connect();
   this->send_request(use_range);
   this->receive_headers();
+
+  // Start async read loop - connection manages its own lifetime
+  this->link->start_read_loop();
 }
 
 void
@@ -261,9 +321,9 @@ unpack::input_stream::detail::http_detail::try_extract_chunk()
     this->link->blocks.pop_front();
     this->offset += chunk.size();
 
-    // Start fetching next chunk for pipelining (with backpressure check)
-    if (this->should_start_read()) {
-      this->start_async_read();
+    // Kick off next read if buffer draining (connection manages the loop)
+    if (this->link->blocks.size() < MAX_BUFFERED_CHUNKS) {
+      this->link->start_read_loop();
     }
 
     return chunk;
@@ -294,7 +354,7 @@ unpack::input_stream::detail::http_detail::read()
   // No buffered data, need to fetch
   if (!this->link->eof && this->link->stream && this->link->parser) {
     if (!this->link->pending_read) {
-      this->start_async_read();
+      this->link->start_read_loop();
     }
 
     // Block until data arrives
@@ -306,77 +366,6 @@ unpack::input_stream::detail::http_detail::read()
   }
 
   return {}; // EOF
-}
-
-void
-unpack::input_stream::detail::http_detail::start_async_read()
-{
-  namespace beast = boost::beast;
-  namespace http = beast::http;
-  namespace asio = boost::asio;
-
-  if (!this->link) {
-    return;
-  }
-
-  this->link->pending_read = true;
-
-  // Capture connection pointer for handler
-  auto* conn_ptr = this->link.get();
-
-  // Create a shared handler function to allow recursion
-  using handler_t = std::function<void(boost::system::error_code, std::size_t)>;
-  auto handler = std::make_shared<handler_t>();
-
-  *handler = [conn_ptr, handler](boost::system::error_code ec, std::size_t) {
-    conn_ptr->pending_read = false;
-
-    // If connection was closed, don't process data
-    if (!conn_ptr->stream || !conn_ptr->parser) {
-      return;
-    }
-
-    if (ec == http::error::end_of_stream || ec == asio::error::eof) {
-      conn_ptr->eof = true;
-      return;
-    }
-
-    if (ec) {
-      conn_ptr->error = ec;
-      return;
-    }
-
-    // Extract body and add to queue
-    auto& body = conn_ptr->parser->get().body();
-    if (!body.empty()) {
-      conn_ptr->blocks.push_back(binary_chunk(body.begin(), body.end()));
-      body.clear();
-    }
-
-    if (conn_ptr->parser->is_done()) {
-      conn_ptr->eof = true;
-      return;
-    }
-
-    // Keep pipeline full: chain next read if buffer not full
-    if (conn_ptr->blocks.size() < MAX_BUFFERED_CHUNKS &&
-        conn_ptr->stream && conn_ptr->parser) {
-      conn_ptr->pending_read = true;
-      http::async_read_some(*conn_ptr->stream, conn_ptr->buffer, *conn_ptr->parser, *handler);
-    }
-  };
-
-  http::async_read_some(*this->link->stream, this->link->buffer, *this->link->parser, *handler);
-}
-
-bool
-unpack::input_stream::detail::http_detail::should_start_read() const
-{
-  if (!this->link) {
-    return false;
-  }
-  return !this->link->pending_read && !this->link->eof && this->link->stream.has_value() &&
-         this->link->parser.has_value() && this->link->blocks.size() < MAX_BUFFERED_CHUNKS;
 }
 
 std::int64_t

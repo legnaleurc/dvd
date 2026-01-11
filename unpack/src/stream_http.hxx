@@ -22,7 +22,7 @@ public:
 };
 
 // Per-connection state - isolated for clean RAII cleanup
-struct connection
+struct connection : std::enable_shared_from_this<connection>
 {
   boost::asio::io_context io_ctx;
   std::optional<boost::beast::tcp_stream> stream;
@@ -40,6 +40,9 @@ struct connection
   ~connection();
   connection(const connection&) = delete;
   connection& operator=(const connection&) = delete;
+
+  // Start async read loop - manages its own lifetime via shared_ptr
+  void start_read_loop();
 };
 
 class input_stream::detail::http_detail : public input_stream::detail
@@ -63,8 +66,6 @@ public:
   void tcp_connect();
   void send_request(bool use_range);
   void receive_headers();
-  void start_async_read();
-  bool should_start_read() const;
   bool is_length_valid() const;
   bool is_range_valid() const;
   binary_chunk try_extract_chunk();
@@ -76,7 +77,7 @@ public:
   std::string target;
 
   // Current connection (nullptr = closed)
-  std::unique_ptr<connection> link;
+  std::shared_ptr<connection> link;
 
   // Stream state (persists across reconnections)
   std::int64_t offset;
