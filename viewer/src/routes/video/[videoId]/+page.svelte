@@ -13,7 +13,7 @@
   let url = "";
   let videoElement: HTMLVideoElement | null = null;
 
-  $: id = $page.params.videoId;
+  $: id = $page.params.videoId ?? "";
   $: video = $videoMap[id];
   $: name = video?.name ?? "";
   $: mimeType = video?.mimeType ?? "";
