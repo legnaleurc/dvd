@@ -25,21 +25,49 @@ class UnpackFailedError(Exception):
     pass
 
 
+def _calculate_scaled_dimensions(
+    width: int, height: int, max_size: int
+) -> tuple[int, int]:
+    """Calculate target dimensions after scaling, without actually scaling the image."""
+    if max_size == 0 or (width <= max_size and height <= max_size):
+        return width, height
+
+    if width > height:
+        new_width = max_size
+        new_height = round(height * max_size / width)
+    elif width < height:
+        new_height = max_size
+        new_width = round(width * max_size / height)
+    else:
+        new_width = max_size
+        new_height = max_size
+
+    return new_width, new_height
+
+
 @asynccontextmanager
 async def create_unpack_engine(drive: Drive, port: int, unpack_path: str):
     async with create_storage_manager() as storage:
-        yield UnpackEngine(drive, port, unpack_path, storage)
+        with ProcessPoolExecutor() as scaling_pool:
+            yield UnpackEngine(drive, port, unpack_path, storage, scaling_pool)
 
 
 class UnpackEngine:
     def __init__(
-        self, drive: Drive, port: int, unpack_path: str, storage: StorageManager
+        self,
+        drive: Drive,
+        port: int,
+        unpack_path: str,
+        storage: StorageManager,
+        scaling_pool: ProcessPoolExecutor,
     ) -> None:
         self._drive = drive
         self._port = port
         self._unpack_path = unpack_path
         self._unpacking: dict[str, Condition] = {}
         self._storage = storage
+        self._scaling_pool = scaling_pool
+        self._scaling: dict[tuple[str, int, int], Condition] = {}
 
     async def get_manifest(self, node: Node, max_size: int = 0) -> list[ImageDict]:
         manifest = self._storage.get_cache_or_none(node.id, max_size)
@@ -60,6 +88,70 @@ class UnpackEngine:
 
     def clear_cache(self):
         self._storage.clear_cache()
+
+    async def prepare_image_for_delivery(
+        self, node_id: str, image_index: int, max_size: int
+    ) -> None:
+        """Prepare an image for delivery to clients.
+
+        Ensures the image at the specified index is ready to be served,
+        performing any necessary transformations (scaling, format conversion, etc.).
+
+        Args:
+            node_id: The node containing the image
+            image_index: Index of the image in the manifest
+            max_size: Maximum dimension constraint (0 = no constraint)
+
+        Note:
+            This method coordinates concurrent requests using SingleFlight.
+            Must be called after get_manifest() to ensure manifest is cached.
+        """
+        # Get cached manifest
+        manifest = self._storage.get_cache_or_none(node_id, max_size)
+        if not manifest or image_index >= len(manifest):
+            return
+
+        image_dict = manifest[image_index]
+
+        # Fast path: Check if already scaled (no lock needed)
+        if image_dict.get("scaled", True):
+            return
+
+        key = (node_id, image_index, max_size)
+
+        # Check if already scaling
+        if key in self._scaling:
+            lock = self._scaling[key]
+            await self._wait_for_scaling_result(lock)
+            return  # After waking up, scaled flag should be True
+
+        # Start scaling
+        lock = Condition()
+        self._scaling[key] = lock
+        await self._scale_image(key, image_dict, max_size)
+
+    async def _wait_for_scaling_result(self, lock: Condition) -> None:
+        """Wait for another request to finish scaling."""
+        async with lock:
+            await lock.wait()
+        # When we wake up, the scaled flag is already True (updated in-place)
+
+    async def _scale_image(
+        self, key: tuple[str, int, int], image_dict: dict, max_size: int
+    ) -> None:
+        """Do the actual scaling work."""
+        lock = self._scaling[key]
+        try:
+            image_path = Path(image_dict["id"])
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                self._scaling_pool, _resize_image, image_path, max_size
+            )
+            image_dict["scaled"] = True
+        finally:
+            del self._scaling[key]  # Delete immediately (no periodic cleanup)
+            async with lock:
+                lock.notify_all()  # Wake all waiting requests
 
     async def _unpack(self, node: Node, max_size: int) -> list[ImageDict]:
         lock = self._unpacking[node.id]
@@ -117,7 +209,7 @@ class UnpackEngine:
     async def _scan_local(self, node_id: str, max_size: int) -> list[ImageDict]:
         parent_node = await self._drive.get_node_by_id(node_id)
 
-        # First pass: collect all image files
+        # Collect all image files
         files_to_process: list[tuple[Path, str]] = []
         top = self._storage.get_path(node_id, max_size)
         for dirpath, dirnames, filenames in top.walk():
@@ -136,45 +228,40 @@ class UnpackEngine:
         if not files_to_process:
             return []
 
-        # Process images in parallel using process pool
-        loop = asyncio.get_event_loop()
-        results: list[tuple[int, Path, str, int, int]] = []
+        # Build manifest with calculated dimensions (no actual scaling yet)
+        rv: list[ImageDict] = []
+        for path, type_ in files_to_process:
+            try:
+                # Get original dimensions using fast method (no PIL loading)
+                image_info = get_image_info(path)
+                original_width = image_info.width
+                original_height = image_info.height
 
-        with ProcessPoolExecutor() as executor:
-            # Submit all tasks using enumerate for index tracking
-            tasks = [
-                loop.run_in_executor(
-                    executor, _resize_image_with_index, idx, path, max_size
+                # Calculate target dimensions
+                target_width, target_height = _calculate_scaled_dimensions(
+                    original_width, original_height, max_size
                 )
-                for idx, (path, type_) in enumerate(files_to_process)
-            ]
 
-            # Collect results as they complete
-            for completed_task in as_completed(tasks):
-                try:
-                    idx, width, height = await completed_task
-                    # Get the corresponding path and type from the original list
-                    path, type_ = files_to_process[idx]
-                    results.append((idx, path, type_, width, height))
-                except Exception as e:
-                    _L.exception(f"failed to process image: {e}")
+                # Determine if scaling is needed
+                needs_scaling = max_size > 0 and (
+                    original_width > max_size or original_height > max_size
+                )
 
-        # Sort by index to preserve order
-        results.sort(key=lambda x: x[0])
+                rv.append(
+                    {
+                        "id": str(path),
+                        "type": type_,
+                        "size": path.stat().st_size,
+                        "etag": parent_node.hash,
+                        "mtime": parent_node.mtime,
+                        "width": target_width,
+                        "height": target_height,
+                        "scaled": not needs_scaling,  # True if no scaling needed
+                    }
+                )
+            except Exception as e:
+                _L.exception(f"failed to process image {path}: {e}")
 
-        # Build final result list using list comprehension
-        rv: list[ImageDict] = [
-            {
-                "id": str(path),
-                "type": type_,
-                "size": path.stat().st_size,
-                "etag": parent_node.hash,
-                "mtime": parent_node.mtime,
-                "width": width,
-                "height": height,
-            }
-            for idx, path, type_, width, height in results
-        ]
         return rv
 
     async def _unpack_remote(self, node: Node) -> list[ImageDict]:
@@ -202,6 +289,7 @@ class UnpackEngine:
                         "mtime": f.mtime,
                         "width": f.width,
                         "height": f.height,
+                        "scaled": True,  # Remote images don't need scaling
                     }
                 )
         return rv

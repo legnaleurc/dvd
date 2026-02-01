@@ -46,3 +46,4 @@ class ImageDict(TypedDict):
     id: str
     etag: str
     mtime: datetime
+    scaled: bool

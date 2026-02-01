@@ -282,6 +282,10 @@ class NodeImageView(NodeObjectMixin, View):
             )
             return response
 
+        # Ensure image is scaled before serving (for local unpacked files)
+        if not node.is_directory:
+            await ue.prepare_image_for_delivery(node.id, image_id, max_size)
+
         # setup streaming response
         drive = self.request.app[KEY_DRIVE]
         response = StreamResponse(status=200)
