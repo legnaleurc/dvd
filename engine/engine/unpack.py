@@ -1,6 +1,6 @@
 import asyncio
 import re
-from asyncio import Condition, as_completed, create_subprocess_exec
+from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from concurrent.futures import ProcessPoolExecutor
 from contextlib import asynccontextmanager
@@ -14,6 +14,7 @@ from PIL import Image
 from wcpan.drive.cli.lib import get_image_info
 from wcpan.drive.core.types import Drive, Node
 
+from .singleflight import SingleFlight
 from .storage import StorageManager, create_storage_manager
 from .types import ImageDict
 
@@ -64,23 +65,30 @@ class UnpackEngine:
         self._drive = drive
         self._port = port
         self._unpack_path = unpack_path
-        self._unpacking: dict[str, Condition] = {}
+        self._unpacking = SingleFlight[str, list[ImageDict]]()
         self._storage = storage
         self._scaling_pool = scaling_pool
-        self._scaling: dict[tuple[str, int, int], Condition] = {}
+        self._scaling = SingleFlight[tuple[str, int, int], None]()
 
     async def get_manifest(self, node: Node, max_size: int = 0) -> list[ImageDict]:
+        # Check cache (host responsibility)
         manifest = self._storage.get_cache_or_none(node.id, max_size)
         if manifest is not None:
             return manifest
 
-        if node.id in self._unpacking:
-            lock = self._unpacking[node.id]
-            return await self._wait_for_result(lock, node.id, max_size)
+        # Use singleflight for coordination
+        result = await self._unpacking(
+            node.id, lambda: self._unpack_work(node, max_size)
+        )
 
-        lock = Condition()
-        self._unpacking[node.id] = lock
-        return await self._unpack(node, max_size)
+        # If we were a waiter, fetch from cache
+        if result is None:
+            try:
+                return self._storage.get_cache(node.id, max_size)
+            except KeyError:
+                raise UnpackFailedError(f"{node.id} canceled unpack")
+
+        return result
 
     @property
     def cache(self):
@@ -117,73 +125,33 @@ class UnpackEngine:
         if image_dict.get("scaled", True):
             return
 
+        # Use singleflight for coordination
         key = (node_id, image_index, max_size)
+        await self._scaling(key, lambda: self._scale_work(image_dict, max_size))
+        # After waking up, scaled flag is True (in-place mutation by first caller)
 
-        # Check if already scaling
-        if key in self._scaling:
-            lock = self._scaling[key]
-            await self._wait_for_scaling_result(lock)
-            return  # After waking up, scaled flag should be True
-
-        # Start scaling
-        lock = Condition()
-        self._scaling[key] = lock
-        await self._scale_image(key, image_dict, max_size)
-
-    async def _wait_for_scaling_result(self, lock: Condition) -> None:
-        """Wait for another request to finish scaling."""
-        async with lock:
-            await lock.wait()
-        # When we wake up, the scaled flag is already True (updated in-place)
-
-    async def _scale_image(
-        self, key: tuple[str, int, int], image_dict: dict, max_size: int
-    ) -> None:
+    async def _scale_work(self, image_dict: dict, max_size: int) -> None:
         """Do the actual scaling work."""
-        lock = self._scaling[key]
-        try:
-            image_path = Path(image_dict["id"])
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(
-                self._scaling_pool, _resize_image, image_path, max_size
-            )
-            image_dict["scaled"] = True
-        finally:
-            del self._scaling[key]  # Delete immediately (no periodic cleanup)
-            async with lock:
-                lock.notify_all()  # Wake all waiting requests
+        image_path = Path(image_dict["id"])
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(
+            self._scaling_pool, _resize_image, image_path, max_size
+        )
+        image_dict["scaled"] = True  # Host manages cache via in-place mutation
 
-    async def _unpack(self, node: Node, max_size: int) -> list[ImageDict]:
-        lock = self._unpacking[node.id]
+    async def _unpack_work(self, node: Node, max_size: int) -> list[ImageDict]:
         try:
             if node.is_directory:
                 manifest = await self._unpack_remote(node)
             else:
                 manifest = await self._unpack_local(node.id, max_size)
-            self._storage.set_cache(node.id, max_size, manifest)
+            self._storage.set_cache(node.id, max_size, manifest)  # Host manages cache
             return manifest
         except UnpackFailedError:
             raise
         except Exception as e:
             _L.exception("unpack failed, abort")
             raise UnpackFailedError(str(e)) from e
-        finally:
-            del self._unpacking[node.id]
-            async with lock:
-                lock.notify_all()
-
-    async def _wait_for_result(
-        self,
-        lock: Condition,
-        node_id: str,
-        max_size: int,
-    ) -> list[ImageDict]:
-        async with lock:
-            await lock.wait()
-        try:
-            return self._storage.get_cache(node_id, max_size)
-        except KeyError:
-            raise UnpackFailedError(f"{node_id} canceled unpack")
 
     async def _unpack_local(self, node_id: str, max_size: int) -> list[ImageDict]:
         cmd = [

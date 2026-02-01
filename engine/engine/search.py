@@ -1,6 +1,6 @@
 import itertools
 import re
-from asyncio import Condition, as_completed
+from asyncio import as_completed
 from collections.abc import AsyncIterator, Callable, Iterator
 from dataclasses import asdict, dataclass
 from logging import getLogger
@@ -10,6 +10,7 @@ from typing import cast
 from wcpan.drive.core.types import Drive, Node
 
 from .lib import dict_from_node
+from .singleflight import SingleFlight
 from .types import SearchNodeDict
 
 
@@ -58,7 +59,7 @@ class SearchEngine(object):
         # NOTE only takes a reference, not owning
         self._drive = drive
         self._cache: dict[SearchParam, list[SearchNodeDict]] = {}
-        self._searching: dict[SearchParam, Condition] = {}
+        self._searching = SingleFlight[SearchParam, list[SearchNodeDict]]()
         self._history: dict[SearchParam, None] = {}
 
     @property
@@ -81,21 +82,25 @@ class SearchEngine(object):
 
         self._update_history(param)
 
+        # Check cache (host responsibility)
         nodes = self._cache.get(param, None)
         if nodes is not None:
             return nodes
 
-        if param in self._searching:
-            lock = self._searching[param]
-            return await self._wait_for_result(lock, param)
+        # Use singleflight for coordination
+        result = await self._searching(param, lambda: self._search_work(param))
 
-        return await self._guarded_search(param)
+        # If we were a waiter, fetch from cache
+        if result is None:
+            try:
+                return self._cache[param]
+            except KeyError:
+                raise SearchFailedError(f"{param} canceled search")
+
+        return result
 
     async def clear_cache(self) -> None:
-        while len(self._searching) > 0:
-            _pattern, lock = next(iter(self._searching.items()))
-            async with lock:
-                await lock.wait()
+        await self._searching.wait_all()
         self._cache: dict[SearchParam, list[SearchNodeDict]] = {}
 
     def invalidate_cache_by_node(self, node: Node) -> None:
@@ -112,34 +117,18 @@ class SearchEngine(object):
         if param in self._cache:
             del self._cache[param]
 
-    async def _wait_for_result(
-        self, lock: Condition, param: SearchParam
-    ) -> list[SearchNodeDict]:
-        async with lock:
-            await lock.wait()
-        try:
-            return self._cache[param]
-        except KeyError:
-            raise SearchFailedError(f"{param} canceled search")
-
-    async def _guarded_search(self, param: SearchParam) -> list[SearchNodeDict]:
-        lock = Condition()
-        self._searching[param] = lock
+    async def _search_work(self, param: SearchParam) -> list[SearchNodeDict]:
         try:
             nodes = await self._pure_search(param)
             g = (_ for _ in nodes if not _.is_trashed)
             g = as_completed(self._make_item(_) for _ in g)
             results = [await _ for _ in g]
             nodes = sorted(results, key=lambda _: (_["parent_path"], _["name"]))
-            self._cache[param] = nodes
+            self._cache[param] = nodes  # Host manages cache
             return nodes
         except Exception as e:
             _L.exception("search failed, abort")
             raise SearchFailedError(str(e))
-        finally:
-            del self._searching[param]
-            async with lock:
-                lock.notify_all()
 
     async def _make_item(self, node: Node) -> SearchNodeDict:
         assert node.parent_id
