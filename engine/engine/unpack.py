@@ -136,7 +136,7 @@ class UnpackEngine:
                 loop.run_in_executor(
                     executor, resize_image_with_index, idx, path, max_size
                 )
-                for idx, (path, type_) in enumerate(files_to_process)
+                for idx, (path, _type) in enumerate(files_to_process)
             ]
 
             # Collect results as they complete
@@ -163,7 +163,7 @@ class UnpackEngine:
                 "width": width,
                 "height": height,
             }
-            for idx, path, type_, width, height in results
+            for _idx, path, type_, width, height in results
         ]
         return rv
 
