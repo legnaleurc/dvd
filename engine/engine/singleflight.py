@@ -11,34 +11,45 @@ class SingleFlight[K: Hashable, R]:
 
     Usage:
         sf = SingleFlight[str, list[dict]]()
-        result = await sf(key, work_fn)
+        result = await sf(
+            key,
+            on_first=lambda: do_work_and_cache(),
+            on_middle=lambda: fetch_from_cache()
+        )
     """
 
     def __init__(self):
         """Create a new SingleFlight coordinator."""
         self._in_progress: dict[K, Condition] = {}
 
-    async def __call__(self, key: K, work_fn: Callable[[], Awaitable[R]]) -> R | None:
+    async def __call__(
+        self,
+        key: K,
+        *,
+        on_first: Callable[[], Awaitable[R]],
+        on_middle: Callable[[], Awaitable[R]],
+    ) -> R:
         """
-        Execute work_fn for the given key, or wait if already in progress.
+        Execute on_first for the first caller, or call on_middle for waiters.
 
         Args:
             key: Unique identifier for this work (used for deduplication)
-            work_fn: Async function to execute (takes no args, returns R)
+            on_first: Async function for first caller (typically: do work + cache)
+            on_middle: Async function for waiting callers (typically: fetch from cache)
 
         Returns:
-            Result of work_fn if first caller, None if waiter (fetch from your cache)
+            Result from either on_first or on_middle (always returns R, never None)
         """
         # Check if work is already in progress
         if key in self._in_progress:
             lock = self._in_progress[key]
             await self._wait(lock)
-            return None  # Caller must fetch from their own cache
+            return await on_middle()  # Waiting caller: run on_middle callback
 
-        # Start the work
+        # First caller: start the work
         lock = Condition()
         self._in_progress[key] = lock
-        return await self._do_work(key, lock, work_fn)
+        return await self._do_work(key, lock, on_first)
 
     async def _wait(self, lock: Condition) -> None:
         """Wait for another coroutine to complete the work."""

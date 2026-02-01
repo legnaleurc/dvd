@@ -48,18 +48,18 @@ class UnpackEngine:
             return manifest
 
         # Use singleflight to coordinate concurrent unpacking
-        result = await self._singleflight(
-            node.id, lambda: self._do_unpack(node, max_size)
-        )
-
-        if result is not None:
-            # First caller: cache and return result
+        async def on_first():
+            result = await self._do_unpack(node, max_size)
             self._storage.set_cache(node.id, max_size, result)
             return result
 
-        # Waiter: fetch from cache
-        try:
+        async def on_middle():
             return self._storage.get_cache(node.id, max_size)
+
+        try:
+            return await self._singleflight(
+                node.id, on_first=on_first, on_middle=on_middle
+            )
         except KeyError:
             raise UnpackFailedError(f"{node.id} unpack was canceled")
 

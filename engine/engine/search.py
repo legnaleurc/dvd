@@ -87,16 +87,18 @@ class SearchEngine(object):
             return nodes
 
         # Use singleflight to coordinate concurrent searches
-        result = await self._singleflight(param, lambda: self._do_search(param))
-
-        if result is not None:
-            # First caller: cache and return result
+        async def on_first():
+            result = await self._do_search(param)
             self._cache[param] = result
             return result
 
-        # Waiter: fetch from cache
-        try:
+        async def on_middle():
             return self._cache[param]
+
+        try:
+            return await self._singleflight(
+                param, on_first=on_first, on_middle=on_middle
+            )
         except KeyError:
             raise SearchFailedError(f"{param} search was canceled")
 
