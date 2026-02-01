@@ -1,8 +1,6 @@
-import asyncio
 import re
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
-from concurrent.futures import ProcessPoolExecutor
 from contextlib import asynccontextmanager
 from itertools import zip_longest
 from logging import getLogger
@@ -10,10 +8,14 @@ from mimetypes import guess_type
 from pathlib import Path
 from typing import Self
 
-from PIL import Image
 from wcpan.drive.cli.lib import get_image_info
 from wcpan.drive.core.types import Drive, Node
 
+from .scaling import (
+    ImageScalingService,
+    calculate_scaled_dimensions,
+    create_scaling_service,
+)
 from .singleflight import SingleFlight
 from .storage import StorageManager, create_storage_manager
 from .types import ImageDict
@@ -26,31 +28,13 @@ class UnpackFailedError(Exception):
     pass
 
 
-def _calculate_scaled_dimensions(
-    width: int, height: int, max_size: int
-) -> tuple[int, int]:
-    """Calculate target dimensions after scaling, without actually scaling the image."""
-    if max_size == 0 or (width <= max_size and height <= max_size):
-        return width, height
-
-    if width > height:
-        new_width = max_size
-        new_height = round(height * max_size / width)
-    elif width < height:
-        new_height = max_size
-        new_width = round(width * max_size / height)
-    else:
-        new_width = max_size
-        new_height = max_size
-
-    return new_width, new_height
-
-
 @asynccontextmanager
 async def create_unpack_engine(drive: Drive, port: int, unpack_path: str):
-    async with create_storage_manager() as storage:
-        with ProcessPoolExecutor() as scaling_pool:
-            yield UnpackEngine(drive, port, unpack_path, storage, scaling_pool)
+    async with (
+        create_storage_manager() as storage,
+        create_scaling_service() as scaling_service,
+    ):
+        yield UnpackEngine(drive, port, unpack_path, storage, scaling_service)
 
 
 class UnpackEngine:
@@ -60,15 +44,14 @@ class UnpackEngine:
         port: int,
         unpack_path: str,
         storage: StorageManager,
-        scaling_pool: ProcessPoolExecutor,
+        scaling_service: ImageScalingService,
     ) -> None:
         self._drive = drive
         self._port = port
         self._unpack_path = unpack_path
         self._unpacking = SingleFlight[str, list[ImageDict]]()
         self._storage = storage
-        self._scaling_pool = scaling_pool
-        self._scaling = SingleFlight[tuple[str, int, int], None]()
+        self._scaling_service = scaling_service
 
     async def get_manifest(self, node: Node, max_size: int = 0) -> list[ImageDict]:
         # Check cache (host responsibility)
@@ -120,24 +103,8 @@ class UnpackEngine:
             return
 
         image_dict = manifest[image_index]
-
-        # Fast path: Check if already scaled (no lock needed)
-        if image_dict.get("scaled", True):
-            return
-
-        # Use singleflight for coordination
         key = (node_id, image_index, max_size)
-        await self._scaling(key, lambda: self._scale_work(image_dict, max_size))
-        # After waking up, scaled flag is True (in-place mutation by first caller)
-
-    async def _scale_work(self, image_dict: dict, max_size: int) -> None:
-        """Do the actual scaling work."""
-        image_path = Path(image_dict["id"])
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(
-            self._scaling_pool, _resize_image, image_path, max_size
-        )
-        image_dict["scaled"] = True  # Host manages cache via in-place mutation
+        await self._scaling_service.ensure_scaled(image_dict, key)
 
     async def _unpack_work(self, node: Node, max_size: int) -> list[ImageDict]:
         try:
@@ -206,7 +173,7 @@ class UnpackEngine:
                 original_height = image_info.height
 
                 # Calculate target dimensions
-                target_width, target_height = _calculate_scaled_dimensions(
+                target_width, target_height = calculate_scaled_dimensions(
                     original_width, original_height, max_size
                 )
 
@@ -289,80 +256,3 @@ class FuzzyName:
 
 def _get_node_url(port: int, node_id: str) -> str:
     return f"http://localhost:{port}/api/v1/nodes/{node_id}/stream"
-
-
-def _resize_image(input_path: Path, max_size: int) -> tuple[int, int]:
-    """
-    Resize image in-place if dimensions exceed max_size.
-    Maintains aspect ratio, scaling so both width and height are <= max_size.
-
-    Args:
-        input_path: Path to the image file
-        max_size: Maximum dimension (0 means no resize)
-
-    Returns:
-        Tuple of (width, height) after resize
-
-    Raises:
-        Exception if image processing fails
-    """
-    # Use get_image_info for lighter processing to check dimensions first
-    image_info = get_image_info(input_path)
-    original_width = image_info.width
-    original_height = image_info.height
-
-    # No resizing needed
-    if max_size == 0 or (original_width <= max_size and original_height <= max_size):
-        return original_width, original_height
-
-    # Calculate new dimensions maintaining aspect ratio
-    # Scale so max(width, height) = max_size
-    if original_width > original_height:
-        new_width = max_size
-        new_height = round(original_height * max_size / original_width)
-    elif original_width < original_height:
-        new_height = max_size
-        new_width = round(original_width * max_size / original_height)
-    else:
-        new_width = max_size
-        new_height = max_size
-
-    # Now open with PIL for actual resizing
-    with Image.open(input_path) as img:
-        # Resize using high-quality Lanczos resampling
-        resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-
-        # Determine save parameters based on format
-        save_kwargs = {}
-        if img.format == "JPEG":
-            save_kwargs["quality"] = 85
-            save_kwargs["optimize"] = True
-        elif img.format == "PNG":
-            save_kwargs["optimize"] = True
-
-        # Save in-place, preserving format
-        resized_img.save(input_path, format=img.format, **save_kwargs)
-
-    _L.info(
-        f"resized image: {input_path.name}, {original_width}x{original_height} -> {new_width}x{new_height}"
-    )
-
-    return new_width, new_height
-
-
-def _resize_image_with_index(
-    idx: int, input_path: Path, max_size: int
-) -> tuple[int, int, int]:
-    """
-    Wrapper function to resize image with index for preserving order.
-
-    Args:
-        idx: Index to preserve file order
-        input_path: Path to the image file
-        max_size: Maximum dimension (0 means no resize)
-
-    Returns:
-        Tuple of (idx, width, height) after resize
-    """
-    width, height = _resize_image(input_path, max_size)
-    return idx, width, height
