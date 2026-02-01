@@ -1,6 +1,6 @@
 import asyncio
 import re
-from asyncio import Condition, as_completed, create_subprocess_exec
+from asyncio import as_completed, create_subprocess_exec
 from asyncio.subprocess import PIPE
 from concurrent.futures import ProcessPoolExecutor
 from contextlib import asynccontextmanager
@@ -14,6 +14,7 @@ from PIL import Image
 from wcpan.drive.cli.lib import get_image_info
 from wcpan.drive.core.types import Drive, Node
 
+from .singleflight import SingleFlight
 from .storage import StorageManager, create_storage_manager
 from .types import ImageDict
 
@@ -38,21 +39,30 @@ class UnpackEngine:
         self._drive = drive
         self._port = port
         self._unpack_path = unpack_path
-        self._unpacking: dict[str, Condition] = {}
+        self._singleflight = SingleFlight[str, list[ImageDict]]()
         self._storage = storage
 
     async def get_manifest(self, node: Node, max_size: int = 0) -> list[ImageDict]:
+        # Fast path: check cache first
         manifest = self._storage.get_cache_or_none(node.id, max_size)
         if manifest is not None:
             return manifest
 
-        if node.id in self._unpacking:
-            lock = self._unpacking[node.id]
-            return await self._wait_for_result(lock, node.id, max_size)
+        # Use singleflight to coordinate concurrent unpacking
+        result = await self._singleflight(
+            node.id, lambda: self._do_unpack(node, max_size)
+        )
 
-        lock = Condition()
-        self._unpacking[node.id] = lock
-        return await self._unpack(node, max_size)
+        if result is not None:
+            # First caller: cache and return result
+            self._storage.set_cache(node.id, max_size, result)
+            return result
+
+        # Waiter: fetch from cache
+        try:
+            return self._storage.get_cache(node.id, max_size)
+        except KeyError:
+            raise UnpackFailedError(f"{node.id} unpack was canceled")
 
     @property
     def cache(self):
@@ -61,37 +71,18 @@ class UnpackEngine:
     def clear_cache(self):
         self._storage.clear_cache()
 
-    async def _unpack(self, node: Node, max_size: int) -> list[ImageDict]:
-        lock = self._unpacking[node.id]
+    async def _do_unpack(self, node: Node, max_size: int) -> list[ImageDict]:
         try:
             if node.is_directory:
                 manifest = await self._unpack_remote(node)
             else:
                 manifest = await self._unpack_local(node.id, max_size)
-            self._storage.set_cache(node.id, max_size, manifest)
             return manifest
         except UnpackFailedError:
             raise
         except Exception as e:
             _L.exception("unpack failed, abort")
             raise UnpackFailedError(str(e)) from e
-        finally:
-            del self._unpacking[node.id]
-            async with lock:
-                lock.notify_all()
-
-    async def _wait_for_result(
-        self,
-        lock: Condition,
-        node_id: str,
-        max_size: int,
-    ) -> list[ImageDict]:
-        async with lock:
-            await lock.wait()
-        try:
-            return self._storage.get_cache(node_id, max_size)
-        except KeyError:
-            raise UnpackFailedError(f"{node_id} canceled unpack")
 
     async def _unpack_local(self, node_id: str, max_size: int) -> list[ImageDict]:
         cmd = [
