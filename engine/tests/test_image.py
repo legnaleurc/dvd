@@ -166,7 +166,7 @@ class TestResizeImageWithIndex(TestCase):
         """Simulate parallel processing with multiple images."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
-            results = []
+            results: list[tuple[int, int, int]] = []
 
             for i in range(3):
                 test_image = tmp_path / f"test_{i}.jpg"

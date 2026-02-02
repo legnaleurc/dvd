@@ -8,7 +8,7 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
     async def test_concurrent_same_key(self):
         """First does work, others wait. All get result from their callbacks."""
         work_count = 0
-        cache = {}
+        cache: dict[str, str] = {}
 
         async def on_first():
             nonlocal work_count
@@ -35,10 +35,10 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
 
     async def test_concurrent_different_keys(self):
         """Different keys execute concurrently."""
-        work_counts = {}
-        cache = {}
+        work_counts: dict[str, int] = {}
+        cache: dict[str, str] = {}
 
-        async def make_work(key: str):
+        def make_work(key: str):
             async def on_first():
                 work_counts[key] = work_counts.get(key, 0) + 1
                 await asyncio.sleep(0.05)
@@ -48,24 +48,30 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
 
             return on_first
 
+        def make_middle(key: str):
+            async def on_middle():
+                return cache[key]
+
+            return on_middle
+
         sf = SingleFlight[str, str]()
 
         # Start concurrent calls with different keys
         results = await asyncio.gather(
             sf(
                 "key1",
-                on_first=await make_work("key1"),
-                on_middle=lambda: cache["key1"],
+                on_first=make_work("key1"),
+                on_middle=make_middle("key1"),
             ),
             sf(
                 "key2",
-                on_first=await make_work("key2"),
-                on_middle=lambda: cache["key2"],
+                on_first=make_work("key2"),
+                on_middle=make_middle("key2"),
             ),
             sf(
                 "key3",
-                on_first=await make_work("key3"),
-                on_middle=lambda: cache["key3"],
+                on_first=make_work("key3"),
+                on_middle=make_middle("key3"),
             ),
         )
 
@@ -76,7 +82,7 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
     async def test_error_propagation(self):
         """Errors propagate to first caller, waiters may also fail in on_middle."""
         work_count = 0
-        cache = {}
+        cache: dict[str, str] = {}
 
         async def failing_work():
             nonlocal work_count
@@ -84,17 +90,19 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
             await asyncio.sleep(0.05)
             raise ValueError("work failed")
 
+        async def on_middle():
+            return cache["key1"]
+
         sf = SingleFlight[str, str]()
 
         # Start multiple concurrent calls
         tasks = [
-            sf("key1", on_first=failing_work, on_middle=lambda: cache["key1"])
-            for _ in range(5)
+            sf("key1", on_first=failing_work, on_middle=on_middle) for _ in range(5)
         ]
 
-        results = []
-        value_errors = []
-        key_errors = []
+        results: list[str] = []
+        value_errors: list[str] = []
+        key_errors: list[str] = []
         for task in asyncio.as_completed(tasks):
             try:
                 result = await task
@@ -117,7 +125,7 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
     async def test_sequential_same_key(self):
         """Sequential calls with same key each do work."""
         work_count = 0
-        cache = {}
+        cache: dict[str, str] = {}
 
         async def work():
             nonlocal work_count
@@ -126,28 +134,31 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
             cache["key1"] = result
             return result
 
+        async def on_middle():
+            return cache["key1"]
+
         sf = SingleFlight[str, str]()
 
         # First call
-        result1 = await sf("key1", on_first=work, on_middle=lambda: cache["key1"])
+        result1 = await sf("key1", on_first=work, on_middle=on_middle)
         self.assertEqual(result1, "result-1")
         self.assertEqual(work_count, 1)
 
         # Second call (not concurrent, should do work again)
-        result2 = await sf("key1", on_first=work, on_middle=lambda: cache["key1"])
+        result2 = await sf("key1", on_first=work, on_middle=on_middle)
         self.assertEqual(result2, "result-2")
         self.assertEqual(work_count, 2)
 
     async def test_tuple_keys(self):
         """Supports tuple keys for multi-parameter deduplication."""
-        work_count = {}
-        cache = {}
+        work_count: dict[tuple[str, int], int] = {}
+        cache: dict[tuple[str, int], str] = {}
 
-        async def work(a: str, b: int):
-            key = (a, b)
+        async def on_first():
+            key = ("foo", 42)
             work_count[key] = work_count.get(key, 0) + 1
             await asyncio.sleep(0.05)
-            result = f"{a}-{b}"
+            result = "foo-42"
             cache[key] = result
             return result
 
@@ -158,10 +169,7 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
 
         # Concurrent calls with same tuple key
         results = await asyncio.gather(
-            *[
-                sf(("foo", 42), on_first=lambda: work("foo", 42), on_middle=on_middle)
-                for _ in range(5)
-            ]
+            *[sf(("foo", 42), on_first=on_first, on_middle=on_middle) for _ in range(5)]
         )
 
         # All callers get the same result
@@ -202,7 +210,7 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
 
     async def test_cleanup_after_work(self):
         """Lock is cleaned up after work completes."""
-        cache = {}
+        cache: dict[str, str] = {}
 
         async def work():
             await asyncio.sleep(0.05)
@@ -210,13 +218,16 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
             cache["key1"] = result
             return result
 
+        async def on_middle():
+            return cache["key1"]
+
         sf = SingleFlight[str, str]()
 
         # Do work
-        await sf("key1", on_first=work, on_middle=lambda: cache["key1"])
+        await sf("key1", on_first=work, on_middle=on_middle)
 
         # Lock should be removed
-        self.assertNotIn("key1", sf._in_progress)
+        self.assertNotIn("key1", sf)
 
         # Next call should do work again (not wait on stale lock)
         work_count = 0
@@ -228,26 +239,29 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
             cache["key1"] = result
             return result
 
-        result = await sf("key1", on_first=work2, on_middle=lambda: cache["key1"])
+        result = await sf("key1", on_first=work2, on_middle=on_middle)
         self.assertEqual(result, "result2")
         self.assertEqual(work_count, 1)
 
     async def test_cleanup_after_error(self):
         """Lock is cleaned up even when work raises exception."""
-        cache = {}
+        cache: dict[str, str] = {}
 
         async def failing_work():
             await asyncio.sleep(0.05)
             raise ValueError("error")
 
+        async def on_middle():
+            return cache["key1"]
+
         sf = SingleFlight[str, str]()
 
         # Do work that fails
         with self.assertRaises(ValueError):
-            await sf("key1", on_first=failing_work, on_middle=lambda: cache["key1"])
+            await sf("key1", on_first=failing_work, on_middle=on_middle)
 
         # Lock should be removed
-        self.assertNotIn("key1", sf._in_progress)
+        self.assertNotIn("key1", sf)
 
         # Next call should do work again
         work_count = 0
@@ -259,13 +273,13 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
             cache["key1"] = result
             return result
 
-        result = await sf("key1", on_first=work2, on_middle=lambda: cache["key1"])
+        result = await sf("key1", on_first=work2, on_middle=on_middle)
         self.assertEqual(result, "result")
         self.assertEqual(work_count, 1)
 
     async def test_contains(self):
         """Test __contains__ for checking in-progress operations."""
-        cache = {}
+        cache: dict[str, str] = {}
 
         async def slow_work():
             await asyncio.sleep(0.1)
@@ -273,12 +287,13 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
             cache["key1"] = result
             return result
 
+        async def on_middle():
+            return cache["key1"]
+
         sf = SingleFlight[str, str]()
 
         # Start work in background
-        task = asyncio.create_task(
-            sf("key1", on_first=slow_work, on_middle=lambda: cache["key1"])
-        )
+        task = asyncio.create_task(sf("key1", on_first=slow_work, on_middle=on_middle))
         await asyncio.sleep(0.01)  # Let it start
 
         # Check it's in progress
@@ -293,27 +308,36 @@ class TestSingleFlight(IsolatedAsyncioTestCase):
 
     async def test_wait_all(self):
         """Test wait_all waits for all operations to complete."""
-        completed = []
-        cache = {}
+        completed: list[str] = []
+        cache: dict[str, str] = {}
 
-        async def work(key: str):
-            await asyncio.sleep(0.05)
-            completed.append(key)
-            result = f"result-{key}"
-            cache[key] = result
-            return result
+        def make_on_first(key: str):
+            async def on_first():
+                await asyncio.sleep(0.05)
+                completed.append(key)
+                result = f"result-{key}"
+                cache[key] = result
+                return result
+
+            return on_first
+
+        def make_on_middle(key: str):
+            async def on_middle():
+                return cache[key]
+
+            return on_middle
 
         sf = SingleFlight[str, str]()
 
         # Start multiple operations
         asyncio.create_task(
-            sf("key1", on_first=lambda: work("key1"), on_middle=lambda: cache["key1"])
+            sf("key1", on_first=make_on_first("key1"), on_middle=make_on_middle("key1"))
         )
         asyncio.create_task(
-            sf("key2", on_first=lambda: work("key2"), on_middle=lambda: cache["key2"])
+            sf("key2", on_first=make_on_first("key2"), on_middle=make_on_middle("key2"))
         )
         asyncio.create_task(
-            sf("key3", on_first=lambda: work("key3"), on_middle=lambda: cache["key3"])
+            sf("key3", on_first=make_on_first("key3"), on_middle=make_on_middle("key3"))
         )
         await asyncio.sleep(0.01)  # Let them start
 

@@ -1,8 +1,8 @@
 from asyncio import Condition
-from collections.abc import Awaitable, Callable, Hashable
+from collections.abc import Awaitable, Callable, Container, Hashable
 
 
-class SingleFlight[K: Hashable, R]:
+class SingleFlight[K: Hashable, R](Container[K]):
     """
     Coordinates concurrent operations so only one operation per key executes,
     while others wait. Does NOT handle caching - that's the caller's responsibility.
@@ -67,7 +67,7 @@ class SingleFlight[K: Hashable, R]:
             async with lock:
                 lock.notify_all()
 
-    def __contains__(self, key: K) -> bool:
+    def __contains__(self, key: object) -> bool:
         """Check if work is in progress for the given key."""
         return key in self._in_progress
 
