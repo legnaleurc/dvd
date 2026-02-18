@@ -10,16 +10,14 @@
   export let id: string;
 
   let popoverEl: HTMLDivElement | null = null;
-  let triggerEl: HTMLElement | null = null;
 
   onMount(() => {
     // Find the trigger button and set up anchor relationship
     const trigger = popoverEl?.previousElementSibling;
     if (trigger instanceof HTMLElement) {
-      triggerEl = trigger;
-      // Set anchor name on trigger for CSS Anchor Positioning
-      // Use setProperty() since anchorName is not yet in TypeScript's DOM types
+      // Use setProperty() since these are newer CSS properties not in TypeScript's DOM types
       trigger.style.setProperty("anchor-name", `--menu-trigger-${id}`);
+      popoverEl?.style.setProperty("position-anchor", `--menu-trigger-${id}`);
     }
   });
 </script>
@@ -32,7 +30,6 @@
   role="menu"
   tabindex="-1"
   class="popover-menu bg-pale-800"
-  style:position-anchor={triggerEl ? `--menu-trigger-${id}` : undefined}
 >
   <slot name="items" />
 </div>
@@ -50,18 +47,16 @@
     border: none;
     margin: 0;
 
-    /* Anchor positioning: try bottom-right first, fallback to other positions */
+    /* Base position: below the trigger, left-aligned (via CSS Anchor Positioning) */
     position: absolute;
+    top: anchor(bottom);
+    left: anchor(left);
+
+    /* If the base position overflows, try these alternatives */
     position-try-fallbacks:
-      --bottom-right,
       --bottom-left,
       --top-right,
       --top-left;
-  }
-
-  @position-try --bottom-right {
-    top: anchor(bottom);
-    left: anchor(left);
   }
 
   @position-try --bottom-left {
@@ -82,7 +77,11 @@
   /* Fallback for browsers without CSS Anchor Positioning support */
   @supports not (anchor-name: --foo) {
     .popover-menu {
-      /* Center on screen as fallback */
+      /* Center in viewport: position:absolute + all edges 0 + margin:auto */
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
       margin: auto;
     }
   }

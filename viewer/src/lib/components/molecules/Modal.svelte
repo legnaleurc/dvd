@@ -56,7 +56,7 @@
   bind:this={dialogEl}
   on:close={handleClose}
   on:click={handleBackdropClick}
-  class="safe-area-inset-0 bg-pale-950"
+  class="bg-pale-950"
 >
   <div class="modal flex flex-col">
     {#if $$slots.title}
