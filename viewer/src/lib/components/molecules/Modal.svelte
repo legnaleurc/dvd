@@ -56,7 +56,7 @@
   bind:this={dialogEl}
   on:close={handleClose}
   on:click={handleBackdropClick}
-  class="safe-area-inset-0 flex flex-col bg-pale-950"
+  class="safe-area-inset-0 bg-pale-950"
 >
   <div class="modal flex flex-col">
     {#if $$slots.title}
@@ -83,6 +83,12 @@
 </dialog>
 
 <style lang="scss">
+  dialog[open] {
+    // flex flex-col — applied only when open so Tailwind doesn't override display:none
+    display: flex;
+    flex-direction: column;
+  }
+
   dialog {
     // Remove default dialog styles
     border: none;
