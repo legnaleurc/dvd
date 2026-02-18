@@ -31,18 +31,24 @@
   popover="auto"
   role="menu"
   tabindex="-1"
-  class="popover-menu safe-area-inset-0 p-3 flex flex-col bg-pale-800"
+  class="popover-menu bg-pale-800"
   style:position-anchor={triggerEl ? `--menu-trigger-${id}` : undefined}
 >
   <slot name="items" />
 </div>
 
 <style>
+  .popover-menu:popover-open {
+    /* flex flex-col p-3 — applied only when open so Tailwind doesn't override display:none */
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem;
+  }
+
   .popover-menu {
     /* Remove default popover styles */
     border: none;
     margin: 0;
-    padding: 0.75rem; /* p-3 */
 
     /* Anchor positioning: try bottom-right first, fallback to other positions */
     position: absolute;
