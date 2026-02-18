@@ -1,114 +1,82 @@
 <script lang="ts">
-  import { onDestroy } from "svelte";
-  import { useBodyScrolling, useMountedStore } from "$atoms/LifeCycle.svelte";
+  import { onMount } from "svelte";
 
   type $$Slots = {
-    trigger: {
-      show: (cursorX: number, cursorY: number) => void;
-    };
-    items: {
-      hide: () => void;
-    };
+    trigger: Record<string, never>;
+    items: Record<string, never>;
   };
 
-  type Range = [number, number];
+  // Unique ID for popover and popovertarget linkage
+  export let id: string;
 
-  const bodyScrolling = useBodyScrolling();
-  const isMounted = useMountedStore();
+  let popoverEl: HTMLDivElement | null = null;
+  let triggerEl: HTMLElement | null = null;
 
-  let rootEl: HTMLDivElement | null = null;
-  let menuEl: HTMLDivElement | null = null;
-  let present: boolean;
-  let cursorX = 0;
-  let cursorY = 0;
-
-  function show(x: number, y: number) {
-    cursorX = x;
-    cursorY = y;
-    present = true;
-  }
-
-  function hide() {
-    present = false;
-    cursorX = 0;
-    cursorY = 0;
-  }
-
-  function adjustPosition() {
-    if (!menuEl || !rootEl) {
-      return;
+  onMount(() => {
+    // Find the trigger button and set up anchor relationship
+    const trigger = popoverEl?.previousElementSibling;
+    if (trigger instanceof HTMLElement) {
+      triggerEl = trigger;
+      // Set anchor name on trigger for CSS Anchor Positioning
+      trigger.style.anchorName = `--menu-trigger-${id}`;
     }
-    const xRange: Range = [0, rootEl.clientWidth];
-    const yRange: Range = [0, rootEl.clientHeight];
-    const boundary = menuEl.getBoundingClientRect();
-
-    // try right-side first
-    if (inRange(cursorX + boundary.width, xRange)) {
-      menuEl.style.left = `${cursorX}px`;
-    } else if (inRange(cursorX - boundary.width, xRange)) {
-      menuEl.style.left = `${cursorX - boundary.width}px`;
-    } else {
-      menuEl.style.left = `${cursorX}px`;
-    }
-    // try bottom-side first
-    if (inRange(cursorY + boundary.height, yRange)) {
-      menuEl.style.top = `${cursorY}px`;
-    } else if (inRange(cursorY - boundary.height, yRange)) {
-      menuEl.style.top = `${cursorY - boundary.height}px`;
-    } else {
-      menuEl.style.top = `${cursorY}px`;
-    }
-
-    menuEl.classList.remove("invisible");
-  }
-
-  function inRange(n: number, range: Range) {
-    return range[0] <= n && n < range[1];
-  }
-
-  // It is possible to unmount without hide(), e.g. the parent was unmounted.
-  // In this case we need to manually cleanup detached elements and global
-  // styles.
-  onDestroy(() => {
-    if (present && rootEl) {
-      // eslint-disable-next-line svelte/no-dom-manipulating
-      rootEl.remove();
-    }
-    bodyScrolling.release();
   });
-
-  $: {
-    if ($isMounted) {
-      if (present) {
-        bodyScrolling.acquire();
-      } else {
-        bodyScrolling.release();
-      }
-    }
-  }
-  $: {
-    if (rootEl && menuEl && present) {
-      document.body.append(rootEl);
-      adjustPosition();
-    }
-  }
 </script>
 
-<slot name="trigger" {show} />
-{#if present}
-  <div
-    role="presentation"
-    class="safe-area-inset-0 fixed overflow-hidden"
-    bind:this={rootEl}
-    on:click|self={hide}
-  >
-    <div
-      role="menu"
-      tabindex="-1"
-      class="absolute invisible p-3 flex flex-col bg-pale-800"
-      bind:this={menuEl}
-    >
-      <slot name="items" {hide} />
-    </div>
-  </div>
-{/if}
+<slot name="trigger" />
+<div
+  bind:this={popoverEl}
+  {id}
+  popover="auto"
+  role="menu"
+  tabindex="-1"
+  class="popover-menu safe-area-inset-0 p-3 flex flex-col bg-pale-800"
+  style:position-anchor={triggerEl ? `--menu-trigger-${id}` : undefined}
+>
+  <slot name="items" />
+</div>
+
+<style lang="scss">
+  .popover-menu {
+    // Remove default popover styles
+    border: none;
+    margin: 0;
+    padding: 0.75rem; // p-3
+
+    // Anchor positioning: try bottom-right first, fallback to other positions
+    position: absolute;
+    position-try-fallbacks:
+      --bottom-right,
+      --bottom-left,
+      --top-right,
+      --top-left;
+  }
+
+  @position-try --bottom-right {
+    top: anchor(bottom);
+    left: anchor(left);
+  }
+
+  @position-try --bottom-left {
+    top: anchor(bottom);
+    right: anchor(right);
+  }
+
+  @position-try --top-right {
+    bottom: anchor(top);
+    left: anchor(left);
+  }
+
+  @position-try --top-left {
+    bottom: anchor(top);
+    right: anchor(right);
+  }
+
+  // Fallback for browsers without CSS Anchor Positioning support
+  @supports not (anchor-name: --foo) {
+    .popover-menu {
+      // Center on screen as fallback
+      margin: auto;
+    }
+  }
+</style>

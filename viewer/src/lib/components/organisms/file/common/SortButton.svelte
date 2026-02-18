@@ -4,8 +4,8 @@
   import SortMenu from "./SortMenu.svelte";
 </script>
 
-<SortMenu let:show>
-  <RoundedButton on:click={(event) => show(event.clientX, event.clientY)}>
+<SortMenu>
+  <RoundedButton popovertarget="sort-menu">
     <Icon name="sort" />
   </RoundedButton>
 </SortMenu>

@@ -9,11 +9,10 @@
     command: string;
   }>;
   type $$Slots = {
-    default: {
-      showMenu: (x: number, y: number) => void;
-    };
+    default: Record<string, never>;
   };
 
+  const MENU_ID = "quick-command-menu";
   const VLC_FOR_WINDOWS = "cmd.exe /c start vlc {url}";
   const VLC_FOR_MACOS = "open -a vlc {url}";
   const VLC_FOR_IOS = "vlc-x-callback://x-callback-url/stream?url={url}";
@@ -25,18 +24,25 @@
   ];
 
   const dispatch = createEventDispatcher();
+
+  function closeMenu() {
+    const menuEl = document.getElementById(MENU_ID);
+    if (menuEl && "hidePopover" in menuEl) {
+      (menuEl as HTMLElement & { hidePopover(): void }).hidePopover();
+    }
+  }
 </script>
 
-<MenuList>
-  <svelte:fragment slot="trigger" let:show>
-    <slot showMenu={show} />
+<MenuList id={MENU_ID}>
+  <svelte:fragment slot="trigger">
+    <slot />
   </svelte:fragment>
-  <svelte:fragment slot="items" let:hide>
+  <svelte:fragment slot="items">
     {#each QUICK_LIST as [command, label], index (index)}
       <MenuItem
         on:click={() => {
           dispatch("command", command);
-          hide();
+          closeMenu();
         }}
       >
         {label}

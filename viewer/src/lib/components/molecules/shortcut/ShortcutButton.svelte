@@ -27,14 +27,8 @@
   }
 </script>
 
-<ShortcutMenu
-  let:showMenu
-  on:shortcut={(event) => moveTarget.set(event.detail)}
->
-  <RoundedButton
-    disabled={isSelectionEmpty}
-    on:click={(e) => showMenu(e.clientX, e.clientY)}
-  >
+<ShortcutMenu on:shortcut={(event) => moveTarget.set(event.detail)}>
+  <RoundedButton disabled={isSelectionEmpty} popovertarget="shortcut-menu">
     <Icon name="drive_file_move" />
   </RoundedButton>
 </ShortcutMenu>

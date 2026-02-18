@@ -5,25 +5,31 @@
   import Icon from "$atoms/Icon.svelte";
 
   type $$Slots = {
-    default: {
-      show: (x: number, y: number) => void;
-    };
+    default: Record<string, never>;
   };
 
+  const MENU_ID = "sort-menu";
   const { method } = getSortContext();
+
+  function closeMenu() {
+    const menuEl = document.getElementById(MENU_ID);
+    if (menuEl && "hidePopover" in menuEl) {
+      (menuEl as HTMLElement & { hidePopover(): void }).hidePopover();
+    }
+  }
 </script>
 
-<MenuList>
-  <svelte:fragment slot="trigger" let:show>
-    <slot {show} />
+<MenuList id={MENU_ID}>
+  <svelte:fragment slot="trigger">
+    <slot />
   </svelte:fragment>
-  <svelte:fragment slot="items" let:hide>
+  <svelte:fragment slot="items">
     {#each METHOD_LIST as m (m)}
       <MenuItem
         class="flex"
         on:click={() => {
           method.set(m);
-          hide();
+          closeMenu();
         }}
       >
         {#if $method === m}

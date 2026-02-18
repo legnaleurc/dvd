@@ -85,8 +85,8 @@
           bind:value={newCommand}
         />
         <svelte:fragment slot="action">
-          <QuickCommandMenu let:showMenu on:command={handleQuickCommand}>
-            <RoundedButton on:click={(e) => showMenu(e.clientX, e.clientY)}>
+          <QuickCommandMenu on:command={handleQuickCommand}>
+            <RoundedButton popovertarget="quick-command-menu">
               <Icon name="input" />
             </RoundedButton>
           </QuickCommandMenu>
