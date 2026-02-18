@@ -18,7 +18,8 @@
     if (trigger instanceof HTMLElement) {
       triggerEl = trigger;
       // Set anchor name on trigger for CSS Anchor Positioning
-      trigger.style.anchorName = `--menu-trigger-${id}`;
+      // Use setProperty() since anchorName is not yet in TypeScript's DOM types
+      trigger.style.setProperty("anchor-name", `--menu-trigger-${id}`);
     }
   });
 </script>
@@ -36,14 +37,14 @@
   <slot name="items" />
 </div>
 
-<style lang="scss">
+<style>
   .popover-menu {
-    // Remove default popover styles
+    /* Remove default popover styles */
     border: none;
     margin: 0;
-    padding: 0.75rem; // p-3
+    padding: 0.75rem; /* p-3 */
 
-    // Anchor positioning: try bottom-right first, fallback to other positions
+    /* Anchor positioning: try bottom-right first, fallback to other positions */
     position: absolute;
     position-try-fallbacks:
       --bottom-right,
@@ -72,10 +73,10 @@
     right: anchor(right);
   }
 
-  // Fallback for browsers without CSS Anchor Positioning support
+  /* Fallback for browsers without CSS Anchor Positioning support */
   @supports not (anchor-name: --foo) {
     .popover-menu {
-      // Center on screen as fallback
+      /* Center on screen as fallback */
       margin: auto;
     }
   }
