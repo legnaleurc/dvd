@@ -108,7 +108,6 @@ dependencies = [
     { name = "aiohttp" },
     { name = "pillow" },
     { name = "wcpan-drive-cli" },
-    { name = "wcpan-drive-core" },
     { name = "wcpan-drive-crypt" },
     { name = "wcpan-drive-google" },
     { name = "wcpan-drive-sqlite" },
@@ -125,11 +124,10 @@ dev = [
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.13.2,<4.0.0" },
     { name = "pillow", specifier = ">=12.0.0,<13.0.0" },
-    { name = "wcpan-drive-cli", specifier = ">=3.8.1,<4.0.0" },
-    { name = "wcpan-drive-core", specifier = ">=4.1.0,<5.0.0" },
-    { name = "wcpan-drive-crypt", specifier = ">=4.1.2,<5.0.0" },
-    { name = "wcpan-drive-google", specifier = ">=9.1.7,<10.0.0" },
-    { name = "wcpan-drive-sqlite", specifier = ">=2.0.0,<3.0.0" },
+    { name = "wcpan-drive-cli", specifier = ">=4.0.2,<5.0.0" },
+    { name = "wcpan-drive-crypt", specifier = ">=5.0.1,<6.0.0" },
+    { name = "wcpan-drive-google", specifier = ">=10.0.1,<11.0.0" },
+    { name = "wcpan-drive-sqlite", specifier = ">=3.0.0,<4.0.0" },
     { name = "wcpan-logging", specifier = ">=2.1.0,<3.0.0" },
     { name = "wcpan-watchdog", specifier = ">=1.0.0,<2.0.0" },
 ]
@@ -411,6 +409,18 @@ wheels = [
 ]
 
 [[package]]
+name = "prompt-toolkit"
+version = "3.0.52"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "wcwidth" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a1/96/06e01a7b38dce6fe1db213e061a4602dd6032a8a97ef6c1a862537732421/prompt_toolkit-3.0.52.tar.gz", hash = "sha256:28cde192929c8e7321de85de1ddbe736f1375148b02f2e17edd840042b1be855", size = 434198, upload-time = "2025-08-27T15:24:02.057Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl", hash = "sha256:9aac639a3bbd33284347de5ad8d68ecc044b91a762dc39b7c21095fcd6a19955", size = 391431, upload-time = "2025-08-27T15:23:59.498Z" },
+]
+
+[[package]]
 name = "propcache"
 version = "0.4.1"
 source = { registry = "https://pypi.org/simple" }
@@ -565,9 +575,10 @@ wheels = [
 
 [[package]]
 name = "wcpan-drive-cli"
-version = "3.8.1"
+version = "4.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "prompt-toolkit" },
     { name = "pymediainfo" },
     { name = "python-magic" },
     { name = "pyyaml" },
@@ -575,56 +586,56 @@ dependencies = [
     { name = "wcpan-logging" },
     { name = "wcpan-queue" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9a/60/f3ab1daca806667df2c7dbc44a2b05edd0edab7242df21095029189969f8/wcpan_drive_cli-3.8.1.tar.gz", hash = "sha256:410f9708344b4354db729035e30dd6ce3f2cd05ffe6607cc50210111e4cf3219", size = 14371, upload-time = "2025-12-02T01:26:21.193Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/f1/6947587f6cd743add2b4c0ecd181e58689915b0f201a81f9f8680a2c03c5/wcpan_drive_cli-4.0.2.tar.gz", hash = "sha256:5da4116c82807dd51015cb945b0cb26d74f0cdaeed22fab36b87e05e91eed5ca", size = 28108, upload-time = "2026-03-15T07:09:45.147Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/84/a684756bbc992c940a5ddf5d797a664d6ae96d52aee0ecb902c66202ac9e/wcpan_drive_cli-3.8.1-py3-none-any.whl", hash = "sha256:6352e707a81eedb809b09f417e159b96152be7209a8b82f48d42048c9ff20eec", size = 24149, upload-time = "2025-12-02T01:26:19.352Z" },
+    { url = "https://files.pythonhosted.org/packages/99/f1/7954e47f2e5bff85f87e5ff603a2cb9908ccad1e88473a206fbe7e2174ec/wcpan_drive_cli-4.0.2-py3-none-any.whl", hash = "sha256:96da9e497245314052669fbcadd35d4ea104d3ad951b2100fc3ba61462675394", size = 23553, upload-time = "2026-03-15T07:09:43.98Z" },
 ]
 
 [[package]]
 name = "wcpan-drive-core"
-version = "4.2.0"
+version = "5.0.6"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e9/60/82c55ca215d9ff5fb1d32803e46b9090f0149403c6d5704014e9ad81a89c/wcpan_drive_core-4.2.0.tar.gz", hash = "sha256:44ef7db7d84f921ca4a52fe30cc17f97edf95ebc0bde1e21adca5c21b3f223bf", size = 10228, upload-time = "2025-08-14T15:58:33.081Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4b/37/1943a48a7f68291ebf7b3d7ecd6d6711c9280c1a36656bfb09466325dc17/wcpan_drive_core-5.0.6.tar.gz", hash = "sha256:55b6ffce7ef4588decfe1491aef3e4ec7dfdf5a5e08550d8c1e168322441eafc", size = 35652, upload-time = "2026-03-15T06:58:54.71Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5e/b1/f0a9b02c02d0fa7ee78a3ff1b2ef61d891e0a7aa9e5bd036796e7ae79acc/wcpan_drive_core-4.2.0-py3-none-any.whl", hash = "sha256:7f56c5b5f12707a27bb8de838b8230a8b71c8fb2d4a63d9d33e2776609624fc0", size = 12256, upload-time = "2025-08-14T15:58:31.578Z" },
+    { url = "https://files.pythonhosted.org/packages/7b/f8/4f945bc9d4dd1290ccebbcdd55026e2af3074d509babb3c71501844a5340/wcpan_drive_core-5.0.6-py3-none-any.whl", hash = "sha256:fbd91b2fc961b9332762b7181da2d36a6763e4fe1b57a7e1f67c26a169bb7286", size = 32470, upload-time = "2026-03-15T06:58:53.171Z" },
 ]
 
 [[package]]
 name = "wcpan-drive-crypt"
-version = "4.1.2"
+version = "5.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "wcpan-drive-core" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/38/2e/871312edc02498438c79859f95e404e1d6ab5b3c1f8c184eac7eb70c1446/wcpan_drive_crypt-4.1.2.tar.gz", hash = "sha256:2b04c1cad5617e77d83f6d303c22755393a77190449ba246f023f9a964d210dd", size = 3620, upload-time = "2025-02-19T11:15:47.023Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9b/29/f361f5cb0a51069cb0a5eadfb3ab050ba3899784c5f70644dd7e62d904a6/wcpan_drive_crypt-5.0.1.tar.gz", hash = "sha256:00ef1d8482d8be0143a19c94d567ea756e4fcd84f6ee94748f7ddceb29238bfa", size = 15486, upload-time = "2026-03-15T07:07:53.255Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ba/7e/15c2a4c5929e76f6b65e95002373b03c52b669498383eec4bd262d9f193f/wcpan_drive_crypt-4.1.2-py3-none-any.whl", hash = "sha256:40901701bc165e30e2aeeac335a4d6a2542d8d68edc9946160f76762b5b3638b", size = 5012, upload-time = "2025-02-19T11:15:45.159Z" },
+    { url = "https://files.pythonhosted.org/packages/63/f8/85bed2e8e40e00e44957625f11d4b74261d834658b9131248574ea7242c7/wcpan_drive_crypt-5.0.1-py3-none-any.whl", hash = "sha256:dddc2ed71723c25341602a75ffd1ef1ac3aec6d0d48111c3dcf5280d983a0c9c", size = 5041, upload-time = "2026-03-15T07:07:54.356Z" },
 ]
 
 [[package]]
 name = "wcpan-drive-google"
-version = "9.1.7"
+version = "10.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "wcpan-drive-core" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/20/05/7063ef8a6d68eaddd75db642cc1e1387fb0f591ac1b00131b7f4edd4440e/wcpan_drive_google-9.1.7.tar.gz", hash = "sha256:3aeeb493c96a68d22e706f01093f1d3e96d49415ce480e2f7d019542a09d0292", size = 14609, upload-time = "2023-12-21T14:14:36.978Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/82/80ff5a9a1a783edcc38e9de4b2cb4150cda8e9268c87f0d66bad88a848ba/wcpan_drive_google-10.0.1.tar.gz", hash = "sha256:55fa5223779fd9f614252343c800318b4adc57e5dbaad83776c54a99fd48ca77", size = 63198, upload-time = "2026-03-15T07:04:33.239Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6b/e7/17653d89024b6e4f63b36a9dd8e909b783df3258c456bae6ee81440c356d/wcpan_drive_google-9.1.7-py3-none-any.whl", hash = "sha256:35b8416944600c46c4a47c7df166a92979e7cf4970f1916211d402e1e2f0a539", size = 19387, upload-time = "2023-12-21T14:14:35.269Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/9a/802ac65b859269b4e829119d0a026d2b5fd962f75dc91029781dfdf7f765/wcpan_drive_google-10.0.1-py3-none-any.whl", hash = "sha256:295cf49b3e02e3496b01ed06255da4d99473ae71752b797d4c7e543b8174b99c", size = 19728, upload-time = "2026-03-15T07:04:34.284Z" },
 ]
 
 [[package]]
 name = "wcpan-drive-sqlite"
-version = "2.1.0"
+version = "3.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "wcpan-drive-core" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/78/3c/12c89a82851a46cc344af50c07974e08dbbcf625884a8c28b7ac2bc866b2/wcpan_drive_sqlite-2.1.0.tar.gz", hash = "sha256:182ac6eb9a7f2287b26b0740e4d853be034182a9da3c89dd89fb6e0df3e3218f", size = 7332, upload-time = "2024-01-03T14:58:09.432Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8b/28/3b977d8eef765f488022bb45ef431d9e5a953623ce34fb8295ced63f9f61/wcpan_drive_sqlite-3.0.0.tar.gz", hash = "sha256:c0fc512713b20c4ed8ce77c946e72c76de59724922c7cdb788e140289365a38f", size = 12854, upload-time = "2026-03-14T12:48:11.113Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ff/cd/2c94c16d755b0da42bd77d7945e1dac812663c96fca1fe47bd265a557db6/wcpan_drive_sqlite-2.1.0-py3-none-any.whl", hash = "sha256:65555d88dbbea08d20fb22f0fbfe07feb93bed695480c2299e3fbf0236cc1150", size = 9461, upload-time = "2024-01-03T14:58:07.64Z" },
+    { url = "https://files.pythonhosted.org/packages/bd/b6/6702b0306bb29af1de1bb38fdc68695ee26d282a443135beb3fedefa4f44/wcpan_drive_sqlite-3.0.0-py3-none-any.whl", hash = "sha256:8af197e7eb3cf302fc8fe0d52c1542365247ff717bb2f662ab19afcd8b9245a0", size = 9459, upload-time = "2026-03-14T12:48:12.11Z" },
 ]
 
 [[package]]
@@ -652,6 +663,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/1b/f7/ac98d10db54387b8b7936ba58d2fb92976e467d6a9b5613c7c600ca1fdb5/wcpan_watchdog-1.3.1.tar.gz", hash = "sha256:a5e0da3c939632e76b69eb2f5189d9bb1aeaea553aca67ecbe02e2ae865ff200", size = 6091, upload-time = "2025-06-20T17:28:37.376Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/6f/ce/deda93dfc68b5d027427d6b2e3ad60c34e888df179757da99d1e423c01ee/wcpan_watchdog-1.3.1-py3-none-any.whl", hash = "sha256:1310e7af2608e727799a0528530519832b506269e1cc91a22ec512d08d90ba40", size = 8485, upload-time = "2025-06-20T17:28:36.528Z" },
+]
+
+[[package]]
+name = "wcwidth"
+version = "0.6.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/35/a2/8e3becb46433538a38726c948d3399905a4c7cabd0df578ede5dc51f0ec2/wcwidth-0.6.0.tar.gz", hash = "sha256:cdc4e4262d6ef9a1a57e018384cbeb1208d8abbc64176027e2c2455c81313159", size = 159684, upload-time = "2026-02-06T19:19:40.919Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/68/5a/199c59e0a824a3db2b89c5d2dade7ab5f9624dbf6448dc291b46d5ec94d3/wcwidth-0.6.0-py3-none-any.whl", hash = "sha256:1a3a1e510b553315f8e146c54764f4fb6264ffad731b3d78088cdb1478ffbdad", size = 94189, upload-time = "2026-02-06T19:19:39.646Z" },
 ]
 
 [[package]]
