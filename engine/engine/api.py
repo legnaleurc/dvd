@@ -91,7 +91,7 @@ class NodeView(
         drive = self.request.app[KEY_DRIVE]
         se = self.request.app[KEY_SEARCH_ENGINE]
         se.invalidate_cache_by_node(node)
-        await drive.move(node, trashed=True)
+        await drive.delete(node)
 
 
 class NodeListView(
