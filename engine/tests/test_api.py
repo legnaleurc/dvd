@@ -208,9 +208,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             },
         )
         self.assertEqual(rv.status, 204)
-        aexpect(drive.move).assert_called_once_with(
-            make_node({"id": "1"}), trashed=True
-        )
+        aexpect(drive.delete).assert_called_once_with(make_node({"id": "1"}))
 
     async def testImageListForFolders(self):
         assert self._client.app
