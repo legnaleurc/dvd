@@ -111,6 +111,7 @@ dependencies = [
     { name = "wcpan-drive-crypt" },
     { name = "wcpan-drive-google" },
     { name = "wcpan-drive-sqlite" },
+    { name = "wcpan-drive-synology" },
     { name = "wcpan-logging" },
     { name = "wcpan-watchdog" },
 ]
@@ -128,6 +129,7 @@ requires-dist = [
     { name = "wcpan-drive-crypt", specifier = ">=5.0.1,<6.0.0" },
     { name = "wcpan-drive-google", specifier = ">=10.0.1,<11.0.0" },
     { name = "wcpan-drive-sqlite", specifier = ">=3.0.0,<4.0.0" },
+    { name = "wcpan-drive-synology", specifier = ">=1.0.0,<2.0.0" },
     { name = "wcpan-logging", specifier = ">=2.1.0,<3.0.0" },
     { name = "wcpan-watchdog", specifier = ">=1.0.0,<2.0.0" },
 ]
@@ -636,6 +638,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/8b/28/3b977d8eef765f488022bb45ef431d9e5a953623ce34fb8295ced63f9f61/wcpan_drive_sqlite-3.0.0.tar.gz", hash = "sha256:c0fc512713b20c4ed8ce77c946e72c76de59724922c7cdb788e140289365a38f", size = 12854, upload-time = "2026-03-14T12:48:11.113Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bd/b6/6702b0306bb29af1de1bb38fdc68695ee26d282a443135beb3fedefa4f44/wcpan_drive_sqlite-3.0.0-py3-none-any.whl", hash = "sha256:8af197e7eb3cf302fc8fe0d52c1542365247ff717bb2f662ab19afcd8b9245a0", size = 9459, upload-time = "2026-03-14T12:48:12.11Z" },
+]
+
+[[package]]
+name = "wcpan-drive-synology"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "wcpan-drive-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8b/72/ba3c74147a271cb6bcd232dcb927ad3d4888533848c4521825a84c61adcc/wcpan_drive_synology-1.0.0.tar.gz", hash = "sha256:083edc07cc8c078da138b82e5df6e396c8c971b796ad31c05e20913b7df4287a", size = 60312, upload-time = "2026-03-15T12:32:03.1Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/8c/f68b62a43a3c75292702bafcb1789b80d242891a273d5f2694c9d2ee8c03/wcpan_drive_synology-1.0.0-py3-none-any.whl", hash = "sha256:751421052cdf2efede0a14189a2c8411b057e47d4c46a1eecc5dccf9f3c7e1b9", size = 22032, upload-time = "2026-03-15T12:32:04.678Z" },
 ]
 
 [[package]]
