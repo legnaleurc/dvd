@@ -16,7 +16,7 @@ dependencies = [
     "wcpan-logging>=2.1.0,<3.0.0",
     "wcpan-drive-sqlite>=3.0.0,<4.0.0",
     "pillow>=12.0.0,<13.0.0",
-    "wcpan-drive-synology>=1.0.1,<2.0.0",
+    "wcpan-drive-synology>=2.0.0,<3.0.0",
 ]
 
 [dependency-groups]
