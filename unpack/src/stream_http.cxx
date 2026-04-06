@@ -31,11 +31,11 @@ create_multi_handle()
 }
 
 unpack::curl_easy::curl_easy(multi_handle multi, easy_handle easy)
-  : multi(multi)
-  , easy(easy)
-  , is_eof(false)
+  : is_eof(false)
   , status_code(0)
   , content_length(-1)
+  , multi(multi)
+  , easy(easy)
 {
   auto rv = curl_multi_add_handle(multi.get(), easy.get());
   if (rv != CURLM_OK) {
@@ -198,7 +198,19 @@ unpack::binary_chunk
 unpack::input_stream::detail::http_detail::read()
 {
   while (this->blocks.empty()) {
-    this->easy->read();
+    if (this->easy->is_eof) {
+      if (!this->is_range_valid()) {
+        break;
+      }
+      this->close();
+      this->open(true);
+    } else {
+      this->easy->read();
+    }
+  }
+
+  if (this->blocks.empty()) {
+    return {};
   }
 
   auto top = std::move(this->blocks.front());

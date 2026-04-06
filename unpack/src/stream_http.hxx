@@ -27,6 +27,10 @@ public:
 
   void read();
 
+  bool is_eof;
+  long status_code;
+  std::int64_t content_length;
+
 private:
   void update_status_code();
   void read_until_status_code();
@@ -35,11 +39,6 @@ private:
 
   multi_handle multi;
   easy_handle easy;
-  bool is_eof;
-
-public:
-  long status_code;
-  std::int64_t content_length;
 };
 
 class input_stream::detail::http_detail : public input_stream::detail
