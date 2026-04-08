@@ -36,6 +36,8 @@ export default ts.config(
   },
   {
     rules: {
+      "svelte/no-navigation-without-resolve": "off",
+      "no-useless-assignment": "off",
       // See sveltejs/eslint-plugin-svelte#348
       "@typescript-eslint/no-unused-vars": [
         "error",
