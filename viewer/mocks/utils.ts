@@ -109,14 +109,14 @@ export function rootResponse(): NodeResponse {
   };
 }
 
-export function status204(): HttpResponse {
+export function status204(): HttpResponse<null> {
   return new HttpResponse(null, {
     status: 204,
     statusText: "No Content",
   });
 }
 
-export function status404(): HttpResponse {
+export function status404(): HttpResponse<null> {
   return new HttpResponse(null, {
     status: 404,
     statusText: "Not Found",
