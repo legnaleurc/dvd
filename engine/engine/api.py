@@ -5,10 +5,10 @@ from collections.abc import Callable, Iterable
 from datetime import datetime
 from functools import partial
 from logging import getLogger
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from typing import Any
 
-from aiohttp.web import Request, Response, StreamResponse, View
+from aiohttp.web import FileResponse, Request, Response, StreamResponse, View
 from aiohttp.web_exceptions import (
     HTTPBadRequest,
     HTTPConflict,
@@ -282,31 +282,22 @@ class NodeImageView(NodeObjectMixin, View):
             )
             return response
 
-        # setup streaming response
+        if not node.is_directory:
+            return FileResponse(Path(data["id"]))
+
         drive = self.request.app[KEY_DRIVE]
         response = StreamResponse(status=200)
         response.content_type = data["type"]
         response.content_length = data["size"]
-
-        # setup cache headers
         _setup_cache_control(response, etag=data["etag"], last_modified=data["mtime"])
-
         await response.prepare(self.request)
-        if node.is_directory:
-            child = await get_node(drive, data["id"])
-            if not child:
-                _L.error(f"tried to find child {data['id']} but not found")
-                raise HTTPInternalServerError()
-            async with drive.download_file(child) as stream:
-                async for chunk in stream:
-                    await response.write(chunk)
-        else:
-            with open(data["id"], "rb") as fin:
-                while True:
-                    chunk = fin.read(65536)
-                    if not chunk:
-                        break
-                    await response.write(chunk)
+        child = await get_node(drive, data["id"])
+        if not child:
+            _L.error(f"tried to find child {data['id']} but not found")
+            raise HTTPInternalServerError()
+        async with drive.download_file(child) as stream:
+            async for chunk in stream:
+                await response.write(chunk)
         return response
 
 
