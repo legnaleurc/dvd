@@ -25,7 +25,7 @@ async def create_storage_manager():
 
 class StorageManager:
     def __init__(self, path: Path):
-        self._cache: dict[tuple[str, int], list[ImageDict]] = {}
+        self._cache: dict[int, dict[str, list[ImageDict]]] = {}
         self._path = path
 
     def clear_cache(self):
@@ -34,20 +34,21 @@ class StorageManager:
             shutil.rmtree(str(child))
 
     def get_cache(self, id_: str, max_size: int = 0) -> list[ImageDict]:
-        return self._cache[(id_, max_size)]
+        return self._cache[max_size][id_]
 
     def get_cache_or_none(self, id_: str, max_size: int = 0) -> list[ImageDict] | None:
-        return self._cache.get((id_, max_size), None)
+        return self._cache.get(max_size, {}).get(id_, None)
 
     def set_cache(self, id_: str, max_size: int, manifest: list[ImageDict]) -> None:
-        self._cache[(id_, max_size)] = manifest
+        if max_size not in self._cache:
+            self._cache[max_size] = {}
+        self._cache[max_size][id_] = manifest
 
     def get_path(self, id_: str, max_size: int = 0) -> Path:
         return self._path / str(max_size) / id_
 
-    @property
-    def cache(self):
-        return self._cache
+    def get_cache_by_max_size(self, max_size: int):
+        return self._cache[max_size]
 
     @property
     def root_path(self) -> Path:
@@ -71,9 +72,8 @@ class StorageManager:
                 _L.debug(f"check {node_dir} ({d})")
                 if d > DAY:
                     shutil.rmtree(str(node_dir))
-                    cache_key = (node_id, max_size)
-                    if cache_key in self._cache:
-                        del self._cache[cache_key]
+                    if max_size in self._cache and node_id in self._cache[max_size]:
+                        del self._cache[max_size][node_id]
                     _L.info(f"prune {node_dir} ({d})")
 
 

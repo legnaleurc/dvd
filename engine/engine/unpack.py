@@ -63,9 +63,8 @@ class UnpackEngine:
         except KeyError:
             raise UnpackFailedError(f"{node.id} unpack was canceled")
 
-    @property
-    def cache(self):
-        return self._storage.cache
+    def get_cache_by_max_size(self, max_size: int):
+        return self._storage.get_cache_by_max_size(max_size)
 
     def clear_cache(self):
         self._storage.clear_cache()

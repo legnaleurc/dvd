@@ -326,28 +326,36 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
 
         ue = self._client.app[KEY_UNPACK_ENGINE]
-        ue.cache[("alive", 0)] = [
-            {
-                "id": "image-1",
-                "type": "image/png",
-                "size": 123,
-                "etag": "etag-1",
-                "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
-                "width": 640,
-                "height": 480,
-            }
-        ]
-        ue.cache[("deleted", 0)] = [
-            {
-                "id": "image-2",
-                "type": "image/png",
-                "size": 456,
-                "etag": "etag-2",
-                "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
-                "width": 800,
-                "height": 600,
-            }
-        ]
+        ue._storage.set_cache(
+            "alive",
+            0,
+            [  # type: ignore[attr-defined]
+                {
+                    "id": "image-1",
+                    "type": "image/png",
+                    "size": 123,
+                    "etag": "etag-1",
+                    "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                    "width": 640,
+                    "height": 480,
+                }
+            ],
+        )
+        ue._storage.set_cache(
+            "deleted",
+            0,
+            [  # type: ignore[attr-defined]
+                {
+                    "id": "image-2",
+                    "type": "image/png",
+                    "size": 456,
+                    "etag": "etag-2",
+                    "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                    "width": 800,
+                    "height": 600,
+                }
+            ],
+        )
 
         rv = await self._client.get(
             "/api/v1/caches/images",
