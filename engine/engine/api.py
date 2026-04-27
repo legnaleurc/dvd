@@ -1,6 +1,6 @@
 import json
 import shlex
-from asyncio import create_subprocess_exec
+from asyncio import as_completed, create_subprocess_exec
 from collections.abc import Callable, Iterable
 from datetime import datetime
 from functools import partial
@@ -19,6 +19,7 @@ from aiohttp.web_exceptions import (
     HTTPUnauthorized,
 )
 from multidict import MultiMapping
+from wcpan.drive.core.exceptions import NodeNotFoundError
 from wcpan.drive.core.lib import dispatch_change
 from wcpan.drive.core.types import ChangeAction, Node
 
@@ -383,28 +384,41 @@ class CachesImagesView(
 ):
     async def list_(self) -> list[ImageListCacheDict]:
         ue = self.request.app[KEY_UNPACK_ENGINE]
+        drive = self.request.app[KEY_DRIVE]
         cache = ue.cache
 
+        # Parse max_size parameter (optional, for filtering)
         max_size = _get_query_value(self.request.query, int, "max_size")
         if max_size is None:
-            max_size = 0
+            max_size = 0  # Default to original size
         if max_size < 0:
             raise HTTPBadRequest(text="max_size must be >= 0")
 
+        # Filter cache entries by max_size
         filtered_keys = [k for k in cache.keys() if k[1] == max_size]
+        node_ids = set(node_id for node_id, _ in filtered_keys)
+
+        # Fetch node info and return
+        node_list: list[Node] = []
+        for future in as_completed(drive.get_node_by_id(_) for _ in node_ids):
+            try:
+                node_list.append(await future)
+            except NodeNotFoundError:
+                continue
+
         return [
             {
-                "id": node_id,
-                "name": cache[(node_id, max_size)][0],
+                "id": _.id,
+                "name": _.name,
                 "image_list": [
                     {
-                        "width": img["width"],
-                        "height": img["height"],
+                        "width": __["width"],
+                        "height": __["height"],
                     }
-                    for img in cache[(node_id, max_size)][1]
+                    for __ in cache[(_.id, max_size)]
                 ],
             }
-            for node_id, _ in filtered_keys
+            for _ in node_list
         ]
 
     async def destory(self):

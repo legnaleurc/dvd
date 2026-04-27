@@ -25,7 +25,7 @@ async def create_storage_manager():
 
 class StorageManager:
     def __init__(self, path: Path):
-        self._cache: dict[tuple[str, int], tuple[str, list[ImageDict]]] = {}
+        self._cache: dict[tuple[str, int], list[ImageDict]] = {}
         self._path = path
 
     def clear_cache(self):
@@ -34,16 +34,13 @@ class StorageManager:
             shutil.rmtree(str(child))
 
     def get_cache(self, id_: str, max_size: int = 0) -> list[ImageDict]:
-        return self._cache[(id_, max_size)][1]
+        return self._cache[(id_, max_size)]
 
     def get_cache_or_none(self, id_: str, max_size: int = 0) -> list[ImageDict] | None:
-        entry = self._cache.get((id_, max_size), None)
-        return None if entry is None else entry[1]
+        return self._cache.get((id_, max_size), None)
 
-    def set_cache(
-        self, id_: str, max_size: int, name: str, manifest: list[ImageDict]
-    ) -> None:
-        self._cache[(id_, max_size)] = (name, manifest)
+    def set_cache(self, id_: str, max_size: int, manifest: list[ImageDict]) -> None:
+        self._cache[(id_, max_size)] = manifest
 
     def get_path(self, id_: str, max_size: int = 0) -> Path:
         return self._path / str(max_size) / id_

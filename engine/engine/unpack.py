@@ -50,7 +50,7 @@ class UnpackEngine:
         # Use singleflight to coordinate concurrent unpacking
         async def on_first():
             result = await self._do_unpack(node, max_size)
-            self._storage.set_cache(node.id, max_size, node.name, result)
+            self._storage.set_cache(node.id, max_size, result)
             return result
 
         async def on_middle():

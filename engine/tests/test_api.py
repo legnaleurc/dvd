@@ -309,6 +309,70 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             stderr=asyncio.subprocess.PIPE,
         )
 
+    async def testCacheImageListSkipsDeletedNodes(self):
+        assert self._client.app
+
+        async def fake_get_node_by_id(id: str):
+            if id == "deleted":
+                raise NodeNotFoundError(id)
+            return make_node(
+                {
+                    "id": id,
+                    "name": f"node-{id}",
+                }
+            )
+
+        drive = self._client.app[KEY_DRIVE]
+        drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
+
+        ue = self._client.app[KEY_UNPACK_ENGINE]
+        ue.cache[("alive", 0)] = [
+            {
+                "id": "image-1",
+                "type": "image/png",
+                "size": 123,
+                "etag": "etag-1",
+                "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                "width": 640,
+                "height": 480,
+            }
+        ]
+        ue.cache[("deleted", 0)] = [
+            {
+                "id": "image-2",
+                "type": "image/png",
+                "size": 456,
+                "etag": "etag-2",
+                "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                "width": 800,
+                "height": 600,
+            }
+        ]
+
+        rv = await self._client.get(
+            "/api/v1/caches/images",
+            headers={
+                "Authorization": "Token 1234",
+            },
+        )
+        self.assertEqual(rv.status, 200)
+        body = await rv.json()
+        self.assertEqual(
+            body,
+            [
+                {
+                    "id": "alive",
+                    "name": "node-alive",
+                    "image_list": [
+                        {
+                            "width": 640,
+                            "height": 480,
+                        }
+                    ],
+                }
+            ],
+        )
+
 
 def aexpect(unknown: object) -> AsyncMock:
     return cast(AsyncMock, unknown)
