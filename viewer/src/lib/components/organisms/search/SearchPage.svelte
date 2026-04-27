@@ -10,6 +10,7 @@
   import { setSearchContext } from "$stores/search";
   import { setQueueContext } from "$stores/queue";
   import { setDisabledContext } from "$stores/disabled";
+  import { useVisibilityChange } from "$atoms/LifeCycle.svelte";
   import BottomBar from "./BottomBar.svelte";
   import TopBar from "./TopBar.svelte";
   import ResultList from "./ResultList.svelte";
@@ -25,6 +26,7 @@
   const { startQueue, stopQueue } = setQueueContext();
   const { isFullScreen } = getFullScreenContext();
   setDisabledContext();
+  const { onVisible } = useVisibilityChange();
 
   function popQueryName(): string {
     const routeId = $page.route.id;
@@ -62,6 +64,10 @@
       $nameInput = queryName;
       return searchName(queryName);
     });
+  });
+
+  onVisible(() => {
+    loadSearchHistory();
   });
 
   $: {
