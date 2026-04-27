@@ -15,7 +15,6 @@ services:
       target: production
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
       - binary:/mnt/binary:ro
       - static:/mnt/static:ro
       - ${DVD_DRIVE_FILE}:/mnt/drive.yaml
@@ -30,10 +29,8 @@ services:
       DVD_ENGINE_TOKEN: ${DVD_TOKEN}
     expose:
       - "80"
-    logging:
-      driver: journald
-      options:
-        tag: dvd-engine
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command: /app/docker/start.sh
   viewer:
     build:
@@ -56,10 +53,6 @@ services:
       - "${DVD_HOST}:${DVD_PORT}:80"
     depends_on:
       - engine
-    logging:
-      driver: journald
-      options:
-        tag: dvd-nginx
 volumes:
   binary:
   static:
