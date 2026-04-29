@@ -1,6 +1,6 @@
 import json
 import shlex
-from asyncio import as_completed, create_subprocess_exec
+from asyncio import as_completed, create_subprocess_exec, gather
 from collections.abc import Callable, Iterable
 from datetime import datetime
 from functools import partial
@@ -19,7 +19,6 @@ from aiohttp.web_exceptions import (
     HTTPUnauthorized,
 )
 from multidict import MultiMapping
-from wcpan.drive.core.exceptions import NodeNotFoundError
 from wcpan.drive.core.lib import dispatch_change
 from wcpan.drive.core.types import ChangeAction, Node
 
@@ -396,13 +395,9 @@ class CachesImagesView(
         # Filter cache entries by max_size
         cache = ue.get_cache_by_max_size(max_size)
 
-        # Fetch node info and return
-        node_list: list[Node] = []
-        async for future in as_completed(drive.get_node_by_id(_) for _ in cache.keys()):
-            try:
-                node_list.append(await future)
-            except NodeNotFoundError:
-                continue
+        # Fetch node info and keep the cache insertion order.
+        results = await gather(*(get_node(drive, _) for _ in cache.keys()))
+        node_list = [_ for _ in results if _ is not None]
 
         return [
             {

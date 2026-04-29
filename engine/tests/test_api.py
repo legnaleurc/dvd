@@ -381,6 +381,53 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             ],
         )
 
+    async def testCacheImageListPreservesOrderWhileSkippingDeletedNodes(self):
+        assert self._client.app
+
+        async def fake_get_node_by_id(id: str):
+            if id == "first":
+                await asyncio.sleep(0.02)
+            if id == "deleted":
+                await asyncio.sleep(0.01)
+                raise NodeNotFoundError(id)
+            return make_node(
+                {
+                    "id": id,
+                    "name": f"node-{id}",
+                }
+            )
+
+        drive = self._client.app[KEY_DRIVE]
+        drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
+
+        ue = self._client.app[KEY_UNPACK_ENGINE]
+        for id_ in ["first", "deleted", "second"]:
+            ue._storage.set_cache(
+                id_,
+                0,
+                [  # type: ignore[attr-defined]
+                    {
+                        "id": f"image-{id_}",
+                        "type": "image/png",
+                        "size": 123,
+                        "etag": f"etag-{id_}",
+                        "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                        "width": 640,
+                        "height": 480,
+                    }
+                ],
+            )
+
+        rv = await self._client.get(
+            "/api/v1/caches/images",
+            headers={
+                "Authorization": "Token 1234",
+            },
+        )
+        self.assertEqual(rv.status, 200)
+        body = await rv.json()
+        self.assertEqual([_["id"] for _ in body], ["first", "second"])
+
 
 def aexpect(unknown: object) -> AsyncMock:
     return cast(AsyncMock, unknown)
