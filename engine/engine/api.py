@@ -1,6 +1,6 @@
 import json
 import shlex
-from asyncio import as_completed, create_subprocess_exec, gather
+from asyncio import create_subprocess_exec, gather
 from collections.abc import Callable, Iterable
 from datetime import datetime
 from functools import partial
@@ -271,6 +271,9 @@ class NodeImageView(NodeObjectMixin, View):
         except IndexError:
             raise HTTPNotFound()
 
+        if not node.is_directory:
+            return FileResponse(Path(data["id"]))
+
         # check cache before streaming
         if not _entity_modified(
             self.request, etag=data["etag"], last_modified=data["mtime"]
@@ -282,19 +285,17 @@ class NodeImageView(NodeObjectMixin, View):
             )
             return response
 
-        if not node.is_directory:
-            return FileResponse(Path(data["id"]))
-
         drive = self.request.app[KEY_DRIVE]
+        child = await get_node(drive, data["id"])
+        if not child:
+            _L.error(f"tried to find child {data['id']} but not found")
+            raise HTTPInternalServerError()
+
         response = StreamResponse(status=200)
         response.content_type = data["type"]
         response.content_length = data["size"]
         _setup_cache_control(response, etag=data["etag"], last_modified=data["mtime"])
         await response.prepare(self.request)
-        child = await get_node(drive, data["id"])
-        if not child:
-            _L.error(f"tried to find child {data['id']} but not found")
-            raise HTTPInternalServerError()
         async with drive.download_file(child) as stream:
             async for chunk in stream:
                 await response.write(chunk)
