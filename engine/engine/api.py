@@ -5,7 +5,7 @@ from collections.abc import Callable, Iterable
 from datetime import datetime
 from functools import partial
 from logging import getLogger
-from pathlib import Path, PurePath
+from pathlib import PurePath
 from typing import Any
 
 from aiohttp.web import FileResponse, Request, Response, StreamResponse, View
@@ -39,7 +39,7 @@ from .search import (
     SearchFailedError,
     SearchNodeDict,
 )
-from .types import ImageListCacheDict, ImageSizeDict, VideoSizeDict
+from .types import ImageDict, ImageListCacheDict, ImageSizeDict, VideoSizeDict
 from .unpack import UnpackFailedError
 
 
@@ -259,32 +259,52 @@ class NodeImageView(NodeObjectMixin, View):
             raise HTTPBadRequest(text="max_size must be >= 0")
 
         node = await self.get_object()
+        manifest = await self._get_manifest(node)
+        data = self._get_manifest_item(manifest, image_id)
+
+        if node.is_directory:
+            return await self._get_directory_image(data)
+        return await self._get_archive_image(node, image_id, data, max_size)
+
+    async def _get_archive_image(
+        self, node: Node, image_id: int, data: ImageDict, max_size: int
+    ):
+        ue = self.request.app[KEY_UNPACK_ENGINE]
+        path = await ue.get_local_image_path(node, image_id, data, max_size)
+        return FileResponse(path)
+
+    async def _get_directory_image(self, data: ImageDict) -> StreamResponse:
+        response = self._create_not_modified_response(data)
+        if response is not None:
+            return response
+        return await self._create_stream_response(data)
+
+    async def _get_manifest(self, node: Node) -> list[ImageDict]:
         ue = self.request.app[KEY_UNPACK_ENGINE]
         try:
-            manifest = await ue.get_manifest(node, max_size)
+            return await ue.get_manifest(node, 0)
         except UnpackFailedError:
             _L.exception(f"failed to get image list from node {node.id}")
             raise HTTPInternalServerError()
 
+    def _get_manifest_item(self, manifest: list[ImageDict], image_id: int) -> ImageDict:
         try:
-            data = manifest[image_id]
+            return manifest[image_id]
         except IndexError:
             raise HTTPNotFound()
 
-        if not node.is_directory:
-            return FileResponse(Path(data["id"]))
-
-        # check cache before streaming
-        if not _entity_modified(
+    def _create_not_modified_response(self, data: ImageDict) -> Response | None:
+        if _entity_modified(
             self.request, etag=data["etag"], last_modified=data["mtime"]
         ):
-            _L.debug(f"304 not modified: {node.id} {image_id}")
-            response = Response(status=HTTPNotModified.status_code)
-            _setup_cache_control(
-                response, etag=data["etag"], last_modified=data["mtime"]
-            )
-            return response
+            return None
 
+        _L.debug(f"304 not modified: {data['id']}")
+        response = Response(status=HTTPNotModified.status_code)
+        _setup_cache_control(response, etag=data["etag"], last_modified=data["mtime"])
+        return response
+
+    async def _create_stream_response(self, data: ImageDict) -> StreamResponse:
         drive = self.request.app[KEY_DRIVE]
         child = await get_node(drive, data["id"])
         if not child:

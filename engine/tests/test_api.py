@@ -7,6 +7,7 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from aiohttp.test_utils import TestClient, TestServer
+from PIL import Image
 from wcpan.drive.core.exceptions import NodeNotFoundError
 from wcpan.drive.core.types import Node
 
@@ -308,6 +309,115 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
+
+    async def testImageListForFilesWithMaxSizeReturnsScaledManifest(self):
+        assert self._client.app
+
+        node = make_node(
+            {
+                "id": "1",
+                "is_directory": False,
+                "hash": "etag-1",
+            }
+        )
+        drive = self._client.app[KEY_DRIVE]
+        drive.get_node_by_id = AsyncMock(return_value=node)
+
+        ue = self._client.app[KEY_UNPACK_ENGINE]
+        source_path = ue._storage.get_path("1", 0) / "page.jpg"  # type: ignore[attr-defined]
+        ue._storage.set_cache(  # type: ignore[attr-defined]
+            "1",
+            0,
+            [
+                {
+                    "id": str(source_path),
+                    "type": "image/jpeg",
+                    "size": 123,
+                    "etag": "etag-1",
+                    "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                    "width": 1920,
+                    "height": 1080,
+                }
+            ],
+        )
+
+        rv = await self._client.get(
+            "/api/v1/nodes/1/images?max_size=1024",
+            headers={
+                "Authorization": f"Token 1234",
+            },
+        )
+
+        self.assertEqual(rv.status, 200)
+        body = await rv.json()
+        self.assertEqual(body, [{"width": 1024, "height": 576}])
+        self.assertFalse(ue._storage.get_path("1", 1024).exists())  # type: ignore[attr-defined]
+
+    async def testImageForFileCreatesLazyVariant(self):
+        assert self._client.app
+
+        node = make_node(
+            {
+                "id": "1",
+                "is_directory": False,
+                "hash": "etag-1",
+            }
+        )
+        drive = self._client.app[KEY_DRIVE]
+        drive.get_node_by_id = AsyncMock(return_value=node)
+
+        ue = self._client.app[KEY_UNPACK_ENGINE]
+        source_path = ue._storage.get_path("1", 0) / "page.jpg"  # type: ignore[attr-defined]
+        source_path.parent.mkdir(parents=True, exist_ok=True)
+        Image.new("RGB", (1920, 1080), color="red").save(
+            source_path, format="JPEG", quality=85
+        )
+        ue._storage.set_cache(  # type: ignore[attr-defined]
+            "1",
+            0,
+            [
+                {
+                    "id": str(source_path),
+                    "type": "image/jpeg",
+                    "size": source_path.stat().st_size,
+                    "etag": "etag-1",
+                    "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                    "width": 1920,
+                    "height": 1080,
+                }
+            ],
+        )
+
+        rv = await self._client.get("/api/v1/nodes/1/images/0?max_size=1024")
+
+        self.assertEqual(rv.status, 200)
+        variant_path = ue._storage.get_path("1", 1024) / "page.jpg"  # type: ignore[attr-defined]
+        self.assertTrue(variant_path.exists())
+        with Image.open(source_path) as img:
+            self.assertEqual(img.size, (1920, 1080))
+        with Image.open(variant_path) as img:
+            self.assertEqual(img.size, (1024, 576))
+        self.assertIsNone(ue._storage.get_cache_or_none("1", 1024))  # type: ignore[attr-defined]
+
+    async def testImageForFileMissingIndexReturns404(self):
+        assert self._client.app
+
+        node = make_node(
+            {
+                "id": "1",
+                "is_directory": False,
+                "hash": "etag-1",
+            }
+        )
+        drive = self._client.app[KEY_DRIVE]
+        drive.get_node_by_id = AsyncMock(return_value=node)
+
+        ue = self._client.app[KEY_UNPACK_ENGINE]
+        ue._storage.set_cache("1", 0, [])  # type: ignore[attr-defined]
+
+        rv = await self._client.get("/api/v1/nodes/1/images/0?max_size=1024")
+
+        self.assertEqual(rv.status, 404)
 
     async def testCacheImageListSkipsDeletedNodes(self):
         assert self._client.app
