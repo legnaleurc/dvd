@@ -89,12 +89,13 @@ export function createStore() {
     const cacheList = await listCachedImage(currentMaxSize);
     const _comicMap = get(comicMap);
     const _idList = get(idList);
+    const incomingIdList: string[] = [];
     for (const cache of cacheList) {
       // skip existing record
       if (_comicMap[cache.id]) {
         continue;
       }
-      _idList.push(cache.id);
+      incomingIdList.push(cache.id);
       _comicMap[cache.id] = {
         name: cache.name,
         imageList: cache.image_list,
@@ -102,7 +103,7 @@ export function createStore() {
       };
     }
     comicMap.set(_comicMap);
-    idList.set(_idList);
+    idList.set([...incomingIdList, ..._idList]);
   }
 
   async function clearComic() {
