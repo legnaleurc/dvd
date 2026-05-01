@@ -1,4 +1,4 @@
-FROM node:20-trixie-slim AS builder
+FROM node:22-trixie-slim AS builder
 
 RUN : \
     && apt-get update \
