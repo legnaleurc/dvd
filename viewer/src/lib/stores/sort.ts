@@ -53,15 +53,15 @@ export function getSortContext() {
 }
 
 function sortByDateAsc(a: Node_, b: Node_) {
-  if (a.modified !== b.modified) {
-    return a.modified - b.modified;
+  if (a.changed !== b.changed) {
+    return a.changed - b.changed;
   }
   return a.id < b.id ? -1 : 1;
 }
 
 function sortByDateDesc(a: Node_, b: Node_) {
-  if (a.modified !== b.modified) {
-    return b.modified - a.modified;
+  if (a.changed !== b.changed) {
+    return b.changed - a.changed;
   }
   return a.id < b.id ? -1 : 1;
 }

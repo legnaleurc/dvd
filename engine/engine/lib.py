@@ -38,7 +38,7 @@ def dict_from_node(node: Node) -> NodeDict:
         "parent_id": node.parent_id,
         "is_trashed": node.is_trashed,
         "is_directory": node.is_directory,
-        "mtime": node.mtime.isoformat(),
+        "changed_time": node.changed_time.isoformat(),
         "mime_type": node.mime_type,
         "hash": node.hash,
         "size": node.size,

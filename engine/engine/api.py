@@ -295,13 +295,15 @@ class NodeImageView(NodeObjectMixin, View):
 
     def _create_not_modified_response(self, data: ImageDict) -> Response | None:
         if _entity_modified(
-            self.request, etag=data["etag"], last_modified=data["mtime"]
+            self.request, etag=data["etag"], last_modified=data["modified_time"]
         ):
             return None
 
         _L.debug(f"304 not modified: {data['id']}")
         response = Response(status=HTTPNotModified.status_code)
-        _setup_cache_control(response, etag=data["etag"], last_modified=data["mtime"])
+        _setup_cache_control(
+            response, etag=data["etag"], last_modified=data["modified_time"]
+        )
         return response
 
     async def _create_stream_response(self, data: ImageDict) -> StreamResponse:
@@ -314,7 +316,9 @@ class NodeImageView(NodeObjectMixin, View):
         response = StreamResponse(status=200)
         response.content_type = data["type"]
         response.content_length = data["size"]
-        _setup_cache_control(response, etag=data["etag"], last_modified=data["mtime"])
+        _setup_cache_control(
+            response, etag=data["etag"], last_modified=data["modified_time"]
+        )
         await response.prepare(self.request)
         async with drive.download_file(child) as stream:
             async for chunk in stream:

@@ -223,7 +223,7 @@ class UnpackEngine:
                 "type": type_,
                 "size": path.stat().st_size,
                 "etag": parent_node.hash,
-                "mtime": parent_node.mtime,
+                "modified_time": parent_node.modified_time,
                 "width": width,
                 "height": height,
             }
@@ -273,7 +273,7 @@ class UnpackEngine:
                         "type": type_,
                         "size": f.size,
                         "etag": f.hash,
-                        "mtime": f.mtime,
+                        "modified_time": f.modified_time,
                         "width": f.width,
                         "height": f.height,
                     }

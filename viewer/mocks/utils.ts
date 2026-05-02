@@ -11,7 +11,7 @@ export function assertIsString(value: unknown): asserts value is string {
 
 type OptionalNodeFields = Partial<{
   name: string;
-  modified: number;
+  changed: number;
 }>;
 
 function toNode(
@@ -27,7 +27,7 @@ function toNode(
     isFolder,
     mimeType: isFolder ? "" : "text/plain",
     category: isFolder ? "folder" : "text",
-    modified: optional?.modified ?? 0,
+    changed: optional?.changed ?? 0,
   };
 }
 
@@ -55,7 +55,7 @@ export function rootNode(): Node_ {
     isFolder: true,
     mimeType: "",
     category: "folder",
-    modified: 0,
+    changed: 0,
   };
 }
 
@@ -76,7 +76,7 @@ function toResponse(
     is_directory: isFolder,
     name: optional?.name ?? id,
     mime_type: isFolder ? "" : "text/plain",
-    mtime: "",
+    changed_time: "",
     is_trashed: optional?.trashed ?? false,
   };
 }
@@ -104,7 +104,7 @@ export function rootResponse(): NodeResponse {
     name: "",
     is_directory: true,
     mime_type: "",
-    mtime: "",
+    changed_time: "",
     is_trashed: false,
   };
 }

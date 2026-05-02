@@ -19,7 +19,7 @@ export function createNode(rawNode: NodeResponse): Node_ {
     parentId: getParentId(rawNode),
     mimeType: rawNode.mime_type,
     category: rawNode.is_directory ? "folder" : rawNode.mime_type.split("/")[0],
-    modified: Date.parse(rawNode.mtime),
+    changed: Date.parse(rawNode.changed_time),
   };
   return node;
 }

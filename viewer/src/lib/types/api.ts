@@ -2,7 +2,7 @@ export interface NodeResponse {
   id: string;
   name: string;
   parent_id: string | null;
-  mtime: string;
+  changed_time: string;
   mime_type: string;
   is_directory: boolean;
   is_trashed: boolean;

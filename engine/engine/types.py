@@ -28,7 +28,7 @@ class NodeDict(TypedDict):
     parent_id: str | None
     is_trashed: bool
     is_directory: bool
-    mtime: str
+    changed_time: str
     mime_type: str
     hash: str
     size: int
@@ -45,4 +45,4 @@ class ImageDict(TypedDict):
     size: int
     id: str
     etag: str
-    mtime: datetime
+    modified_time: datetime

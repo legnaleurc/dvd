@@ -3,7 +3,7 @@ export interface Node_ {
   name: string;
   isFolder: boolean;
   parentId: string | null;
-  modified: number;
+  changed: number;
   mimeType: string;
   category: string;
 }

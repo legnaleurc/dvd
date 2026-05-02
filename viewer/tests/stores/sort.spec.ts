@@ -14,25 +14,25 @@ describe("sort", () => {
     const compare = getCompareFunction("BY_DATE_DESC");
     const list = [
       fileNode("a", "", {
-        modified: 1,
+        changed: 1,
       }),
       fileNode("b", "", {
-        modified: 1,
+        changed: 1,
       }),
       fileNode("c", "", {
-        modified: 2,
+        changed: 2,
       }),
     ];
     list.sort(compare);
     expect(list).toEqual([
       fileNode("c", "", {
-        modified: 2,
+        changed: 2,
       }),
       fileNode("a", "", {
-        modified: 1,
+        changed: 1,
       }),
       fileNode("b", "", {
-        modified: 1,
+        changed: 1,
       }),
     ]);
   });
@@ -41,25 +41,25 @@ describe("sort", () => {
     const compare = getCompareFunction("BY_DATE_ASC");
     const list = [
       fileNode("a", "", {
-        modified: 2,
+        changed: 2,
       }),
       fileNode("b", "", {
-        modified: 1,
+        changed: 1,
       }),
       fileNode("c", "", {
-        modified: 2,
+        changed: 2,
       }),
     ];
     list.sort(compare);
     expect(list).toEqual([
       fileNode("b", "", {
-        modified: 1,
+        changed: 1,
       }),
       fileNode("a", "", {
-        modified: 2,
+        changed: 2,
       }),
       fileNode("c", "", {
-        modified: 2,
+        changed: 2,
       }),
     ]);
   });

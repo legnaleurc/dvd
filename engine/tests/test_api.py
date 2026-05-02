@@ -334,7 +334,9 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                     "type": "image/jpeg",
                     "size": 123,
                     "etag": "etag-1",
-                    "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                    "modified_time": datetime.fromisoformat(
+                        "1900-01-01T00:00:00+00:00"
+                    ),
                     "width": 1920,
                     "height": 1080,
                 }
@@ -381,7 +383,9 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                     "type": "image/jpeg",
                     "size": source_path.stat().st_size,
                     "etag": "etag-1",
-                    "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                    "modified_time": datetime.fromisoformat(
+                        "1900-01-01T00:00:00+00:00"
+                    ),
                     "width": 1920,
                     "height": 1080,
                 }
@@ -445,7 +449,9 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                     "type": "image/png",
                     "size": 123,
                     "etag": "etag-1",
-                    "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                    "modified_time": datetime.fromisoformat(
+                        "1900-01-01T00:00:00+00:00"
+                    ),
                     "width": 640,
                     "height": 480,
                 }
@@ -460,7 +466,9 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                     "type": "image/png",
                     "size": 456,
                     "etag": "etag-2",
-                    "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                    "modified_time": datetime.fromisoformat(
+                        "1900-01-01T00:00:00+00:00"
+                    ),
                     "width": 800,
                     "height": 600,
                 }
@@ -521,7 +529,9 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                         "type": "image/png",
                         "size": 123,
                         "etag": f"etag-{id_}",
-                        "mtime": datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+                        "modified_time": datetime.fromisoformat(
+                            "1900-01-01T00:00:00+00:00"
+                        ),
                         "width": 640,
                         "height": 480,
                     }
@@ -552,8 +562,9 @@ def make_node(d: Any):
         parent_id=None,
         is_trashed=False,
         is_directory=False,
-        ctime=datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
-        mtime=datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+        created_time=datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+        modified_time=datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
+        changed_time=datetime.fromisoformat("1900-01-01T00:00:00+00:00"),
         mime_type="",
         hash="",
         size=0,
