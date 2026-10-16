@@ -70,6 +70,19 @@ unpack::curl_easy::read()
     throw std::runtime_error(curl_multi_strerror(rv));
   }
 
+  // A finished transfer is not necessarily a successful one, e.g. the peer
+  // may reset the connection after sending headers.
+  int n_queued = 0;
+  CURLMsg* msg = nullptr;
+  while ((msg = curl_multi_info_read(this->multi.get(), &n_queued))) {
+    if (msg->msg != CURLMSG_DONE) {
+      continue;
+    }
+    if (msg->data.result != CURLE_OK) {
+      throw std::runtime_error(curl_easy_strerror(msg->data.result));
+    }
+  }
+
   this->is_eof = n_active <= 0;
 }
 
