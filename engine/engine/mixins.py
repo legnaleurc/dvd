@@ -1,14 +1,18 @@
 import re
 from collections.abc import AsyncGenerator
 from contextlib import AsyncExitStack, asynccontextmanager
+from datetime import datetime
 from logging import getLogger
 
+from aiohttp import hdrs
 from aiohttp.abc import AbstractView
-from aiohttp.web import StreamResponse
+from aiohttp.web import BaseRequest, StreamResponse
 from aiohttp.web_exceptions import (
     HTTPBadGateway,
     HTTPBadRequest,
     HTTPNotFound,
+    HTTPNotModified,
+    HTTPRequestRangeNotSatisfiable,
     HTTPUnauthorized,
 )
 from wcpan.drive.core.types import Drive, Node, ReadableFile
@@ -37,72 +41,70 @@ class NodeObjectMixin(AbstractView):
 
 class NodeRandomAccessMixin(AbstractView):
     async def create_response(self):
-        range_ = self.request.http_range
-        if range_.start is None and range_.stop is None:
-            return StreamResponse(status=200)
-        return StreamResponse(status=206)
+        return StreamResponse(status=200)
 
     async def setup_headers(
         self,
         response: StreamResponse,
         node: Node,
-    ) -> tuple[int, int] | None:
+    ) -> tuple[int, int]:
+        """
+        Fills the headers by RFC 9110 and returns the (offset, length) to serve.
+        Raises 304 if not modified, or 416 if the range is not satisfiable.
+        """
         assert node.size is not None
 
         DEFAULT_MIME_TYPE = "application/octet-stream"
 
-        range_ = self.request.http_range
-        offset = 0 if range_.start is None else range_.start
-        stop = node.size if range_.stop is None else range_.stop
-        length = stop - offset
-        # Not out of range.
-        good_range = _is_valid_range(range_, node.size)
-        # The response needs Content-Range.
-        want_range = range_.start is not None or range_.stop is not None
-
         response.content_type = (
             DEFAULT_MIME_TYPE if not node.mime_type else node.mime_type
         )
-        response.content_length = length
-        if want_range:
-            response.headers["Content-Range"] = f"bytes {offset}-{stop - 1}/{node.size}"
+        if not is_entity_modified(
+            self.request, etag=node.hash, last_modified=node.modified_time
+        ):
+            not_modified = HTTPNotModified()
+            setup_validators(
+                not_modified, etag=node.hash, last_modified=node.modified_time
+            )
+            raise not_modified
+
+        setup_validators(response, etag=node.hash, last_modified=node.modified_time)
         response.headers["Accept-Ranges"] = "bytes"
 
-        if not good_range:
-            response.set_status(416)
-            return None
+        range_ = _get_file_range(self.request, node)
+        if range_ is None:
+            response.content_length = node.size
+            return 0, node.size
 
-        return offset, length
+        start, stop = range_
+        response.set_status(206)
+        response.content_length = stop - start
+        response.headers["Content-Range"] = f"bytes {start}-{stop - 1}/{node.size}"
+        return start, stop - start
 
     async def feed(
         self,
         response: StreamResponse,
         node: Node,
-        good_range: tuple[int, int] | None,
+        range_: tuple[int, int],
     ) -> None:
-        if not good_range:
+        offset, length = range_
+        if length <= 0:
             await response.prepare(self.request)
             return
 
-        offset, length = good_range
         drive = self.request.app[KEY_DRIVE]
         async with open_download(drive, node, offset) as stream:
             await response.prepare(self.request)
             async for chunk in stream:
-                if len(chunk) < length:
-                    try:
-                        await response.write(chunk)
-                    except ConnectionResetError:
-                        # client closed
-                        break
-                    length -= len(chunk)
-                else:
-                    chunk = chunk[:length]
-                    try:
-                        await response.write(chunk)
-                    except ConnectionResetError:
-                        # client closed
-                        break
+                chunk = chunk[:length]
+                try:
+                    await response.write(chunk)
+                except ConnectionResetError:
+                    # client closed
+                    break
+                length -= len(chunk)
+                if length <= 0:
                     break
 
 
@@ -145,19 +147,80 @@ async def open_download(
         yield stream
 
 
-def _is_valid_range(range_: slice, size: int) -> bool:
-    if range_.start is None and range_.stop is None:
-        return True
-    if range_.start is None:
-        return False
-    if range_.start < 0:
-        return False
-    if range_.start >= size:
-        return False
-    if range_.stop is None:
-        return True
-    if range_.stop <= 0:
-        return False
-    if range_.stop > size:
-        return False
+def is_entity_modified(
+    request: BaseRequest, *, etag: str, last_modified: datetime
+) -> bool:
+    """
+    https://www.rfc-editor.org/rfc/rfc9110#section-13.2.2
+    """
+    if etags := request.if_none_match:
+        # weak comparison, and "*" matches any representation
+        return all(_.value != "*" and _.value != etag for _ in etags)
+    if since := request.if_modified_since:
+        return last_modified > since
+    # Not a conditional request, treat as modified.
     return True
+
+
+def setup_validators(
+    response: StreamResponse, *, etag: str, last_modified: datetime
+) -> None:
+    if etag:
+        response.etag = etag
+    response.last_modified = last_modified
+
+
+def _get_file_range(request: BaseRequest, node: Node) -> tuple[int, int] | None:
+    """
+    Converts the Range header to a [start, stop) range of the file.
+    Returns None if the whole file should be served instead.
+    https://www.rfc-editor.org/rfc/rfc9110#section-14.2
+    """
+    assert node.size is not None
+
+    if hdrs.RANGE not in request.headers:
+        return None
+    if not _is_if_range_matched(request, node):
+        return None
+
+    try:
+        range_ = request.http_range
+    except ValueError:
+        # Invalid, multiple or unknown unit ranges, which we MAY ignore.
+        return None
+
+    size = node.size
+    start: int = range_.start
+    stop = range_.stop
+    if start < 0:
+        # suffix-range: the last N bytes
+        start = max(size + start, 0)
+        stop = size
+    elif stop is None or stop > size:
+        # last-pos absent or beyond the end means the remainder
+        stop = size
+
+    if start >= size:
+        raise HTTPRequestRangeNotSatisfiable(
+            headers={
+                "Accept-Ranges": "bytes",
+                "Content-Range": f"bytes */{size}",
+            }
+        )
+    return start, stop
+
+
+def _is_if_range_matched(request: BaseRequest, node: Node) -> bool:
+    """
+    The validator must match strongly, so a weak entity-tag never matches.
+    https://www.rfc-editor.org/rfc/rfc9110#section-13.1.5
+    """
+    value = request.headers.get(hdrs.IF_RANGE)
+    if value is None:
+        return True
+    if value.startswith(("W/", '"')):
+        return bool(node.hash) and value == f'"{node.hash}"'
+    if_range = request.if_range
+    if if_range is None:
+        return False
+    return int(if_range.timestamp()) == int(node.modified_time.timestamp())

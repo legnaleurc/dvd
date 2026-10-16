@@ -28,7 +28,9 @@ from .mixins import (
     HasTokenMixin,
     NodeObjectMixin,
     NodeRandomAccessMixin,
+    is_entity_modified,
     open_download,
+    setup_validators,
 )
 from .rest import (
     CreateAPIMixin,
@@ -195,8 +197,8 @@ class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
             raise HTTPBadRequest()
 
         response = await self.create_response()
-        good_range = await self.setup_headers(response, node)
-        await self.feed(response, node, good_range)
+        range_ = await self.setup_headers(response, node)
+        await self.feed(response, node, range_)
         return response
 
 
@@ -207,9 +209,9 @@ class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, View):
             raise HTTPBadRequest()
 
         response = await self.create_response()
-        good_range = await self.setup_headers(response, node)
+        range_ = await self.setup_headers(response, node)
         response.headers["Content-Disposition"] = f'attachment; filename="{node.name}"'
-        await self.feed(response, node, good_range)
+        await self.feed(response, node, range_)
         return response
 
 
@@ -299,7 +301,7 @@ class NodeImageView(NodeObjectMixin, View):
             raise HTTPNotFound()
 
     def _create_not_modified_response(self, data: ImageDict) -> Response | None:
-        if _entity_modified(
+        if is_entity_modified(
             self.request, etag=data["etag"], last_modified=data["modified_time"]
         ):
             return None
@@ -498,18 +500,8 @@ def _invalidate_cache_by_change(
     return change
 
 
-def _entity_modified(request: Request, *, etag: str, last_modified: datetime) -> bool:
-    if etags := request.if_none_match:
-        return all(etag != _.value for _ in etags)
-    if since := request.if_modified_since:
-        return last_modified > since
-    # Not a conditional request, treat as modified.
-    return True
-
-
 def _setup_cache_control(
     response: StreamResponse, *, etag: str, last_modified: datetime
 ) -> None:
     response.headers["Cache-Control"] = "private, max-age=86400, immutable"
-    response.etag = etag
-    response.last_modified = last_modified
+    setup_validators(response, etag=etag, last_modified=last_modified)

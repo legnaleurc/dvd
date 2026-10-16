@@ -141,6 +141,115 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(rv.headers["Content-Range"], "bytes 2-5/10")
         self.assertEqual(await rv.read(), data[2:6])
 
+    async def testStreamNodeRange(self):
+        assert self._client.app
+
+        data = b"0123456789"
+        node = make_node({"id": "1", "name": "a.zip", "size": len(data)})
+
+        drive = self._client.app[KEY_DRIVE]
+        aexpect(drive.get_node_by_id).return_value = node
+        drive.download_file = MagicMock(
+            side_effect=lambda _node: FakeReadableFile(data)
+        )
+
+        # (Range, status, Content-Range, body)
+        cases: list[tuple[str, int, str | None, bytes]] = [
+            ("bytes=2-", 206, "bytes 2-9/10", data[2:]),
+            ("bytes=-3", 206, "bytes 7-9/10", data[7:]),
+            ("bytes=-100", 206, "bytes 0-9/10", data),
+            ("bytes=8-100", 206, "bytes 8-9/10", data[8:]),
+            ("bytes=9-9", 206, "bytes 9-9/10", data[9:]),
+            ("bytes=10-", 416, "bytes */10", b""),
+            ("bytes=10-20", 416, "bytes */10", b""),
+            # invalid or unsupported ranges are ignored
+            ("bytes=5-2", 200, None, data),
+            ("bytes=0-1,4-5", 200, None, data),
+            ("items=0-1", 200, None, data),
+        ]
+        for range_, status, content_range, body in cases:
+            with self.subTest(range=range_):
+                rv = await self._client.get(
+                    "/api/v1/nodes/1/stream", headers={"Range": range_}
+                )
+                self.assertEqual(rv.status, status)
+                self.assertEqual(rv.headers.get("Content-Range"), content_range)
+                if status != 416:
+                    self.assertEqual(await rv.read(), body)
+
+    async def testStreamNodeNotModified(self):
+        assert self._client.app
+
+        data = b"0123456789"
+        node = make_node({"id": "1", "name": "a.zip", "size": len(data), "hash": "abc"})
+
+        drive = self._client.app[KEY_DRIVE]
+        aexpect(drive.get_node_by_id).return_value = node
+        drive.download_file = MagicMock(
+            side_effect=lambda _node: FakeReadableFile(data)
+        )
+
+        rv = await self._client.head("/api/v1/nodes/1/stream")
+        last_modified = rv.headers["Last-Modified"]
+
+        # (headers, status)
+        cases: list[tuple[dict[str, str], int]] = [
+            ({"If-None-Match": '"abc"'}, 304),
+            ({"If-None-Match": 'W/"abc"'}, 304),
+            ({"If-None-Match": '"x", "abc"'}, 304),
+            ({"If-None-Match": "*"}, 304),
+            ({"If-None-Match": '"other"'}, 200),
+            ({"If-Modified-Since": last_modified}, 304),
+            ({"If-Modified-Since": "Mon, 01 Jan 1800 00:00:00 GMT"}, 200),
+            # If-None-Match takes precedence over If-Modified-Since
+            ({"If-None-Match": '"other"', "If-Modified-Since": last_modified}, 200),
+            # 304 takes precedence over Range
+            ({"If-None-Match": '"abc"', "Range": "bytes=2-5"}, 304),
+        ]
+        for path in ["/api/v1/nodes/1/stream", "/api/v1/nodes/1/download"]:
+            for headers, status in cases:
+                with self.subTest(path=path, headers=headers):
+                    rv = await self._client.get(path, headers=headers)
+                    self.assertEqual(rv.status, status)
+                    self.assertEqual(rv.headers["ETag"], '"abc"')
+                    self.assertEqual(rv.headers["Last-Modified"], last_modified)
+                    if status == 304:
+                        self.assertEqual(await rv.read(), b"")
+                    else:
+                        self.assertEqual(await rv.read(), data)
+
+    async def testStreamNodeIfRange(self):
+        assert self._client.app
+
+        data = b"0123456789"
+        node = make_node({"id": "1", "name": "a.zip", "size": len(data), "hash": "abc"})
+
+        drive = self._client.app[KEY_DRIVE]
+        aexpect(drive.get_node_by_id).return_value = node
+        drive.download_file = MagicMock(
+            side_effect=lambda _node: FakeReadableFile(data)
+        )
+
+        rv = await self._client.head("/api/v1/nodes/1/stream")
+        self.assertEqual(rv.headers["ETag"], '"abc"')
+        last_modified = rv.headers["Last-Modified"]
+
+        cases: list[tuple[str, int]] = [
+            (last_modified, 206),
+            ("Mon, 01 Jan 2001 00:00:00 GMT", 200),
+            ('"abc"', 206),
+            ('W/"abc"', 200),
+            ('"other"', 200),
+        ]
+        for if_range, status in cases:
+            with self.subTest(if_range=if_range):
+                rv = await self._client.get(
+                    "/api/v1/nodes/1/stream",
+                    headers={"Range": "bytes=2-5", "If-Range": if_range},
+                )
+                self.assertEqual(rv.status, status)
+                self.assertEqual(await rv.read(), data[2:6] if status == 206 else data)
+
     async def testDownloadNodeWithDriveError(self):
         assert self._client.app
 
