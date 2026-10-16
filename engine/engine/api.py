@@ -24,7 +24,12 @@ from wcpan.drive.core.types import ChangeAction, Node
 
 from .app import KEY_DRIVE, KEY_SEARCH_ENGINE, KEY_UNPACK_ENGINE
 from .lib import NodeDict, dict_from_change, dict_from_node, get_node, json_decoder_hook
-from .mixins import HasTokenMixin, NodeObjectMixin, NodeRandomAccessMixin
+from .mixins import (
+    HasTokenMixin,
+    NodeObjectMixin,
+    NodeRandomAccessMixin,
+    open_download,
+)
 from .rest import (
     CreateAPIMixin,
     DestroyAPIMixin,
@@ -319,8 +324,8 @@ class NodeImageView(NodeObjectMixin, View):
         _setup_cache_control(
             response, etag=data["etag"], last_modified=data["modified_time"]
         )
-        await response.prepare(self.request)
-        async with drive.download_file(child) as stream:
+        async with open_download(drive, child) as stream:
+            await response.prepare(self.request)
             async for chunk in stream:
                 await response.write(chunk)
         return response

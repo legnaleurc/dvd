@@ -1,17 +1,24 @@
 import re
+from collections.abc import AsyncGenerator
+from contextlib import AsyncExitStack, asynccontextmanager
+from logging import getLogger
 
 from aiohttp.abc import AbstractView
 from aiohttp.web import StreamResponse
 from aiohttp.web_exceptions import (
+    HTTPBadGateway,
     HTTPBadRequest,
     HTTPNotFound,
     HTTPUnauthorized,
 )
-from wcpan.drive.core.types import Node
+from wcpan.drive.core.types import Drive, Node, ReadableFile
 
 from .app import KEY_DRIVE, KEY_TOKEN
 from .lib import get_node
 from .rest import PermissionMixin
+
+
+_L = getLogger(__name__)
 
 
 class NodeObjectMixin(AbstractView):
@@ -73,14 +80,14 @@ class NodeRandomAccessMixin(AbstractView):
         node: Node,
         good_range: tuple[int, int] | None,
     ) -> None:
-        await response.prepare(self.request)
         if not good_range:
+            await response.prepare(self.request)
             return
 
         offset, length = good_range
         drive = self.request.app[KEY_DRIVE]
-        async with drive.download_file(node) as stream:
-            await stream.seek(offset)
+        async with open_download(drive, node, offset) as stream:
+            await response.prepare(self.request)
             async for chunk in stream:
                 if len(chunk) < length:
                     try:
@@ -118,6 +125,24 @@ class HasTokenMixin(PermissionMixin, AbstractView):
                 "WWW-Authenticate": f"Token realm=api",
             }
         )
+
+
+@asynccontextmanager
+async def open_download(
+    drive: Drive, node: Node, offset: int = 0
+) -> AsyncGenerator[ReadableFile]:
+    """
+    Opens the download and starts the transfer, so the caller can still answer
+    with an error status if the drive fails, before preparing its response.
+    """
+    async with AsyncExitStack() as stack:
+        try:
+            stream = await stack.enter_async_context(drive.download_file(node))
+            await stream.seek(offset)
+        except Exception as e:
+            _L.exception(f"failed to download node {node.id}")
+            raise HTTPBadGateway() from e
+        yield stream
 
 
 def _is_valid_range(range_: slice, size: int) -> bool:

@@ -115,6 +115,50 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         )
         self.assertEqual(rv.status, 404)
 
+    async def testDownloadNode(self):
+        assert self._client.app
+
+        data = b"0123456789"
+        node = make_node({"id": "1", "name": "a.zip", "size": len(data)})
+
+        drive = self._client.app[KEY_DRIVE]
+        aexpect(drive.get_node_by_id).return_value = node
+        drive.download_file = MagicMock(
+            side_effect=lambda _node: FakeReadableFile(data)
+        )
+
+        rv = await self._client.get("/api/v1/nodes/1/download")
+        self.assertEqual(rv.status, 200)
+        self.assertEqual(await rv.read(), data)
+
+        rv = await self._client.get(
+            "/api/v1/nodes/1/stream",
+            headers={
+                "Range": "bytes=2-5",
+            },
+        )
+        self.assertEqual(rv.status, 206)
+        self.assertEqual(rv.headers["Content-Range"], "bytes 2-5/10")
+        self.assertEqual(await rv.read(), data[2:6])
+
+    async def testDownloadNodeWithDriveError(self):
+        assert self._client.app
+
+        node = make_node({"id": "1", "name": "a.zip", "size": 10})
+
+        drive = self._client.app[KEY_DRIVE]
+        aexpect(drive.get_node_by_id).return_value = node
+        drive.download_file = MagicMock(
+            side_effect=lambda _node: FakeReadableFile(
+                b"", error=ConnectionRefusedError()
+            )
+        )
+
+        for path in ["/api/v1/nodes/1/download", "/api/v1/nodes/1/stream"]:
+            with self.assertLogs("engine.mixins", level="ERROR"):
+                rv = await self._client.get(path)
+            self.assertEqual(rv.status, 502)
+
     async def testMoveNode(self):
         assert self._client.app
 
@@ -547,6 +591,28 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(rv.status, 200)
         body = await rv.json()
         self.assertEqual([_["id"] for _ in body], ["first", "second"])
+
+
+class FakeReadableFile:
+    def __init__(self, data: bytes, *, error: Exception | None = None) -> None:
+        self._data = data
+        self._error = error
+        self._offset = 0
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *_: Any) -> None:
+        pass
+
+    async def seek(self, offset: int) -> int:
+        if self._error:
+            raise self._error
+        self._offset = offset
+        return offset
+
+    async def __aiter__(self):
+        yield self._data[self._offset :]
 
 
 def aexpect(unknown: object) -> AsyncMock:
