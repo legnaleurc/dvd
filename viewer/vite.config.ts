@@ -1,3 +1,5 @@
+import adapter from "@sveltejs/adapter-static";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import type { PluginOption } from "vite";
 import { defineConfig } from "vitest/config";
 import { sveltekit } from "@sveltejs/kit/vite";
@@ -21,12 +23,26 @@ const redirect = (map: Record<string, string>): PluginOption => ({
 });
 
 export default defineConfig({
-  server: {
-    proxy: {
-      "/api": process.env.BACKEND_BASE_URL ?? "",
-    },
-  },
-  plugins: [tailwindcss(), sveltekit(), redirect({ "/": "/files" })],
+  server: { proxy: { "/api": process.env.BACKEND_BASE_URL ?? "" } },
+  plugins: [
+    tailwindcss(),
+    sveltekit({
+      preprocess: vitePreprocess(),
+      adapter: adapter({ fallback: "index.html" }),
+      alias: {
+        $mocks: "mocks",
+        $tests: "tests",
+        $actions: "src/lib/actions",
+        $stores: "src/lib/stores",
+        $tools: "src/lib/tools",
+        $types: "src/lib/types",
+        $atoms: "src/lib/components/atoms",
+        $molecules: "src/lib/components/molecules",
+        $organisms: "src/lib/components/organisms",
+      },
+    }),
+    redirect({ "/": "/files" }),
+  ],
   test: {
     // Node.js 25+ enables Web Storage by default, which shadows jsdom's
     // localStorage with one that is undefined without --localstorage-file.
