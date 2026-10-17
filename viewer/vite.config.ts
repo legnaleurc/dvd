@@ -1,4 +1,5 @@
-import type { PluginOption, UserConfig } from "vite";
+import type { PluginOption } from "vite";
+import { defineConfig } from "vitest/config";
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -19,13 +20,16 @@ const redirect = (map: Record<string, string>): PluginOption => ({
   },
 });
 
-const config: UserConfig = {
+export default defineConfig({
   server: {
     proxy: {
       "/api": process.env.BACKEND_BASE_URL ?? "",
     },
   },
   plugins: [tailwindcss(), sveltekit(), redirect({ "/": "/files" })],
-};
-
-export default config;
+  test: {
+    // Node.js 25+ enables Web Storage by default, which shadows jsdom's
+    // localStorage with one that is undefined without --localstorage-file.
+    execArgv: ["--no-experimental-webstorage"],
+  },
+});
