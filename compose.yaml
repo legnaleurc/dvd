@@ -13,6 +13,7 @@ services:
     build:
       context: ./engine
       target: production
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - binary:/mnt/binary:ro
@@ -48,6 +49,7 @@ services:
     command: sh -c "cp -R /app/* /mnt/static"
   nginx:
     image: docker.io/library/nginx:stable-alpine-slim
+    restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /usr/share/zoneinfo:/usr/share/zoneinfo:ro
