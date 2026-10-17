@@ -1,6 +1,5 @@
 .DS_Store
 .vscode
-.python-version
 .env
 .env.*
 !.env.example

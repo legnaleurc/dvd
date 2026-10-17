@@ -28,9 +28,6 @@ jobs:
         uses: astral-sh/setup-uv@v10.3.0
         with:
           working-directory: "engine"
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v7
-        with:
           python-version: ${{ matrix.python-version }}
       - name: Install
         working-directory: engine
