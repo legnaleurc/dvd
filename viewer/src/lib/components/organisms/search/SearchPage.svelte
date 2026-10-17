@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { beforeNavigate, replaceState } from "$app/navigation";
+  import { beforeNavigate, goto } from "$app/navigation";
   import { page } from "$app/stores";
 
   import type { NeverRecord } from "$types/traits";
@@ -36,7 +36,7 @@
 
     const queryName = $page.url.searchParams.get("name");
     $page.url.searchParams.delete("name");
-    replaceState($page.url, $page.state);
+    goto($page.url, { shallow: true, replace: true, state: $page.state });
     if (!queryName) {
       return "";
     }
@@ -46,7 +46,9 @@
 
   let isSelectionEmpty = true;
 
-  beforeNavigate(() => {
+  beforeNavigate(({ shallow, type }) => {
+    if (shallow && type === "goto") return;
+
     deselectAll();
   });
 
@@ -96,7 +98,6 @@
   {#if !isSelectionEmpty}
     <BottomBar />
   {/if}
-  <div class="hidden">
-    <slot />
-  </div>
+
+  <div class="hidden"><slot></slot></div>
 </div>

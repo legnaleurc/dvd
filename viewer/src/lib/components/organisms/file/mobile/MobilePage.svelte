@@ -37,7 +37,9 @@
     stack = [...stack.slice(0, index + 1)];
   }
 
-  beforeNavigate(() => {
+  beforeNavigate(({ shallow, type }) => {
+    if (shallow && type === "goto") return;
+
     deselectAll();
   });
 
@@ -54,6 +56,7 @@
 
 <div class="w-full h-full flex flex-col">
   <PathBar {stack} on:back={handlePop} on:backTo={handlePopTo} />
+
   <div class="flex-1 min-h-0">
     {#each stack as id (id)}
       <div class="hidden last:flex w-full h-full">
