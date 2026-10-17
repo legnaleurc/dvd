@@ -8,7 +8,7 @@ from logging import getLogger
 from pathlib import PurePath
 from typing import Any
 
-from aiohttp.web import FileResponse, Request, Response, StreamResponse, View
+from aiohttp.web import FileResponse, Response, StreamResponse, View
 from aiohttp.web_exceptions import (
     HTTPBadRequest,
     HTTPConflict,

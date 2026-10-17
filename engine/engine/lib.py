@@ -2,10 +2,9 @@ from datetime import datetime
 from typing import Any
 
 from wcpan.drive.core.exceptions import NodeNotFoundError
-from wcpan.drive.core.lib import dispatch_change
 from wcpan.drive.core.types import ChangeAction, Drive, Node
 
-from .types import NodeDict
+from .types import ChangeDict, NodeDict
 
 
 def json_decoder_hook(d: dict[str, Any]) -> Any:
@@ -45,15 +44,9 @@ def dict_from_node(node: Node) -> NodeDict:
     }
 
 
-def dict_from_change(change: ChangeAction):
-    return dispatch_change(
-        change,
-        on_remove=lambda _: {
-            "removed": True,
-            "id": _,
-        },
-        on_update=lambda _: {
-            "removed": False,
-            "node": dict_from_node(_),
-        },
-    )
+def dict_from_change(change: ChangeAction) -> ChangeDict:
+    match change:
+        case (True, id_):
+            return {"removed": True, "id": id_}
+        case (False, node):
+            return {"removed": False, "node": dict_from_node(node)}

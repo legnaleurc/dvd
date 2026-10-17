@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 
 class ImageSizeDict(TypedDict):
@@ -32,6 +32,19 @@ class NodeDict(TypedDict):
     mime_type: str
     hash: str
     size: int
+
+
+class RemovedChangeDict(TypedDict):
+    removed: Literal[True]
+    id: str
+
+
+class UpsertChangeDict(TypedDict):
+    removed: Literal[False]
+    node: NodeDict
+
+
+type ChangeDict = RemovedChangeDict | UpsertChangeDict
 
 
 class SearchNodeDict(NodeDict):
