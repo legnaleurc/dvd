@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { extractCircleAndAuthor } from "$lib/tools/string";
+import { extractCircleAndAuthor } from "#lib/tools/string.js";
 
 describe("string", () => {
   describe("extractCircleAndAuthor", () => {
