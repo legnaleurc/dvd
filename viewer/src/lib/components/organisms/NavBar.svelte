@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { getFullScreenContext } from "$stores/fullscreen";
   import Icon from "$atoms/Icon.svelte";
 
@@ -41,7 +41,7 @@
         <a
           draggable="false"
           class="w-full h-full flex justify-center items-center active:bg-pale-700"
-          class:text-pale-300={!$page.url.pathname.startsWith(tab.path)}
+          class:text-pale-300={!page.url.pathname.startsWith(tab.path)}
           href={tab.path}
         >
           <Icon name={tab.icon} />

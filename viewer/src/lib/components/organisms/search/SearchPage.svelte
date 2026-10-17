@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
 
   import { beforeNavigate, goto } from "$app/navigation";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
 
   import type { NeverRecord } from "$types/traits";
   import { setSelectionContext } from "$stores/selection";
@@ -29,14 +29,15 @@
   const { onVisible } = useVisibilityChange();
 
   function popQueryName(): string {
-    const routeId = $page.route.id;
+    const routeId = page.route.id;
     if (routeId !== "/search") {
       return "";
     }
 
-    const queryName = $page.url.searchParams.get("name");
-    $page.url.searchParams.delete("name");
-    goto($page.url, { shallow: true, replace: true, state: $page.state });
+    const url = new URL(page.url.href);
+    const queryName = url.searchParams.get("name");
+    url.searchParams.delete("name");
+    goto(url, { shallow: true, replace: true, state: page.state });
     if (!queryName) {
       return "";
     }

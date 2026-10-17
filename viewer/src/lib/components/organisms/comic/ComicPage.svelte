@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { toStore } from "svelte/store";
 
   import type { NeverRecord } from "$types/traits";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { getComicContext } from "$stores/comic";
   import BookList from "./BookList.svelte";
   import ImageList from "./ImageList.svelte";
@@ -13,9 +14,12 @@
 
   const { idList, comicMap, openComic } = getComicContext();
 
-  $: isMainRoute = $page.route.id === "/comic";
-  $: isBookRoute = $page.route.id === "/comic/[comicId]";
-  $: comicId = $page.params.comicId ?? "";
+  const pageRouteId = toStore(() => page.route.id);
+  const pageComicId = toStore(() => page.params.comicId);
+
+  $: isMainRoute = $pageRouteId === "/comic";
+  $: isBookRoute = $pageRouteId === "/comic/[comicId]";
+  $: comicId = $pageComicId ?? "";
 
   onMount(() => {
     if (isBookRoute && !$comicMap[comicId]) {
@@ -34,7 +38,6 @@
       <ImageList {id} {isActive} />
     </div>
   {/each}
-  <div class="hidden">
-    <slot />
-  </div>
+
+  <div class="hidden"><slot></slot></div>
 </div>

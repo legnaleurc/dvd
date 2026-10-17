@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { toStore } from "svelte/store";
 
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { getVideoContext } from "$stores/video";
   import { getStreamUrl } from "$tools/api";
   import { callExternal } from "$tools/external";
@@ -13,7 +14,9 @@
   let url = "";
   let videoElement: HTMLVideoElement | null = null;
 
-  $: id = $page.params.videoId ?? "";
+  const pageVideoId = toStore(() => page.params.videoId);
+
+  $: id = $pageVideoId ?? "";
   $: video = $videoMap[id];
   $: name = video?.name ?? "";
   $: mimeType = video?.mimeType ?? "";

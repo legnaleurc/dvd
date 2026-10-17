@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
+  import { toStore } from "svelte/store";
 
   import type { NeverRecord, SvelteComponentModule } from "$types/traits";
   import { setVideoContext } from "$stores/video";
@@ -11,6 +12,8 @@
   };
 
   setVideoContext();
+
+  const pageRouteId = toStore(() => page.route.id);
 
   type Page = {
     routePrefix: string;
@@ -40,7 +43,7 @@
     },
   ];
 
-  $: routeId = $page.route.id ?? "";
+  $: routeId = $pageRouteId ?? "";
 </script>
 
 <main class="w-full h-full">
@@ -51,7 +54,7 @@
     >
       <LazyLoad lazy={page_.lazy}>
         <LoadingBlock slot="pending" />
-        <slot slot="fullfilled" />
+        <slot slot="fullfilled"></slot>
       </LazyLoad>
     </section>
   {/each}
