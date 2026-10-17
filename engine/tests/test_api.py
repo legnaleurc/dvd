@@ -21,6 +21,8 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         await super().asyncSetUp()
 
         static_path = self.enterContext(TemporaryDirectory())
+        (Path(static_path) / "_app").mkdir()
+        (Path(static_path) / "assets").mkdir()
         self.enterContext(patch("engine.main.create_drive_from_config"))
         app = await self.enterAsyncContext(
             _application_context(

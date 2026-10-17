@@ -17,7 +17,6 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - binary:/mnt/binary:ro
-      - static:/mnt/static:ro
       - ${DVD_DRIVE_FILE}:/mnt/drive.yaml
       - ${DVD_CONFIG_DIR}:/mnt/config:ro
       - ${DVD_DATA_DIR}:/mnt/data:rw

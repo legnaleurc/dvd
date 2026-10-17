@@ -149,12 +149,8 @@ def _setup_api_path(app: Application) -> None:
 
 
 def _setup_static_path(app: Application, path: str) -> None:
-    app.router.add_view(r"/", view.IndexRedirect)
-    app.router.add_view(r"/files", view.IndexView)
-    app.router.add_view(r"/search", view.IndexView)
-    app.router.add_view(r"/settings", view.IndexView)
-    app.router.add_view(r"/comic", view.IndexView)
-    app.router.add_view(r"/comic/{id}", view.IndexView)
-    app.router.add_view(r"/video", view.IndexView)
-    app.router.add_view(r"/video/{id}", view.IndexView)
-    app.router.add_static(r"/", path)
+    root = Path(path)
+    app.router.add_static(r"/_app", root / "_app")
+    app.router.add_static(r"/assets", root / "assets")
+    # must be registered after api and static routes
+    app.router.add_view(r"/{path:.*}", view.IndexView)

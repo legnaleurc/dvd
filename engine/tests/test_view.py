@@ -13,6 +13,11 @@ class ViewTestCase(IsolatedAsyncioTestCase):
         await super().asyncSetUp()
 
         static_path = self.enterContext(TemporaryDirectory())
+        self._static_path = Path(static_path)
+        self._write("index.html", "index")
+        self._write("_app/immutable/x.js", "js")
+        self._write("assets/favicon.svg", "svg")
+
         self.enterContext(patch("engine.main.create_drive_from_config"))
         app = await self.enterAsyncContext(
             _application_context(
@@ -25,44 +30,56 @@ class ViewTestCase(IsolatedAsyncioTestCase):
         )
         client = await self.enterAsyncContext(TestClient(TestServer(app)))
         self._client = client
-        self._static_path = Path(static_path)
 
     async def asyncTearDown(self) -> None:
         await super().asyncTearDown()
 
-    async def testCorrectRoutes(self):
-        expected = "test"
+    def _write(self, path: str, content: str) -> None:
+        full_path = self._static_path / path
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        with full_path.open("w") as fout:
+            fout.write(content)
 
-        index_path = self._static_path / "index.html"
-        with index_path.open("w") as fout:
-            fout.write(expected)
-
-        valid_routes = [
+    async def testPages(self):
+        routes = [
             "",
             "files",
             "settings",
             "search",
             "comic",
             "comic/abc",
+            "video",
+            "video/abc",
+            "abc",
+            "random.txt",
         ]
-        for route in valid_routes:
-            rv = await self._client.get(f"/{route}")
-            self.assertEqual(rv.status, 200)
-            body = await rv.text()
-            self.assertEqual(body, expected)
+        for route in routes:
+            with self.subTest(route=route):
+                rv = await self._client.get(f"/{route}")
+                self.assertEqual(rv.status, 200)
+                body = await rv.text()
+                self.assertEqual(body, "index")
 
-    async def testInvalidRoutes(self):
-        rv = await self._client.get("/abc")
-        self.assertEqual(rv.status, 404)
+    async def testUnknownApi(self):
+        for route in ["api", "api/v1/unknown"]:
+            with self.subTest(route=route):
+                rv = await self._client.get(f"/{route}")
+                self.assertEqual(rv.status, 404)
 
-    async def testStaticUrl(self):
-        expected = "test"
+    async def testStaticFiles(self):
+        expected = {
+            "_app/immutable/x.js": "js",
+            "assets/favicon.svg": "svg",
+        }
+        for route, content in expected.items():
+            with self.subTest(route=route):
+                rv = await self._client.get(f"/{route}")
+                self.assertEqual(rv.status, 200)
+                body = await rv.text()
+                self.assertEqual(body, content)
 
-        index_path = self._static_path / "random.txt"
-        with index_path.open("w") as fout:
-            fout.write(expected)
-
-        rv = await self._client.get("/random.txt")
-        self.assertEqual(rv.status, 200)
-        body = await rv.text()
-        self.assertEqual(body, expected)
+    async def testMissingStaticFiles(self):
+        for route in ["_app/missing.js", "assets/missing.svg"]:
+            with self.subTest(route=route):
+                rv = await self._client.get(f"/{route}")
+                self.assertEqual(rv.status, 404)
