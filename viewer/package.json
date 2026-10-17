@@ -43,5 +43,9 @@
   "engines": {
     "node": ">=22.x",
     "npm": ">=8.x"
+  },
+  "allowScripts": {
+    "@parcel/watcher": false,
+    "msw": false
   }
 }
