@@ -16,7 +16,6 @@ from aiohttp.web_exceptions import (
     HTTPNoContent,
     HTTPNotFound,
     HTTPNotModified,
-    HTTPUnauthorized,
 )
 from multidict import MultiMapping
 from wcpan.drive.core.lib import dispatch_change
@@ -37,7 +36,7 @@ from .rest import (
     DestroyAPIMixin,
     ListAPIMixin,
     PartialUpdateAPIMixin,
-    RetriveAPIMixin,
+    RetrieveAPIMixin,
     json_response,
 )
 from .search import (
@@ -56,12 +55,12 @@ _L = getLogger(__name__)
 class NodeView(
     NodeObjectMixin,
     HasTokenMixin,
-    RetriveAPIMixin[NodeDict],
-    PartialUpdateAPIMixin,
+    RetrieveAPIMixin[NodeDict],
+    PartialUpdateAPIMixin[NodeDict],
     DestroyAPIMixin,
     View,
 ):
-    async def retrive(self):
+    async def retrieve(self):
         node = await self.get_object()
         return dict_from_node(node)
 
@@ -77,22 +76,24 @@ class NodeView(
                 "name",
             ),
         )
-        if kwargs:
-            parent_node = None
-            name = None
-            if "parent_id" in kwargs and "parent_path" in kwargs:
-                raise HTTPBadRequest()
-            if "parent_id" in kwargs:
-                parent_node = await drive.get_node_by_id(kwargs["parent_id"])
-            if "parent_path" in kwargs:
-                parent_path = PurePath(kwargs["parent_path"])
-                parent_node = await drive.get_node_by_path(parent_path)
-            if "name" in kwargs:
-                name = kwargs["name"]
-            await drive.move(node, new_parent=parent_node, new_name=name)
-        raise HTTPNoContent()
+        if not kwargs:
+            return dict_from_node(node)
 
-    async def destory(self):
+        parent_node = None
+        name = None
+        if "parent_id" in kwargs and "parent_path" in kwargs:
+            raise HTTPBadRequest()
+        if "parent_id" in kwargs:
+            parent_node = await drive.get_node_by_id(kwargs["parent_id"])
+        if "parent_path" in kwargs:
+            parent_path = PurePath(kwargs["parent_path"])
+            parent_node = await drive.get_node_by_path(parent_path)
+        if "name" in kwargs:
+            name = kwargs["name"]
+        node = await drive.move(node, new_parent=parent_node, new_name=name)
+        return dict_from_node(node)
+
+    async def destroy(self):
         node = await self.get_object()
         _L.info(f"trash {node.id} {node.name}")
         drive = self.request.app[KEY_DRIVE]
@@ -381,8 +382,7 @@ class NodeVideoListView(
 
 class ChangesView(HasTokenMixin, View):
     async def post(self):
-        if not await self.has_permission():
-            raise HTTPUnauthorized()
+        await self.check_permission()
 
         drive = self.request.app[KEY_DRIVE]
         se = self.request.app[KEY_SEARCH_ENGINE]
@@ -395,8 +395,7 @@ class ChangesView(HasTokenMixin, View):
 
 class ApplyView(HasTokenMixin, View):
     async def post(self):
-        if not await self.has_permission():
-            raise HTTPUnauthorized()
+        await self.check_permission()
 
         kwargs = await self.request.json()
         command = kwargs["command"]
@@ -446,15 +445,14 @@ class CachesImagesView(
             for _ in node_list
         ]
 
-    async def destory(self):
+    async def destroy(self):
         ue = self.request.app[KEY_UNPACK_ENGINE]
         ue.clear_cache()
 
 
 class CachesSearchesView(HasTokenMixin, View):
     async def post(self):
-        if not await self.has_permission():
-            raise HTTPUnauthorized()
+        await self.check_permission()
 
         parser = partial(json.loads, object_hook=json_decoder_hook)
         nodes: list[Node] = await self.request.json(loads=parser)

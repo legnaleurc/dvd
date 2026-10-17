@@ -1,34 +1,37 @@
 import json
-from abc import ABCMeta, abstractmethod
-from typing import Any
+from abc import abstractmethod
+from typing import Any, NoReturn
 
+from aiohttp.abc import AbstractView
 from aiohttp.web import Response
 from aiohttp.web_exceptions import HTTPNoContent
 
 
-class PermissionMixin(metaclass=ABCMeta):
-    async def has_permission(self) -> bool:
-        return True
-
-    @abstractmethod
-    async def raise_permission_error(self): ...
-
-
-class RetriveAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
-    async def get(self) -> Response:
+class PermissionMixin(AbstractView):
+    async def check_permission(self) -> None:
         if not await self.has_permission():
             await self.raise_permission_error()
-        rv = await self.retrive()
+
+    @abstractmethod
+    async def has_permission(self) -> bool: ...
+
+    @abstractmethod
+    async def raise_permission_error(self) -> NoReturn: ...
+
+
+class RetrieveAPIMixin[T](PermissionMixin):
+    async def get(self) -> Response:
+        await self.check_permission()
+        rv = await self.retrieve()
         return json_response(rv, status=200)
 
     @abstractmethod
-    async def retrive(self) -> T: ...
+    async def retrieve(self) -> T: ...
 
 
-class ListAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
+class ListAPIMixin[T](PermissionMixin):
     async def get(self) -> Response:
-        if not await self.has_permission():
-            await self.raise_permission_error()
+        await self.check_permission()
         rv = await self.list_()
         return json_response(rv, status=200)
 
@@ -36,21 +39,19 @@ class ListAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
     async def list_(self) -> list[T]: ...
 
 
-class PartialUpdateAPIMixin(PermissionMixin, metaclass=ABCMeta):
-    async def patch(self):
-        if not await self.has_permission():
-            await self.raise_permission_error()
+class PartialUpdateAPIMixin[T](PermissionMixin):
+    async def patch(self) -> Response:
+        await self.check_permission()
         rv = await self.partial_update()
         return json_response(rv, status=200)
 
     @abstractmethod
-    async def partial_update(self): ...
+    async def partial_update(self) -> T: ...
 
 
-class CreateAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
+class CreateAPIMixin[T](PermissionMixin):
     async def post(self) -> Response:
-        if not await self.has_permission():
-            await self.raise_permission_error()
+        await self.check_permission()
         rv = await self.create()
         return json_response(rv, status=201)
 
@@ -58,15 +59,14 @@ class CreateAPIMixin[T](PermissionMixin, metaclass=ABCMeta):
     async def create(self) -> T: ...
 
 
-class DestroyAPIMixin(PermissionMixin, metaclass=ABCMeta):
-    async def delete(self):
-        if not await self.has_permission():
-            await self.raise_permission_error()
-        await self.destory()
+class DestroyAPIMixin(PermissionMixin):
+    async def delete(self) -> NoReturn:
+        await self.check_permission()
+        await self.destroy()
         raise HTTPNoContent()
 
     @abstractmethod
-    async def destory(self): ...
+    async def destroy(self) -> None: ...
 
 
 def json_response(data: Any, status: int = 200):

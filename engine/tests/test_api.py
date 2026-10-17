@@ -50,6 +50,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
 
         rv = await self._client.post("/api/v1/changes")
         self.assertEqual(rv.status, 401)
+        self.assertEqual(rv.headers["WWW-Authenticate"], "Token realm=api")
         rv = await self._client.post(
             "/api/v1/changes",
             headers={
@@ -282,6 +283,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
 
         drive = self._client.app[KEY_DRIVE]
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
+        drive.move = AsyncMock(return_value=make_node({"id": "1", "parent_id": "2"}))
 
         rv = await self._client.patch(
             "/api/v1/nodes/1",
@@ -299,11 +301,14 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                 "Authorization": f"Token 1234",
             },
         )
-        self.assertEqual(rv.status, 204)
+        self.assertEqual(rv.status, 200)
         aexpect(drive.move).assert_called_once_with(
             make_node({"id": "1"}),
             new_parent=make_node({"id": "2"}),
             new_name=None,
+        )
+        self.assertEqual(
+            await rv.json(), dict_from_node(make_node({"id": "1", "parent_id": "2"}))
         )
 
     async def testRenameNode(self):
@@ -318,6 +323,7 @@ class ApiTestCase(IsolatedAsyncioTestCase):
 
         drive = self._client.app[KEY_DRIVE]
         drive.get_node_by_id = AsyncMock(wraps=fake_get_node_by_id)
+        drive.move = AsyncMock(return_value=make_node({"id": "1", "name": "test"}))
 
         rv = await self._client.patch(
             "/api/v1/nodes/1",
@@ -335,11 +341,14 @@ class ApiTestCase(IsolatedAsyncioTestCase):
                 "Authorization": f"Token 1234",
             },
         )
-        self.assertEqual(rv.status, 204)
+        self.assertEqual(rv.status, 200)
         aexpect(drive.move).assert_called_once_with(
             make_node({"id": "1"}),
             new_parent=None,
             new_name="test",
+        )
+        self.assertEqual(
+            await rv.json(), dict_from_node(make_node({"id": "1", "name": "test"}))
         )
 
     async def testTrashNode(self):
