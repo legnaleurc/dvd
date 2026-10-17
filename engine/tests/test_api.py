@@ -132,7 +132,17 @@ class ApiTestCase(IsolatedAsyncioTestCase):
 
         rv = await self._client.get("/api/v1/nodes/1/download")
         self.assertEqual(rv.status, 200)
+        self.assertEqual(
+            rv.headers["Content-Disposition"], 'attachment; filename="a.zip"'
+        )
         self.assertEqual(await rv.read(), data)
+
+        rv = await self._client.head("/api/v1/nodes/1/download")
+        self.assertEqual(rv.status, 200)
+        self.assertEqual(rv.headers["Content-Length"], str(len(data)))
+        self.assertEqual(
+            rv.headers["Content-Disposition"], 'attachment; filename="a.zip"'
+        )
 
         rv = await self._client.get(
             "/api/v1/nodes/1/stream",

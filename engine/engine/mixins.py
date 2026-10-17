@@ -1,12 +1,12 @@
 import re
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Mapping
 from contextlib import AsyncExitStack, asynccontextmanager
 from datetime import datetime
 from logging import getLogger
 
 from aiohttp import hdrs
 from aiohttp.abc import AbstractView
-from aiohttp.web import BaseRequest, StreamResponse
+from aiohttp.web import BaseRequest, Request, StreamResponse
 from aiohttp.web_exceptions import (
     HTTPBadGateway,
     HTTPBadRequest,
@@ -26,7 +26,7 @@ _L = getLogger(__name__)
 
 
 class NodeObjectMixin(AbstractView):
-    async def get_object(self):
+    async def get_object(self) -> Node:
         id_ = self.request.match_info.get("id", None)
         if not id_:
             raise HTTPBadRequest()
@@ -39,73 +39,35 @@ class NodeObjectMixin(AbstractView):
         return node
 
 
-class NodeRandomAccessMixin(AbstractView):
-    async def create_response(self):
-        return StreamResponse(status=200)
+class NodeRandomAccessMixin(NodeObjectMixin):
+    """
+    Serves the file content of a node, with conditional and range requests.
+    """
 
-    async def setup_headers(
+    async def head(self) -> StreamResponse:
+        _node, response, _range = await self._prepare_response()
+        await response.prepare(self.request)
+        return response
+
+    async def get(self) -> StreamResponse:
+        node, response, range_ = await self._prepare_response()
+        await _feed(self.request, response, node, range_)
+        return response
+
+    async def get_extra_headers(self) -> Mapping[str, str]:
+        return {}
+
+    async def _prepare_response(
         self,
-        response: StreamResponse,
-        node: Node,
-    ) -> tuple[int, int]:
-        """
-        Fills the headers by RFC 9110 and returns the (offset, length) to serve.
-        Raises 304 if not modified, or 416 if the range is not satisfiable.
-        """
-        assert node.size is not None
+    ) -> tuple[Node, StreamResponse, tuple[int, int]]:
+        node = await self.get_object()
+        if node.is_directory:
+            raise HTTPBadRequest()
 
-        DEFAULT_MIME_TYPE = "application/octet-stream"
-
-        response.content_type = (
-            DEFAULT_MIME_TYPE if not node.mime_type else node.mime_type
-        )
-        if not is_entity_modified(
-            self.request, etag=node.hash, last_modified=node.modified_time
-        ):
-            not_modified = HTTPNotModified()
-            setup_validators(
-                not_modified, etag=node.hash, last_modified=node.modified_time
-            )
-            raise not_modified
-
-        setup_validators(response, etag=node.hash, last_modified=node.modified_time)
-        response.headers["Accept-Ranges"] = "bytes"
-
-        range_ = _get_file_range(self.request, node)
-        if range_ is None:
-            response.content_length = node.size
-            return 0, node.size
-
-        start, stop = range_
-        response.set_status(206)
-        response.content_length = stop - start
-        response.headers["Content-Range"] = f"bytes {start}-{stop - 1}/{node.size}"
-        return start, stop - start
-
-    async def feed(
-        self,
-        response: StreamResponse,
-        node: Node,
-        range_: tuple[int, int],
-    ) -> None:
-        offset, length = range_
-        if length <= 0:
-            await response.prepare(self.request)
-            return
-
-        drive = self.request.app[KEY_DRIVE]
-        async with open_download(drive, node, offset) as stream:
-            await response.prepare(self.request)
-            async for chunk in stream:
-                chunk = chunk[:length]
-                try:
-                    await response.write(chunk)
-                except ConnectionResetError:
-                    # client closed
-                    break
-                length -= len(chunk)
-                if length <= 0:
-                    break
+        response = StreamResponse(status=200)
+        range_ = _setup_headers(self.request, response, node)
+        response.headers.update(await self.get_extra_headers())
+        return node, response, range_
 
 
 class HasTokenMixin(PermissionMixin):
@@ -168,6 +130,68 @@ def setup_validators(
     if etag:
         response.etag = etag
     response.last_modified = last_modified
+
+
+def _setup_headers(
+    request: BaseRequest,
+    response: StreamResponse,
+    node: Node,
+) -> tuple[int, int]:
+    """
+    Fills the headers by RFC 9110 and returns the (offset, length) to serve.
+    Raises 304 if not modified, or 416 if the range is not satisfiable.
+    """
+    assert node.size is not None
+
+    DEFAULT_MIME_TYPE = "application/octet-stream"
+
+    response.content_type = DEFAULT_MIME_TYPE if not node.mime_type else node.mime_type
+    if not is_entity_modified(
+        request, etag=node.hash, last_modified=node.modified_time
+    ):
+        not_modified = HTTPNotModified()
+        setup_validators(not_modified, etag=node.hash, last_modified=node.modified_time)
+        raise not_modified
+
+    setup_validators(response, etag=node.hash, last_modified=node.modified_time)
+    response.headers["Accept-Ranges"] = "bytes"
+
+    range_ = _get_file_range(request, node)
+    if range_ is None:
+        response.content_length = node.size
+        return 0, node.size
+
+    start, stop = range_
+    response.set_status(206)
+    response.content_length = stop - start
+    response.headers["Content-Range"] = f"bytes {start}-{stop - 1}/{node.size}"
+    return start, stop - start
+
+
+async def _feed(
+    request: Request,
+    response: StreamResponse,
+    node: Node,
+    range_: tuple[int, int],
+) -> None:
+    offset, length = range_
+    if length <= 0:
+        await response.prepare(request)
+        return
+
+    drive = request.app[KEY_DRIVE]
+    async with open_download(drive, node, offset) as stream:
+        await response.prepare(request)
+        async for chunk in stream:
+            chunk = chunk[:length]
+            try:
+                await response.write(chunk)
+            except ConnectionResetError:
+                # client closed
+                break
+            length -= len(chunk)
+            if length <= 0:
+                break
 
 
 def _get_file_range(request: BaseRequest, node: Node) -> tuple[int, int] | None:

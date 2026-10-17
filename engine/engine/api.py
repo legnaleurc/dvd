@@ -1,7 +1,7 @@
 import json
 import shlex
 from asyncio import create_subprocess_exec, gather
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from datetime import datetime
 from functools import partial
 from logging import getLogger
@@ -181,39 +181,14 @@ class NodeChildrenView(NodeObjectMixin, HasTokenMixin, ListAPIMixin[NodeDict], V
         return children
 
 
-class NodeStreamView(NodeObjectMixin, NodeRandomAccessMixin, View):
-    async def head(self):
+class NodeStreamView(NodeRandomAccessMixin, View):
+    pass
+
+
+class NodeDownloadView(NodeRandomAccessMixin, View):
+    async def get_extra_headers(self) -> Mapping[str, str]:
         node = await self.get_object()
-        if node.is_directory:
-            raise HTTPBadRequest()
-
-        response = await self.create_response()
-        await self.setup_headers(response, node)
-        await response.prepare(self.request)
-        return response
-
-    async def get(self):
-        node = await self.get_object()
-        if node.is_directory:
-            raise HTTPBadRequest()
-
-        response = await self.create_response()
-        range_ = await self.setup_headers(response, node)
-        await self.feed(response, node, range_)
-        return response
-
-
-class NodeDownloadView(NodeObjectMixin, NodeRandomAccessMixin, View):
-    async def get(self):
-        node = await self.get_object()
-        if node.is_directory:
-            raise HTTPBadRequest()
-
-        response = await self.create_response()
-        range_ = await self.setup_headers(response, node)
-        response.headers["Content-Disposition"] = f'attachment; filename="{node.name}"'
-        await self.feed(response, node, range_)
-        return response
+        return {"Content-Disposition": f'attachment; filename="{node.name}"'}
 
 
 class NodeImageListView(
