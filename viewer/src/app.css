@@ -71,6 +71,8 @@
 
     /* Prevent viewport scrolling in iOS. */
     position: fixed;
+    /* iOS 26 tints the status bar area from the root background. */
+    background-color: black;
     /* Prevent touch actions. */
     touch-action: manipulation;
   }
@@ -89,6 +91,7 @@
 
   @media screen {
     html {
+      padding-top: var(--inset-top);
       padding-left: var(--inset-left);
       padding-right: var(--inset-right);
       padding-bottom: var(--inset-bottom);
