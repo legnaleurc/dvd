@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getComicContext } from "$stores/comic";
-  import { getSelectionContext } from "$stores/selection";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import Icon from "$atoms/Icon.svelte";
+  import { getComicContext } from "#stores/comic.js";
+  import { getSelectionContext } from "#stores/selection.js";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import Icon from "#atoms/Icon.svelte";
 
   export let getNameById: (id: string) => string;
 

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { get } from "svelte/store";
 
-import { fileNode } from "$mocks/utils";
-import { createStore, getCompareFunction } from "$stores/sort";
+import { fileNode } from "#mocks/utils.js";
+import { createStore, getCompareFunction } from "#stores/sort.js";
 
 describe("sort", () => {
   test("has good initial value", () => {

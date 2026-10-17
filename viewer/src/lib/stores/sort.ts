@@ -1,7 +1,7 @@
 import { getContext, setContext } from "svelte";
 import { writable } from "svelte/store";
 
-import type { Node_ } from "$types/filesystem";
+import type { Node_ } from "#types/filesystem.js";
 
 const KEY = Symbol();
 

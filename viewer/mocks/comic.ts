@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 
-import type { ImageResponse } from "$types/api";
+import type { ImageResponse } from "#types/api.js";
 import { assertIsString, folderResponse, status204 } from "./utils";
 
 const TABLE: Record<string, ImageResponse[]> = {

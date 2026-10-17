@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getImageUrl } from "$tools/api";
-  import { getComicContext } from "$stores/comic";
-  import { getFullScreenContext } from "$stores/fullscreen";
-  import { publishIntersection } from "$actions/observer";
+  import { getImageUrl } from "#tools/api.js";
+  import { getComicContext } from "#stores/comic.js";
+  import { getFullScreenContext } from "#stores/fullscreen.js";
+  import { publishIntersection } from "#actions/observer.js";
   import Header from "./Header.svelte";
   import ImageBlock from "./ImageBlock.svelte";
 

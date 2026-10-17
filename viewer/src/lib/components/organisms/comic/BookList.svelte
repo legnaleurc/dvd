@@ -1,10 +1,10 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { getComicContext } from "$stores/comic";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import EmptyBlock from "$atoms/EmptyBlock.svelte";
-  import ListItem from "$molecules/ListItem.svelte";
+  import { getComicContext } from "#stores/comic.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import EmptyBlock from "#atoms/EmptyBlock.svelte";
+  import ListItem from "#molecules/ListItem.svelte";
 
   const { idList, comicMap, clearComic, openCachedComic } = getComicContext();
 

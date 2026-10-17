@@ -1,7 +1,7 @@
 import { HttpResponse } from "msw";
 
-import type { NodeResponse } from "$types/api";
-import type { Node_ } from "$types/filesystem";
+import type { NodeResponse } from "#types/api.js";
+import type { Node_ } from "#types/filesystem.js";
 
 export function assertIsString(value: unknown): asserts value is string {
   if (typeof value !== "string") {

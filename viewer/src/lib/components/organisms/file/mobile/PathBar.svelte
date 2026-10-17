@@ -1,13 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$types/traits";
-  import { getFileSystemContext } from "$stores/filesystem";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import QueueButton from "$molecules/queue";
-  import SyncButton from "$organisms/file/common/SyncButton.svelte";
-  import SortButton from "$organisms/file/common/SortButton.svelte";
+  import type { SvelteCustomEvents } from "#types/traits.js";
+  import { getFileSystemContext } from "#stores/filesystem.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import QueueButton from "#molecules/queue/index.js";
+  import SyncButton from "#organisms/file/common/SyncButton.svelte";
+  import SortButton from "#organisms/file/common/SortButton.svelte";
   import Breadcrumb from "./Breadcrumb.svelte";
 
   type $$Events = SvelteCustomEvents<{

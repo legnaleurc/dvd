@@ -29,17 +29,6 @@ export default defineConfig({
     sveltekit({
       preprocess: vitePreprocess(),
       adapter: adapter({ fallback: "index.html" }),
-      alias: {
-        $mocks: "mocks",
-        $tests: "tests",
-        $actions: "src/lib/actions",
-        $stores: "src/lib/stores",
-        $tools: "src/lib/tools",
-        $types: "src/lib/types",
-        $atoms: "src/lib/components/atoms",
-        $molecules: "src/lib/components/molecules",
-        $organisms: "src/lib/components/organisms",
-      },
     }),
     redirect({ "/": "/files" }),
   ],

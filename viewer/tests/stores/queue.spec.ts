@@ -13,10 +13,10 @@ import {
 import { get } from "svelte/store";
 import { setupServer } from "msw/node";
 
-import { handlers } from "$mocks/queue";
-import { createStore, type ActionQueueStore } from "$stores/queue";
+import { handlers } from "#mocks/queue.js";
+import { createStore, type ActionQueueStore } from "#stores/queue.js";
 
-vi.mock(import("$tools/logging"), async () => ({
+vi.mock(import("#tools/logging.js"), async () => ({
   reportWarning() {},
 }));
 

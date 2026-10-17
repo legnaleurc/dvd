@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$types/traits";
-  import Icon from "$atoms/Icon.svelte";
-  import NodeIcon from "$atoms/NodeIcon.svelte";
+  import type { SvelteCustomEvents } from "#types/traits.js";
+  import Icon from "#atoms/Icon.svelte";
+  import NodeIcon from "#atoms/NodeIcon.svelte";
 
   type $$Events = SvelteCustomEvents<{
     click: null;

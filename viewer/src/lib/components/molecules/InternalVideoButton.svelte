@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getVideoContext } from "$stores/video";
-  import { getSelectionContext } from "$stores/selection";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import Icon from "$atoms/Icon.svelte";
+  import { getVideoContext } from "#stores/video.js";
+  import { getSelectionContext } from "#stores/selection.js";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import Icon from "#atoms/Icon.svelte";
 
   const { openVideo } = getVideoContext();
   const { selectedId, deselectList } = getSelectionContext();

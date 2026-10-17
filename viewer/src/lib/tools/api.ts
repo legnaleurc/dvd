@@ -7,7 +7,7 @@ import type {
   NodeSearchParam,
   SearchResponse,
   VideoResponse,
-} from "$types/api";
+} from "#types/api.js";
 
 export async function readRootNode(): Promise<NodeResponse> {
   const res = await get("/api/v1/nodes/root");

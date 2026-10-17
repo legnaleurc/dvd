@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { saveToken } from "$tools/storage";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import VoidForm from "$atoms/VoidForm.svelte";
+  import { saveToken } from "#tools/storage.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import VoidForm from "#atoms/VoidForm.svelte";
   import InputGroup from "./InputGroup.svelte";
   import SettingsGroup from "./SettingsGroup.svelte";
 

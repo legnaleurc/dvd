@@ -1,11 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$types/traits";
-  import { getShortcutContext } from "$stores/shortcut";
-  import EmptyBlock from "$atoms/EmptyBlock.svelte";
-  import MenuList from "$molecules/MenuList.svelte";
-  import MenuItem from "$molecules/MenuItem.svelte";
+  import type { SvelteCustomEvents } from "#types/traits.js";
+  import { getShortcutContext } from "#stores/shortcut.js";
+  import EmptyBlock from "#atoms/EmptyBlock.svelte";
+  import MenuList from "#molecules/MenuList.svelte";
+  import MenuItem from "#molecules/MenuItem.svelte";
 
   type $$Events = SvelteCustomEvents<{
     shortcut: string;

@@ -5,9 +5,9 @@ import {
   fileResponse,
   folderNode,
   folderResponse,
-} from "$mocks/utils";
-import type { ChangeResponse } from "$types/api";
-import { applyChange } from "$tools/filesystem";
+} from "#mocks/utils.js";
+import type { ChangeResponse } from "#types/api.js";
+import { applyChange } from "#tools/filesystem.js";
 
 describe("filesystem", () => {
   describe("applyChange", () => {

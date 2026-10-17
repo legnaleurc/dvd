@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { getSearchContext } from "$stores/search";
-  import QueueButton from "$molecules/queue";
+  import { getSearchContext } from "#stores/search.js";
+  import QueueButton from "#molecules/queue/index.js";
   import SearchBox from "./SearchBox.svelte";
   import HistoryButton from "./HistoryButton.svelte";
   import DetailButton from "./DetailButton.svelte";

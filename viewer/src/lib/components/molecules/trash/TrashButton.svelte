@@ -1,10 +1,10 @@
 <script lang="ts">
   import { writable } from "svelte/store";
 
-  import { getSelectionContext } from "$stores/selection";
-  import { getDisabledContext } from "$stores/disabled";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
+  import { getSelectionContext } from "#stores/selection.js";
+  import { getDisabledContext } from "#stores/disabled.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
   import TrashModal from "./TrashModal.svelte";
 
   export let trashNodes: (idList: string[]) => Promise<void>;

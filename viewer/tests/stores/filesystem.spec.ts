@@ -12,9 +12,9 @@ import {
 import { get } from "svelte/store";
 import { setupServer } from "msw/node";
 
-import { handlers } from "$mocks/filesystem";
-import { fileNode } from "$mocks/utils";
-import { createStore } from "$stores/filesystem";
+import { handlers } from "#mocks/filesystem.js";
+import { fileNode } from "#mocks/utils.js";
+import { createStore } from "#stores/filesystem.js";
 
 describe("filesystem", () => {
   const server = setupServer(...handlers);

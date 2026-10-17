@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getSelectionContext } from "$stores/selection";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import IconBadge from "$atoms/IconBadge.svelte";
-  import Icon from "$atoms/Icon.svelte";
+  import { getSelectionContext } from "#stores/selection.js";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import IconBadge from "#atoms/IconBadge.svelte";
+  import Icon from "#atoms/Icon.svelte";
 
   const { selectedId, deselectAll } = getSelectionContext();
 

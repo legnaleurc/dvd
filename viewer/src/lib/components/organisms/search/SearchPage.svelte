@@ -4,13 +4,13 @@
   import { beforeNavigate, goto } from "$app/navigation";
   import { page } from "$app/state";
 
-  import type { NeverRecord } from "$types/traits";
-  import { setSelectionContext } from "$stores/selection";
-  import { getFullScreenContext } from "$stores/fullscreen";
-  import { setSearchContext } from "$stores/search";
-  import { setQueueContext } from "$stores/queue";
-  import { setDisabledContext } from "$stores/disabled";
-  import { useVisibilityChange } from "$atoms/LifeCycle.svelte";
+  import type { NeverRecord } from "#types/traits.js";
+  import { setSelectionContext } from "#stores/selection.js";
+  import { getFullScreenContext } from "#stores/fullscreen.js";
+  import { setSearchContext } from "#stores/search.js";
+  import { setQueueContext } from "#stores/queue.js";
+  import { setDisabledContext } from "#stores/disabled.js";
+  import { useVisibilityChange } from "#atoms/LifeCycle.svelte";
   import BottomBar from "./BottomBar.svelte";
   import TopBar from "./TopBar.svelte";
   import ResultList from "./ResultList.svelte";

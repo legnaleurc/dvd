@@ -1,7 +1,7 @@
 <script lang="ts">
   import { extractCircleAndAuthor } from "#lib/tools/string.js";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
 
   export let name: string;
 

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getQueueContext } from "$stores/queue";
-  import Icon from "$atoms/Icon.svelte";
-  import IconBadge from "$atoms/IconBadge.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
+  import { getQueueContext } from "#stores/queue.js";
+  import Icon from "#atoms/Icon.svelte";
+  import IconBadge from "#atoms/IconBadge.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
   import QueueModal from "./QueueModal.svelte";
 
   export let getNameById: (id: string) => string;

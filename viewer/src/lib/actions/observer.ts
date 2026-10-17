@@ -1,6 +1,6 @@
 import type { Action } from "svelte/action";
 
-import { makeAction } from "$tools/fp";
+import { makeAction } from "#tools/fp.js";
 
 const INTERSECT_EVENT = "dv.intersect";
 const OBSERVE_INTERSECTION_EVENT = "dv.observeintersection";

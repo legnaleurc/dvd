@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { debounce } from "$tools/fp";
-  import { retry } from "$actions/image";
-  import { subscribeIntersection } from "$actions/observer";
+  import { debounce } from "#tools/fp.js";
+  import { retry } from "#actions/image.js";
+  import { subscribeIntersection } from "#actions/observer.js";
 
   export let isActive: boolean;
   export let width: number;

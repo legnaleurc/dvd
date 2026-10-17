@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$types/traits";
-  import { enterpress } from "$actions/event";
+  import type { SvelteCustomEvents } from "#types/traits.js";
+  import { enterpress } from "#actions/event.js";
 
   type $$Events = SvelteCustomEvents<{
     enterpress: null;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { NeverRecord } from "$types/traits";
+  import type { NeverRecord } from "#types/traits.js";
   import ActionBlock from "./ActionBlock.svelte";
   import MaxSizeBlock from "./MaxSizeBlock.svelte";
   import ShortcutBlock from "./ShortcutBlock.svelte";

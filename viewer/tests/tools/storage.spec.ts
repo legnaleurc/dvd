@@ -9,8 +9,8 @@ import {
   saveShortcutList,
   loadToken,
   saveToken,
-} from "$tools/storage";
-import { expectNotNull } from "$tests/lib";
+} from "#tools/storage.js";
+import { expectNotNull } from "#tests/lib.js";
 
 describe("storage", () => {
   afterEach(() => {

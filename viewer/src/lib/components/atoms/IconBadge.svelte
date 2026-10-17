@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Variants } from "$types/button";
+  import type { Variants } from "#types/button.js";
 
   export let count: number;
   export let variant: Variants = "vanilla";

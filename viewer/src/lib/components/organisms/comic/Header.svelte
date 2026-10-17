@@ -1,10 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$types/traits";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import CopyCircleAuthorButton from "$molecules/CopyCircleAuthorButton.svelte";
+  import type { SvelteCustomEvents } from "#types/traits.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import CopyCircleAuthorButton from "#molecules/CopyCircleAuthorButton.svelte";
 
   type $$Events = SvelteCustomEvents<{
     first: null;

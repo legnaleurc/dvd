@@ -1,9 +1,13 @@
 import { getContext, setContext } from "svelte";
 import { writable, get } from "svelte/store";
 
-import type { NodeMap, ChildrenMap } from "$types/filesystem";
-import { createChangeList, listNodeChildren, readRootNode } from "$tools/api";
-import { applyChange, createNode } from "$tools/filesystem";
+import type { NodeMap, ChildrenMap } from "#types/filesystem.js";
+import {
+  createChangeList,
+  listNodeChildren,
+  readRootNode,
+} from "#tools/api.js";
+import { applyChange, createNode } from "#tools/filesystem.js";
 
 const CONTEXT_KEY = Symbol();
 

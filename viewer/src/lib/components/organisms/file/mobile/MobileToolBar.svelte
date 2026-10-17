@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { renameNode } from "$tools/api";
-  import { getFileSystemContext } from "$stores/filesystem";
-  import { getQueueContext } from "$stores/queue";
-  import HorizontalToolBar from "$molecules/HorizontalToolBar.svelte";
+  import { renameNode } from "#tools/api.js";
+  import { getFileSystemContext } from "#stores/filesystem.js";
+  import { getQueueContext } from "#stores/queue.js";
+  import HorizontalToolBar from "#molecules/HorizontalToolBar.svelte";
 
   const { nodeMap, sync } = getFileSystemContext();
   const { moveNodesToPath, trashNodes } = getQueueContext();

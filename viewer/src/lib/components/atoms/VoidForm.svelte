@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { NeverRecord } from "$types/traits";
+  import type { NeverRecord } from "#types/traits.js";
 
   type $$Slots = {
     default: NeverRecord;

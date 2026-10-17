@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getShortcutContext } from "$stores/shortcut";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import TextInput from "$atoms/TextInput.svelte";
+  import { getShortcutContext } from "#stores/shortcut.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import TextInput from "#atoms/TextInput.svelte";
   import InputGroup from "./InputGroup.svelte";
 
   export let index: number;

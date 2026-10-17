@@ -1,9 +1,9 @@
 import { getContext, setContext } from "svelte";
 import { writable } from "svelte/store";
 
-import { moveNodeToId, moveNodeToPath, trashNode } from "$tools/api";
-import { Queue } from "$tools/queue";
-import { reportWarning } from "$tools/logging";
+import { moveNodeToId, moveNodeToPath, trashNode } from "#tools/api.js";
+import { Queue } from "#tools/queue.js";
+import { reportWarning } from "#tools/logging.js";
 
 type Task = ((consumerId: number) => Promise<void>) | null;
 type ApiTask = (id: string) => Promise<void>;

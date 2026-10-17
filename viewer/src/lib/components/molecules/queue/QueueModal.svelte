@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { SvelteCustomEvents } from "$types/traits";
-  import { getQueueContext } from "$stores/queue";
-  import Modal from "$molecules/Modal.svelte";
+  import type { SvelteCustomEvents } from "#types/traits.js";
+  import { getQueueContext } from "#stores/queue.js";
+  import Modal from "#molecules/Modal.svelte";
 
   type $$Events = SvelteCustomEvents<{
     hide: null;

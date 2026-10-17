@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 
-import type { ChangeResponse, NodeResponse } from "$types/api";
+import type { ChangeResponse, NodeResponse } from "#types/api.js";
 import { assertIsString, fileResponse, rootResponse, status404 } from "./utils";
 
 const TABLE: Record<string, NodeResponse> = {

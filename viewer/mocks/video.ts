@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 
-import type { VideoResponse } from "$types/api";
+import type { VideoResponse } from "#types/api.js";
 import { assertIsString, status404 } from "./utils";
 
 const TABLE: Record<string, VideoResponse[]> = {

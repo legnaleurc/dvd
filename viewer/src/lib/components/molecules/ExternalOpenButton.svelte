@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { callExternal } from "$tools/external";
-  import { getSelectionContext } from "$stores/selection";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import Icon from "$atoms/Icon.svelte";
+  import { callExternal } from "#tools/external.js";
+  import { getSelectionContext } from "#stores/selection.js";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import Icon from "#atoms/Icon.svelte";
 
   export let getNameById: (id: string) => string;
   export let getMimeTypeById: (id: string) => string;

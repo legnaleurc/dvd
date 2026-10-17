@@ -1,14 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$types/traits";
-  import { getFileSystemContext } from "$stores/filesystem";
-  import { getSelectionContext } from "$stores/selection";
-  import { getDisabledContext } from "$stores/disabled";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import NodeIcon from "$atoms/NodeIcon.svelte";
-  import ListItem from "$molecules/ListItem.svelte";
+  import type { SvelteCustomEvents } from "#types/traits.js";
+  import { getFileSystemContext } from "#stores/filesystem.js";
+  import { getSelectionContext } from "#stores/selection.js";
+  import { getDisabledContext } from "#stores/disabled.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import NodeIcon from "#atoms/NodeIcon.svelte";
+  import ListItem from "#molecules/ListItem.svelte";
 
   export let id: string;
 

@@ -2,9 +2,9 @@
   import { onMount } from "svelte";
   import { toStore } from "svelte/store";
 
-  import type { NeverRecord } from "$types/traits";
+  import type { NeverRecord } from "#types/traits.js";
   import { page } from "$app/state";
-  import { getComicContext } from "$stores/comic";
+  import { getComicContext } from "#stores/comic.js";
   import BookList from "./BookList.svelte";
   import ImageList from "./ImageList.svelte";
 

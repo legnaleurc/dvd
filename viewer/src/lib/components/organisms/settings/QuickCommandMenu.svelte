@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SvelteCustomEvents } from "$types/traits";
-  import MenuItem from "$molecules/MenuItem.svelte";
-  import MenuList from "$molecules/MenuList.svelte";
+  import type { SvelteCustomEvents } from "#types/traits.js";
+  import MenuItem from "#molecules/MenuItem.svelte";
+  import MenuList from "#molecules/MenuList.svelte";
 
   type $$Events = SvelteCustomEvents<{
     command: string;

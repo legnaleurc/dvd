@@ -2,11 +2,11 @@
   import { createEventDispatcher } from "svelte";
   import { writable } from "svelte/store";
 
-  import type { SvelteCustomEvents } from "$types/traits";
-  import { createFolder } from "$tools/api";
-  import { getSelectionContext } from "$stores/selection";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
+  import type { SvelteCustomEvents } from "#types/traits.js";
+  import { createFolder } from "#tools/api.js";
+  import { getSelectionContext } from "#stores/selection.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
   import CreateFolderModal from "./CreateFolderModal.svelte";
 
   type $$Events = SvelteCustomEvents<{

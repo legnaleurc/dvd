@@ -3,11 +3,11 @@
   import { toStore } from "svelte/store";
 
   import { page } from "$app/state";
-  import { getVideoContext } from "$stores/video";
-  import { getStreamUrl } from "$tools/api";
-  import { callExternal } from "$tools/external";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import Icon from "$atoms/Icon.svelte";
+  import { getVideoContext } from "#stores/video.js";
+  import { getStreamUrl } from "#tools/api.js";
+  import { callExternal } from "#tools/external.js";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import Icon from "#atoms/Icon.svelte";
 
   const { videoMap, openVideo } = getVideoContext();
 

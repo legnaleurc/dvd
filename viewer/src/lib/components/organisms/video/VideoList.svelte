@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getVideoContext } from "$stores/video";
-  import EmptyBlock from "$atoms/EmptyBlock.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import Icon from "$atoms/Icon.svelte";
+  import { getVideoContext } from "#stores/video.js";
+  import EmptyBlock from "#atoms/EmptyBlock.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import Icon from "#atoms/Icon.svelte";
   import VideoItem from "./VideoItem.svelte";
 
   const { idList, clearAllVideo } = getVideoContext();

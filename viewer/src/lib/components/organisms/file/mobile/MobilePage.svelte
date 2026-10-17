@@ -1,10 +1,10 @@
 <script lang="ts">
   import { beforeNavigate } from "$app/navigation";
-  import { setSelectionContext } from "$stores/selection";
-  import { getFileSystemContext } from "$stores/filesystem";
-  import { getFullScreenContext } from "$stores/fullscreen";
-  import { setSortContext } from "$stores/sort";
-  import SortedList from "$organisms/file/common/SortedList.svelte";
+  import { setSelectionContext } from "#stores/selection.js";
+  import { getFileSystemContext } from "#stores/filesystem.js";
+  import { getFullScreenContext } from "#stores/fullscreen.js";
+  import { setSortContext } from "#stores/sort.js";
+  import SortedList from "#organisms/file/common/SortedList.svelte";
   import MobileToolBar from "./MobileToolBar.svelte";
   import NodeList from "./NodeList.svelte";
   import PathBar from "./PathBar.svelte";

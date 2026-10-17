@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getFileSystemContext } from "$stores/filesystem";
-  import { setSelectionContext } from "$stores/selection";
-  import { setSortContext } from "$stores/sort";
-  import SortedList from "$organisms/file/common/SortedList.svelte";
+  import { getFileSystemContext } from "#stores/filesystem.js";
+  import { setSelectionContext } from "#stores/selection.js";
+  import { setSortContext } from "#stores/sort.js";
+  import SortedList from "#organisms/file/common/SortedList.svelte";
   import DesktopToolBar from "./DesktopToolBar.svelte";
   import NodeChildren from "./NodeChildren.svelte";
 

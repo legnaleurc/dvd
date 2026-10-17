@@ -12,10 +12,10 @@ import {
 import { get } from "svelte/store";
 import { setupServer } from "msw/node";
 
-import { handlers } from "$mocks/comic";
-import { createStore } from "$stores/comic";
+import { handlers } from "#mocks/comic.js";
+import { createStore } from "#stores/comic.js";
 
-vi.mock(import("$tools/logging"), async () => ({
+vi.mock(import("#tools/logging.js"), async () => ({
   reportWarning() {},
 }));
 

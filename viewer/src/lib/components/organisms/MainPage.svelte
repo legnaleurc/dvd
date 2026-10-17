@@ -2,10 +2,10 @@
   import { page } from "$app/state";
   import { toStore } from "svelte/store";
 
-  import type { NeverRecord, SvelteComponentModule } from "$types/traits";
-  import { setVideoContext } from "$stores/video";
-  import LazyLoad from "$atoms/LazyLoad.svelte";
-  import LoadingBlock from "$atoms/LoadingBlock.svelte";
+  import type { NeverRecord, SvelteComponentModule } from "#types/traits.js";
+  import { setVideoContext } from "#stores/video.js";
+  import LazyLoad from "#atoms/LazyLoad.svelte";
+  import LoadingBlock from "#atoms/LoadingBlock.svelte";
 
   type $$Slots = {
     default: NeverRecord;

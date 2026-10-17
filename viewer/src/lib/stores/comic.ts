@@ -1,15 +1,15 @@
 import { getContext, setContext } from "svelte";
 import { get, writable } from "svelte/store";
 
-import type { ImageResponse } from "$types/api";
+import type { ImageResponse } from "#types/api.js";
 import {
   clearCachedImage,
   listCachedImage,
   listImage,
   readNode,
-} from "$tools/api";
-import { reportWarning } from "$tools/logging";
-import { loadMaxSize, saveMaxSize } from "$tools/storage";
+} from "#tools/api.js";
+import { reportWarning } from "#tools/logging.js";
+import { loadMaxSize, saveMaxSize } from "#tools/storage.js";
 
 type ImageData = ImageResponse;
 type ComicData = {

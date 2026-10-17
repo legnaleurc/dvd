@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { renameNode } from "$tools/api";
-  import { getFileSystemContext } from "$stores/filesystem";
-  import { getQueueContext } from "$stores/queue";
-  import CopyUrlButton from "$molecules/CopyUrlButton.svelte";
-  import DeselectAllButton from "$molecules/DeselectAllButton.svelte";
-  import DownloadButton from "$molecules/DownloadButton.svelte";
-  import InternalImageButton from "$molecules/InternalImageButton.svelte";
-  import InternalVideoButton from "$molecules/InternalVideoButton.svelte";
-  import RenameButton from "$molecules/rename";
-  import TrashButton from "$molecules/trash";
-  import SortButton from "$organisms/file/common/SortButton.svelte";
+  import { renameNode } from "#tools/api.js";
+  import { getFileSystemContext } from "#stores/filesystem.js";
+  import { getQueueContext } from "#stores/queue.js";
+  import CopyUrlButton from "#molecules/CopyUrlButton.svelte";
+  import DeselectAllButton from "#molecules/DeselectAllButton.svelte";
+  import DownloadButton from "#molecules/DownloadButton.svelte";
+  import InternalImageButton from "#molecules/InternalImageButton.svelte";
+  import InternalVideoButton from "#molecules/InternalVideoButton.svelte";
+  import RenameButton from "#molecules/rename/index.js";
+  import TrashButton from "#molecules/trash/index.js";
+  import SortButton from "#organisms/file/common/SortButton.svelte";
   import CreateFolderButton from "./CreateFolderButton.svelte";
 
   const { nodeMap, sync } = getFileSystemContext();

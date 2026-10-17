@@ -3,12 +3,12 @@
 
   import { beforeNavigate } from "$app/navigation";
 
-  import { setComicContext } from "$stores/comic";
-  import { setFullScreenContext } from "$stores/fullscreen";
-  import { setShortcutContext } from "$stores/shortcut";
-  import NavBar from "$organisms/NavBar.svelte";
-  import MainPage from "$organisms/MainPage.svelte";
-  import type { NeverRecord } from "$types/traits";
+  import { setComicContext } from "#stores/comic.js";
+  import { setFullScreenContext } from "#stores/fullscreen.js";
+  import { setShortcutContext } from "#stores/shortcut.js";
+  import NavBar from "#organisms/NavBar.svelte";
+  import MainPage from "#organisms/MainPage.svelte";
+  import type { NeverRecord } from "#types/traits.js";
 
   import "../app.css";
 

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getStreamUrl } from "$tools/api";
-  import { getSelectionContext } from "$stores/selection";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
+  import { getStreamUrl } from "#tools/api.js";
+  import { getSelectionContext } from "#stores/selection.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
 
   export let isFolderById: (id: string) => boolean;
   export let getNameById: (id: string) => string;

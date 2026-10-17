@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getDisabledContext } from "$stores/disabled";
-  import { getSelectionContext } from "$stores/selection";
-  import { getSearchContext } from "$stores/search";
-  import ListItem from "$molecules/ListItem.svelte";
+  import { getDisabledContext } from "#stores/disabled.js";
+  import { getSelectionContext } from "#stores/selection.js";
+  import { getSearchContext } from "#stores/search.js";
+  import ListItem from "#molecules/ListItem.svelte";
 
   export let id: string;
   export let detailed: boolean;

@@ -2,8 +2,8 @@
   import { createEventDispatcher } from "svelte";
   import VirtualScroll from "svelte-virtual-scroll-list";
 
-  import type { SvelteCustomEvents } from "$types/traits";
-  import LoadingBlock from "$atoms/LoadingBlock.svelte";
+  import type { SvelteCustomEvents } from "#types/traits.js";
+  import LoadingBlock from "#atoms/LoadingBlock.svelte";
   import NodeItem from "./NodeItem.svelte";
 
   type $$Events = SvelteCustomEvents<{

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { setQueueContext } from "$stores/queue";
-  import { setFileSystemContext } from "$stores/filesystem";
-  import { setDisabledContext } from "$stores/disabled";
-  import LazyLoad from "$atoms/LazyLoad.svelte";
-  import LoadingBlock from "$atoms/LoadingBlock.svelte";
-  import type { NeverRecord } from "$types/traits";
+  import { setQueueContext } from "#stores/queue.js";
+  import { setFileSystemContext } from "#stores/filesystem.js";
+  import { setDisabledContext } from "#stores/disabled.js";
+  import LazyLoad from "#atoms/LazyLoad.svelte";
+  import LoadingBlock from "#atoms/LoadingBlock.svelte";
+  import type { NeverRecord } from "#types/traits.js";
 
   type $$Slots = {
     default: NeverRecord;

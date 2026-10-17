@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getSearchContext } from "$stores/search";
-  import { getSelectionContext } from "$stores/selection";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
+  import { getSearchContext } from "#stores/search.js";
+  import { getSelectionContext } from "#stores/selection.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
 
   const { detailList } = getSearchContext();
   const { selectedId, deselectList, deselectAll } = getSelectionContext();

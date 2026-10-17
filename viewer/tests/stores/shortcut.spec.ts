@@ -3,8 +3,8 @@
 import { afterEach, describe, expect, test } from "vitest";
 import { get } from "svelte/store";
 
-import { createStore } from "$stores/shortcut";
-import { expectNotNull } from "$tests/lib";
+import { createStore } from "#stores/shortcut.js";
+import { expectNotNull } from "#tests/lib.js";
 
 describe("shortcut", () => {
   afterEach(() => {

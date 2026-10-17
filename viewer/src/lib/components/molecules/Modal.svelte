@@ -1,11 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from "svelte";
 
-  import type { NeverRecord, SvelteCustomEvents } from "$types/traits";
-  import { mouseclick } from "$actions/event";
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
-  import { useBodyScrolling, useMountedStore } from "$atoms/LifeCycle.svelte";
+  import type { NeverRecord, SvelteCustomEvents } from "#types/traits.js";
+  import { mouseclick } from "#actions/event.js";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
+  import { useBodyScrolling, useMountedStore } from "#atoms/LifeCycle.svelte";
 
   type $$Events = SvelteCustomEvents<{
     hide: null;

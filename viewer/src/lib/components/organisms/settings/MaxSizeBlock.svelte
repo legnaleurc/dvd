@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { getComicContext } from "$stores/comic";
-  import VoidForm from "$atoms/VoidForm.svelte";
+  import { getComicContext } from "#stores/comic.js";
+  import VoidForm from "#atoms/VoidForm.svelte";
   import InputGroup from "./InputGroup.svelte";
   import SettingsGroup from "./SettingsGroup.svelte";
 

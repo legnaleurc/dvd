@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { NeverRecord, SvelteComponentModule } from "$types/traits";
+  import type { NeverRecord, SvelteComponentModule } from "#types/traits.js";
 
   type $$Slots = {
     pending: NeverRecord;

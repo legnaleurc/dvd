@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Icon from "$atoms/Icon.svelte";
-  import RoundedButton from "$atoms/RoundedButton.svelte";
+  import Icon from "#atoms/Icon.svelte";
+  import RoundedButton from "#atoms/RoundedButton.svelte";
   import SortMenu from "./SortMenu.svelte";
 </script>
 

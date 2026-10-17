@@ -1,4 +1,4 @@
-import { makeAction } from "$tools/fp";
+import { makeAction } from "#tools/fp.js";
 
 type DragActionParams = {
   onDragStart?: (event: DragEvent) => void;

@@ -2,7 +2,7 @@
   import { page } from "$app/state";
   import { toStore } from "svelte/store";
 
-  import type { NeverRecord } from "$types/traits";
+  import type { NeverRecord } from "#types/traits.js";
   import VideoList from "./VideoList.svelte";
 
   type $$Slots = {

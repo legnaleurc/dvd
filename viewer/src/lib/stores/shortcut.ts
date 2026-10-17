@@ -1,7 +1,7 @@
 import { getContext, setContext } from "svelte";
 import { writable } from "svelte/store";
 
-import { loadShortcutList, saveShortcutList } from "$tools/storage";
+import { loadShortcutList, saveShortcutList } from "#tools/storage.js";
 
 const KEY = Symbol();
 

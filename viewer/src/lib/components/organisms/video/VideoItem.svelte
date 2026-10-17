@@ -1,8 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
 
-  import { getVideoContext } from "$stores/video";
-  import ListItem from "$molecules/ListItem.svelte";
+  import { getVideoContext } from "#stores/video.js";
+  import ListItem from "#molecules/ListItem.svelte";
 
   export let id: string;
 
