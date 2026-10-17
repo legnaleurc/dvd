@@ -1,6 +1,2 @@
 export type Variants =
-  | "primary"
-  | "secondary"
-  | "vanilla"
-  | "warning"
-  | "danger";
+  "primary" | "secondary" | "vanilla" | "warning" | "danger";
