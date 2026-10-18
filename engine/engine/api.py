@@ -384,8 +384,9 @@ class ApplyView(RequireTokenMixin, View):
         command = [_.format(**kwargs) for _ in command]
         p = await create_subprocess_exec(*command)
         await p.communicate()
-        assert p.returncode == 0
-        raise HTTPNoContent()
+        if p.returncode == 0:
+            raise HTTPNoContent()
+        raise HTTPInternalServerError()
 
 
 class CachesImagesView(
