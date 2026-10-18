@@ -277,9 +277,136 @@ class ApiTestCase(IsolatedAsyncioTestCase):
         )
 
         for path in ["/api/v1/nodes/1/download", "/api/v1/nodes/1/stream"]:
-            with self.assertLogs("engine.mixins", level="ERROR"):
+            with self.assertLogs("engine.lib", level="ERROR"):
                 rv = await self._client.get(path)
             self.assertEqual(rv.status, 502)
+
+    def _configure_remote_content(self, data: bytes):
+        assert self._client.app
+        child = make_node({"id": "1", "size": len(data), "hash": "abc"})
+        parent = make_node({"id": "folder", "is_directory": True})
+        drive = self._client.app[KEY_DRIVE]
+        aexpect(drive.get_node_by_id).side_effect = (
+            lambda id_: parent if id_ == "folder" else child
+        )
+        ue = self._client.app[KEY_UNPACK_ENGINE]
+        ue.get_manifest = AsyncMock(
+            return_value=[
+                {
+                    "id": child.id,
+                    "type": "image/jpeg",
+                    "size": child.size,
+                    "etag": child.hash,
+                    "modified_time": child.modified_time,
+                    "width": 100,
+                    "height": 100,
+                }
+            ]
+        )
+        opened = []
+
+        def open_file(_node):
+            stream = FakeReadableFile(data)
+            opened.append(stream)
+            return stream
+
+        drive.download_file = MagicMock(side_effect=open_file)
+        return drive, opened
+
+    async def testRemoteContentHttpBehavior(self):
+        data = b"0123456789"
+        drive, opened = self._configure_remote_content(data)
+        paths = [
+            "/api/v1/nodes/1/stream",
+            "/api/v1/nodes/1/download",
+            "/api/v1/nodes/folder/images/0",
+        ]
+        cases = [
+            ("GET", {}, 200, data, None),
+            ("HEAD", {}, 200, b"", None),
+            ("GET", {"Range": "bytes=2-5"}, 206, data[2:6], "bytes 2-5/10"),
+            ("HEAD", {"Range": "bytes=2-5"}, 206, b"", "bytes 2-5/10"),
+            ("GET", {"Range": "bytes=-3"}, 206, data[-3:], "bytes 7-9/10"),
+            ("GET", {"Range": "bytes=10-"}, 416, None, "bytes */10"),
+            ("GET", {"If-None-Match": 'W/"abc"', "Range": "bytes=10-"}, 304, b"", None),
+            ("HEAD", {"If-None-Match": '"abc"'}, 304, b"", None),
+            (
+                "GET",
+                {"If-Modified-Since": "Mon, 01 Jan 1900 00:00:00 GMT"},
+                304,
+                b"",
+                None,
+            ),
+            (
+                "GET",
+                {
+                    "If-None-Match": '"other"',
+                    "If-Modified-Since": "Mon, 01 Jan 1900 00:00:00 GMT",
+                },
+                200,
+                data,
+                None,
+            ),
+            (
+                "GET",
+                {"Range": "bytes=2-5", "If-Range": '"abc"'},
+                206,
+                data[2:6],
+                "bytes 2-5/10",
+            ),
+            ("GET", {"Range": "bytes=2-5", "If-Range": 'W/"abc"'}, 200, data, None),
+        ]
+        for path in paths:
+            for method, headers, status, body, content_range in cases:
+                with self.subTest(path=path, method=method, headers=headers):
+                    opened.clear()
+                    drive.download_file.reset_mock()
+                    aexpect(drive.get_node_by_id).reset_mock()
+                    rv = await self._client.request(method, path, headers=headers)
+                    self.assertEqual(rv.status, status)
+                    self.assertEqual(rv.headers.get("Content-Range"), content_range)
+                    actual = await rv.read()
+                    if body is not None:
+                        self.assertEqual(actual, body)
+                    transfers = method == "GET" and status in (200, 206)
+                    self.assertEqual(drive.download_file.call_count, int(transfers))
+                    self.assertEqual(
+                        drive.get_node_by_id.call_count,
+                        1 + int(transfers and "images" in path),
+                    )
+                    for stream in opened:
+                        self.assertTrue(stream.closed)
+                    if status in (200, 206, 304):
+                        self.assertEqual(rv.headers["ETag"], '"abc"')
+                        if "images" in path:
+                            self.assertEqual(
+                                rv.headers["Cache-Control"],
+                                "private, max-age=86400, immutable",
+                            )
+
+    async def testEmptyRemoteContentDoesNotDownload(self):
+        drive, _opened = self._configure_remote_content(b"")
+        for path in [
+            "/api/v1/nodes/1/stream",
+            "/api/v1/nodes/1/download",
+            "/api/v1/nodes/folder/images/0",
+        ]:
+            with self.subTest(path=path):
+                rv = await self._client.get(path)
+                self.assertEqual(rv.status, 200)
+                self.assertEqual(rv.headers["Content-Length"], "0")
+                self.assertEqual(await rv.read(), b"")
+        drive.download_file.assert_not_called()
+
+    async def testDirectoryImageDownloadErrorClosesStream(self):
+        drive, _opened = self._configure_remote_content(b"0123456789")
+        stream = FakeReadableFile(b"", error=ConnectionRefusedError())
+        drive.download_file = MagicMock(return_value=stream)
+        with self.assertLogs("engine.lib", level="ERROR"):
+            rv = await self._client.get("/api/v1/nodes/folder/images/0")
+        self.assertEqual(rv.status, 502)
+        await rv.read()
+        self.assertTrue(stream.closed)
 
     async def testMoveNode(self):
         assert self._client.app
@@ -577,6 +704,28 @@ class ApiTestCase(IsolatedAsyncioTestCase):
             self.assertEqual(img.size, (1024, 576))
         self.assertIsNone(ue._storage.get_cache_or_none("1", 1024))  # type: ignore[attr-defined]
 
+        variant_body = await rv.read()
+        variant_etag = rv.headers["ETag"]
+        stat = variant_path.stat()
+        self.assertEqual(variant_etag, f'"{stat.st_mtime_ns:x}-{stat.st_size:x}"')
+        source = await self._client.get("/api/v1/nodes/1/images/0")
+        self.assertEqual(await source.read(), source_path.read_bytes())
+        self.assertNotEqual(source.headers["ETag"], variant_etag)
+        path = "/api/v1/nodes/1/images/0?max_size=1024"
+        head = await self._client.head(path)
+        self.assertEqual(head.status, 200)
+        self.assertEqual(head.headers["ETag"], variant_etag)
+        self.assertEqual(head.headers["Content-Length"], str(len(variant_body)))
+        self.assertEqual(await head.read(), b"")
+        conditional = await self._client.get(
+            path, headers={"If-None-Match": variant_etag}
+        )
+        self.assertEqual(conditional.status, 304)
+        self.assertEqual(await conditional.read(), b"")
+        ranged = await self._client.get(path, headers={"Range": "bytes=2-5"})
+        self.assertEqual(ranged.status, 206)
+        self.assertEqual(await ranged.read(), variant_body[2:6])
+
     async def testImageForFileMissingIndexReturns404(self):
         assert self._client.app
 
@@ -728,12 +877,13 @@ class FakeReadableFile:
         self._data = data
         self._error = error
         self._offset = 0
+        self.closed = False
 
     async def __aenter__(self):
         return self
 
     async def __aexit__(self, *_: Any) -> None:
-        pass
+        self.closed = True
 
     async def seek(self, offset: int) -> int:
         if self._error:

@@ -1,10 +1,21 @@
+from collections.abc import AsyncGenerator
+from contextlib import AsyncExitStack, asynccontextmanager
 from datetime import datetime
+from logging import getLogger
 from typing import Any
 
 from wcpan.drive.core.exceptions import NodeNotFoundError
-from wcpan.drive.core.types import ChangeAction, Drive, Node
+from wcpan.drive.core.types import ChangeAction, Drive, Node, ReadableFile
 
-from .types import ChangeDict, NodeDict
+from .rest import ContentMetadata
+from .types import ChangeDict, ImageDict, NodeDict
+
+
+_L = getLogger(__name__)
+
+
+class DownloadFailedError(Exception):
+    pass
 
 
 def json_decoder_hook(d: dict[str, Any]) -> Any:
@@ -50,3 +61,46 @@ def dict_from_change(change: ChangeAction) -> ChangeDict:
             return {"removed": True, "id": id_}
         case (False, node):
             return {"removed": False, "node": dict_from_node(node)}
+
+
+@asynccontextmanager
+async def open_download(
+    drive: Drive, node: Node, offset: int = 0
+) -> AsyncGenerator[ReadableFile]:
+    """
+    Opens the download and starts the transfer, so the caller can still answer
+    with an error status if the drive fails, before preparing its response.
+    Raises DownloadFailedError if the drive fails to start the transfer.
+    """
+    async with AsyncExitStack() as stack:
+        try:
+            stream = await stack.enter_async_context(drive.download_file(node))
+            await stream.seek(offset)
+        except Exception as e:
+            _L.exception(f"failed to download node {node.id}")
+            raise DownloadFailedError(node.id) from e
+        yield stream
+
+
+def content_metadata_from_node(node: Node) -> ContentMetadata:
+    """
+    Raises IsADirectoryError if the node has no content to serve.
+    """
+    if node.is_directory:
+        raise IsADirectoryError(node.id)
+    assert node.size is not None
+    return ContentMetadata(
+        size=node.size,
+        content_type=node.mime_type,
+        etag=node.hash,
+        last_modified=node.modified_time,
+    )
+
+
+def content_metadata_from_image(data: ImageDict) -> ContentMetadata:
+    return ContentMetadata(
+        size=data["size"],
+        content_type=data["type"],
+        etag=data["etag"],
+        last_modified=data["modified_time"],
+    )

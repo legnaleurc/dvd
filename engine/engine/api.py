@@ -1,37 +1,42 @@
 import json
 import shlex
 from asyncio import create_subprocess_exec, gather
-from collections.abc import Callable, Iterable, Mapping
-from datetime import datetime
+from collections.abc import AsyncGenerator, Callable, Iterable
+from contextlib import asynccontextmanager
 from functools import partial
 from logging import getLogger
 from pathlib import PurePath
 from typing import Any
 
-from aiohttp.web import FileResponse, Response, StreamResponse, View
+from aiohttp.web import StreamResponse, View
 from aiohttp.web_exceptions import (
+    HTTPBadGateway,
     HTTPBadRequest,
     HTTPConflict,
     HTTPInternalServerError,
     HTTPNoContent,
     HTTPNotFound,
-    HTTPNotModified,
 )
 from multidict import MultiMapping
 from wcpan.drive.core.lib import dispatch_change
-from wcpan.drive.core.types import ChangeAction, Node
+from wcpan.drive.core.types import ChangeAction, Drive, Node, ReadableFile
 
 from .app import KEY_DRIVE, KEY_SEARCH_ENGINE, KEY_UNPACK_ENGINE
-from .lib import NodeDict, dict_from_change, dict_from_node, get_node, json_decoder_hook
-from .mixins import (
-    HasTokenMixin,
-    NodeObjectMixin,
-    NodeRandomAccessMixin,
-    is_entity_modified,
+from .lib import (
+    DownloadFailedError,
+    NodeDict,
+    content_metadata_from_image,
+    content_metadata_from_node,
+    dict_from_change,
+    dict_from_node,
+    get_node,
+    json_decoder_hook,
     open_download,
-    setup_validators,
 )
+from .mixins import HasTokenMixin, NodeObjectMixin
 from .rest import (
+    ContentAPIMixin,
+    ContentMetadata,
     CreateAPIMixin,
     DestroyAPIMixin,
     ListAPIMixin,
@@ -181,14 +186,23 @@ class NodeChildrenView(NodeObjectMixin, HasTokenMixin, ListAPIMixin[NodeDict], V
         return children
 
 
-class NodeStreamView(NodeRandomAccessMixin, View):
-    pass
-
-
-class NodeDownloadView(NodeRandomAccessMixin, View):
-    async def get_extra_headers(self) -> Mapping[str, str]:
+class NodeStreamView(NodeObjectMixin, ContentAPIMixin, View):
+    async def serve_content(self) -> StreamResponse:
         node = await self.get_object()
-        return {"Content-Disposition": f'attachment; filename="{node.name}"'}
+        return await self.serve_stream(
+            _get_file_metadata(node),
+            partial(_open_node, self.request.app[KEY_DRIVE], node),
+        )
+
+
+class NodeDownloadView(NodeObjectMixin, ContentAPIMixin, View):
+    async def serve_content(self) -> StreamResponse:
+        node = await self.get_object()
+        return await self.serve_stream(
+            _get_file_metadata(node),
+            partial(_open_node, self.request.app[KEY_DRIVE], node),
+            headers={"Content-Disposition": f'attachment; filename="{node.name}"'},
+        )
 
 
 class NodeImageListView(
@@ -227,20 +241,10 @@ class NodeImageListView(
         ]
 
 
-class NodeImageView(NodeObjectMixin, View):
-    async def get(self):
-        image_id = self.request.match_info.get("image_id")
-        if not image_id:
-            raise HTTPBadRequest()
-        image_id = int(image_id)
-
-        # Parse and validate max_size parameter
-        max_size = _get_query_value(self.request.query, int, "max_size")
-        if max_size is None:
-            max_size = 0
-        if max_size < 0:
-            raise HTTPBadRequest(text="max_size must be >= 0")
-
+class NodeImageView(NodeObjectMixin, ContentAPIMixin, View):
+    async def serve_content(self) -> StreamResponse:
+        image_id = self._get_image_id()
+        max_size = self._get_max_size()
         node = await self.get_object()
         manifest = await self._get_manifest(node)
         data = self._get_manifest_item(manifest, image_id)
@@ -249,18 +253,36 @@ class NodeImageView(NodeObjectMixin, View):
             return await self._get_directory_image(data)
         return await self._get_archive_image(node, image_id, data, max_size)
 
+    def _get_image_id(self) -> int:
+        image_id = self.request.match_info.get("image_id")
+        if not image_id:
+            raise HTTPBadRequest()
+        try:
+            return int(image_id)
+        except Exception as e:
+            raise HTTPBadRequest(text="invalid image_id") from e
+
+    def _get_max_size(self) -> int:
+        max_size = _get_query_value(self.request.query, int, "max_size")
+        if max_size is None:
+            max_size = 0
+        if max_size < 0:
+            raise HTTPBadRequest(text="max_size must be >= 0")
+        return max_size
+
     async def _get_archive_image(
         self, node: Node, image_id: int, data: ImageDict, max_size: int
     ):
         ue = self.request.app[KEY_UNPACK_ENGINE]
         path = await ue.get_local_image_path(node, image_id, data, max_size)
-        return FileResponse(path)
+        return self.serve_file(path)
 
     async def _get_directory_image(self, data: ImageDict) -> StreamResponse:
-        response = self._create_not_modified_response(data)
-        if response is not None:
-            return response
-        return await self._create_stream_response(data)
+        return await self.serve_stream(
+            content_metadata_from_image(data),
+            partial(self._open_directory_image, data),
+            headers={"Cache-Control": "private, max-age=86400, immutable"},
+        )
 
     async def _get_manifest(self, node: Node) -> list[ImageDict]:
         ue = self.request.app[KEY_UNPACK_ENGINE]
@@ -276,37 +298,18 @@ class NodeImageView(NodeObjectMixin, View):
         except IndexError:
             raise HTTPNotFound()
 
-    def _create_not_modified_response(self, data: ImageDict) -> Response | None:
-        if is_entity_modified(
-            self.request, etag=data["etag"], last_modified=data["modified_time"]
-        ):
-            return None
-
-        _L.debug(f"304 not modified: {data['id']}")
-        response = Response(status=HTTPNotModified.status_code)
-        _setup_cache_control(
-            response, etag=data["etag"], last_modified=data["modified_time"]
-        )
-        return response
-
-    async def _create_stream_response(self, data: ImageDict) -> StreamResponse:
+    @asynccontextmanager
+    async def _open_directory_image(
+        self, data: ImageDict, offset: int
+    ) -> AsyncGenerator[ReadableFile]:
         drive = self.request.app[KEY_DRIVE]
         child = await get_node(drive, data["id"])
         if not child:
             _L.error(f"tried to find child {data['id']} but not found")
             raise HTTPInternalServerError()
 
-        response = StreamResponse(status=200)
-        response.content_type = data["type"]
-        response.content_length = data["size"]
-        _setup_cache_control(
-            response, etag=data["etag"], last_modified=data["modified_time"]
-        )
-        async with open_download(drive, child) as stream:
-            await response.prepare(self.request)
-            async for chunk in stream:
-                await response.write(chunk)
-        return response
+        async with _open_node(drive, child, offset) as stream:
+            yield stream
 
 
 class NodeVideoListView(
@@ -462,6 +465,24 @@ def _get_query_value[T](
     return fn(value)
 
 
+@asynccontextmanager
+async def _open_node(
+    drive: Drive, node: Node, offset: int
+) -> AsyncGenerator[ReadableFile]:
+    try:
+        async with open_download(drive, node, offset) as stream:
+            yield stream
+    except DownloadFailedError:
+        raise HTTPBadGateway()
+
+
+def _get_file_metadata(node: Node) -> ContentMetadata:
+    try:
+        return content_metadata_from_node(node)
+    except IsADirectoryError:
+        raise HTTPBadRequest()
+
+
 def _invalidate_cache_by_change(
     engine: SearchEngine, change: ChangeAction
 ) -> ChangeAction:
@@ -471,10 +492,3 @@ def _invalidate_cache_by_change(
         on_update=lambda node: engine.invalidate_cache_by_node(node),
     )
     return change
-
-
-def _setup_cache_control(
-    response: StreamResponse, *, etag: str, last_modified: datetime
-) -> None:
-    response.headers["Cache-Control"] = "private, max-age=86400, immutable"
-    setup_validators(response, etag=etag, last_modified=last_modified)
