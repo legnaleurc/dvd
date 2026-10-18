@@ -30,7 +30,6 @@ from .lib import (
     dict_from_change,
     dict_from_node,
     get_node,
-    json_decoder_hook,
     open_download,
 )
 from .mixins import NodeObjectMixin, RequireTokenMixin
@@ -428,19 +427,6 @@ class CachesImagesView(
     async def destroy(self):
         ue = self.request.app[KEY_UNPACK_ENGINE]
         ue.clear_cache()
-
-
-class CachesSearchesView(RequireTokenMixin, View):
-    async def post(self):
-        await self.check_permission()
-
-        parser = partial(json.loads, object_hook=json_decoder_hook)
-        nodes: list[Node] = await self.request.json(loads=parser)
-
-        se = self.request.app[KEY_SEARCH_ENGINE]
-        for node in nodes:
-            se.invalidate_cache_by_node(node)
-        raise HTTPNoContent()
 
 
 class HistoryView(RequireTokenMixin, ListAPIMixin[dict[str, Any]], View):
