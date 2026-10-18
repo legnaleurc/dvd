@@ -27,7 +27,7 @@ class NodeObjectMixin(AbstractView):
         return node
 
 
-class HasTokenMixin(PermissionMixin):
+class RequireTokenMixin(PermissionMixin):
     async def has_permission(self):
         token = self.request.app[KEY_TOKEN]
         if not token:

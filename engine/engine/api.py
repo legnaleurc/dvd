@@ -33,7 +33,7 @@ from .lib import (
     json_decoder_hook,
     open_download,
 )
-from .mixins import HasTokenMixin, NodeObjectMixin
+from .mixins import NodeObjectMixin, RequireTokenMixin
 from .rest import (
     ContentAPIMixin,
     ContentMetadata,
@@ -59,7 +59,7 @@ _L = getLogger(__name__)
 
 class NodeView(
     NodeObjectMixin,
-    HasTokenMixin,
+    RequireTokenMixin,
     RetrieveAPIMixin[NodeDict],
     PartialUpdateAPIMixin[NodeDict],
     DestroyAPIMixin,
@@ -108,7 +108,7 @@ class NodeView(
 
 
 class NodeListView(
-    HasTokenMixin, ListAPIMixin[SearchNodeDict], CreateAPIMixin[NodeDict], View
+    RequireTokenMixin, ListAPIMixin[SearchNodeDict], CreateAPIMixin[NodeDict], View
 ):
     async def list_(self):
         # node name
@@ -176,7 +176,9 @@ class NodeListView(
             raise HTTPConflict() from e
 
 
-class NodeChildrenView(NodeObjectMixin, HasTokenMixin, ListAPIMixin[NodeDict], View):
+class NodeChildrenView(
+    NodeObjectMixin, RequireTokenMixin, ListAPIMixin[NodeDict], View
+):
     async def list_(self):
         node = await self.get_object()
         drive = self.request.app[KEY_DRIVE]
@@ -206,7 +208,7 @@ class NodeDownloadView(NodeObjectMixin, ContentAPIMixin, View):
 
 
 class NodeImageListView(
-    NodeObjectMixin, HasTokenMixin, ListAPIMixin[ImageSizeDict], View
+    NodeObjectMixin, RequireTokenMixin, ListAPIMixin[ImageSizeDict], View
 ):
     async def list_(self) -> list[ImageSizeDict]:
         node = await self.get_object()
@@ -313,7 +315,7 @@ class NodeImageView(NodeObjectMixin, ContentAPIMixin, View):
 
 
 class NodeVideoListView(
-    NodeObjectMixin, HasTokenMixin, ListAPIMixin[VideoSizeDict], View
+    NodeObjectMixin, RequireTokenMixin, ListAPIMixin[VideoSizeDict], View
 ):
     async def list_(self) -> list[VideoSizeDict]:
         node = await self.get_object()
@@ -358,7 +360,7 @@ class NodeVideoListView(
         return manifest
 
 
-class ChangesView(HasTokenMixin, View):
+class ChangesView(RequireTokenMixin, View):
     async def post(self):
         await self.check_permission()
 
@@ -371,7 +373,7 @@ class ChangesView(HasTokenMixin, View):
         return json_response(changes)
 
 
-class ApplyView(HasTokenMixin, View):
+class ApplyView(RequireTokenMixin, View):
     async def post(self):
         await self.check_permission()
 
@@ -388,7 +390,7 @@ class ApplyView(HasTokenMixin, View):
 
 
 class CachesImagesView(
-    HasTokenMixin, ListAPIMixin[ImageListCacheDict], DestroyAPIMixin, View
+    RequireTokenMixin, ListAPIMixin[ImageListCacheDict], DestroyAPIMixin, View
 ):
     async def list_(self) -> list[ImageListCacheDict]:
         ue = self.request.app[KEY_UNPACK_ENGINE]
@@ -428,7 +430,7 @@ class CachesImagesView(
         ue.clear_cache()
 
 
-class CachesSearchesView(HasTokenMixin, View):
+class CachesSearchesView(RequireTokenMixin, View):
     async def post(self):
         await self.check_permission()
 
@@ -441,7 +443,7 @@ class CachesSearchesView(HasTokenMixin, View):
         raise HTTPNoContent()
 
 
-class HistoryView(HasTokenMixin, ListAPIMixin[dict[str, Any]], View):
+class HistoryView(RequireTokenMixin, ListAPIMixin[dict[str, Any]], View):
     async def list_(self) -> list[dict[str, Any]]:
         se = self.request.app[KEY_SEARCH_ENGINE]
         history = [_.to_dict() for _ in se.history]
