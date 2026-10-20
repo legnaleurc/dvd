@@ -10,10 +10,8 @@ ENV_LOCK := $(ENV_DIR)/.package-lock.json
 BLD_DIR := build
 BLD_LOCK := $(BLD_DIR)/index.html
 
-.PHONY: release debug clean purge test build setup
+.PHONY: setup build clean purge test
 
-release: build
-debug: setup
 clean:
 	$(RM) $(OBJ_FILES) $(BLD_DIR)
 purge: clean

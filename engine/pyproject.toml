@@ -18,6 +18,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    # only for type checking: pillow exposes numpy types in its interface
     "numpy>=2.5.4,<3.0.0",
     "ruff>=0.14.10,<1.0.0",
 ]

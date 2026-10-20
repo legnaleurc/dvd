@@ -1,6 +1,6 @@
 FROM python:3.13-slim-trixie AS builder
 
-# build-essential is required for GNU/Make and native modules
+# build-essential is required for native modules
 RUN : \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -15,9 +15,9 @@ ENV UV_SYSTEM_PYTHON=1
 ENV UV_NO_BINARY_PACKAGE=pymediainfo
 
 # build venv
-COPY pyproject.toml uv.lock Makefile /app/
+COPY pyproject.toml uv.lock /app/
 WORKDIR /app
-RUN make release
+RUN uv sync --locked --no-dev
 
 FROM python:3.13-slim-trixie AS production
 

@@ -7,9 +7,12 @@ RUN : \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY . /app
+COPY package.json package-lock.json /app/
 WORKDIR /app
-RUN make release
+RUN npm ci
+
+COPY . /app
+RUN npm run build
 
 FROM alpine:latest AS production
 

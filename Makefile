@@ -1,5 +1,5 @@
-release: unpack-release engine-release viewer-release
-debug: unpack-debug engine-debug viewer-debug
+release: unpack-release engine-setup viewer-build
+debug: unpack-debug engine-setup viewer-setup
 clean: unpack-clean engine-clean viewer-clean
 purge: unpack-purge engine-purge viewer-purge
 test: engine-test viewer-test
@@ -13,10 +13,8 @@ unpack-clean:
 unpack-purge:
 	$(MAKE) -C unpack purge
 
-engine-release:
-	$(MAKE) -C engine release
-engine-debug:
-	$(MAKE) -C engine debug
+engine-setup:
+	$(MAKE) -C engine setup
 engine-clean:
 	$(MAKE) -C engine clean
 engine-purge:
@@ -24,10 +22,10 @@ engine-purge:
 engine-test:
 	$(MAKE) -C engine test
 
-viewer-release:
-	$(MAKE) -C viewer release
-viewer-debug:
-	$(MAKE) -C viewer debug
+viewer-setup:
+	$(MAKE) -C viewer setup
+viewer-build:
+	$(MAKE) -C viewer build
 viewer-clean:
 	$(MAKE) -C viewer clean
 viewer-purge:

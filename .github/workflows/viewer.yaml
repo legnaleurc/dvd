@@ -29,7 +29,7 @@ jobs:
       - name: Run tests
         run: |
           cd viewer
-          npm install
+          npm ci
           npm run lint
           npm run check
           npm test

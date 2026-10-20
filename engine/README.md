@@ -5,7 +5,7 @@ This module requires Python 3.13+.
 ## prepare dependencies
 
 ```sh
-make debug
+make setup
 ```
 
 ## initialize drive
