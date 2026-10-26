@@ -179,7 +179,7 @@ class UnpackEngine:
         _out, err = await p.communicate()
         if p.returncode != 0:
             raise UnpackFailedError(
-                f"unpack failed code: {p.returncode}\n\n{err.decode('utf-8')}"
+                f"unpack failed code: {p.returncode}\n\n{err.decode('utf-8', errors='replace')}"
             )
         return await self._scan_local(node_id)
 
