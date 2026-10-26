@@ -266,12 +266,19 @@ std::size_t
 unpack::input_stream::detail::http_detail::write(char* ptr,
                                                  std::size_t size,
                                                  std::size_t nmemb,
-                                                 void* userdata)
+                                                 void* userdata) noexcept
 {
   auto self = static_cast<input_stream::detail::http_detail*>(userdata);
   auto chunk = reinterpret_cast<const std::uint8_t*>(ptr);
+  // libcurl guarantees size == 1 and nmemb <= CURL_MAX_WRITE_SIZE.
   std::size_t length = size * nmemb;
-  self->blocks.emplace_back(chunk, chunk + length);
+  try {
+    self->blocks.emplace_back(chunk, chunk + length);
+  } catch (const std::exception&) {
+    // Must not unwind through libcurl; a short count aborts the transfer
+    // with CURLE_WRITE_ERROR, which curl_easy::read() turns into an error.
+    return 0;
+  }
   return length;
 }
 

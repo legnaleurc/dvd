@@ -6,12 +6,12 @@
 #include <format>
 
 int
-unpack::archive_context::open(archive* handle, void* context)
+unpack::archive_context::open(archive* handle, void* context) noexcept
 {
   auto ctx = static_cast<archive_context*>(context);
   try {
     ctx->stream.open();
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     archive_set_error(handle, EIO, "failed to open stream: %s", e.what());
     return ARCHIVE_FATAL;
   }
@@ -19,13 +19,13 @@ unpack::archive_context::open(archive* handle, void* context)
 }
 
 int
-unpack::archive_context::close(archive* handle, void* context)
+unpack::archive_context::close(archive* handle, void* context) noexcept
 {
   auto ctx = static_cast<archive_context*>(context);
   try {
     ctx->chunk.clear();
     ctx->stream.close();
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     archive_set_error(handle, EIO, "failed to close stream: %s", e.what());
     return ARCHIVE_FATAL;
   }
@@ -35,14 +35,14 @@ unpack::archive_context::close(archive* handle, void* context)
 la_ssize_t
 unpack::archive_context::read(archive* handle,
                               void* context,
-                              const void** buffer)
+                              const void** buffer) noexcept
 {
   auto ctx = static_cast<archive_context*>(context);
   try {
     ctx->chunk = ctx->stream.read();
-    *buffer = &ctx->chunk[0];
+    *buffer = ctx->chunk.data();
     return ctx->chunk.size();
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     archive_set_error(handle, EIO, "failed to read stream: %s", e.what());
     return ARCHIVE_FATAL;
   }
@@ -52,12 +52,12 @@ la_int64_t
 unpack::archive_context::seek(archive* handle,
                               void* context,
                               la_int64_t offset,
-                              int whence)
+                              int whence) noexcept
 {
   auto ctx = static_cast<archive_context*>(context);
   try {
     return ctx->stream.seek(offset, whence);
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     archive_set_error(handle, EIO, "failed to seek stream: %s", e.what());
     return ARCHIVE_FATAL;
   }

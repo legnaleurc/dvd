@@ -14,7 +14,7 @@ decode(const std::string& encoded, const char* codec)
 
   try {
     return conv::to_utf<char>(encoded, codec, conv::stop);
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     return std::nullopt;
   }
 }

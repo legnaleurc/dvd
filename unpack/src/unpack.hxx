@@ -23,13 +23,15 @@ public:
 class archive_context
 {
 public:
-  static int open(archive* handle, void* context);
-  static int close(archive* handle, void* context);
-  static la_ssize_t read(archive* handle, void* context, const void** buffer);
+  static int open(archive* handle, void* context) noexcept;
+  static int close(archive* handle, void* context) noexcept;
+  static la_ssize_t read(archive* handle,
+                         void* context,
+                         const void** buffer) noexcept;
   static la_int64_t seek(archive* handle,
                          void* context,
                          la_int64_t offset,
-                         int whence);
+                         int whence) noexcept;
 
   archive_context(const std::string& archive_uri,
                   const std::string& local_path);

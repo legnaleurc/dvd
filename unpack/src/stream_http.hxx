@@ -47,7 +47,7 @@ public:
   static std::size_t write(char* ptr,
                            std::size_t size,
                            std::size_t nmemb,
-                           void* userdata);
+                           void* userdata) noexcept;
 
   explicit http_detail(const std::string& url);
 
