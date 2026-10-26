@@ -269,7 +269,7 @@ unpack::input_stream::detail::http_detail::write(char* ptr,
                                                  void* userdata)
 {
   auto self = static_cast<input_stream::detail::http_detail*>(userdata);
-  auto chunk = static_cast<const std::uint8_t*>(static_cast<void*>(ptr));
+  auto chunk = reinterpret_cast<const std::uint8_t*>(ptr);
   std::size_t length = size * nmemb;
   self->blocks.emplace_back(chunk, chunk + length);
   return length;
