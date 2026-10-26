@@ -1,6 +1,7 @@
 #ifndef UNPACK_TEXT_HPP
 #define UNPACK_TEXT_HPP
 
+#include <cstddef>
 #include <string>
 
 namespace unpack {
@@ -17,7 +18,7 @@ public:
   std::string to_utf8(const std::string& encoded);
 
 private:
-  const char** index;
+  std::size_t index;
 };
 
 }
