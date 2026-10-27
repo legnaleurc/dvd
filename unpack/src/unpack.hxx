@@ -44,6 +44,7 @@ public:
   void update_entry_path(archive_entry* entry);
 
 private:
+  std::string get_entry_name(archive_entry* entry);
   std::string to_output_path(const std::string& entry_name);
 
   std::string local_path;
