@@ -105,8 +105,18 @@ unpack::archive_context::get_entry_name(archive_entry* entry)
 std::string
 unpack::archive_context::to_output_path(const std::string& entry_name)
 {
+  // Entry names come from the archive and must not escape local_path:
+  // appending an absolute path would replace local_path entirely, and ".."
+  // would climb out of it. Inner ".." (e.g. "a/../b") is fine once
+  // normalized, and the normalized name is what gets written, so the OS never
+  // resolves ".." through a symlink.
+  auto name =
+    std::filesystem::path(entry_name).relative_path().lexically_normal();
+  if (!name.empty() && *name.begin() == "..") {
+    throw std::runtime_error(std::format("unsafe entry name: {}", entry_name));
+  }
   std::filesystem::path path = this->local_path;
-  path /= entry_name;
+  path /= name;
   return path.string();
 }
 
