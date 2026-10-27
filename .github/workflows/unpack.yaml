@@ -28,6 +28,10 @@ jobs:
       - name: Build
         working-directory: unpack
         run: make ${{ matrix.build-type }}
+      - name: Test
+        if: matrix.build-type == 'debug'
+        working-directory: unpack
+        run: make test
   MacOSX:
     runs-on: macos-latest
     strategy:
@@ -47,3 +51,9 @@ jobs:
         env:
           CMAKE_PREFIX_PATH: /opt/homebrew/opt/libarchive
         run: make ${{ matrix.build-type }}
+      - name: Test
+        if: matrix.build-type == 'debug'
+        working-directory: unpack
+        env:
+          CMAKE_PREFIX_PATH: /opt/homebrew/opt/libarchive
+        run: make test

@@ -2,7 +2,7 @@ release: unpack-release engine-setup viewer-build
 debug: unpack-debug engine-setup viewer-setup
 clean: unpack-clean engine-clean viewer-clean
 purge: unpack-purge engine-purge viewer-purge
-test: engine-test viewer-test
+test: unpack-test engine-test viewer-test
 
 unpack-release:
 	$(MAKE) -C unpack release
@@ -12,6 +12,8 @@ unpack-clean:
 	$(MAKE) -C unpack clean
 unpack-purge:
 	$(MAKE) -C unpack purge
+unpack-test:
+	$(MAKE) -C unpack test
 
 engine-setup:
 	$(MAKE) -C engine setup
