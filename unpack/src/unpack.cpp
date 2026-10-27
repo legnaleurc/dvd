@@ -113,9 +113,11 @@ unpack_to(unpack::archive_context& context)
       throw archive_error(reader.get(), "archive_read_next_header");
     }
 
-    // skip folders
-    auto file_type = archive_entry_filetype(entry);
-    if (file_type & AE_IFDIR) {
+    // Only extract regular files. Folders are created along with their files,
+    // and links are not needed but could point outside of local_path, so skip
+    // them along with devices, fifos, etc.
+    if (archive_entry_filetype(entry) != AE_IFREG ||
+        archive_entry_hardlink(entry)) {
       continue;
     }
 
